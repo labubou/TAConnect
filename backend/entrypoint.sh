@@ -16,8 +16,11 @@ done
 echo "Database is ready!"
 
 echo "Checking for migration conflicts..."
+# Check if there's an inconsistent migration history
 if python manage.py migrate --check 2>&1 | grep -q "InconsistentMigrationHistory"; then
-  echo "Migration conflicts detected. Resetting database schema..."
+  echo "⚠️  Migration conflict detected. Clearing migration history..."
+  
+  # Clear the django_migrations table
   python manage.py shell -c "
 from django.db import connection
 cursor = connection.cursor()
@@ -30,7 +33,11 @@ print('Database schema reset')
 fi
 
 echo "Running database migrations..."
+# Create migrations for accounts app first (custom user model)
+python manage.py makemigrations accounts
+# Then create migrations for other apps
 python manage.py makemigrations
+# Apply all migrations
 python manage.py migrate
 
 echo "Creating superuser..."
@@ -38,10 +45,16 @@ python manage.py shell -c "
 from django.contrib.auth import get_user_model
 User = get_user_model()
 if not User.objects.filter(username='admin').exists():
-    User.objects.create_superuser('admin', 'admin@example.com', 'admin123')
-    print('Superuser created: admin/admin123')
+    User.objects.create_superuser(
+        username='admin',
+        email='admin@example.com',
+        password='admin123',
+        user_type='instructor'
+    )
+    print('✓ Superuser created: admin/admin123')
 else:
-    print('Superuser already exists')
+    print('✓ Superuser already exists')
 "
 
+echo "Starting Django development server..."
 python manage.py runserver 0.0.0.0:8000
