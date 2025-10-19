@@ -25,10 +25,10 @@ class User(AbstractUser):
         return self.user_type == 'student'
 
     #functions to check existence of username or email
-    def username_exists(self, username):
+    def username_exists(username):
         return User.objects.filter(username=username).exists()
 
-    def email_exists(self, email):
+    def email_exists(email):
         return User.objects.filter(email=email).exists()
 
     def __str__(self):
