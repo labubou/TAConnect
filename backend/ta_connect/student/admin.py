@@ -1,3 +1,29 @@
 from django.contrib import admin
+from django.contrib.auth import get_user_model
+from .models import Booking
+from django.db import connection
+from django.db.utils import OperationalError, ProgrammingError
+import logging
 
-# Register your models here.
+User = get_user_model()
+
+class BookingAdmin(admin.ModelAdmin):
+    list_display = ("id", "student", "office_hour", "start_time", "end_time", "created_at", "is_cancelled")
+    list_filter = ("is_cancelled", "office_hour__course_name")
+    search_fields = ("student__username", "student__email", "office_hour__course_name")
+    date_hierarchy = "start_time"
+    readonly_fields = ("created_at",)
+
+def _table_exists(table_name: str) -> bool:
+    try:
+        return table_name in connection.introspection.table_names()
+    except (ProgrammingError, OperationalError):
+        return False
+
+if _table_exists("student_booking"):
+    admin.site.register(Booking, BookingAdmin)
+else:
+    logging.getLogger(__name__).warning(
+        "Skipping admin registration for Booking because table 'student_booking' does not exist. "
+        "Run migrations (manage.py makemigrations && manage.py migrate) to create the table."
+    )

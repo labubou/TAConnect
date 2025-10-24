@@ -1,9 +1,16 @@
+from django.conf import settings
 from django.db import models
-from accounts.models import User
 
 # Create your models here.
 class OfficeHourSlot(models.Model):
-    instructor = models.ForeignKey(User, on_delete=models.CASCADE, related_name="office_hours")
+    # use AUTH_USER_MODEL to avoid direct import and migration pitfalls
+    instructor = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="office_hours",
+    )
     course_name = models.TextField()
     section = models.CharField(max_length=10, blank=True, null=True, default=None)
     day_of_week = models.CharField(
@@ -23,13 +30,14 @@ class OfficeHourSlot(models.Model):
 class BookingPolicy(models.Model):
     office_hour_slot = models.OneToOneField(OfficeHourSlot, on_delete=models.CASCADE, related_name="policy")
     require_university_email = models.BooleanField(default=True)
-    allowed_students = models.JSONField()
+    # make JSONField safe with default list and allow blank
+    allowed_students = models.JSONField(default=list, blank=True, null=True)
 
     def __str__(self):
         return f"Policy for {self.office_hour_slot}"
 
 class TAAnalytics(models.Model):
-    instructor = models.OneToOneField(User, on_delete=models.CASCADE)
+    instructor = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     total_sessions = models.PositiveIntegerField(default=0)
     total_feedback_count = models.PositiveIntegerField(default=0)
     average_rating = models.FloatField(default=0.0)
