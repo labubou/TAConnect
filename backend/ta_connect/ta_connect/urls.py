@@ -27,9 +27,9 @@ schema_view = get_schema_view(
     openapi.Info(
         title="TA Connect API",
         default_version='v1',
-        description="API documentation for TA Connect - a personal finance management app",
+        description="API documentation for TA Connect",
         terms_of_service="https://www.google.com/policies/terms/",
-        contact=openapi.Contact(email="taconnect@outlook.com"),
+        contact=openapi.Contact(email="taconnect.team@gmail.com"),
         license=openapi.License(name="Dual License: AGPL-3.0 / Commercial"),
     ),
     public=True,
@@ -39,6 +39,7 @@ schema_view = get_schema_view(
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/', include('accounts.urls')),
+    path('api/instructor/', include('instructor.urls')),
     path('swagger/', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
     path('redoc/', schema_view.with_ui('redoc', cache_timeout=0), name='schema-redoc'),
     path('swagger.json', schema_view.without_ui(cache_timeout=0), name='schema-json'), 
