@@ -1,5 +1,6 @@
 from django.conf import settings
 from django.db import models
+from django.utils import timezone
 
 # Create your models here.
 class OfficeHourSlot(models.Model):
@@ -23,6 +24,9 @@ class OfficeHourSlot(models.Model):
     duration_minutes = models.PositiveIntegerField(default=10)
     start_date = models.DateField()
     end_date = models.DateField()
+    status = models.BooleanField(default=True)  # Active or Inactive
+    updated_at = models.DateTimeField(auto_now=True)
+    created_at = models.DateTimeField(default=timezone.now)
 
     def __str__(self):
         return f"{self.course_name} - {self.section} {self.day_of_week} {self.start_time}-{self.end_time}"

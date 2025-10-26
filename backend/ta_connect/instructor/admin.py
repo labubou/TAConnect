@@ -7,7 +7,7 @@ User = get_user_model()
 
 @admin.register(OfficeHourSlot)
 class OfficeHourSlotAdmin(admin.ModelAdmin):
-    list_display = ("id", "instructor", "course_name", "section", "day_of_week", "start_time", "end_time", "duration_minutes", "start_date", "end_date")
+    list_display = ("id", "instructor", "course_name", "section", "day_of_week", "start_time", "end_time", "duration_minutes", "start_date", "end_date", "status", "created_at", "updated_at")
     list_filter = ("day_of_week", "course_name", "instructor")
     search_fields = ("course_name", "section", "instructor__username", "instructor__email")
     date_hierarchy = "start_date"
