@@ -15,8 +15,8 @@ function LandingPage() {
         <img src={Logo2} alt="TA Connect Logo" className="logo" />        
           <div className="flex items-center space-x-4">
           <button
-            onClick={() => window.location.href = 'https://youtu.be/xvFZjo5PgG0?si=KMWlhySUE2iPC9Xe'}
-            className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-700"
+              onClick={() => navigate('/login')}
+              className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-700"
           >
             {strings.navbar.login}
           </button>
@@ -30,7 +30,7 @@ function LandingPage() {
             onClick={toggleTheme}
             className="px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600"
           >
-            {theme === 'light' ? strings.navbar.darkMode : strings.navbar.lightMode}
+            {theme === 'light' ? '🌙 Dark' : '☀️ Light'}
           </button>
         </div>
       </nav>
