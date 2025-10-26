@@ -1,8 +1,11 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom'; 
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../../contexts/AuthContext';
+import axios from 'axios';
 
 function LoginPage() {
     const navigate = useNavigate();
+    const { login } = useAuth();
     const [credentials, setCredentials] = useState({ username: '', password: '' });
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
@@ -20,29 +23,18 @@ function LoginPage() {
     setError('');
 
     try {
-      const response = await fetch('/api/auth/login/', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(credentials)
-      });
+      const response = await axios.post('/api/auth/login/', credentials);
 
-      const data = await response.json();
-
-      if (response.ok) {
-        localStorage.setItem('access_token', data.access);
-        localStorage.setItem('refresh_token', data.refresh);
-        localStorage.setItem('user', JSON.stringify(data.user));
-        window.location.href = '/dashboard';
-      } else {
-        setError(data.error || 'Login failed');
-        if (data.message) {
-          setError(data.message);
-        }
+      if (response.data) {
+        await login({
+          access: response.data.access,
+          refresh: response.data.refresh,
+          user: response.data.user
+        });
+        navigate('/dashboard');
       }
     } catch (err) {
-      setError('An error occurred. Please try again.');
+      setError(err.response?.data?.error || err.response?.data?.message || 'Login failed');
     } finally {
       setLoading(false);
     }
@@ -50,10 +42,9 @@ function LoginPage() {
 
   const handleGoogleLogin = async () => {
     try {
-      const response = await fetch('/api/auth/google/login-url/');
-      const data = await response.json();
-      if (data.auth_url) {
-        window.location.href = data.auth_url;
+      const response = await axios.get('/api/auth/google/login-url/');
+      if (response.data?.auth_url) {
+        window.location.href = response.data.auth_url;
       }
     } catch (err) {
       setError('Failed to initiate Google login');
