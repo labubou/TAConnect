@@ -29,3 +29,16 @@
     @apply rounded-md border border-transparent px-4 py-2 text-base font-medium bg-neutral-900 text-white transition-colors hover:border-indigo-500 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500;
   }
 }
+
+.logo {
+  height: 80px;
+  width: 80px;
+  object-fit: cover;
+  cursor: pointer;
+  transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1); /* smoother, natural easing */
+}
+.logo:hover {
+  transform: scale(1.2);
+}
+
+

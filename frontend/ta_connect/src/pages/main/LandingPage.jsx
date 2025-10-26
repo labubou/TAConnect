@@ -1,65 +1,89 @@
-import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useTheme } from '../../contexts/ThemeContext';
+import Logo2 from '../../assets/Logo2.png';
+import strings from '../../strings/landingPageStrings';
+
 
 function LandingPage() {
-  const [count, setCount] = useState(0);
+  const navigate = useNavigate();
   const { theme, toggleTheme } = useTheme();
 
   return (
-    <main className="min-h-screen bg-white text-slate-900 dark:bg-neutral-900 dark:text-neutral-100 flex items-center justify-center p-6">
-      <div className="max-w-3xl w-full">
-        <div className="flex items-center justify-between gap-4 mb-6">
-          <span className="inline-flex items-center rounded-full border px-3 py-1 text-xs font-medium bg-slate-50 dark:bg-neutral-800 border-slate-200 dark:border-neutral-700">
-            Tailwind is loaded ✅
-          </span>
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+      {/* navbar */}
+      <nav className="w-full flex items-center justify-between p-4 bg-white dark:bg-gray-800 shadow-md">
+        <img src={Logo2} alt="TA Connect Logo" className="logo" />        
+          <div className="flex items-center space-x-4">
+          <button
+            onClick={() => window.location.href = 'https://youtu.be/xvFZjo5PgG0?si=KMWlhySUE2iPC9Xe'}
+            className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-700"
+          >
+            {strings.navbar.login}
+          </button>
+          <button
+            onClick={() => window.location.href = 'https://youtu.be/1t7SYmGC_Lo?si=KjUCp7h_DTkM2lf2'}
+            className="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600"
+          >
+            {strings.navbar.register}
+          </button>
           <button
             onClick={toggleTheme}
-            className="rounded-md border border-slate-200 dark:border-neutral-700 px-3 py-2 text-sm bg-slate-900 text-white dark:bg-white dark:text-slate-900 transition-colors"
-            title={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
+            className="px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600"
           >
-            {theme === 'dark' ? 'Light mode' : 'Dark mode'}
+            {theme === 'light' ? strings.navbar.darkMode : strings.navbar.lightMode}
           </button>
         </div>
+      </nav>
 
-        <h1 className="text-4xl font-extrabold tracking-tight">
-          <span className="bg-gradient-to-r from-indigo-600 via-purple-600 to-sky-500 bg-clip-text text-transparent">
-            TAConnect Frontend
-          </span>
+      {/* main boddy */}
+      <div className="flex flex-col items-center justify-center min-h-screen p-4">
+        <h1 className="text-4xl font-bold mb-6">
+          {strings.heading.welcome} <span className="text-blue-600">{strings.heading.connect}</span>
         </h1>
-        <p className="mt-2 text-slate-600 dark:text-slate-300">
-          Vite + React + Tailwind is running.
-        </p>
+        <p className="text-lg mb-6">{strings.heading.subtitle}</p>
 
-        <div className="mt-6 grid grid-cols-1 sm:grid-cols-3 gap-4">
-          <div className="rounded-xl border bg-white/70 dark:bg-neutral-900/60 backdrop-blur px-4 py-5 shadow-sm border-slate-200 dark:border-neutral-800">
-            <p className="text-xs uppercase tracking-wide text-slate-500 dark:text-slate-400">Framework</p>
-            <p className="mt-1 font-semibold">React</p>
+        <div className="mt-10 grid grid-cols-1 sm:grid-cols-3 gap-6 w-full max-w-5xl">
+          <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow hover:shadow-lg transition">
+            <h2 className="text-xl font-semibold mb-2">{strings.steps[0].title}</h2>
+            <p className="text-gray-600 dark:text-gray-300 text-sm">
+              {strings.steps[0].description}
+            </p>
           </div>
-          <div className="rounded-xl border bg-white/70 dark:bg-neutral-900/60 backdrop-blur px-4 py-5 shadow-sm border-slate-200 dark:border-neutral-800">
-            <p className="text-xs uppercase tracking-wide text-slate-500 dark:text-slate-400">Bundler</p>
-            <p className="mt-1 font-semibold">Vite</p>
+          <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow hover:shadow-lg transition">
+            <h2 className="text-xl font-semibold mb-2">{strings.steps[1].title}</h2>
+            <p className="text-gray-600 dark:text-gray-300 text-sm">
+              {strings.steps[1].description}
+            </p>
           </div>
-          <div className="rounded-xl border bg-white/70 dark:bg-neutral-900/60 backdrop-blur px-4 py-5 shadow-sm border-slate-200 dark:border-neutral-800">
-            <p className="text-xs uppercase tracking-wide text-slate-500 dark:text-slate-400">CSS</p>
-            <p className="mt-1 font-semibold">Tailwind</p>
-          </div>
-        </div>
-
-        <div className="mt-8 flex items-center gap-4">
-          <button
-            onClick={() => setCount((c) => c + 1)}
-            className="rounded-lg bg-indigo-600 px-4 py-2 text-white font-medium shadow hover:bg-indigo-500 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
-          >
-            Count: {count}
-          </button>
-          <div className="flex items-center gap-2 text-slate-500 dark:text-slate-400">
-            <span className="h-4 w-4 animate-spin rounded-full border-2 border-slate-300 border-t-indigo-500" />
-            <span className="text-sm">Live reload is active</span>
+          <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow hover:shadow-lg transition">
+            <h2 className="text-xl font-semibold mb-2">{strings.steps[2].title}</h2>
+            <p className="text-gray-600 dark:text-gray-300 text-sm">
+              {strings.steps[2].description}
+            </p>
           </div>
         </div>
       </div>
-    </main>
+
+      <footer className="w-full bg-white dark:bg-gray-800 py-6 mt-12 shadow-inner">
+        <div className="max-w-5xl mx-auto px-4 flex flex-col sm:flex-row justify-between items-center text-gray-600 dark:text-gray-300 text-sm">
+          <p>&copy; {new Date().getFullYear()} {strings.footer.copyright}</p>
+            <div className="flex space-x-4 mt-2 sm:mt-0">
+            <a href="https://github.com/Kbassem10/TAConnect" target="_blank" rel="noopener noreferrer" className="hover:text-blue-600 transition">
+              {strings.footer.github}
+            </a>
+            <a href="/about" className="hover:text-blue-600 transition">
+              {strings.footer.about}
+            </a>
+            <a href="/contact" className="hover:text-blue-600 transition">
+              {strings.footer.contact}
+            </a>
+            </div>
+          </div>
+      </footer>
+
+    </div>
   );
 }
 
 export default LandingPage;
+ 
