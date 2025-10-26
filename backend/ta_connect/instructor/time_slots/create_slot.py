@@ -36,6 +36,11 @@ def add_time_slot(request):
                 {'error': 'Course name, start time, end time, day of week, start date, and end date are required.'}
                 , status=status.HTTP_400_BAD_REQUEST)
 
+        days_of_week_choices = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
+        if day_of_week not in days_of_week_choices:
+            return Response(
+                {'error': f'Day of week must be one of {days_of_week_choices}.'}
+                , status=status.HTTP_400_BAD_REQUEST)
 
         try: #making a try and except to handle database errors
             # Create the time slot
