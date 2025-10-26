@@ -2,6 +2,7 @@ import { AuthProvider } from './contexts/AuthContext'
 import { ThemeProvider } from './contexts/ThemeContext'
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
 import LandingPage from './pages/main/LandingPage'
+import LoginPage from './pages/main/LoginPage';
 
 function App() {
   return (
@@ -17,6 +18,10 @@ function App() {
                     <LandingPage />
                   </div>
                 } 
+              />
+               <Route 
+                path="/login"
+                element={<LoginPage />}
               />
               {/* Add more routes here */}
             </Routes>
