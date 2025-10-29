@@ -1,7 +1,7 @@
 from django.shortcuts import get_object_or_404
 from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes
-from rest_framework.permissions import IsAuthenticated
+from accounts.permissions import IsInstructor, IsStudent
 from rest_framework.response import Response
 from instructor.models import OfficeHourSlot
 from drf_yasg.utils import swagger_auto_schema
@@ -36,13 +36,11 @@ from instructor.schemas.time_slot_schemas import update_time_slot_request, updat
     }
 )
 @api_view(['POST'])
-@permission_classes([IsAuthenticated])
+@permission_classes([IsInstructor])
 def update_time_slot_status(request, slot_id):
     """Handle update time slot for the logged-in user."""
     user = request.user
 
-    
-    
     if not slot_id:
         return Response(
             {'error': 'Slot ID is required.'}

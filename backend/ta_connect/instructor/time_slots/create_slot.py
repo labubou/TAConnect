@@ -5,6 +5,7 @@ from rest_framework.response import Response
 from instructor.models import OfficeHourSlot, BookingPolicy
 from drf_yasg.utils import swagger_auto_schema
 from instructor.schemas.time_slot_schemas import add_time_slot_request, add_time_slot_response
+from accounts.permissions import IsInstructor, IsStudent
 
 @swagger_auto_schema(
     method="post",
@@ -17,7 +18,7 @@ from instructor.schemas.time_slot_schemas import add_time_slot_request, add_time
     }
 )
 @api_view(["POST"])
-@permission_classes([IsAuthenticated])
+@permission_classes([IsInstructor])
 def add_time_slot(request):
     try:
         user = request.user
