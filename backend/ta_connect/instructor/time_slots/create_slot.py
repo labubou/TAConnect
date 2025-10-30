@@ -30,11 +30,12 @@ def add_time_slot(request):
         duration_minutes = request.data.get("duration_minutes", 10)
         start_date = request.data.get("start_date")
         end_date = request.data.get("end_date")
+        room= request.data.get("room")
 
         # Validate the required input data
-        if not user or not course_name or not start_time or not end_time or not day_of_week or not start_date or not end_date:
+        if not user or not course_name or not start_time or not end_time or not day_of_week or not start_date or not end_date or not room:
             return Response(
-                {'error': 'Course name, start time, end time, day of week, start date, and end date are required.'}
+                {'error': 'Course name, start time, end time, day of week, start date, room, and end date are required.'}
                 , status=status.HTTP_400_BAD_REQUEST)
 
         days_of_week_choices = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
@@ -51,6 +52,7 @@ def add_time_slot(request):
                 section=section,
                 start_time=start_time,
                 end_time=end_time,
+                day_of_week=day_of_week,
                 duration_minutes=duration_minutes,
                 start_date=start_date,
                 end_date=end_date
