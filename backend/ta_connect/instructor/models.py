@@ -24,6 +24,7 @@ class OfficeHourSlot(models.Model):
     duration_minutes = models.PositiveIntegerField(default=10)
     start_date = models.DateField()
     end_date = models.DateField()
+    room = models.TextField(default="TBA")
     status = models.BooleanField(default=True)  # Active or Inactive
     updated_at = models.DateTimeField(auto_now=True)
     created_at = models.DateTimeField(default=timezone.now)
