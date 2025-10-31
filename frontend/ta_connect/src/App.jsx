@@ -3,6 +3,7 @@ import { ThemeProvider } from './contexts/ThemeContext'
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom'
 import LandingPage from './pages/main/LandingPage'
 import LoginPage from './pages/main/LoginPage';
+import RegisterPage from './pages/main/RegisterPage';
 import ForgotPasswordPage from './pages/main/ForgotPasswordPage';
 import ResetPasswordPage from './pages/main/ResetPasswordPage';
 
@@ -24,6 +25,10 @@ function App() {
                <Route 
                 path="/login"
                 element={<LoginPage />}
+              />
+              <Route 
+                path="/register"
+                element={<RegisterPage />}
               />
               <Route
                 path="/forgot-password"
