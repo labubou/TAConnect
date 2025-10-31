@@ -23,7 +23,7 @@ function LandingPage() {
             {strings.navbar.login}
           </button>
           <button
-            onClick={() => window.location.href = 'https://youtu.be/1t7SYmGC_Lo?si=KjUCp7h_DTkM2lf2'}
+            onClick={() => navigate('/register')}
             className="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600"
           >
             {strings.navbar.register}
