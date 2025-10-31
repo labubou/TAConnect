@@ -81,7 +81,7 @@ function LoginPage() {
         </div>
         <div className="flex items-center space-x-4">
           <button
-            onClick={() => window.location.href = 'https://youtu.be/1t7SYmGC_Lo?si=KjUCp7h_DTkM2lf2'}
+            onClick={() => navigate('/register')}
             className="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600"
           >
             {strings.registerButton}
@@ -134,27 +134,22 @@ function LoginPage() {
               />
             </div>
 
-            <div className="flex justify-end">
-            <button
+            <div className="flex gap-3">
+              <button
+                onClick={handleSubmit}
+                disabled={loading}
+                className="flex-1 px-4 py-2 rounded-lg text-white transition shadow bg-blue-900 hover:bg-blue-950 dark:bg-blue-900/80 dark:hover:bg-blue-900"
+              >
+                {loading ? strings.loggingInButton : strings.loginButton}
+              </button>
+
+              <button
                 onClick={() => navigate('/forgot-password')}
-                className="px-4 py-2 rounded-lg text-white transition shadow bg-blue-900 hover:bg-blue-950 dark:bg-blue-900/80 dark:hover:bg-blue-900"
-
-
-            >
+                className="flex-1 px-4 py-2 rounded-lg text-white transition shadow bg-blue-900 hover:bg-blue-950 dark:bg-blue-900/80 dark:hover:bg-blue-900"
+              >
                 {strings.forgotPassword}
-                </button>
-
+              </button>
             </div>
-
-            <button
-              onClick={handleSubmit}
-              disabled={loading}
-              className="px-4 py-2 rounded-lg text-white transition shadow bg-blue-900 hover:bg-blue-950 dark:bg-blue-900/80 dark:hover:bg-blue-900"
-
-
-            >
-              {loading ? strings.loggingInButton : strings.loginButton}
-            </button>
 
             <div className="relative my-6">
               <div className="absolute inset-0 flex items-center">
