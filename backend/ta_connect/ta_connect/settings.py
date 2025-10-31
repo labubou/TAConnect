@@ -141,22 +141,13 @@ TEMPLATES = [
     },
 ]
 
-# Email configuration for verification emails
-# In development use the console backend to avoid SMTP failures when MAIL_PASSWORD
-# isn't configured. In production (DEBUG=False) the SMTP backend will be used and
-# credentials are read from environment/config.
-if DEBUG:
-    EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
-    # You can also use file-based backend during development if you prefer:
-    # EMAIL_BACKEND = 'django.core.mail.backends.filebased.EmailBackend'
-    # EMAIL_FILE_PATH = BASE_DIR / 'sent_emails'
-else:
-    EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-    EMAIL_HOST = 'smtp.gmail.com'
-    EMAIL_PORT = 587
-    EMAIL_USE_TLS = True
-    EMAIL_HOST_USER = 'taconnect.team@gmail.com'
-    EMAIL_HOST_PASSWORD = config('MAIL_PASSWORD')
+#! Don't change that please it's working
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = 'taconnect.team@gmail.com'
+EMAIL_HOST_PASSWORD = config('MAIL_PASSWORD')
 
 WSGI_APPLICATION = 'ta_connect.wsgi.application'
 
