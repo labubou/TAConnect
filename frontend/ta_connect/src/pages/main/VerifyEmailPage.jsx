@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useNavigate, useSearchParams, useParams } from 'react-router-dom';
 import { useTheme } from '../../contexts/ThemeContext';
 import ThemeToggle from '../../components/ThemeToggle';
 import Footer from '../../components/Footer';
@@ -10,13 +10,17 @@ function VerifyEmailPage() {
   const navigate = useNavigate();
   const { theme } = useTheme();
   const [searchParams] = useSearchParams();
+  const params = useParams();
   const [status, setStatus] = useState('verifying'); // verifying, success, error
   const [message, setMessage] = useState('Verifying your email...');
 
   useEffect(() => {
     const verifyEmail = async () => {
-      const uid = searchParams.get('uid');
-      const token = searchParams.get('token');
+      // Support both URL formats: 
+      // 1. /verify-email/:uid/:token (from email)
+      // 2. /verify-email?uid=xxx&token=yyy (query params)
+      const uid = params.uid || searchParams.get('uid');
+      const token = params.token || searchParams.get('token');
 
       if (!uid || !token) {
         setStatus('error');

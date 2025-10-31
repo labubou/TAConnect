@@ -42,6 +42,10 @@ function App() {
               <Route 
                 path="/verify-email"
                 element={<VerifyEmailPage />}
+              />  
+              <Route 
+                path="/verify-email/:uid/:token"
+                element={<VerifyEmailPage />}
               />
               <Route
                 path="/forgot-password"
