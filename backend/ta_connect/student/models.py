@@ -1,6 +1,6 @@
 from django.db import models
 from django.conf import settings
-
+import datetime
 # Create your models here.
 
 class Booking(models.Model):
@@ -12,6 +12,7 @@ class Booking(models.Model):
 
     start_time = models.DateTimeField()
     end_time = models.DateTimeField()
+    date = models.DateField(default=datetime.date.today)
     created_at = models.DateTimeField(auto_now_add=True)
     is_cancelled = models.BooleanField(default=False)
 

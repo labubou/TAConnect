@@ -6,7 +6,6 @@ from instructor.models import OfficeHourSlot, BookingPolicy
 from student.models import Booking
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
-from ..schemas.slot_schemas import url_data_slots_response
 import datetime
 
 # Create your views here.
@@ -69,8 +68,8 @@ def book_slot(request, slot_id):
         if slot.start_date > selected_date or slot.end_date < selected_date:
             return Response({'error': 'This slot is not active on the selected date'}, status=400)
         
-        if slot.status == False:
-            return Response({'error': 'This slot is inactive'}, status=400)
+        if not slot.status:
+            return Response({'error': f'This slot is inactive'}, status=400)
         
         # Check if student email is allowed (if policy requires specific emails)
         student_email = request.user.email
@@ -81,11 +80,12 @@ def book_slot(request, slot_id):
                     'error': 'Your email is not authorized to book this office hour slot'
                 }, status=403)
         
+        available_times = []
+
         # Verify the selected date matches the slot's day of week
         day_of_the_week = selected_date.strftime('%a')  # Mon, Tue, etc.
         if day_of_the_week != slot.day_of_week:
             return Response({
-                'error': f'This slot is only available on {slot.day_of_week}, not {day_of_the_week}'
             }, status=400)
         
         # Get already booked appointments for this date
@@ -93,8 +93,6 @@ def book_slot(request, slot_id):
             office_hour=slot,
             date=selected_date
         ).values_list('start_time', flat=True)
-        
-        available_times = []
 
         # Use slot's duration_minutes, not booked_times
         separation_minutes = slot.duration_minutes
@@ -122,4 +120,4 @@ def book_slot(request, slot_id):
         }, status=200)
     
     except Exception as e:
-        return Response({'error': f'An error occurred'}, status=500)
+        return Response({'error': f'An error occurred {str(e)}'}, status=500)
