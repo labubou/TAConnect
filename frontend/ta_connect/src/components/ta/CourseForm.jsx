@@ -181,7 +181,7 @@ export default function CourseForm({ onCreated, editing, onUpdated, onCancelEdit
       console.debug('Create response:', res?.data);
       const serverId = res?.data?.time_slot_id;
       onCreated && onCreated({ ...payload, time_slot_id: serverId, id: serverId });
-      setMessage('Created successfully. ID: ' + (serverId || '—'));
+      setMessage('');
       setForm(initial);
     } catch (err) {
       console.error('Create slot error', err);

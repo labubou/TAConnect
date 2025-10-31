@@ -1,22 +1,23 @@
-const strings = {
-  appName: 'TAConnect',
+const TANavbarStrings = {
+  appName: "TA Connect",
+
   navigation: {
-    profile: 'Profile',
-    createSlot: 'Create Slot',
-    deleteSlot: 'Delete Slot',
-    updateSlot: 'Update Slot',
-    toggleStatus: 'Toggle Slot Status',
-    logout: 'Logout'
+    profile: "Profile",
+    createSlot: "Create Course / Slot",
+    manageCourses: "Manage Courses",
+    logout: "Logout",
   },
+
   user: {
-    emailNotVerified: 'Email not verified',
-    defaultName: 'User'
+    defaultName: "User",
+    emailNotVerified: "Email not verified. Please verify your account.",
   },
+
   aria: {
-    toggleNav: 'Toggle navigation',
-    expandSidebar: 'Expand sidebar',
-    collapseSidebar: 'Collapse sidebar'
+    toggleNav: "Toggle navigation sidebar",
+    expandSidebar: "Expand sidebar",
+    collapseSidebar: "Collapse sidebar",
   }
 };
 
-export default strings;
+export default TANavbarStrings;

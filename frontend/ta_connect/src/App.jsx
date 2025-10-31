@@ -13,6 +13,8 @@ import PublicRoute from './components/PublicRoute';
 import CreateCourse from './pages/ta/CreateCourse';
 import TAPage from './pages/ta/TAPage';
 import ProfilePage from './pages/ta/ProfilePage';
+import ManageCourses from "./pages/ta/ManageCourses";
+
 
 function App() {
   return (
@@ -60,6 +62,8 @@ function App() {
               <Route path="/ta" element={<TAPage />} />
               <Route path="/ta/profile" element={<ProfilePage />} />
               <Route path="/ta/create-course" element={<CreateCourse />} />
+              <Route path="/ta/manage-courses" element={<ManageCourses />} />
+
               {/* Add more routes here */}
             </Routes>
           </div>

@@ -1,4 +1,4 @@
-const strings = {
+const taPageStrings = {
   navbar: {
     appName: "TA Connect",
     login: "Login",
@@ -13,4 +13,4 @@ const strings = {
   },
 };
 
-export default strings;
+export default taPageStrings;

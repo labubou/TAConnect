@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import { Link, useLocation } from 'react-router-dom';
-import Logo from '../../assets/Logo.png';
+import Logo from '../../assets/Logo2.png';
 import { useTheme } from '../../contexts/ThemeContext';
 import ThemeToggle from '../ThemeToggle';
 import strings from '../../strings/TANavbarStrings';
@@ -96,9 +96,9 @@ const TAnavbar = ({ onToggle }) => {
       }`}>
         <div className="h-full w-64 bg-gradient-to-b from-white/95 via-white/90 to-white/95 dark:from-gray-950/90 dark:via-gray-900/90 dark:to-gray-950/90 backdrop-blur-2xl border-r border-white/30 dark:border-gray-800 shadow-2xl">
           <div className="flex flex-col h-full">
-            {/* Scrollable Content Container */}
+            
             <div className="flex-1 overflow-y-auto overflow-x-hidden scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent hover:scrollbar-thumb-gray-400 p-6">
-              {/* Logo/Brand Section */}
+              
               <div className="mb-8 pt-12">
                 <div className="flex items-center justify-center mb-4">
                   <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-[#366c6b] to-[#1a3535] rounded-full shadow-lg border-4 border-white dark:border-gray-800">
@@ -122,7 +122,7 @@ const TAnavbar = ({ onToggle }) => {
                 </div>
               </div>
 
-              {/* User Info Card */}
+              
               <div className="mb-8">
                 <div className="chef-card rounded-2xl p-4 shadow-lg">
                   <div className="flex items-center space-x-3 mb-3">
@@ -196,36 +196,32 @@ const TAnavbar = ({ onToggle }) => {
                   <span className="font-semibold">{strings.navigation.createSlot}</span>
                 </Link>
 
-                <div className="navbar-link group flex items-center p-4 rounded-2xl text-gray-400 dark:text-gray-500 cursor-not-allowed opacity-60">
-                  <div className="w-10 h-10 rounded-xl bg-gray-100 dark:bg-gray-800 flex items-center justify-center mr-3">
-                    <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                    </svg>
-                  </div>
-                  <span className="font-semibold">{strings.navigation.deleteSlot}</span>
-                </div>
 
-                <div className="navbar-link group flex items-center p-4 rounded-2xl text-gray-400 dark:text-gray-500 cursor-not-allowed opacity-60">
-                  <div className="w-10 h-10 rounded-xl bg-gray-100 dark:bg-gray-800 flex items-center justify-center mr-3">
-                    <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                <Link 
+                  to="/ta/manage-courses"
+                  className={`navbar-link group flex items-center p-4 rounded-2xl transition-all duration-300 ${
+                    isActive('/ta/manage-courses') 
+                      ? 'bg-gradient-to-r from-[#366c6b] to-[#1a3535] text-white shadow-lg transform scale-105' 
+                      : 'text-gray-700 dark:text-gray-200 hover:bg-white/70 dark:hover:bg-gray-800/60 hover:shadow-md hover:scale-105'
+                  }`}
+                  onClick={closeNavbar}
+                >
+                  <div className={`w-10 h-10 rounded-xl flex items-center justify-center mr-3 transition-colors duration-300 ${
+                    isActive('/ta/manage-courses') 
+                      ? 'bg-white/20' 
+                      : 'bg-gray-100 dark:bg-gray-800 group-hover:bg-[#eaf6f6] group-hover:dark:bg-gray-700'
+                  }`}>
+                    <svg className={`w-5 h-5 ${isActive('/ta/manage-courses') ? 'text-white' : 'text-[#366c6b]'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536M9 11l6 6-7 1-1-7 6-6z" />
                     </svg>
-                  </div>
-                  <span className="font-semibold">{strings.navigation.updateSlot}</span>
-                </div>
 
-                <div className="navbar-link group flex items-center p-4 rounded-2xl text-gray-400 dark:text-gray-500 cursor-not-allowed opacity-60">
-                  <div className="w-10 h-10 rounded-xl bg-gray-100 dark:bg-gray-800 flex items-center justify-center mr-3">
-                    <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
-                    </svg>
                   </div>
-                  <span className="font-semibold">{strings.navigation.toggleStatus}</span>
-                </div>
+                  <span className="font-semibold">{strings.navigation.manageCourses}</span>
+                </Link>
               </div>
             </div>
 
-            {/* Fixed Bottom Section - Logout Button and Footer */}
+            
             <div className="flex-shrink-0 border-t border-gray-200/50 dark:border-gray-800 p-6 bg-gradient-to-t from-white/95 to-transparent dark:from-gray-950/90 dark:to-transparent">
               <button
                 onClick={handleLogout}
