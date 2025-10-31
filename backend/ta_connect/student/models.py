@@ -11,7 +11,6 @@ class Booking(models.Model):
     office_hour = models.ForeignKey("instructor.OfficeHourSlot", on_delete=models.CASCADE, related_name="bookings")
 
     start_time = models.DateTimeField()
-    end_time = models.DateTimeField()
     date = models.DateField(default=datetime.date.today)
     created_at = models.DateTimeField(auto_now_add=True)
     is_cancelled = models.BooleanField(default=False)

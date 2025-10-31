@@ -38,7 +38,7 @@ import datetime
 )
 @api_view(['GET'])
 @permission_classes([IsStudent])
-def book_slot(request, slot_id):
+def get_book_times_for_day(request, slot_id):
     try:
         today = datetime.date.today()
 
