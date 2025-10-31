@@ -4,6 +4,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import LandingPage from './pages/main/LandingPage'
 import LoginPage from './pages/main/LoginPage';
 import ForgotPasswordPage from './pages/main/ForgotPasswordPage';
+import ResetPasswordPage from './pages/main/ResetPasswordPage';
 
 function App() {
   return (
@@ -27,6 +28,10 @@ function App() {
               <Route
                 path="/forgot-password"
                 element={<ForgotPasswordPage />}
+              />
+              <Route
+                path="/reset-password"
+                element={<ResetPasswordPage />}
               />
               {/* Add more routes here */}
             </Routes>
