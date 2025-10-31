@@ -6,6 +6,7 @@ import { useAuth } from '../../contexts/AuthContext';
 import axios from 'axios';
 import Logo2 from '../../assets/Logo2.png';
 import strings from '../../strings/loginPageStrings';
+import Footer from '../../components/Footer';
 
 
 function LoginPage() {
@@ -182,6 +183,7 @@ function LoginPage() {
           </div>
         </div>
       </div>
+      <Footer />
     </div>
   );
 }
