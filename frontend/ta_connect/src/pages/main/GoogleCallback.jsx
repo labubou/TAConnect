@@ -22,11 +22,12 @@ const GoogleCallback = () => {
         code,
       });
       
-      const { access, refresh, user: userData, is_new_user } = response.data;
+      const { access, refresh, user: userData, is_new_user, needs_user_type } = response.data;
       
       return { 
         success: true, 
         isNewUser: is_new_user || false,
+        needsUserType: needs_user_type || false,
         data: { access, refresh, user: userData }
       };
     } catch (error) {
@@ -76,12 +77,19 @@ const GoogleCallback = () => {
           login(result.data);
           setStatus('success');
           setIsNewUser(result.isNewUser);
-          if (result.isNewUser) {
-            setMessage('Welcome to TA Connect! Your account has been created successfully.');
+          
+          // Check if user needs to set user_type
+          if (result.needsUserType) {
+            setMessage('Account created! Please select your user type to continue.');
+            setTimeout(() => navigate('/select-user-type'), 2000);
           } else {
-            setMessage('Login successful! Redirecting to dashboard...');
+            if (result.isNewUser) {
+              setMessage('Welcome to TA Connect! Your account has been created successfully.');
+            } else {
+              setMessage('Login successful! Redirecting to dashboard...');
+            }
+            setTimeout(() => navigate('/dashboard'), 2000);
           }
-          setTimeout(() => navigate('/dashboard'), 2000);
         } else {
           setStatus('error');
           setMessage(result.error || 'Google authentication failed.');

@@ -8,7 +8,7 @@ from .schemas.profile_schemas import (
 
 @swagger_auto_schema(
     method='get',
-    operation_description='Get current authenticated user details.',
+    operation_description='Get current authenticated user details including user type.',
     responses={200: user_view_response}
 )
 @api_view(['GET'])
@@ -25,4 +25,5 @@ def user_view(request):
         'first_name': user.first_name,
         'last_name': user.last_name,
         'email_verify': getattr(user, 'email_verify', False),
+        'user_type': getattr(user, 'user_type', None),
     })

@@ -2,7 +2,7 @@ from drf_yasg import openapi
 
 add_time_slot_request = openapi.Schema(
     type=openapi.TYPE_OBJECT,
-    required=['course_name', 'day_of_week', 'start_time', 'end_time', 'start_date', 'end_date'],
+    required=['course_name', 'day_of_week', 'start_time', 'end_time', 'start_date', 'end_date', 'room'],
     properties={
         'course_name': openapi.Schema(type=openapi.TYPE_STRING, description='Name of the course', example='Computer Science 101'),
         'section': openapi.Schema(type=openapi.TYPE_STRING, description='Section identifier (optional)', example='A1'),
@@ -17,6 +17,7 @@ add_time_slot_request = openapi.Schema(
         'duration_minutes': openapi.Schema(type=openapi.TYPE_INTEGER, description='Duration of each booking slot in minutes', example=10, default=10),
         'start_date': openapi.Schema(type=openapi.TYPE_STRING, format='date', description='Start date of office hours', example='2024-01-15'),
         'end_date': openapi.Schema(type=openapi.TYPE_STRING, format='date', description='End date of office hours', example='2024-05-15'),
+        'room': openapi.Schema(type=openapi.TYPE_STRING, description='Room location for office hours', example='Building A, Room 101'),
     },
 )
 
@@ -31,7 +32,7 @@ add_time_slot_response = openapi.Schema(
 
 update_time_slot_request = openapi.Schema(
     type=openapi.TYPE_OBJECT,
-    required=['course_name', 'day_of_week', 'start_time', 'end_time', 'start_date', 'end_date'],
+    required=['course_name', 'day_of_week', 'start_time', 'end_time', 'start_date', 'end_date', 'room'],
     properties={
         'course_name': openapi.Schema(type=openapi.TYPE_STRING, description='Name of the course', example='Computer Science 101'),
         'section': openapi.Schema(type=openapi.TYPE_STRING, description='Section identifier (optional)', example='A1'),
@@ -46,6 +47,7 @@ update_time_slot_request = openapi.Schema(
         'duration_minutes': openapi.Schema(type=openapi.TYPE_INTEGER, description='Duration of each booking slot in minutes', example=10, default=10),
         'start_date': openapi.Schema(type=openapi.TYPE_STRING, format='date', description='Start date of office hours', example='2024-01-15'),
         'end_date': openapi.Schema(type=openapi.TYPE_STRING, format='date', description='End date of office hours', example='2024-05-15'),
+        'room': openapi.Schema(type=openapi.TYPE_STRING, description='Room location for office hours', example='Building A, Room 101'),
     },
 )
 

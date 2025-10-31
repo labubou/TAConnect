@@ -29,6 +29,7 @@ urlpatterns = [
     path('auth/google/url/', google_auth.google_login_url, name='google_login_url'),
     path('auth/google/authenticate/', google_auth.google_auth, name='google_auth'),
     path('auth/google/callback/', google_auth.google_callback, name='google_callback'),
+    path('auth/google/set-user-type/', google_auth.set_user_type, name='set_user_type'),
 
     #Profile endpoints
     path('profile/', profile.get_profile, name='get_profile'),
