@@ -31,12 +31,19 @@ def add_time_slot(request):
         start_date = request.data.get("start_date")
         end_date = request.data.get("end_date")
         room = request.data.get("room")
+        set_student_limit = request.data.get("set_student_limit", 1)
 
         # Validate the required input data
         if not user or not course_name or not start_time or not end_time or not day_of_week or not start_date or not end_date or not room:
             return Response(
                 {'error': 'Course name, start time, end time, day of week, start date, room, and end date are required.'}
                 , status=status.HTTP_400_BAD_REQUEST)
+
+        if set_student_limit < 1:
+            return Response(
+                {'error': 'Student limit must be at least 1.'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
 
         days_of_week_choices = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
         if day_of_week not in days_of_week_choices:
@@ -56,8 +63,15 @@ def add_time_slot(request):
                 duration_minutes=duration_minutes,
                 start_date=start_date,
                 end_date=end_date,
-                room=room
+                room=room,
             )
+
+            # Create the time slot policy
+            time_slot_policy = BookingPolicy.objects.create(
+                office_hour_slot=time_slot,
+                set_student_limit=set_student_limit
+            )
+
         except Exception as e:
             return Response({'error': f'Failed to create time slot'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 

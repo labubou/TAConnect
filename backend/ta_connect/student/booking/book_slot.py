@@ -91,6 +91,14 @@ def book_slot(request, slot_id):
                     'error': 'Your email is not authorized to book this office hour slot'
                 }, status=403)
 
+        existing_booking_per_student = Booking.objects.filter(
+            office_hour=slot,
+            student=request.user,
+            date=selected_date
+        ).count()
+        if existing_booking_per_student >= slot.policy.set_student_limit:
+            return Response({'error': f'You have already booked a slot for this date and the maximum is {slot.policy.set_student_limit}'}, status=403)
+
         # Combine date and time into datetime
         start_datetime = datetime.datetime.combine(selected_date, selected_time)
 

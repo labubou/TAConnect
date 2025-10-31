@@ -18,6 +18,7 @@ url_data_slots_response = openapi.Schema(
         'duration_minutes': openapi.Schema(type=openapi.TYPE_INTEGER, description='Duration in minutes', example=10),
         'start_date': openapi.Schema(type=openapi.TYPE_STRING, format='date', description='Start date', example='2024-01-15'),
         'end_date': openapi.Schema(type=openapi.TYPE_STRING, format='date', description='End date', example='2024-05-15'),
+        'room': openapi.Schema(type=openapi.TYPE_STRING, description='Room location', example='Tech Building Room 301'),
         'status': openapi.Schema(type=openapi.TYPE_BOOLEAN, description='Slot active status', example=True),
         'error': openapi.Schema(type=openapi.TYPE_STRING, description='Error message if any'),
     },
