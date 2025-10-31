@@ -5,6 +5,7 @@ import LandingPage from './pages/main/LandingPage'
 import LoginPage from './pages/main/LoginPage';
 import ForgotPasswordPage from './pages/main/ForgotPasswordPage';
 import ResetPasswordPage from './pages/main/ResetPasswordPage';
+import GoogleCallback from './pages/main/GoogleCallback';
 
 function App() {
   return (
@@ -32,6 +33,10 @@ function App() {
               <Route
                 path="/reset-password"
                 element={<ResetPasswordPage />}
+              />
+              <Route
+                path="/auth/google/callback"
+                element={<GoogleCallback />}
               />
               {/* Add more routes here */}
             </Routes>

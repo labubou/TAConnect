@@ -189,3 +189,6 @@ def google_callback(request):
         return redirect(f"{frontend_url}/auth/google/callback?code={code}")
     
     return redirect(f"{frontend_url}/login?error=google_auth_failed")
+
+# Add alias for the endpoint
+google_authenticate = google_auth
