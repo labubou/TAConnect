@@ -1,12 +1,13 @@
 import { useNavigate } from 'react-router-dom';
 import { useTheme } from '../../contexts/ThemeContext';
+import ThemeToggle from '../../components/ThemeToggle';
 import Logo2 from '../../assets/Logo2.png';
 import strings from '../../strings/landingPageStrings';
 
 
 function LandingPage() {
   const navigate = useNavigate();
-  const { theme, toggleTheme } = useTheme();
+  const { theme } = useTheme();
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
@@ -26,12 +27,7 @@ function LandingPage() {
           >
             {strings.navbar.register}
           </button>
-          <button
-            onClick={toggleTheme}
-            className="px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600"
-          >
-            {theme === 'light' ? '🌙 Dark' : '☀️ Light'}
-          </button>
+          <ThemeToggle />
         </div>
       </nav>
 

@@ -3,13 +3,14 @@ import { useAuth } from '../contexts/AuthContext';
 import { Link, useLocation } from 'react-router-dom';
 import Logo from '../assets/Logo.png';
 import { useTheme } from '../contexts/ThemeContext'; // use ThemeContext instead
+import ThemeToggle from './ThemeToggle';
 
 const Navbar = ({ onToggle }) => {
   const { user, logout } = useAuth();
   const location = useLocation();
   const [isOpen, setIsOpen] = useState(true);
   const [isMobile, setIsMobile] = useState(false);
-  const { theme, toggleTheme } = useTheme(); // add this
+  const { theme } = useTheme(); // add this
 
   useEffect(() => {
     const checkScreenSize = () => {
@@ -83,14 +84,7 @@ const Navbar = ({ onToggle }) => {
 
       {/* Theme toggle - top right */}
       <div className="fixed top-4 right-4 z-50">
-        <button
-          onClick={toggleTheme}
-          aria-label="Toggle theme"
-          title={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
-          className="rounded-2xl bg-white/80 dark:bg-gray-800/80 backdrop-blur-xl border border-white/30 dark:border-gray-700 px-3 py-2 text-sm text-gray-800 dark:text-gray-200 shadow hover:shadow-lg transition"
-        >
-          {theme === 'dark' ? 'Light' : 'Dark'}
-        </button>
+        <ThemeToggle />
       </div>
 
       {/* Navbar Container */}

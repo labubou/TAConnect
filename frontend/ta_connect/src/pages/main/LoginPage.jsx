@@ -1,4 +1,6 @@
 import { useState } from 'react';
+import { useTheme } from '../../contexts/ThemeContext';
+import ThemeToggle from '../../components/ThemeToggle';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import axios from 'axios';
@@ -11,8 +13,8 @@ function LoginPage() {
     const { login } = useAuth();
     const [credentials, setCredentials] = useState({ username: '', password: '' });
     const [error, setError] = useState('');
-    const [loading, setLoading] = useState(false);
-    const [theme, setTheme] = useState('light');
+  const [loading, setLoading] = useState(false);
+  const { theme } = useTheme();
     const handleChange = (e) => {
         setCredentials({
         ...credentials,
@@ -54,10 +56,6 @@ function LoginPage() {
     }
   };
 
-  const toggleTheme = () => {
-    setTheme(theme === 'light' ? 'dark' : 'light');
-  };
-
   const isDark = theme === 'dark';
 
   return (
@@ -74,12 +72,7 @@ function LoginPage() {
           >
             {strings.registerButton}
           </button>
-          <button
-            onClick={toggleTheme}
-            className="px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600"
-          >
-            {theme === 'light' ? '🌙 Dark' : '☀️ Light'}
-          </button>
+          <ThemeToggle />
         </div>
       </nav>
 
@@ -130,7 +123,9 @@ function LoginPage() {
             <div className="flex justify-end">
             <button
                 onClick={() => navigate('/forgot-password')}
-                className={`text-sm ${isDark ? 'text-blue-400' : 'text-blue-600'} hover:underline`}
+                className="px-4 py-2 rounded-lg text-white transition shadow bg-blue-900 hover:bg-blue-950 dark:bg-blue-900/80 dark:hover:bg-blue-900"
+
+
             >
                 {strings.forgotPassword}
                 </button>
@@ -140,7 +135,9 @@ function LoginPage() {
             <button
               onClick={handleSubmit}
               disabled={loading}
-              className="w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 disabled:bg-blue-400 transition"
+              className="px-4 py-2 rounded-lg text-white transition shadow bg-blue-900 hover:bg-blue-950 dark:bg-blue-900/80 dark:hover:bg-blue-900"
+
+
             >
               {loading ? strings.loggingInButton : strings.loginButton}
             </button>
@@ -175,7 +172,9 @@ function LoginPage() {
               {strings.noAccount}{' '}
               <button
                 onClick={() => navigate('/register')}
-                className={`${isDark ? 'text-blue-400' : 'text-blue-600'} hover:underline font-medium`}
+                className="px-4 py-2 rounded-lg text-white transition shadow bg-blue-900 hover:bg-blue-950 dark:bg-blue-900/80 dark:hover:bg-blue-900"
+
+
               >
                 {strings.registerHere}
               </button>

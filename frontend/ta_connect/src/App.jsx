@@ -1,8 +1,9 @@
 import { AuthProvider } from './contexts/AuthContext'
 import { ThemeProvider } from './contexts/ThemeContext'
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom'
 import LandingPage from './pages/main/LandingPage'
 import LoginPage from './pages/main/LoginPage';
+import ForgotPasswordPage from './pages/main/ForgotPasswordPage';
 
 function App() {
   return (
@@ -22,6 +23,10 @@ function App() {
                <Route 
                 path="/login"
                 element={<LoginPage />}
+              />
+              <Route
+                path="/forgot-password"
+                element={<ForgotPasswordPage />}
               />
               {/* Add more routes here */}
             </Routes>
