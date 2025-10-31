@@ -14,13 +14,13 @@ from student.schemas.booking_schemas import cancel_booked_slot_request, cancel_b
 
 
 @swagger_auto_schema(
-    method='delete',
-    operation_description='Cancel an existing booking for an office hour slot.',
+    method='PATCH',
+    operation_description='Cancel an existing booking for an office hour slot. Cannot cancel bookings for past dates or times.',
     manual_parameters=[
         openapi.Parameter(
-            'slot_id',
+            'booking_id',
             openapi.IN_PATH,
-            description='ID of the office hour slot',
+            description='ID of the booking to cancel',
             type=openapi.TYPE_INTEGER,
             required=True
         )
@@ -28,38 +28,35 @@ from student.schemas.booking_schemas import cancel_booked_slot_request, cancel_b
     request_body=cancel_booked_slot_request,
     responses={
         200: cancel_booked_slot_response,
-        400: 'Invalid request or booking already cancelled',
+        400: 'Invalid request, booking already cancelled, or attempting to cancel a past booking',
         404: 'Booking not found',
         500: 'Internal server error'
     }
 )
-@api_view(['DELETE'])
+@api_view(['PATCH'])
 @permission_classes([IsStudent])
-def cancel_slot(request, slot_id):
+def cancel_slot(request, booking_id):
     try:
-        date_str = request.data.get("date")
-        start_time_str = request.data.get("time")
-
-        if not date_str or not start_time_str:
-            return Response({'error': 'Date and time are required'}, status=400)
-
-        # Check the format of the date and time
-        try:
-            selected_date = datetime.datetime.strptime(date_str, '%Y-%m-%d').date()
-            selected_time = datetime.datetime.strptime(start_time_str, '%H:%M').time()
-            start_datetime = datetime.datetime.combine(selected_date, selected_time)
-        except ValueError:
-            return Response({'error': 'Invalid date/time format. Use YYYY-MM-DD for date and HH:MM for time'}, status=400)
 
         # Find the specific booking
         booking = get_object_or_404(
             Booking,
-            office_hour_id=slot_id,
+            id=booking_id,
             student=request.user,
-            date=selected_date,
-            start_time=start_datetime,
             is_cancelled=False
         )
+
+        # Check if the booking date has already passed
+        today = datetime.date.today()
+        if booking.date < today:
+            return Response({'error': 'Cannot cancel a booking for a past date'}, status=400)
+        
+        # Check if canceling today and the time has already passed
+        if booking.date == today:
+            current_time = datetime.datetime.now().time()
+            booking_time = booking.start_time.time()
+            if booking_time < current_time:
+                return Response({'error': 'Cannot cancel a booking that has already passed'}, status=400)
 
         # Cancel the booking
         booking.is_cancelled = True
@@ -71,8 +68,8 @@ def cancel_slot(request, slot_id):
             'student_email': request.user.email,
             'instructor_name': f"{booking.office_hour.instructor.first_name} {booking.office_hour.instructor.last_name}" if booking.office_hour.instructor.first_name else booking.office_hour.instructor.username,
             'course_name': booking.office_hour.course_name,
-            'booking_date': selected_date.strftime('%B %d, %Y'),
-            'booking_time': start_time_str,
+            'booking_date': booking.date.strftime('%B %d, %Y'),
+            'booking_time': booking.start_time.strftime('%I:%M %p'),
             'room': booking.office_hour.room,
             'frontend_url': frontend_url,
         }
@@ -95,7 +92,7 @@ def cancel_slot(request, slot_id):
 
         return Response({
             'success': True,
-            'message': f"Successfully cancelled booking for {booking.office_hour.course_name} on {date_str} at {start_time_str}."
+            'message': f"Successfully cancelled booking for {booking.office_hour.course_name} on {booking.date.strftime('%B %d, %Y')} at {booking.start_time.strftime('%I:%M %p')}."
         }, status=200)
 
     except Exception as e:

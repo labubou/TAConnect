@@ -16,12 +16,12 @@ from student.schemas.booking_schemas import update_booked_slot_request, update_b
 # Create your views here.
 @swagger_auto_schema(
     method='PATCH',
-    operation_description='Update an existing booking for an office hour slot.',
+    operation_description='Update an existing booking for an office hour slot. The new date must be today or in the future.',
     manual_parameters=[
         openapi.Parameter(
-            'slot_id',
+            'booking_id',
             openapi.IN_PATH,
-            description='ID of the office hour slot',
+            description='ID of the booking to update',
             type=openapi.TYPE_INTEGER,
             required=True
         )
@@ -29,7 +29,7 @@ from student.schemas.booking_schemas import update_booked_slot_request, update_b
     request_body=update_booked_slot_request,
     responses={
         200: update_booked_slot_response,
-        400: 'Invalid request or slot not active',
+        400: 'Invalid request, slot not active, or attempting to update to a past date/time',
         403: 'Student email not allowed to update this slot',
         404: 'Booking not found',
         500: 'Internal server error'
@@ -37,36 +37,41 @@ from student.schemas.booking_schemas import update_booked_slot_request, update_b
 )
 @api_view(['PATCH'])
 @permission_classes([IsStudent])
-def update_slot(request, slot_id):
+def update_slot(request, booking_id):
     try:
-        # Get booking details
-        old_date_str = request.data.get("old_date")
-        old_time_str = request.data.get("old_time")
+        
+        existing_booking = get_object_or_404(
+            Booking,
+            id=booking_id,
+            student=request.user,
+            is_cancelled=False
+        )
+
         new_date_str = request.data.get("new_date")
         new_time_str = request.data.get("new_time")
 
-        if not all([old_date_str, old_time_str, new_date_str, new_time_str]):
-            return Response({'error': 'All date and time fields are required'}, status=400)
+        if not new_date_str or not new_time_str:
+            return Response({'error': 'New date and time are required'}, status=400)
 
         # Parse dates and times
         try:
-            old_date = datetime.datetime.strptime(old_date_str, '%Y-%m-%d').date()
-            old_time = datetime.datetime.strptime(old_time_str, '%H:%M').time()
+            old_date = existing_booking.date
+            old_time = existing_booking.start_time.time()
             new_date = datetime.datetime.strptime(new_date_str, '%Y-%m-%d').date()
             new_time = datetime.datetime.strptime(new_time_str, '%H:%M').time()
         except ValueError:
             return Response({'error': 'Invalid date/time format. Use YYYY-MM-DD for date and HH:MM for time'}, status=400)
 
-        # Find the existing booking
-        old_start_datetime = datetime.datetime.combine(old_date, old_time)
-        existing_booking = get_object_or_404(
-            Booking,
-            office_hour_id=slot_id,
-            student=request.user,
-            date=old_date,
-            start_time=old_start_datetime,
-            is_cancelled=False
-        )
+        # Check if the new date is in the past
+        today = datetime.date.today()
+        if new_date < today:
+            return Response({'error': 'Cannot update booking to a past date'}, status=400)
+        
+        # Check if updating to today and the time has already passed
+        if new_date == today:
+            current_time = datetime.datetime.now().time()
+            if new_time < current_time:
+                return Response({'error': 'Cannot update booking to a past time'}, status=400)
 
         slot = existing_booking.office_hour
 
@@ -79,6 +84,7 @@ def update_slot(request, slot_id):
 
         # Check if new time is already booked
         new_start_datetime = datetime.datetime.combine(new_date, new_time)
+
         time_conflict = Booking.objects.filter(
             office_hour=slot,
             date=new_date,
@@ -100,10 +106,10 @@ def update_slot(request, slot_id):
             'student_email': request.user.email,
             'instructor_name': f"{slot.instructor.first_name} {slot.instructor.last_name}" if slot.instructor.first_name else slot.instructor.username,
             'course_name': slot.course_name,
-            'old_booking_date': old_date_str,
-            'old_booking_time': old_time_str,
-            'new_booking_date': new_date_str,
-            'new_booking_time': new_time_str,
+            'old_booking_date': str(old_date),
+            'old_booking_time': str(old_time),
+            'new_booking_date': str(new_date),
+            'new_booking_time': str(new_time),
             'duration': slot.duration_minutes,
             'room': slot.room,
             'frontend_url': frontend_url,
