@@ -46,6 +46,7 @@ class BookingPolicy(models.Model):
 class AllowedStudents(models.Model):
     booking_policy = models.ForeignKey(
         BookingPolicy,
+        on_delete=models.CASCADE,  # Deleting BookingPolicy deletes AllowedStudents
         related_name="allowed_students"  # Access via policy.allowed_students.all()
     )
     first_name = models.CharField(max_length=100)

@@ -50,6 +50,15 @@ def url_data_slots(request,slot_id):
         if slot.status==False:
             return Response({'error': 'This slot is inactive'}, status=400)
         
+        # Check if student email is allowed (if policy requires specific emails)
+        student_email = request.user.email
+        if hasattr(slot, 'policy') and slot.policy.require_specific_email:
+            is_allowed = slot.policy.allowed_students.filter(email=student_email).exists()
+            if not is_allowed:
+                return Response({
+                    'error': 'Your email is not authorized to book this office hour slot'
+                }, status=403)
+
         return Response({
             'id': slot.id,
             'instructor': slot.instructor.username,
