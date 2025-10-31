@@ -33,7 +33,7 @@ function ResetPasswordPage() {
     }
 
     try {
-  const res = await axios.post('/api/auth/password-reset/validate/', { uid, token });
+      const res = await axios.post('/api/auth/password-reset/validate/', { uid, token });
       if (res.data.valid) {
         setTokenValid(true);
       } else {
