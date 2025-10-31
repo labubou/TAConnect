@@ -10,11 +10,12 @@ import datetime
 from django.core.mail import send_mail
 from django.template.loader import render_to_string
 from ta_connect.settings import frontend_url
+from student.schemas.booking_schemas import book_slot_request, book_slot_response
 
 # Create your views here.
 @swagger_auto_schema(
     method='post',
-    operation_description='Get available booking times for a specific date and slot.',
+    operation_description='Book an office hour slot for a specific date and time.',
     manual_parameters=[
         openapi.Parameter(
             'slot_id',
@@ -22,19 +23,13 @@ from ta_connect.settings import frontend_url
             description='ID of the office hour slot',
             type=openapi.TYPE_INTEGER,
             required=True
-        ),
-        openapi.Parameter(
-            'date',
-            openapi.IN_QUERY,
-            description='Date in YYYY-MM-DD format',
-            type=openapi.TYPE_STRING,
-            required=True
         )
     ],
+    request_body=book_slot_request,
     responses={
-        200: 'List of available time slots',
+        200: book_slot_response,
         400: 'Invalid request or slot not active',
-        403: 'Student email not allowed to book this slot',
+        403: 'Student email not allowed to book this slot or booking limit reached',
         404: 'Slot not found',
         500: 'Internal server error'
     }
@@ -90,6 +85,14 @@ def book_slot(request, slot_id):
                 return Response({
                     'error': 'Your email is not authorized to book this office hour slot'
                 }, status=403)
+
+        existing_booking_per_student = Booking.objects.filter(
+            office_hour=slot,
+            student=request.user,
+            date=selected_date
+        ).count()
+        if existing_booking_per_student >= slot.policy.set_student_limit:
+            return Response({'error': f'You have already booked a slot for this date and the maximum is {slot.policy.set_student_limit}'}, status=403)
 
         # Combine date and time into datetime
         start_datetime = datetime.datetime.combine(selected_date, selected_time)

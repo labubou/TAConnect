@@ -39,6 +39,7 @@ class BookingPolicy(models.Model):
         related_name="policy"
     )
     require_specific_email = models.BooleanField(default=False)
+    set_student_limit = models.PositiveIntegerField(null=True, blank=True, default=1)
 
     def __str__(self):
         return f"Policy for {self.office_hour_slot}"
