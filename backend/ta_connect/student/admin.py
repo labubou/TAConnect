@@ -8,10 +8,10 @@ import logging
 User = get_user_model()
 
 class BookingAdmin(admin.ModelAdmin):
-    list_display = ("id", "student", "office_hour", "start_time", "end_time", "created_at", "is_cancelled")
-    list_filter = ("is_cancelled", "office_hour__course_name")
-    search_fields = ("student__username", "student__email", "office_hour__course_name")
-    date_hierarchy = "start_time"
+    list_display = ("id", "student", "office_hour", "date", "start_time", "created_at", "is_cancelled")
+    list_filter = ("is_cancelled", "date", "created_at")
+    search_fields = ("student__username", "student__email")
+    date_hierarchy = "date"
     readonly_fields = ("created_at",)
 
 def _table_exists(table_name: str) -> bool:

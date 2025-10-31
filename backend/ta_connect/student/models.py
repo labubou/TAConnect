@@ -1,15 +1,17 @@
 from django.db import models
 from django.conf import settings
-
+import datetime
 # Create your models here.
 
 class Booking(models.Model):
+    
     # use settings.AUTH_USER_MODEL to avoid direct import and migration pitfalls
     student = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="bookings")
     # use string reference to avoid import cycles and migration ordering issues
     office_hour = models.ForeignKey("instructor.OfficeHourSlot", on_delete=models.CASCADE, related_name="bookings")
+
     start_time = models.DateTimeField()
-    end_time = models.DateTimeField()
+    date = models.DateField(default=datetime.date.today)
     created_at = models.DateTimeField(auto_now_add=True)
     is_cancelled = models.BooleanField(default=False)
 
