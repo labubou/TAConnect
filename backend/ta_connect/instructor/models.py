@@ -33,20 +33,38 @@ class OfficeHourSlot(models.Model):
         return f"{self.course_name} - {self.section} {self.day_of_week} {self.start_time}-{self.end_time}"
 
 class BookingPolicy(models.Model):
-    office_hour_slot = models.OneToOneField(OfficeHourSlot, on_delete=models.CASCADE, related_name="policy")
-    require_university_email = models.BooleanField(default=True)
-    # make JSONField safe with default list and allow blank
-    allowed_students = models.JSONField(default=list, blank=True, null=True)
+    office_hour_slot = models.OneToOneField(
+        OfficeHourSlot, 
+        on_delete=models.CASCADE,
+        related_name="policy"
+    )
+    require_specific_email = models.BooleanField(default=False)
 
     def __str__(self):
         return f"Policy for {self.office_hour_slot}"
+
+class AllowedStudents(models.Model):
+    booking_policy = models.ForeignKey(
+        BookingPolicy,
+        related_name="allowed_students"  # Access via policy.allowed_students.all()
+    )
+    first_name = models.CharField(max_length=100)
+    last_name = models.CharField(max_length=100)
+    id_number = models.CharField(max_length=100)
+    email = models.EmailField()
+
+    class Meta:
+        verbose_name_plural = "Allowed Students"
+        unique_together = ['booking_policy', 'email']  # Prevent duplicate emails per policy
+
+    def __str__(self):
+        return f"{self.email} - {self.booking_policy}"
 
 class TAAnalytics(models.Model):
     instructor = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     total_sessions = models.PositiveIntegerField(default=0)
     total_feedback_count = models.PositiveIntegerField(default=0)
     average_rating = models.FloatField(default=0.0)
-
     last_updated = models.DateTimeField(auto_now=True)
 
     def __str__(self):
