@@ -17,6 +17,8 @@ from accounts.schemas.auth_schemas import (
     google_login_url_response,
     google_auth_request,
     google_auth_response,
+    set_user_type_request,
+    set_user_type_response,
 )
 
 @swagger_auto_schema(
@@ -101,8 +103,9 @@ def google_auth(request):
         user = User.objects.filter(email=email).first()
         
         if user:
-            # User exists, generate tokens and return
+            # User exists, check if user_type is set
             refresh = RefreshToken.for_user(user)
+            
             return Response({
                 'refresh': str(refresh),
                 'access': str(refresh.access_token),
@@ -112,10 +115,12 @@ def google_auth(request):
                     'email': user.email,
                     'first_name': user.first_name,
                     'last_name': user.last_name,
-                }
+                    'user_type': user.user_type if user.user_type else None,
+                },
+                'needs_user_type': not bool(user.user_type)
             })
         else:
-            # User doesn't exist, create new user
+            # User doesn't exist, create new user without user_type
             username = email.split('@')[0]
             
             # Ensure username is unique
@@ -125,29 +130,16 @@ def google_auth(request):
                 username = f"{base_username}{counter}"
                 counter += 1
             
-            # Create new user
+            # Create new user without user_type (will be set later)
             user = User.objects.create_user(
                 username=username,
                 email=email,
                 first_name=first_name,
                 last_name=last_name,
                 email_verify=True,
-                is_active=True
+                is_active=True,
+                user_type=''  # Empty, to be set by user
             )
-
-            # Send welcome email
-            try:
-                mail_subject = 'Welcome to TAConnect!'
-                message = render_to_string('welcome_email.html', {
-                    'user': user,
-                    'domain': SITE_DOMAIN.rstrip('/'),
-                    'frontend_url': frontend_url,
-                    'uid': user.pk,  # Not used for Google, but template expects it
-                    'token': '',     # Not used for Google, but template expects it
-                })
-                send_mail(mail_subject, '', 'taconnect.team@gmail.com', [user.email], html_message=message)
-            except Exception as email_error:
-                print(f"Failed to send welcome email: {str(email_error)}")
 
             # Generate tokens and return
             refresh = RefreshToken.for_user(user)
@@ -160,8 +152,10 @@ def google_auth(request):
                     'email': user.email,
                     'first_name': user.first_name,
                     'last_name': user.last_name,
+                    'user_type': None,
                 },
-                'is_new_user': True
+                'is_new_user': True,
+                'needs_user_type': True
             })
 
     except Exception:
@@ -189,3 +183,91 @@ def google_callback(request):
         return redirect(f"{frontend_url}/auth/google/callback?code={code}")
     
     return redirect(f"{frontend_url}/login?error=google_auth_failed")
+
+# Add alias for the endpoint
+google_authenticate = google_auth
+
+@swagger_auto_schema(
+    method='post',
+    operation_description='Set user type for Google OAuth users who need to complete their profile.',
+    request_body=set_user_type_request,
+    responses={
+        200: set_user_type_response,
+        400: 'Invalid user type or missing field',
+        401: 'Authentication required or invalid token'
+    }
+)
+@api_view(['POST'])
+@permission_classes([AllowAny])
+def set_user_type(request):
+    """Set user type for newly created Google OAuth users"""
+    try:
+        user_type = request.data.get('user_type')
+        
+        if not user_type:
+            return Response(
+                {'error': 'user_type is required'}, 
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        # Validate user_type
+        if user_type not in dict(User.USER_TYPE_CHOICES).keys():
+            return Response(
+                {'error': 'Invalid user_type. Must be either "student" or "instructor"'}, 
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        # Get user from token
+        auth_header = request.headers.get('Authorization', '')
+        if not auth_header.startswith('Bearer '):
+            return Response(
+                {'error': 'Authentication required'}, 
+                status=status.HTTP_401_UNAUTHORIZED
+            )
+        
+        token = auth_header.split(' ')[1]
+        
+        try:
+            from rest_framework_simplejwt.tokens import AccessToken
+            access_token = AccessToken(token)
+            user_id = access_token['user_id']
+            user = User.objects.get(id=user_id)
+        except Exception:
+            return Response(
+                {'error': 'Invalid or expired token'}, 
+                status=status.HTTP_401_UNAUTHORIZED
+            )
+        
+        # Update user_type
+        user.user_type = user_type
+        user.save()
+        
+        # Send welcome email now that user_type is set
+        try:
+            mail_subject = 'Welcome to TAConnect!'
+            message = render_to_string('welcome_email.html', {
+                'user': user,
+                'domain': SITE_DOMAIN.rstrip('/'),
+                'frontend_url': frontend_url,
+            })
+            send_mail(mail_subject, '', 'taconnect.team@gmail.com', [user.email], html_message=message)
+        except Exception as email_error:
+            print(f"Failed to send welcome email: {str(email_error)}")
+        
+        return Response({
+            'message': 'User type set successfully',
+            'user': {
+                'id': user.id,
+                'username': user.username,
+                'email': user.email,
+                'first_name': user.first_name,
+                'last_name': user.last_name,
+                'user_type': user.user_type,
+            }
+        }, status=status.HTTP_200_OK)
+        
+    except Exception:
+        return Response(
+            {'error': 'An error occurred while setting user type'}, 
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR
+        )

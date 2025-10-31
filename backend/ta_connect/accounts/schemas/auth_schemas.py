@@ -123,6 +123,39 @@ google_auth_response = openapi.Schema(
         'access': openapi.Schema(type=openapi.TYPE_STRING),
         'user': openapi.Schema(type=openapi.TYPE_OBJECT),
         'is_new_user': openapi.Schema(type=openapi.TYPE_BOOLEAN),
+        'needs_user_type': openapi.Schema(type=openapi.TYPE_BOOLEAN),
+        'error': openapi.Schema(type=openapi.TYPE_STRING),
+    },
+)
+
+set_user_type_request = openapi.Schema(
+    type=openapi.TYPE_OBJECT,
+    required=['user_type'],
+    properties={
+        'user_type': openapi.Schema(
+            type=openapi.TYPE_STRING,
+            description='User type (student or instructor)',
+            enum=['student', 'instructor'],
+            example='student'
+        ),
+    },
+)
+
+set_user_type_response = openapi.Schema(
+    type=openapi.TYPE_OBJECT,
+    properties={
+        'message': openapi.Schema(type=openapi.TYPE_STRING, example='User type set successfully'),
+        'user': openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                'id': openapi.Schema(type=openapi.TYPE_INTEGER),
+                'username': openapi.Schema(type=openapi.TYPE_STRING),
+                'email': openapi.Schema(type=openapi.TYPE_STRING),
+                'first_name': openapi.Schema(type=openapi.TYPE_STRING),
+                'last_name': openapi.Schema(type=openapi.TYPE_STRING),
+                'user_type': openapi.Schema(type=openapi.TYPE_STRING),
+            }
+        ),
         'error': openapi.Schema(type=openapi.TYPE_STRING),
     },
 )

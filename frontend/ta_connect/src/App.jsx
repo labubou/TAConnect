@@ -7,6 +7,9 @@ import RegisterPage from './pages/main/RegisterPage';
 import VerifyEmailPage from './pages/main/VerifyEmailPage';
 import ForgotPasswordPage from './pages/main/ForgotPasswordPage';
 import ResetPasswordPage from './pages/main/ResetPasswordPage';
+import GoogleCallback from './pages/main/GoogleCallback';
+import SelectUserType from './pages/main/SelectUserType';
+import PublicRoute from './components/PublicRoute';
 
 function App() {
   return (
@@ -42,6 +45,14 @@ function App() {
               <Route
                 path="/reset-password"
                 element={<ResetPasswordPage />}
+              />
+              <Route
+                path="/auth/google/callback"
+                element={<GoogleCallback />}
+              />
+              <Route
+                path="/select-user-type"
+                element={<SelectUserType />}
               />
               {/* Add more routes here */}
             </Routes>

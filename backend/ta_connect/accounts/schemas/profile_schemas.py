@@ -9,6 +9,7 @@ get_profile_response = openapi.Schema(
         'first_name': openapi.Schema(type=openapi.TYPE_STRING),
         'last_name': openapi.Schema(type=openapi.TYPE_STRING),
         'email_verify': openapi.Schema(type=openapi.TYPE_BOOLEAN),
+        'user_type': openapi.Schema(type=openapi.TYPE_STRING, enum=['student', 'instructor']),
         'date_joined': openapi.Schema(type=openapi.TYPE_STRING, format='date-time'),
     },
 )
@@ -20,6 +21,7 @@ update_profile_request = openapi.Schema(
         'last_name': openapi.Schema(type=openapi.TYPE_STRING),
         'username': openapi.Schema(type=openapi.TYPE_STRING),
         'email': openapi.Schema(type=openapi.TYPE_STRING),
+        'user_type': openapi.Schema(type=openapi.TYPE_STRING, enum=['student', 'instructor']),
     },
 )
 
@@ -27,7 +29,18 @@ update_profile_response = openapi.Schema(
     type=openapi.TYPE_OBJECT,
     properties={
         'message': openapi.Schema(type=openapi.TYPE_STRING),
-        'user': openapi.Schema(type=openapi.TYPE_OBJECT),
+        'user': openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                'id': openapi.Schema(type=openapi.TYPE_INTEGER),
+                'username': openapi.Schema(type=openapi.TYPE_STRING),
+                'email': openapi.Schema(type=openapi.TYPE_STRING),
+                'first_name': openapi.Schema(type=openapi.TYPE_STRING),
+                'last_name': openapi.Schema(type=openapi.TYPE_STRING),
+                'email_verify': openapi.Schema(type=openapi.TYPE_BOOLEAN),
+                'user_type': openapi.Schema(type=openapi.TYPE_STRING),
+            }
+        ),
         'error': openapi.Schema(type=openapi.TYPE_STRING),
     },
 )
@@ -75,6 +88,7 @@ user_view_response = openapi.Schema(
         'first_name': openapi.Schema(type=openapi.TYPE_STRING),
         'last_name': openapi.Schema(type=openapi.TYPE_STRING),
         'email_verify': openapi.Schema(type=openapi.TYPE_BOOLEAN),
+        'user_type': openapi.Schema(type=openapi.TYPE_STRING, enum=['student', 'instructor']),
     },
 )
 

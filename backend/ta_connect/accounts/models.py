@@ -15,7 +15,7 @@ class User(AbstractUser):
     )
 
     email_verify = models.BooleanField(default=False, verbose_name="Email Verified")
-    user_type = models.CharField(max_length=10, choices=USER_TYPE_CHOICES, verbose_name="User Type")
+    user_type = models.CharField(max_length=10, choices=USER_TYPE_CHOICES, blank=True, null=True, verbose_name="User Type")
 
     #functions to check user type
     def is_instructor(self):

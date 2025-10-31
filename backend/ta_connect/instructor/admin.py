@@ -15,9 +15,9 @@ class OfficeHourSlotAdmin(admin.ModelAdmin):
 
 @admin.register(BookingPolicy)
 class BookingPolicyAdmin(admin.ModelAdmin):
-    list_display = ("id", "office_hour_slot", "require_university_email")
-    search_fields = ("office_hour_slot__course_name",)
-    list_filter = ("require_university_email",)
+    list_display = ['office_hour_slot', 'require_specific_email']  # Changed from require_university_email
+    list_filter = ['require_specific_email']  # Changed from require_university_email
+    search_fields = ['office_hour_slot__course_name', 'office_hour_slot__section']
 
 @admin.register(TAAnalytics)
 class TAAnalyticsAdmin(admin.ModelAdmin):
