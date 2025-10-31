@@ -105,11 +105,17 @@ function RegisterPage() {
       const response = await axios.post('/api/auth/register/', formData);
       
       if (response.data) {
-        setSuccess(strings.messages.success);
-        // Redirect to login after 2 seconds
-        setTimeout(() => {
-          navigate('/login');
-        }, 2000);
+        setSuccess(response.data.message || strings.messages.success);
+        // Clear the form
+        setFormData({
+          username: '',
+          email: '',
+          password: '',
+          password2: '',
+          first_name: '',
+          last_name: '',
+          user_type: '',
+        });
       }
     } catch (err) {
       setError(
@@ -157,15 +163,33 @@ function RegisterPage() {
 
           {/* Error Message */}
           {error && (
-            <div className={`mb-4 p-3 ${isDark ? 'bg-red-900 border-red-600 text-red-200' : 'bg-red-100 border-red-400 text-red-700'} border rounded`}>
-              {error}
+            <div className={`mb-4 p-3 ${isDark ? 'bg-red-900 border-red-600 text-red-200' : 'bg-red-100 border-red-400 text-red-700'} border rounded flex items-start`}>
+              <svg className="w-5 h-5 mr-2 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+              </svg>
+              <span>{error}</span>
             </div>
           )}
 
           {/* Success Message */}
           {success && (
-            <div className={`mb-4 p-3 ${isDark ? 'bg-green-900 border-green-600 text-green-200' : 'bg-green-100 border-green-400 text-green-700'} border rounded`}>
-              {success}
+            <div className={`mb-4 p-4 ${isDark ? 'bg-green-900 border-green-600 text-green-200' : 'bg-green-100 border-green-400 text-green-700'} border rounded`}>
+              <div className="flex items-start">
+                <svg className="w-6 h-6 mr-3 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                </svg>
+                <div className="flex-1">
+                  <p className="font-semibold text-lg mb-1">✉️ {success}</p>
+                  <p className="text-sm">{strings.messages.successSubtext}</p>
+                  <p className="text-sm mt-2">Check your spam folder if you don't see the email.</p>
+                  <button
+                    onClick={() => navigate('/login')}
+                    className={`mt-3 px-4 py-2 ${isDark ? 'bg-green-700 hover:bg-green-600' : 'bg-green-600 hover:bg-green-700'} text-white rounded transition`}
+                  >
+                    Go to Login
+                  </button>
+                </div>
+              </div>
             </div>
           )}
 
@@ -186,7 +210,7 @@ function RegisterPage() {
                     errors.first_name 
                       ? 'border-red-500' 
                       : isDark ? 'border-gray-600' : 'border-gray-300'
-                  } ${isDark ? 'bg-gray-700 text-white' : 'bg-white text-black'} rounded-lg focus:ring-2 focus:ring-blue-500`}
+                  } ${isDark ? 'bg-gray-700 text-white' : 'bg-white text-black'} rounded-lg focus:ring-2 focus:ring-blue-500 transition-transform focus:scale-105`}
                   placeholder={strings.form.firstNamePlaceholder}
                 />
                 {errors.first_name && (
@@ -207,7 +231,7 @@ function RegisterPage() {
                     errors.last_name 
                       ? 'border-red-500' 
                       : isDark ? 'border-gray-600' : 'border-gray-300'
-                  } ${isDark ? 'bg-gray-700 text-white' : 'bg-white text-black'} rounded-lg focus:ring-2 focus:ring-blue-500`}
+                  } ${isDark ? 'bg-gray-700 text-white' : 'bg-white text-black'} rounded-lg focus:ring-2 focus:ring-blue-500 transition-transform focus:scale-105`}
                   placeholder={strings.form.lastNamePlaceholder}
                 />
                 {errors.last_name && (
@@ -230,7 +254,7 @@ function RegisterPage() {
                   errors.username 
                     ? 'border-red-500' 
                     : isDark ? 'border-gray-600' : 'border-gray-300'
-                } ${isDark ? 'bg-gray-700 text-white' : 'bg-white text-black'} rounded-lg focus:ring-2 focus:ring-blue-500`}
+                } ${isDark ? 'bg-gray-700 text-white' : 'bg-white text-black'} rounded-lg focus:ring-2 focus:ring-blue-500 transition-transform focus:scale-105`}
                 placeholder={strings.form.usernamePlaceholder}
               />
               {errors.username && (
@@ -252,7 +276,7 @@ function RegisterPage() {
                   errors.email 
                     ? 'border-red-500' 
                     : isDark ? 'border-gray-600' : 'border-gray-300'
-                } ${isDark ? 'bg-gray-700 text-white' : 'bg-white text-black'} rounded-lg focus:ring-2 focus:ring-blue-500`}
+                } ${isDark ? 'bg-gray-700 text-white' : 'bg-white text-black'} rounded-lg focus:ring-2 focus:ring-blue-500 transition-transform focus:scale-105`}
                 placeholder={strings.form.emailPlaceholder}
               />
               {errors.email && (
@@ -275,7 +299,7 @@ function RegisterPage() {
                     errors.password 
                       ? 'border-red-500' 
                       : isDark ? 'border-gray-600' : 'border-gray-300'
-                  } ${isDark ? 'bg-gray-700 text-white' : 'bg-white text-black'} rounded-lg focus:ring-2 focus:ring-blue-500`}
+                  } ${isDark ? 'bg-gray-700 text-white' : 'bg-white text-black'} rounded-lg focus:ring-2 focus:ring-blue-500 transition-transform focus:scale-105`}
                   placeholder={strings.form.passwordPlaceholder}
                 />
                 {errors.password && (
@@ -296,7 +320,7 @@ function RegisterPage() {
                     errors.password2 
                       ? 'border-red-500' 
                       : isDark ? 'border-gray-600' : 'border-gray-300'
-                  } ${isDark ? 'bg-gray-700 text-white' : 'bg-white text-black'} rounded-lg focus:ring-2 focus:ring-blue-500`}
+                  } ${isDark ? 'bg-gray-700 text-white' : 'bg-white text-black'} rounded-lg focus:ring-2 focus:ring-blue-500 transition-transform focus:scale-105`}
                   placeholder={strings.form.confirmPasswordPlaceholder}
                 />
                 {errors.password2 && (

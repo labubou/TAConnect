@@ -4,6 +4,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import LandingPage from './pages/main/LandingPage'
 import LoginPage from './pages/main/LoginPage';
 import RegisterPage from './pages/main/RegisterPage';
+import VerifyEmailPage from './pages/main/VerifyEmailPage';
 import ForgotPasswordPage from './pages/main/ForgotPasswordPage';
 import ResetPasswordPage from './pages/main/ResetPasswordPage';
 
@@ -29,6 +30,10 @@ function App() {
               <Route 
                 path="/register"
                 element={<RegisterPage />}
+              />
+              <Route 
+                path="/verify-email"
+                element={<VerifyEmailPage />}
               />
               <Route
                 path="/forgot-password"

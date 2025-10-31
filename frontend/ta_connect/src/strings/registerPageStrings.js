@@ -39,7 +39,8 @@ const REGISTER_PAGE = {
     userTypeRequired: "Please select your user type",
   },
   messages: {
-    success: "Account created successfully! Redirecting to login...",
+    success: "Account created successfully! Please check your email to verify your account.",
+    successSubtext: "We've sent a verification link to your email address. Click the link to activate your account.",
     error: "Failed to create account. Please try again.",
   },
   footer: {
