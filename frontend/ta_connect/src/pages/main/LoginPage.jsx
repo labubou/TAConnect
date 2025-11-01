@@ -33,26 +33,36 @@ function LoginPage() {
       const response = await axios.post('/api/auth/login/', credentials);
 
       if (response.data) {
-        // Login without user data to force AuthContext to fetch full user data
+        // Pass the complete response data including user object
         await login({
           access: response.data.access,
-          refresh: response.data.refresh
+          refresh: response.data.refresh,
+          user: response.data.user
         });
         
-        // Fetch user data to get user_type
-        try {
-          const userResponse = await axios.get('/api/user-data/');
-          const userType = userResponse.data?.user_type;
-          
-          // Navigate based on user type
-          if (userType === 'instructor') {
-            navigate('/ta');
-          } else if (userType === 'student') {
-            navigate('/student');
+        // Navigate based on user type if available, otherwise fetch it
+        const userType = response.data.user?.user_type;
+        
+        if (userType === 'instructor') {
+          navigate('/ta');
+        } else if (userType === 'student') {
+          navigate('/student');
+        } else {
+          // If user_type not in response, fetch user data
+          try {
+            const userResponse = await axios.get('/api/user-data/');
+            const fetchedUserType = userResponse.data?.user_type;
+            
+            if (fetchedUserType === 'instructor') {
+              navigate('/ta');
+            } else if (fetchedUserType === 'student') {
+              navigate('/student');
+            } else {
+              navigate('/');
+            }
+          } catch {
+            navigate('/');
           }
-        } catch {
-          // If fetching user data fails, default to TA page
-          navigate('/landingPage');
         }
       }
     } catch (err) {

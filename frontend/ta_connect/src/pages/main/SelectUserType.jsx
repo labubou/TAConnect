@@ -31,13 +31,18 @@ function SelectUserType() {
       if (response.data) {
         // Update user context with new user_type
         updateUser(response.data.user);
+        
+        // Redirect based on selected user type
+        if (selectedType === 'instructor') {
+          navigate('/ta');
+        } else if (selectedType === 'student') {
+          navigate('/student');
+        }
       }
     } catch (err) {
       setError(err.response?.data?.error || 'Failed to set user type');
     } finally {
-        setLoading(false);
-        // Redirect to dashboard
-        navigate('/dashboard');
+      setLoading(false);
     }
   };
 

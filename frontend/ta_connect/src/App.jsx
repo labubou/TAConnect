@@ -1,6 +1,6 @@
 import { AuthProvider } from './contexts/AuthContext'
 import { ThemeProvider } from './contexts/ThemeContext'
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom'
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
 import LandingPage from './pages/main/LandingPage'
 import LoginPage from './pages/main/LoginPage';
 import RegisterPage from './pages/main/RegisterPage';
@@ -9,12 +9,12 @@ import ForgotPasswordPage from './pages/main/ForgotPasswordPage';
 import ResetPasswordPage from './pages/main/ResetPasswordPage';
 import GoogleCallback from './pages/main/GoogleCallback';
 import SelectUserType from './pages/main/SelectUserType';
+import ProtectedRoute from './components/ProtectedRoute';
 import PublicRoute from './components/PublicRoute';
 import CreateCourse from './pages/ta/CreateCourse';
 import TAPage from './pages/ta/TAPage';
 import ProfilePage from './pages/ta/ProfilePage';
 import ManageCourses from "./pages/ta/ManageCourses";
-
 
 function App() {
   return (
@@ -26,18 +26,26 @@ function App() {
               <Route 
                 path="/" 
                 element={
-                  <div>
+                  <PublicRoute>
                     <LandingPage />
-                  </div>
+                  </PublicRoute>
                 } 
               />
-               <Route 
+              <Route 
                 path="/login"
-                element={<LoginPage />}
+                element={
+                  <PublicRoute>
+                    <LoginPage />
+                  </PublicRoute>
+                }
               />
               <Route 
                 path="/register"
-                element={<RegisterPage />}
+                element={
+                  <PublicRoute>
+                    <RegisterPage />
+                  </PublicRoute>
+                }
               />
               <Route 
                 path="/verify-email"
@@ -49,7 +57,11 @@ function App() {
               />
               <Route
                 path="/forgot-password"
-                element={<ForgotPasswordPage />}
+                element={
+                  <PublicRoute>
+                    <ForgotPasswordPage />
+                  </PublicRoute>
+                }
               />
               <Route
                 path="/reset-password"
@@ -63,10 +75,38 @@ function App() {
                 path="/select-user-type"
                 element={<SelectUserType />}
               />
-              <Route path="/ta" element={<TAPage />} />
-              <Route path="/ta/profile" element={<ProfilePage />} />
-              <Route path="/ta/create-course" element={<CreateCourse />} />
-              <Route path="/ta/manage-courses" element={<ManageCourses />} />
+              <Route 
+                path="/ta" 
+                element={
+                  <ProtectedRoute>
+                    <TAPage />
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/ta/profile" 
+                element={
+                  <ProtectedRoute>
+                    <ProfilePage />
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/ta/create-course" 
+                element={
+                  <ProtectedRoute>
+                    <CreateCourse />
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/ta/manage-courses" 
+                element={
+                  <ProtectedRoute>
+                    <ManageCourses />
+                  </ProtectedRoute>
+                } 
+              />
 
               {/* Add more routes here */}
             </Routes>

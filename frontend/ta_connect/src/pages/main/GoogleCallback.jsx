@@ -88,7 +88,16 @@ const GoogleCallback = () => {
             } else {
               setMessage('Login successful! Redirecting to dashboard...');
             }
-            setTimeout(() => navigate('/dashboard'), 2000);
+            
+            // Navigate based on user type
+            const userType = result.data?.user?.user_type;
+            if (userType === 'instructor') {
+              setTimeout(() => navigate('/ta'), 2000);
+            } else if (userType === 'student') {
+              setTimeout(() => navigate('/student'), 2000);
+            } else {
+              setTimeout(() => navigate('/'), 2000);
+            }
           }
         } else {
           setStatus('error');

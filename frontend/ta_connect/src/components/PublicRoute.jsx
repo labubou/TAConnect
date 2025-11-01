@@ -3,7 +3,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { Navigate } from 'react-router-dom';
 
 const PublicRoute = ({ children }) => {
-  const { isAuthenticated, loading } = useAuth();
+  const { isAuthenticated, loading, user } = useAuth();
 
   if (loading) {
     return (
@@ -16,7 +16,16 @@ const PublicRoute = ({ children }) => {
     );
   }
 
-  if (isAuthenticated) return <Navigate to="/dashboard" replace />;
+  if (isAuthenticated) {
+    // Redirect based on user type
+    if (user?.user_type === 'instructor') {
+      return <Navigate to="/ta" replace />;
+    } else if (user?.user_type === 'student') {
+      return <Navigate to="/student" replace />;
+    }
+    // Fallback to landing page if user_type is not set
+    return <Navigate to="/" replace />;
+  }
 
   return <>{children}</>;
 };
