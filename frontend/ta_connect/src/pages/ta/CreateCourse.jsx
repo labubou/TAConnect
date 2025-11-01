@@ -14,6 +14,10 @@ export default function CreateCourse() {
 
   const handleCreated = (slot) => {
     setCreated(slot);
+    // Clear success message after 5 seconds
+    setTimeout(() => {
+      setCreated(null);
+    }, 5000);
   };
 
   return (
@@ -50,15 +54,24 @@ export default function CreateCourse() {
             {strings.description}
           </p>
 
-          {/* Form */}
-          <CourseForm onCreated={handleCreated} />
-
           {/* Success Message */}
           {created && (
-            <div className="mt-6 p-4 rounded-lg bg-green-100 text-green-800">
-              {strings.success} {created.time_slot_id || created.id || '—'}
+            <div className={`mb-6 p-4 rounded-lg ${
+              isDark 
+                ? 'bg-green-900/30 border border-green-700 text-green-300' 
+                : 'bg-green-100 border border-green-400 text-green-800'
+            }`}>
+              <div className="flex items-center">
+                <svg className="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                </svg>
+                <span>{strings.success} (ID: {created.time_slot_id || created.id || '—'})</span>
+              </div>
             </div>
           )}
+
+          {/* Form */}
+          <CourseForm onCreated={handleCreated} />
         </div>
       </main>
 
