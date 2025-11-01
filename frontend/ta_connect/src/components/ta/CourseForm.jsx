@@ -172,20 +172,42 @@ export default function CourseForm({ onCreated, editing, onUpdated, onCancelEdit
     setError('');
     setMessage('');
     try {
-
       const payload = { ...form };
       payload.start_time = convert12To24(timeParts.start_hour, timeParts.start_min, timeParts.start_ampm);
       payload.end_time = convert12To24(timeParts.end_hour, timeParts.end_min, timeParts.end_ampm);
+      
+      // Ensure section is at least a space if empty (backend expects it)
+      if (!payload.section || !payload.section.trim()) {
+        payload.section = ' ';
+      }
+      
       console.debug('Creating time slot payload:', payload);
       const res = await axios.post('/api/instructor/time-slots/create-slot', payload);
       console.debug('Create response:', res?.data);
-      const serverId = res?.data?.time_slot_id;
-      onCreated && onCreated({ ...payload, time_slot_id: serverId, id: serverId });
-      setMessage('');
-      setForm(initial);
+      
+      if (res?.data?.success && res?.data?.time_slot_id) {
+        const serverId = res.data.time_slot_id;
+        setMessage('Slot created successfully!');
+        setForm(initial);
+        setTimeParts({
+          start_hour: '9',
+          start_min: '00',
+          start_ampm: 'AM',
+          end_hour: '10',
+          end_min: '00',
+          end_ampm: 'AM',
+        });
+        onCreated && onCreated({ ...payload, time_slot_id: serverId, id: serverId });
+      } else {
+        setError(res?.data?.error || 'Failed to create slot');
+      }
     } catch (err) {
       console.error('Create slot error', err);
-      setError(err.response?.data?.error || err.message || 'Failed to create');
+      const errorMessage = err.response?.data?.error || 
+                           err.response?.data?.message || 
+                           err.message || 
+                           'Failed to create slot. Please try again.';
+      setError(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -200,17 +222,33 @@ export default function CourseForm({ onCreated, editing, onUpdated, onCancelEdit
     setError('');
     setMessage('');
     try {
-  const payload = { ...form };
-  payload.start_time = convert12To24(timeParts.start_hour, timeParts.start_min, timeParts.start_ampm);
-  payload.end_time = convert12To24(timeParts.end_hour, timeParts.end_min, timeParts.end_ampm);
-  console.debug('Updating slot', editing.id, 'payload:', payload);
-  const res = await axios.post(`/api/instructor/time-slots/update-slot/${editing.id}`, payload);
+      const payload = { ...form };
+      payload.start_time = convert12To24(timeParts.start_hour, timeParts.start_min, timeParts.start_ampm);
+      payload.end_time = convert12To24(timeParts.end_hour, timeParts.end_min, timeParts.end_ampm);
+      
+      // Ensure section is at least a space if empty (backend expects it)
+      if (!payload.section || !payload.section.trim()) {
+        payload.section = ' ';
+      }
+      
+      console.debug('Updating slot', editing.id, 'payload:', payload);
+      const res = await axios.post(`/api/instructor/time-slots/update-slot/${editing.id}`, payload);
       console.debug('Update response:', res?.data);
-      onUpdated && onUpdated(editing.id, { ...payload, id: res?.data?.time_slot_id || editing.id });
-      setMessage('Updated successfully');
+      
+      if (res?.data?.success) {
+        const updatedId = res?.data?.time_slot_id || editing.id;
+        setMessage('Slot updated successfully!');
+        onUpdated && onUpdated(editing.id, { ...payload, id: updatedId });
+      } else {
+        setError(res?.data?.error || 'Failed to update slot');
+      }
     } catch (err) {
       console.error('Update slot error', err);
-      setError(err.response?.data?.error || err.message || 'Failed to update');
+      const errorMessage = err.response?.data?.error || 
+                           err.response?.data?.message || 
+                           err.message || 
+                           'Failed to update slot. Please try again.';
+      setError(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -236,8 +274,34 @@ export default function CourseForm({ onCreated, editing, onUpdated, onCancelEdit
           {editing ? 'Edit Slot' : 'Create Slot'}
         </h3>
 
-        {error && <div className="mb-2 text-sm text-red-600">{error}</div>}
-        {message && <div className="mb-2 text-sm text-green-600">{message}</div>}
+        {error && (
+          <div className={`mb-4 p-3 rounded-lg ${
+            isDark 
+              ? 'bg-red-900/30 border border-red-700 text-red-300' 
+              : 'bg-red-100 border border-red-400 text-red-700'
+          }`}>
+            <div className="flex items-start">
+              <svg className="w-5 h-5 mr-2 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+              </svg>
+              <span className="text-sm">{error}</span>
+            </div>
+          </div>
+        )}
+        {message && (
+          <div className={`mb-4 p-3 rounded-lg ${
+            isDark 
+              ? 'bg-green-900/30 border border-green-700 text-green-300' 
+              : 'bg-green-100 border border-green-400 text-green-700'
+          }`}>
+            <div className="flex items-center">
+              <svg className="w-5 h-5 mr-2 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+              </svg>
+              <span className="text-sm">{message}</span>
+            </div>
+          </div>
+        )}
 
         <form onSubmit={handleSubmit} className="space-y-3">
           <div>

@@ -33,12 +33,27 @@ function LoginPage() {
       const response = await axios.post('/api/auth/login/', credentials);
 
       if (response.data) {
+        // Login without user data to force AuthContext to fetch full user data
         await login({
           access: response.data.access,
-          refresh: response.data.refresh,
-          user: response.data.user
+          refresh: response.data.refresh
         });
-        navigate('/dashboard');
+        
+        // Fetch user data to get user_type
+        try {
+          const userResponse = await axios.get('/api/user-data/');
+          const userType = userResponse.data?.user_type;
+          
+          // Navigate based on user type
+          if (userType === 'instructor') {
+            navigate('/ta');
+          } else if (userType === 'student') {
+            navigate('/student');
+          }
+        } catch {
+          // If fetching user data fails, default to TA page
+          navigate('/landingPage');
+        }
       }
     } catch (err) {
       setError(err.response?.data?.error || err.response?.data?.message || 'Login failed');
