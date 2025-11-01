@@ -13,8 +13,9 @@ import ProtectedRoute from './components/ProtectedRoute';
 import PublicRoute from './components/PublicRoute';
 import CreateCourse from './pages/ta/CreateCourse';
 import TAPage from './pages/ta/TAPage';
-import ProfilePage from './pages/ta/ProfilePage';
+import ProfilePage from './pages/main/ProfilePage';
 import ManageCourses from "./pages/ta/ManageCourses";
+import StudentHomePage from './pages/student/studentHomePage';
 
 function App() {
   return (
@@ -107,6 +108,11 @@ function App() {
                   </ProtectedRoute>
                 } 
               />
+
+              {/* Student Routes */}
+              <Route path="/student" element={<StudentHomePage />} />
+              <Route path="/student/profile" element={<ProfilePage />} />
+
 
               {/* Add more routes here */}
             </Routes>

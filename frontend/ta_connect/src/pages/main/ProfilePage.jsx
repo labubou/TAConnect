@@ -4,6 +4,7 @@ import axios from 'axios';
 import { useAuth } from '../../contexts/AuthContext';
 import { useTheme } from '../../contexts/ThemeContext';
 import TAnavbar from '../../components/ta/TAnavbar';
+import StudentNavbar from '../../components/student/studentNavbar';
 import strings from '../../strings/TaprofilePage';
 
 export default function ProfilePage() {
@@ -53,7 +54,11 @@ export default function ProfilePage() {
 
   return (
     <div className={`min-h-screen ${isDark ? 'bg-gray-900' : 'bg-gray-50'}`}>
-      <TAnavbar onToggle={setIsNavbarOpen} />
+      {user?.user_type === 'instructor' ? (
+        <TAnavbar onToggle={setIsNavbarOpen} />
+      ) : (
+        <StudentNavbar onToggle={setIsNavbarOpen} />
+      )}
 
       <main
         className={`transition-all duration-300 ${
