@@ -6,9 +6,10 @@ from instructor.models import OfficeHourSlot, BookingPolicy
 from accounts.models import User
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
-from .schemas.slot_schemas import get_user_slots_response
+from .schemas.slot_schemas import get_user_slots_response, get_instructor_data_response
 from rest_framework.permissions import IsAuthenticated
 from django.db.models import Q
+
 # Create your views here.
 @swagger_auto_schema(
     method='get',
@@ -118,5 +119,59 @@ def search_instructors(request):
             ]
         }, status=200)
     
+    except Exception as e:
+        return Response({'error': f'An error occurred: {str(e)}'}, status=500)
+
+@swagger_auto_schema(
+    method='get',
+    operation_description='Get detailed information about a specific instructor including their office hour slots.',
+    manual_parameters=[
+        openapi.Parameter(
+            'user_id',
+            openapi.IN_PATH,
+            description='ID of the instructor',
+            type=openapi.TYPE_INTEGER,
+            required=True
+        )
+    ],
+    responses={
+        200: get_instructor_data_response,
+        404: 'Instructor not found',
+        500: 'Internal server error'
+    }
+)
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def get_instructor_data(request, user_id):
+    """
+    Get detailed information about a specific instructor.
+    """
+    try:
+        instructor = User.objects.get(id=user_id, user_type='instructor')
+        data = {
+            'id': instructor.id,
+            'username': instructor.username,
+            'full_name': instructor.full_name,
+            'email': instructor.email,
+            'slots': [
+                {
+                    'id': slot.id,
+                    'course_name': slot.course_name,
+                    'section': slot.section,
+                    'day_of_week': slot.day_of_week,
+                    'start_time': slot.start_time,
+                    'end_time': slot.end_time,
+                    'duration_minutes': slot.duration_minutes,
+                    'start_date': slot.start_date,
+                    'end_date': slot.end_date,
+                    'room': slot.room,
+                    'status': slot.status,
+                } for slot in OfficeHourSlot.objects.filter(instructor=instructor)
+            ]
+        }
+        return Response(data, status=200)
+
+    except User.DoesNotExist:
+        return Response({'error': 'Instructor not found'}, status=404)
     except Exception as e:
         return Response({'error': f'An error occurred: {str(e)}'}, status=500)

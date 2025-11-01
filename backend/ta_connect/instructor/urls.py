@@ -14,4 +14,5 @@ urlpatterns = [
     #urls of the user data
     path('get-user-slots', views.get_user_slots, name='get-user-slots'),
     path('search-instructors', views.search_instructors, name='search-instructors'),
+    path('get-instructor-data/<int:user_id>/', views.get_instructor_data, name='get-instructor-data'),
 ]
