@@ -33,36 +33,37 @@ function LoginPage() {
       const response = await axios.post('/api/auth/login/', credentials);
 
       if (response.data) {
-        // Pass the complete response data including user object
+        // Set tokens immediately and update Authorization header synchronously
+        const { access, refresh } = response.data;
+        
+        // Set Authorization header immediately before AuthContext useEffect runs
+        if (access) {
+          axios.defaults.headers.common['Authorization'] = `Bearer ${access}`;
+        }
+        
+        // Login and let AuthContext handle fetching user data
         await login({
-          access: response.data.access,
-          refresh: response.data.refresh,
+          access,
+          refresh,
           user: response.data.user
         });
         
-        // Navigate based on user type if available, otherwise fetch it
-        const userType = response.data.user?.user_type;
-        
-        if (userType === 'instructor') {
-          navigate('/ta');
-        } else if (userType === 'student') {
-          navigate('/student');
-        } else {
-          // If user_type not in response, fetch user data
-          try {
-            const userResponse = await axios.get('/api/user-data/');
-            const fetchedUserType = userResponse.data?.user_type;
-            
-            if (fetchedUserType === 'instructor') {
-              navigate('/ta');
-            } else if (fetchedUserType === 'student') {
-              navigate('/student');
-            } else {
-              navigate('/');
-            }
-          } catch {
-            navigate('/');
+        // Fetch user data to get user_type for navigation
+        try {
+          const userResponse = await axios.get('/api/user-data/');
+          const userType = userResponse.data?.user_type;
+          
+          // Navigate based on user type
+          if (userType === 'instructor') {
+            navigate('/ta');
+          } else if (userType === 'student') {
+            navigate('/student');
           }
+        } catch (fetchErr) {
+          console.error('Failed to fetch user data:', fetchErr);
+          // If fetching user data fails, try to navigate anyway
+          // AuthContext will handle it
+          navigate('/ta');
         }
       }
     } catch (err) {
