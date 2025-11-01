@@ -24,6 +24,10 @@ class User(AbstractUser):
     def is_student(self):
         return self.user_type == 'student'
 
+    @property
+    def full_name(self):
+        return f"{self.first_name} {self.last_name}".strip() or self.username
+
     #functions to check existence of username or email
     def username_exists(username):
         return User.objects.filter(username=username).exists()
