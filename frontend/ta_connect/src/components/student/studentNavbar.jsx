@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import Logo from '../../assets/Logo2.png';
 import { useTheme } from '../../contexts/ThemeContext';
 import ThemeToggle from '../ThemeToggle';
@@ -9,6 +9,7 @@ import strings from '../../strings/studentNavbarStrings';
 const StudentNavbar = ({ onToggle }) => {
   const { user, logout } = useAuth();
   const location = useLocation();
+  const navigate = useNavigate();
   const [isOpen, setIsOpen] = useState(true);
   const [isMobile, setIsMobile] = useState(false);
   const { theme } = useTheme();
@@ -31,11 +32,12 @@ const StudentNavbar = ({ onToggle }) => {
 
   const isActive = (path) => location.pathname === path;
 
-  const handleLogout = () => {
-    logout();
+  const handleLogout = async () => {
+    await logout();
     if (isMobile) {
       setIsOpen(false);
     }
+    navigate('/login');
   };
 
   const toggleNavbar = () => {
