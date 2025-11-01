@@ -12,8 +12,9 @@ import SelectUserType from './pages/main/SelectUserType';
 import PublicRoute from './components/PublicRoute';
 import CreateCourse from './pages/ta/CreateCourse';
 import TAPage from './pages/ta/TAPage';
-import ProfilePage from './pages/ta/ProfilePage';
+import ProfilePage from './pages/main/ProfilePage';
 import ManageCourses from "./pages/ta/ManageCourses";
+import StudentHomePage from './pages/student/studentHomePage';
 
 
 function App() {
@@ -67,6 +68,11 @@ function App() {
               <Route path="/ta/profile" element={<ProfilePage />} />
               <Route path="/ta/create-course" element={<CreateCourse />} />
               <Route path="/ta/manage-courses" element={<ManageCourses />} />
+
+              {/* Student Routes */}
+              <Route path="/student" element={<StudentHomePage />} />
+              <Route path="/student/profile" element={<ProfilePage />} />
+
 
               {/* Add more routes here */}
             </Routes>
