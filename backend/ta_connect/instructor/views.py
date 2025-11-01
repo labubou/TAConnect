@@ -3,10 +3,12 @@ from accounts.permissions import IsStudent, IsInstructor
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
 from instructor.models import OfficeHourSlot, BookingPolicy
+from accounts.models import User
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
 from .schemas.slot_schemas import get_user_slots_response
 from rest_framework.permissions import IsAuthenticated
+from django.db.models import Q
 # Create your views here.
 @swagger_auto_schema(
     method='get',
@@ -49,27 +51,72 @@ def get_user_slots(request):
 
 @swagger_auto_schema(
     method='get',
-    operation_description='Search office hour slots by TA name and return matching TA names.',
+    operation_description='Search for instructors by name (first name, last name, or username).',
+    manual_parameters=[
+        openapi.Parameter(
+            'query',
+            openapi.IN_QUERY,
+            description='Search query for instructor name',
+            type=openapi.TYPE_STRING,
+            required=True
+        )
+    ],
     responses={
-        200: get_user_slots_response,
+        200: openapi.Response(
+            description='List of matching instructors',
+            schema=openapi.Schema(
+                type=openapi.TYPE_OBJECT,
+                properties={
+                    'instructors': openapi.Schema(
+                        type=openapi.TYPE_ARRAY,
+                        items=openapi.Schema(
+                            type=openapi.TYPE_OBJECT,
+                            properties={
+                                'id': openapi.Schema(type=openapi.TYPE_INTEGER, description='Instructor ID', example=1),
+                                'username': openapi.Schema(type=openapi.TYPE_STRING, description='Username', example='john_doe'),
+                                'full_name': openapi.Schema(type=openapi.TYPE_STRING, description='Full name', example='John Doe'),
+                                'email': openapi.Schema(type=openapi.TYPE_STRING, description='Email', example='john.doe@example.com'),
+                            }
+                        )
+                    )
+                }
+            )
+        ),
+        400: 'Search query parameter is required',
         500: 'Internal server error'
     }
 )
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
-def search_ta(request):
+def search_instructors(request):
+    """
+    Search for instructors by name (first name, last name, or username).
+    Returns a list of matching instructors with their ID and name.
+    """
     try:
-        ta_name = request.query_params.get('ta_name', None)
-        user = request.user
+        query = request.GET.get('query', '').strip()
 
-        if ta_name:
-            ta_names = OfficeHourSlot.objects.filter(ta_name__icontains=ta_name).values_list('ta_name', flat=True).distinct()
-        else:
-            ta_names = []
-
+        if not query:
+            return Response({'error': 'Search query parameter is required'}, status=400)
+        
+        # Search for instructors matching the query
+        instructors = User.objects.filter(
+            Q(user_type='instructor') &
+            (Q(first_name__icontains=query) | 
+             Q(last_name__icontains=query) | 
+             Q(username__icontains=query))
+        ).distinct()[:10]  # Limit to 10 results
+        
         return Response({
-            'matching_tas': list(ta_names)
+            'instructors': [
+                {
+                    'id': instructor.id,
+                    'username': instructor.username,
+                    'full_name': instructor.full_name,
+                    'email': instructor.email,
+                } for instructor in instructors
+            ]
         }, status=200)
     
     except Exception as e:
-        return Response({'error': f'An error occurred {str(e)}'}, status=500)
+        return Response({'error': f'An error occurred: {str(e)}'}, status=500)
