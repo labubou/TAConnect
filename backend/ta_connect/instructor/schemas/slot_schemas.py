@@ -85,8 +85,10 @@ get_user_slots_response = openapi.Schema(
                     'created_at': openapi.Schema(type=openapi.TYPE_STRING, format='date-time'),
                 }
             )
-        }
-    )
+        ),
+        'error': openapi.Schema(type=openapi.TYPE_STRING, description='Error message if request fails'),
+    },
+    description='Response containing office hour slots and their associated bookings'
 )
 
 get_instructor_data_response = openapi.Response(
@@ -121,11 +123,8 @@ get_instructor_data_response = openapi.Response(
                         'status': openapi.Schema(type=openapi.TYPE_BOOLEAN, description='Slot active status', example=True),
                     }
                 )
-            )
+            ),
+            'error': openapi.Schema(type=openapi.TYPE_STRING, description='Error message if request fails'),
         }
     )
-        ),
-        'error': openapi.Schema(type=openapi.TYPE_STRING, description='Error message if request fails'),
-    },
-    description='Response containing office hour slots and their associated bookings'
 )
