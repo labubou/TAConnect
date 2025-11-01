@@ -182,7 +182,7 @@ export default function CourseForm({ onCreated, editing, onUpdated, onCancelEdit
       }
       
       console.debug('Creating time slot payload:', payload);
-      const res = await axios.post('/api/instructor/time-slots/create-slot', payload);
+      const res = await axios.post('/api/instructor/time-slots/create-slot/', payload);
       console.debug('Create response:', res?.data);
       
       if (res?.data?.success && res?.data?.time_slot_id) {
