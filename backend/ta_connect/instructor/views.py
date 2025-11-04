@@ -126,9 +126,13 @@ def search_instructors(request):
     """
     try:
         query = request.GET.get('query', '').strip()
-        instructors= User.objects.filter(user_type='instructor')
+        instructors = User.objects.filter(
+            user_type='instructor',
+            is_superuser=False,
+            is_staff=False
+        )
 
-        if  query:
+        if query:
             instructors = instructors.filter(
                 Q(first_name__icontains=query) | 
                 Q(last_name__icontains=query) | 
