@@ -86,14 +86,14 @@ def get_user_slots(request):
         openapi.Parameter(
             'query',
             openapi.IN_QUERY,
-            description='Search query for instructor name',
+            description='Search query for instructor name (optional)',
             type=openapi.TYPE_STRING,
-            required=True
+            required=False
         )
     ],
     responses={
         200: openapi.Response(
-            description='List of matching instructors',
+            description='List of matching instructors (matching query or all, in alphabetical order)',
             schema=openapi.Schema(
                 type=openapi.TYPE_OBJECT,
                 properties={
@@ -102,17 +102,17 @@ def get_user_slots(request):
                         items=openapi.Schema(
                             type=openapi.TYPE_OBJECT,
                             properties={
-                                'id': openapi.Schema(type=openapi.TYPE_INTEGER, description='Instructor ID', example=1),
-                                'username': openapi.Schema(type=openapi.TYPE_STRING, description='Username', example='john_doe'),
-                                'full_name': openapi.Schema(type=openapi.TYPE_STRING, description='Full name', example='John Doe'),
-                                'email': openapi.Schema(type=openapi.TYPE_STRING, description='Email', example='john.doe@example.com'),
+                                'id': openapi.Schema(type=openapi.TYPE_INTEGER, description='Instructor ID'),
+                                'username': openapi.Schema(type=openapi.TYPE_STRING, description='Username'),
+                                'full_name': openapi.Schema(type=openapi.TYPE_STRING, description='Full name'),
+                                'email': openapi.Schema(type=openapi.TYPE_STRING, description='Email'),
                             }
                         )
                     )
                 }
             )
         ),
-        400: 'Search query parameter is required',
+        
         500: 'Internal server error'
     }
 )
@@ -121,22 +121,22 @@ def get_user_slots(request):
 def search_instructors(request):
     """
     Search for instructors by name (first name, last name, or username).
-    Returns a list of matching instructors with their ID and name.
+    Returns a list of matching instructors with
+    their ID and name or list all instructors in alphabetical order.
     """
     try:
         query = request.GET.get('query', '').strip()
+        instructors= User.objects.filter(user_type='instructor')
 
-        if not query:
-            return Response({'error': 'Search query parameter is required'}, status=400)
-        
-        # Search for instructors matching the query
-        instructors = User.objects.filter(
-            Q(user_type='instructor') &
-            (Q(first_name__icontains=query) | 
-             Q(last_name__icontains=query) | 
-             Q(username__icontains=query))
-        ).distinct()[:10]  # Limit to 10 results
-        
+        if  query:
+            instructors = instructors.filter(
+                Q(first_name__icontains=query) | 
+                Q(last_name__icontains=query) | 
+                Q(username__icontains=query)
+            )
+
+        instructors = instructors.order_by('first_name', 'last_name')[:50]
+  
         return Response({
             'instructors': [
                 {
@@ -205,3 +205,4 @@ def get_instructor_data(request, user_id):
     except Exception as e:
         return Response({'error': f'An error occurred: {str(e)}'}, status=500)
         return Response({'error': f'An error occurred: {str(e)}'}, status=500)
+
