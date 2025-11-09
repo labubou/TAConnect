@@ -16,6 +16,7 @@ from accounts.schemas.auth_schemas import (
     verify_email_request,
     verify_email_response,
 )
+from ..serializers.register_serializer import RegisterSerializer
 
 #the register route
 @swagger_auto_schema(
@@ -28,80 +29,17 @@ from accounts.schemas.auth_schemas import (
 @permission_classes([AllowAny])
 def register_view(request):
     try:
-        username = request.data.get('username')
-        email = request.data.get('email')
-        password = request.data.get('password')
-        password2 = request.data.get('password2')
-        user_type = request.data.get('user_type')
-        first_name = request.data.get('first_name', '')
-        last_name = request.data.get('last_name', '')
+        serializer = RegisterSerializer(data=request.data)
 
-        # Check if all required fields are provided
-        if not all([username, email, password, password2, user_type]):
+        if not serializer.is_valid():
             return Response(
-                {'error': 'All fields are required'}, 
+                {'error': serializer.errors}, 
                 status=status.HTTP_400_BAD_REQUEST
-            )
-
-        # Check if username contains '@'
-        if '@' in username:
-            return Response(
-                {'error': 'Username cannot contain @ in it'}, 
-                status=status.HTTP_400_BAD_REQUEST
-            )
-
-        # Check if email contains '@'
-        if '@' not in email:
-            return Response(
-                {'error': 'Email must contain @ in it'}, 
-                status=status.HTTP_400_BAD_REQUEST
-            )
-
-        # Check if passwords match
-        if password != password2:
-            return Response(
-                {'error': 'Passwords do not match'}, 
-                status=status.HTTP_400_BAD_REQUEST
-            )
-
-        # Check if username already exists
-        try:
-            if User.username_exists(username):
-                return Response(
-                    {'error': 'Username already exists'}, 
-                    status=status.HTTP_400_BAD_REQUEST
-                )
-        except Exception as db_error:
-            return Response(
-                {'error': f'Database connection error. Please ensure migrations are run and database is accessible {db_error}'}, 
-                status=status.HTTP_500_INTERNAL_SERVER_ERROR
-            )
-        
-        # Check if email already exists
-        try:
-            if User.email_exists(email):
-                return Response(
-                    {'error': 'Email already exists'}, 
-                    status=status.HTTP_400_BAD_REQUEST
-                )
-        except Exception as db_error:
-            return Response(
-                {'error': 'Database connection error. Please ensure migrations are run and database is accessible.'}, 
-                status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
         
         # Create a new user
         try:
-            user = User.objects.create_user(
-                username=username,
-                email=email,
-                password=password,
-                email_verify=False,
-                first_name=first_name,
-                last_name=last_name,
-                user_type=user_type
-            )
-            user.save()
+            user = serializer.save()
         except Exception:
             return Response(
                 {'error': f'Failed to create user'}, 
@@ -119,7 +57,7 @@ def register_view(request):
                 'uid': urlsafe_base64_encode(force_bytes(user.pk)),
                 'token': default_token_generator.make_token(user),
             })
-            send_mail(mail_subject, message, 'taconnect.team@gmail.com', [email], html_message=message)
+            send_mail(mail_subject, message, 'taconnect.team@gmail.com', [user.email], html_message=message)
         except Exception as email_error:
             # If email fails, still create the user but log the error
             print(f"Failed to send verification email: {str(email_error)}")

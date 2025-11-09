@@ -14,6 +14,7 @@ from ta_connect.settings import SITE_DOMAIN, frontend_url
 from django.views.decorators.csrf import csrf_exempt
 from drf_yasg.utils import swagger_auto_schema
 from accounts.schemas.auth_schemas import login_request, login_response
+from ..serializers.login_serializer import LoginSerializer
 
 #the login route
 @swagger_auto_schema(
@@ -27,32 +28,18 @@ from accounts.schemas.auth_schemas import login_request, login_response
 @csrf_exempt
 def login_view(request):
     try:
-        user_username_mail = request.data.get('username')
-        password = request.data.get('password')
+        serializer = LoginSerializer(data=request.data)
 
-        if not user_username_mail or not password:
+        if not serializer.is_valid():
             return Response(
-                {'error': 'Username/email and password are required'}, 
+                {'error': serializer.errors}, 
                 status=status.HTTP_400_BAD_REQUEST
             )
+        
+        username = serializer.validated_data.get('username')
+        password = serializer.validated_data.get('password')
 
-        user = None
-
-        # Check if the input is a username or email
-        if '@' not in user_username_mail:
-            # Authenticate using username
-            user = authenticate(username=user_username_mail, password=password)
-        else:
-            # Authenticate using email - first find user by email, then authenticate with username
-            try:
-                user_obj = User.objects.filter(email=user_username_mail).first()
-                if user_obj:
-                    user = authenticate(username=user_obj.username, password=password)
-            except Exception as e:
-                return Response(
-                    {'error': 'Database error occurred'}, 
-                    status=status.HTTP_500_INTERNAL_SERVER_ERROR
-                )
+        user = authenticate(username=username, password=password)
 
         if user:
             if user.email_verify == True:

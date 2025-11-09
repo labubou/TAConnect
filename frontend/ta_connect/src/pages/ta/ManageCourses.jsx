@@ -18,7 +18,7 @@ export default function ManageCourses() {
   useEffect(() => {
     const fetchSlots = async () => {
       try {
-        const res = await axios.get("/api/instructor/get-user-slots/");
+        const res = await axios.get("/api/instructor/get-user-slots");
         setSlots(res?.data?.slots || []);
       } catch (err) {
         console.error("Failed to fetch slots:", err);
