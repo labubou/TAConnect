@@ -67,7 +67,42 @@ function LoginPage() {
         }
       }
     } catch (err) {
-      setError(err.response?.data?.error || err.response?.data?.message || 'Login failed');
+      // Extract error message properly
+      let errorMessage = 'Login failed';
+      
+      if (err.response?.data) {
+        const errorData = err.response.data;
+        
+        // Check for different error formats
+        if (typeof errorData === 'string') {
+          errorMessage = errorData;
+        } else if (errorData.error) {
+          // If error is an object, extract the message
+          if (typeof errorData.error === 'string') {
+            errorMessage = errorData.error;
+          } else if (typeof errorData.error === 'object') {
+            // Handle validation errors from serializer
+            const firstKey = Object.keys(errorData.error)[0];
+            const firstError = errorData.error[firstKey];
+            errorMessage = Array.isArray(firstError) ? firstError[0] : String(firstError);
+          }
+        } else if (errorData.message) {
+          errorMessage = errorData.message;
+        } else if (errorData.detail) {
+          errorMessage = errorData.detail;
+        } else {
+          // If error is an object with unknown structure, try to get first value
+          const firstKey = Object.keys(errorData)[0];
+          if (firstKey) {
+            const firstValue = errorData[firstKey];
+            errorMessage = Array.isArray(firstValue) ? firstValue[0] : String(firstValue);
+          }
+        }
+      } else if (err.message) {
+        errorMessage = err.message;
+      }
+      
+      setError(errorMessage);
     } finally {
       setLoading(false);
     }

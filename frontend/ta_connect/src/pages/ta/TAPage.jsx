@@ -35,7 +35,7 @@ export default function TAPage() {
     try {
       setLoading(true);
       setError('');
-      const res = await axios.get('/api/instructor/get-user-slots/');
+      const res = await axios.get('/api/instructor/get-user-slots');
       setSlots(res?.data?.slots || []);
     } catch (err) {
       console.error('Failed to fetch slots:', err);
