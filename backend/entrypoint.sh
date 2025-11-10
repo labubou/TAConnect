@@ -35,6 +35,8 @@ fi
 echo "Running database migrations..."
 # Create migrations for accounts app first (custom user model)
 python manage.py makemigrations accounts
+python manage.py makemigrations students
+python manage.py makemigrations instructors
 # Then create migrations for other apps
 python manage.py makemigrations
 # Apply all migrations

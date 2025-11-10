@@ -25,7 +25,6 @@ from accounts.schemas.profile_schemas import (
 from ..serializers.change_password_serializer import ChangePasswordSerializer
 from ..serializers.update_profile_serializer import UpdateProfileSerializer
 from ..serializers.verify_email_change_serializer import VerifyEmailChangeSerializer
-from ..serializers.get_profile_serializer import GetProfileSerializer
 
 @swagger_auto_schema(
     method='get',
@@ -37,7 +36,16 @@ from ..serializers.get_profile_serializer import GetProfileSerializer
 def get_profile(request):
     """Get current user profile information"""
     user = request.user
-    serializer = GetProfileSerializer(user)
+    return Response({
+        'id': user.id,
+        'username': user.username,
+        'email': user.email,
+        'first_name': user.first_name,
+        'last_name': user.last_name,
+        'email_verify': user.email_verify,
+        'user_type': user.user_type,
+        'date_joined': user.date_joined,
+    })
     return Response(serializer.data)
 
 @swagger_auto_schema(
@@ -83,14 +91,6 @@ def update_profile(request):
             if last_name != user.last_name:
                 user.last_name = last_name
                 messages.append("Last name updated")
-
-        # Validate and update user type
-        user_type = validated_data.get('user_type', '')
-        if user_type is not None:
-            user_type = user_type.strip()
-            if user_type and user_type != user.user_type:
-                user.user_type = user_type
-                messages.append("User type updated")
 
         # Validate and update username
         username = validated_data.get('username', '')
