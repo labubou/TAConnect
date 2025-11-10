@@ -8,7 +8,6 @@ class UpdateProfileSerializer(serializers.Serializer):
     last_name = serializers.CharField(max_length=150, required=False, allow_blank=True)
     username = serializers.CharField(max_length=150, required=False, allow_blank=True)
     email = serializers.EmailField(required=False, allow_blank=True)
-    user_type = serializers.CharField(max_length=10, required=False, allow_blank=True)
 
     def validate_username(self, value):
         """Validate username - cannot contain @ and must be unique"""
@@ -39,16 +38,6 @@ class UpdateProfileSerializer(serializers.Serializer):
         user = self.context.get('user')
         if user and User.objects.filter(email=value).exclude(id=user.id).exists():
             raise serializers.ValidationError('Email already taken, please choose another one!')
-        
-        return value
-
-    def validate_user_type(self, value):
-        """Validate user type - must be a valid choice"""
-        if not value:
-            return value
-        
-        if value not in dict(User.USER_TYPE_CHOICES).keys():
-            raise serializers.ValidationError("Invalid user type")
         
         return value
 

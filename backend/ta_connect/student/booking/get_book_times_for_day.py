@@ -7,6 +7,7 @@ from student.models import Booking
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
 import datetime
+from student.serializers.get_book_times_for_day_serializer import GetBookTimesSerializer
 
 # Create your views here.
 @swagger_auto_schema(
@@ -40,77 +41,57 @@ import datetime
 @permission_classes([IsStudent])
 def get_book_times_for_day(request, slot_id):
     try:
-        today = datetime.date.today()
-
-        # Get date from query parameters, not request.data (GET request)
-        date_str = request.query_params.get("date")
-
         slot = OfficeHourSlot.objects.filter(id=slot_id).first()
 
         if not slot:
             return Response({'error': 'Slot not found'}, status=404)
         
+        # Get date from query parameters
+        date_str = request.query_params.get("date")
+        
         if not date_str:
             return Response({'error': 'No date provided'}, status=400)
 
-        if not slot.instructor:
-            return Response({'error': 'Instructor not assigned to this slot'}, status=400)
+        serializer = GetBookTimesSerializer(
+            data={'date': date_str},
+            context={'slot': slot, 'request': request}
+        )
+        
+        if not serializer.is_valid():
+            return Response(
+                {'error': serializer.errors},
+                status=400
+            )
 
-        if not slot.day_of_week or not slot.start_time or not slot.end_time:
-            return Response({'error': 'Slot timing details are incomplete'}, status=400)
+        #generate available times in the view
+        selected_date = serializer.validated_data['selected_date']
         
-        # Check if slot is within the active date range
-        try:
-            selected_date = datetime.datetime.strptime(date_str, '%Y-%m-%d').date()
-        except ValueError:
-            return Response({'error': 'Invalid date format. Use YYYY-MM-DD'}, status=400)
-        
-        if slot.start_date > selected_date or slot.end_date < selected_date:
-            return Response({'error': 'This slot is not active on the selected date'}, status=400)
-        
-        if not slot.status:
-            return Response({'error': f'This slot is inactive'}, status=400)
-        
-        # Check if student email is allowed (if policy requires specific emails)
-        student_email = request.user.email
-        if hasattr(slot, 'policy') and slot.policy.require_specific_email:
-            is_allowed = slot.policy.allowed_students.filter(email=student_email).exists()
-            if not is_allowed:
-                return Response({
-                    'error': 'Your email is not authorized to book this office hour slot'
-                }, status=403)
-        
-        available_times = []
-
-        # Verify the selected date matches the slot's day of week
-        day_of_the_week = selected_date.strftime('%a')  # Mon, Tue, etc.
-        if day_of_the_week != slot.day_of_week:
-            return Response({
-            }, status=400)
-        
-        # Get already booked appointments for this date
+        #get already booked appointments for this date
         booked_times = Booking.objects.filter(
             office_hour=slot,
-            date=selected_date
+            date=selected_date,
+            is_cancelled=False
         ).values_list('start_time', flat=True)
 
-        # Use slot's duration_minutes, not booked_times
+        booked_times_set = set(bt.time() if hasattr(bt, 'time') else bt for bt in booked_times)
+        
+        available_times = []
         separation_minutes = slot.duration_minutes
         current_time = datetime.datetime.combine(datetime.date.today(), slot.start_time)
         end_time = datetime.datetime.combine(datetime.date.today(), slot.end_time)
         
-        # Generate all possible time slots between start_time and end_time
+        #generate all possible time slots between start_time and end_time
         while current_time < end_time:
             time_obj = current_time.time()
             
-            # Check if this time is already booked
-            if time_obj not in booked_times:
+            #check if this time is already booked
+            if time_obj not in booked_times_set:
                 available_times.append({
                     'value': time_obj.strftime('%H:%M:%S'),
                     'display': time_obj.strftime('%I:%M %p')
                 })
             
-            # Move to the next time slot based on duration_minutes
+            #move to the next time slot based on duration_minutes
             current_time += datetime.timedelta(minutes=int(separation_minutes))
 
         return Response({

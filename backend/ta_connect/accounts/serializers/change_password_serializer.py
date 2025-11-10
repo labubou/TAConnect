@@ -5,18 +5,15 @@ from django.core.exceptions import ValidationError
 class ChangePasswordSerializer(serializers.Serializer):
     """Serializer for changing user password"""
     
-    current_password = serializers.CharField(write_only=True, required=True)
-    new_password = serializers.CharField(write_only=True, required=True)
-    confirm_password = serializers.CharField(write_only=True, required=True)
+    current_password = serializers.CharField(write_only=True)
+    new_password = serializers.CharField(write_only=True)
+    confirm_password = serializers.CharField(write_only=True)
 
     def validate(self, data):
         """Validate password change data"""
         current_password = data.get('current_password')
         new_password = data.get('new_password')
         confirm_password = data.get('confirm_password')
-
-        if not all([current_password, new_password, confirm_password]):
-            raise serializers.ValidationError('All password fields are required')
 
         # Check if new passwords match
         if new_password != confirm_password:

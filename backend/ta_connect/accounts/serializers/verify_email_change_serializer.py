@@ -7,9 +7,9 @@ from django.contrib.auth.tokens import default_token_generator
 class VerifyEmailChangeSerializer(serializers.Serializer):
     """Serializer for verifying email change"""
     
-    uid = serializers.CharField(required=True)
-    token = serializers.CharField(required=True)
-    new_email = serializers.CharField(required=True)  # This is the encoded email from URL
+    uid = serializers.CharField()
+    token = serializers.CharField()
+    new_email = serializers.CharField()
 
     def validate(self, data):
         """Validate email change verification data"""

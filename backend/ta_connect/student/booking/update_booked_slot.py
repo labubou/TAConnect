@@ -11,6 +11,8 @@ from django.core.mail import send_mail
 from django.template.loader import render_to_string
 from ta_connect.settings import frontend_url
 from student.schemas.booking_schemas import update_booked_slot_request, update_booked_slot_response
+from student.serializers.update_book_serializer import UpdateBookingSerializer
+
 #update booked slot
 
 # Create your views here.
@@ -39,7 +41,6 @@ from student.schemas.booking_schemas import update_booked_slot_request, update_b
 @permission_classes([IsStudent])
 def update_slot(request, booking_id):
     try:
-        
         existing_booking = get_object_or_404(
             Booking,
             id=booking_id,
@@ -47,58 +48,21 @@ def update_slot(request, booking_id):
             is_cancelled=False
         )
 
-        new_date_str = request.data.get("new_date")
-        new_time_str = request.data.get("new_time")
-
-        if not new_date_str or not new_time_str:
-            return Response({'error': 'New date and time are required'}, status=400)
-
-        # Parse dates and times
-        try:
-            old_date = existing_booking.date
-            old_time = existing_booking.start_time.time()
-            new_date = datetime.datetime.strptime(new_date_str, '%Y-%m-%d').date()
-            new_time = datetime.datetime.strptime(new_time_str, '%H:%M').time()
-        except ValueError:
-            return Response({'error': 'Invalid date/time format. Use YYYY-MM-DD for date and HH:MM for time'}, status=400)
-
-        # Check if the new date is in the past
-        today = datetime.date.today()
-        if new_date < today:
-            return Response({'error': 'Cannot update booking to a past date'}, status=400)
+        serializer = UpdateBookingSerializer(
+            data=request.data,
+            context={'booking': existing_booking, 'request': request}
+        )
         
-        # Check if updating to today and the time has already passed
-        if new_date == today:
-            current_time = datetime.datetime.now().time()
-            if new_time < current_time:
-                return Response({'error': 'Cannot update booking to a past time'}, status=400)
+        if not serializer.is_valid():
+            return Response(
+                {'error': serializer.errors},
+                status=400
+            )
 
+        # Update the booking through the serializer
+        updated_booking = serializer.save(instance=existing_booking)
+        
         slot = existing_booking.office_hour
-
-        # Validate new booking time
-        if slot.start_date > new_date or slot.end_date < new_date:
-            return Response({'error': 'The new date is outside the valid range for this slot'}, status=400)
-
-        if not slot.status:
-            return Response({'error': 'This slot is currently inactive'}, status=400)
-
-        # Check if new time is already booked
-        new_start_datetime = datetime.datetime.combine(new_date, new_time)
-
-        time_conflict = Booking.objects.filter(
-            office_hour=slot,
-            date=new_date,
-            start_time=new_start_datetime,
-            is_cancelled=False
-        ).exclude(id=existing_booking.id).exists()
-
-        if time_conflict:
-            return Response({'error': 'The new time slot is already booked'}, status=400)
-
-        # Update the booking
-        existing_booking.date = new_date
-        existing_booking.start_time = new_start_datetime
-        existing_booking.save()
 
         # Prepare email context
         email_context = {
@@ -106,10 +70,10 @@ def update_slot(request, booking_id):
             'student_email': request.user.email,
             'instructor_name': f"{slot.instructor.first_name} {slot.instructor.last_name}" if slot.instructor.first_name else slot.instructor.username,
             'course_name': slot.course_name,
-            'old_booking_date': str(old_date),
-            'old_booking_time': str(old_time),
-            'new_booking_date': str(new_date),
-            'new_booking_time': str(new_time),
+            'old_booking_date': str(serializer.validated_data['old_date']),
+            'old_booking_time': str(serializer.validated_data['old_time']),
+            'new_booking_date': str(serializer.validated_data['new_date']),
+            'new_booking_time': str(serializer.validated_data['new_time']),
             'duration': slot.duration_minutes,
             'room': slot.room,
             'frontend_url': frontend_url,
@@ -133,10 +97,10 @@ def update_slot(request, booking_id):
 
         return Response({
             'success': True,
-            'booking_id': existing_booking.id,
-            'new_date': new_date_str,
-            'new_time': new_time_str,
-            'message': f"Successfully updated booking to {new_date_str} at {new_time_str}."
+            'booking_id': updated_booking.id,
+            'new_date': str(serializer.validated_data['new_date']),
+            'new_time': str(serializer.validated_data['new_time']),
+            'message': f"Successfully updated booking to {str(serializer.validated_data['new_date'])} at {str(serializer.validated_data['new_time'])}."
         }, status=200)
 
     except Exception as e:
