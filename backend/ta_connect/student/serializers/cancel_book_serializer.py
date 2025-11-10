@@ -17,7 +17,7 @@ class CancelBookingSerializer(serializers.Serializer):
         # Check if canceling today and the time has already passed
         if booking.date == today:
             current_time = datetime.datetime.now().time()
-            booking_time = booking.start_time.time()
+            booking_time = booking.start_time.time() if isinstance(booking.start_time, datetime.datetime) else booking.start_time
             if booking_time < current_time:
                 raise serializers.ValidationError({'error': 'Cannot cancel a booking that has already passed'})
         

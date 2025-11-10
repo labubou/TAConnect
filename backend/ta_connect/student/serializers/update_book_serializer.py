@@ -65,7 +65,7 @@ class UpdateBookingSerializer(serializers.Serializer):
         # Store computed values
         data['new_start_datetime'] = new_start_datetime
         data['old_date'] = existing_booking.date
-        data['old_time'] = existing_booking.start_time.time()
+        data['old_time'] = existing_booking.start_time.time() if isinstance(existing_booking.start_time, datetime.datetime) else existing_booking.start_time
         
         return data
 

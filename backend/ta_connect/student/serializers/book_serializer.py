@@ -16,6 +16,12 @@ class BookSerializer(serializers.Serializer):
             date_str = datetime.datetime.strptime(value, '%Y-%m-%d').date()
         except ValueError:
             raise serializers.ValidationError("Invalid date format. Use YYYY-MM-DD.")
+        
+        # Check if the date is in the past
+        today = datetime.date.today()
+        if date_str < today:
+            raise serializers.ValidationError("Cannot book an appointment in the past.")
+        
         return date_str
 
     def validate_start_time_str(self, value):
@@ -46,6 +52,19 @@ class BookSerializer(serializers.Serializer):
         if not slot.status:
             raise serializers.ValidationError({'error': f'This slot is inactive'})
         
+        if slot.day_of_week != data['date_str'].strftime('%a'):
+            raise serializers.ValidationError({'error': 'Selected date does not match slot day of week'})
+
+        # Fix: slot.start_time and slot.end_time are already time objects
+        slot_start_time = slot.start_time if isinstance(slot.start_time, datetime.time) else slot.start_time.time()
+        slot_end_time = slot.end_time if isinstance(slot.end_time, datetime.time) else slot.end_time.time()
+        
+        if data['start_time_str'] < slot_start_time or data['start_time_str'] >= slot_end_time:
+            raise serializers.ValidationError({'error': 'Selected time is outside the slot time range'})
+
+        if data['date_str'] == datetime.date.today() and data['start_time_str'] < datetime.datetime.now().time():
+            raise serializers.ValidationError({'error': 'Cannot book a time that has already passed'})
+
         # Check if student email is allowed (if policy requires specific emails)
         student_email = self.context['request'].user.email
         if hasattr(slot, 'policy') and slot.policy.require_specific_email:

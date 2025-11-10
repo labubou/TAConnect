@@ -11,6 +11,12 @@ class GetBookTimesSerializer(serializers.Serializer):
             selected_date = datetime.datetime.strptime(value, '%Y-%m-%d').date()
         except ValueError:
             raise serializers.ValidationError('Invalid date format. Use YYYY-MM-DD')
+        
+        # Check if the date is in the past
+        today = datetime.date.today()
+        if selected_date < today:
+            raise serializers.ValidationError('Cannot view or book appointments for past dates.')
+        
         return selected_date
 
     def validate(self, data):
