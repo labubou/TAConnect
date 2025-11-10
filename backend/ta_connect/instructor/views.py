@@ -208,5 +208,4 @@ def get_instructor_data(request, user_id):
         return Response({'error': 'Instructor not found'}, status=404)
     except Exception as e:
         return Response({'error': f'An error occurred: {str(e)}'}, status=500)
-        return Response({'error': f'An error occurred: {str(e)}'}, status=500)
 
