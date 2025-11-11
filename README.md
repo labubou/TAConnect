@@ -23,10 +23,6 @@ For setup, API, contributing, and more, see [PROJECT_GUIDE.md](PROJECT_GUIDE.md)
 - **Role-Based Dashboards** – TAs and students see customized dashboards and functionalities.
 - **Booking System** – Students can easily book, modify, and cancel office hour appointments.
 
-### 💬 Feedback & Communication
-- **Post-Session Feedback** – Students can provide session feedback directly after each booking.
-- **TA Analytics Dashboard** – TAs can view aggregated feedback and attendance stats to improve sessions.
-
 ### 📈 Analytics & Insights
 - **Booking Analytics** – Visual reports showing most booked times, attendance patterns, and student engagement.
 - **Feedback Analysis** – Aggregated student feedback insights to enhance teaching quality.
@@ -63,11 +59,10 @@ For setup, API, contributing, and more, see [PROJECT_GUIDE.md](PROJECT_GUIDE.md)
 
 ## 🔧 Technology Stack
 
-- **Frontend**: React, Vite, Tailwind CSS, FullCalendar, Recharts
+- **Frontend**: React, Vite, Tailwind CSS
 - **Backend**: Django REST Framework, JWT Authentication, drf-spectacular (Swagger Docs)
 - **Database**: PostgreSQL
 - **Deployment**: Docker, Docker Compose
-- **Testing**: Pytest (backend), React Testing Library (frontend)
 
 ---
 
@@ -86,7 +81,6 @@ Frontend Developer | Omar Salama
 
 - 📅 Calendar Integrations – Google Calendar & Outlook sync
 - 🔔 Smart Notifications – Email and push reminders
-- 📱 Mobile Optimization – Better responsiveness & UX
 - 🧠 AI Scheduling Assistant – Suggest optimal time slots
 - 🧩 University Integrations – LMS and academic APIs
 
