@@ -59,9 +59,11 @@ class BookSerializer(serializers.Serializer):
         slot_start_time = slot.start_time if isinstance(slot.start_time, datetime.time) else slot.start_time.time()
         slot_end_time = slot.end_time if isinstance(slot.end_time, datetime.time) else slot.end_time.time()
         
+        #make sure that the time is in the slot time range
         if data['start_time_str'] < slot_start_time or data['start_time_str'] >= slot_end_time:
             raise serializers.ValidationError({'error': 'Selected time is outside the slot time range'})
 
+        #make sure that the time is not in the past if the date is today
         if data['date_str'] == datetime.date.today() and data['start_time_str'] < datetime.datetime.now().time():
             raise serializers.ValidationError({'error': 'Cannot book a time that has already passed'})
 

@@ -81,3 +81,21 @@ cancel_booked_slot_response = openapi.Response(
         }
     )
 )
+
+book_slot_manual_parameters = [
+    openapi.Parameter(
+        'slot_id',
+        openapi.IN_PATH,
+        description='ID of the office hour slot',
+        type=openapi.TYPE_INTEGER,
+        required=True
+    )
+]
+
+book_slot_responses = {
+    200: book_slot_response,
+    400: 'Invalid request or slot not active',
+    403: 'Student email not allowed to book this slot or booking limit reached',
+    404: 'Slot not found',
+    500: 'Internal server error'
+}
