@@ -10,30 +10,16 @@ import datetime
 from django.core.mail import send_mail
 from django.template.loader import render_to_string
 from ta_connect.settings import frontend_url
-from student.schemas.booking_schemas import book_slot_request, book_slot_response
+from student.schemas.booking_schemas import book_slot_request, book_slot_response, book_slot_manual_parameters, book_slot_responses
 from student.serializers.book_serializer import BookSerializer
 
 # Create your views here.
 @swagger_auto_schema(
     method='post',
     operation_description='Book an office hour slot for a specific date and time.',
-    manual_parameters=[
-        openapi.Parameter(
-            'slot_id',
-            openapi.IN_PATH,
-            description='ID of the office hour slot',
-            type=openapi.TYPE_INTEGER,
-            required=True
-        )
-    ],
+    manual_parameters=book_slot_manual_parameters,
     request_body=book_slot_request,
-    responses={
-        200: book_slot_response,
-        400: 'Invalid request or slot not active',
-        403: 'Student email not allowed to book this slot or booking limit reached',
-        404: 'Slot not found',
-        500: 'Internal server error'
-    }
+    responses=book_slot_responses
 )
 @api_view(['POST'])
 @permission_classes([IsStudent])
@@ -94,4 +80,5 @@ def book_slot(request, slot_id):
         }, status=200)
     
     except Exception as e:
-        return Response({'error': f'An error occurred {str(e)}'}, status=500)
+        print(f"Error in booking slot: {str(e)}")
+        return Response({'error': f'An error occurred'}, status=500)
