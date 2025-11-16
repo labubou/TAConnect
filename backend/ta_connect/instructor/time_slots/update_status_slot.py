@@ -6,7 +6,7 @@ from rest_framework.response import Response
 from instructor.models import OfficeHourSlot
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
-from instructor.schemas.time_slot_schemas import update_time_slot_request, update_time_slot_response
+from instructor.schemas.time_slot_schemas import update_status_time_slot_response
 
 @swagger_auto_schema(
     method='POST',
@@ -21,16 +21,7 @@ from instructor.schemas.time_slot_schemas import update_time_slot_request, updat
         )
     ],
     responses={
-        200: openapi.Response(
-            description='Time slot status updated successfully',
-            schema=openapi.Schema(
-                type=openapi.TYPE_OBJECT,
-                properties={
-                    'success': openapi.Schema(type=openapi.TYPE_BOOLEAN),
-                    'time_slot_id': openapi.Schema(type=openapi.TYPE_INTEGER),
-                }
-            )
-        ),
+        200: update_status_time_slot_response,
         404: 'Time slot not found',
         500: 'Internal server error - failed to update time slot status',
     }

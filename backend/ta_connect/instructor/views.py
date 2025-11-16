@@ -1,211 +1,157 @@
 from django.shortcuts import render
-from accounts.permissions import IsStudent, IsInstructor
-from rest_framework.decorators import api_view, permission_classes
+from rest_framework.generics import GenericAPIView
 from rest_framework.response import Response
-from instructor.models import OfficeHourSlot, BookingPolicy
+from rest_framework import status
+from rest_framework.permissions import IsAuthenticated
+from accounts.permissions import IsInstructor, IsStudent
+from instructor.models import OfficeHourSlot
 from accounts.models import User
 from student.models import Booking
 from drf_yasg.utils import swagger_auto_schema
-from drf_yasg import openapi
-from .schemas.slot_schemas import get_user_slots_response, get_instructor_data_response
-from rest_framework.permissions import IsAuthenticated
+from .schemas.slot_schemas import (
+    get_user_slots_swagger,
+    search_instructors_swagger,
+    get_instructor_data_swagger
+)
 from django.db.models import Q
 
 # Create your views here.
-@swagger_auto_schema(
-    method='get',
-    operation_description='Get all office hour slots for the logged-in instructor.',
-    responses={
-        200: get_user_slots_response,
-        500: 'Internal server error'
-    }
-)
-@api_view(['GET'])
-@permission_classes([IsInstructor])
-def get_user_slots(request):
-    try:
-        user = request.user
+class GetUserSlotsView(GenericAPIView):
+    permission_classes = [IsInstructor]
 
-        slots = OfficeHourSlot.objects.filter(instructor=user)
-        books = Booking.objects.filter(office_hour__in=slots)
-        return Response({
-            'slots': [
-                {
-                    'id': slot.id,
-                    'course_name': slot.course_name,
-                    'section': slot.section,
-                    'day_of_week': slot.day_of_week,
-                    'start_time': slot.start_time.strftime('%H:%M:%S') if slot.start_time else None,
-                    'end_time': slot.end_time.strftime('%H:%M:%S') if slot.end_time else None,
-                    'duration_minutes': slot.duration_minutes,
-                    'start_date': slot.start_date.strftime('%Y-%m-%d') if slot.start_date else None,
-                    'end_date': slot.end_date.strftime('%Y-%m-%d') if slot.end_date else None,
-                    'room': slot.room,
-                    'status': slot.status,
-                    'created_at': slot.created_at.isoformat() if slot.created_at else None,
-                    'require_specific_email': slot.policy.require_specific_email if hasattr(slot, 'policy') else False,
-                    'set_student_limit': slot.policy.set_student_limit if hasattr(slot, 'policy') else None,
-                } for slot in slots
-            ],
-            'bookings': [
-                {
-                    'id': book.id,
-                    'student': {
-                        'id': book.student.id,
-                        'username': book.student.username,
-                        'email': book.student.email,
-                        'first_name': book.student.first_name,
-                        'last_name': book.student.last_name,
-                    },
-                    'office_hour': {
-                        'id': book.office_hour.id,
-                        'course_name': book.office_hour.course_name,
-                        'section': book.office_hour.section,
-                        'day_of_week': book.office_hour.day_of_week,
-                        'start_time': book.office_hour.start_time.strftime('%H:%M:%S') if book.office_hour.start_time else None,
-                        'end_time': book.office_hour.end_time.strftime('%H:%M:%S') if book.office_hour.end_time else None,
-                        'duration_minutes': book.office_hour.duration_minutes,
-                        'room': book.office_hour.room,
-                        'status': book.office_hour.status,
-                    },
-                    'date': book.date.strftime('%Y-%m-%d') if book.date else None,
-                    'start_time': book.start_time.strftime('%Y-%m-%d %H:%M:%S') if book.start_time else None,
-                    'is_cancelled': book.is_cancelled,
-                    'created_at': book.created_at.isoformat() if book.created_at else None,
-                } for book in books
-            ]
-        }, status=200)
-    
-    except Exception as e:
-        return Response({'error': f'An error occurred {str(e)}'}, status=500)
+    @swagger_auto_schema(**get_user_slots_swagger)
+    def get(self, request):
+        try:
+            user = request.user
 
-@swagger_auto_schema(
-    method='get',
-    operation_description='Search for instructors by name (first name, last name, or username).',
-    manual_parameters=[
-        openapi.Parameter(
-            'query',
-            openapi.IN_QUERY,
-            description='Search query for instructor name (optional)',
-            type=openapi.TYPE_STRING,
-            required=False
-        )
-    ],
-    responses={
-        200: openapi.Response(
-            description='List of matching instructors (matching query or all, in alphabetical order)',
-            schema=openapi.Schema(
-                type=openapi.TYPE_OBJECT,
-                properties={
-                    'instructors': openapi.Schema(
-                        type=openapi.TYPE_ARRAY,
-                        items=openapi.Schema(
-                            type=openapi.TYPE_OBJECT,
-                            properties={
-                                'id': openapi.Schema(type=openapi.TYPE_INTEGER, description='Instructor ID'),
-                                'username': openapi.Schema(type=openapi.TYPE_STRING, description='Username'),
-                                'full_name': openapi.Schema(type=openapi.TYPE_STRING, description='Full name'),
-                                'email': openapi.Schema(type=openapi.TYPE_STRING, description='Email'),
-                            }
-                        )
-                    )
-                }
-            )
-        ),
+            slots = OfficeHourSlot.objects.filter(instructor=user)
+            books = Booking.objects.filter(office_hour__in=slots)
+            return Response({
+                'slots': [
+                    {
+                        'id': slot.id,
+                        'course_name': slot.course_name,
+                        'section': slot.section,
+                        'day_of_week': slot.day_of_week,
+                        'start_time': slot.start_time.strftime('%H:%M:%S') if slot.start_time else None,
+                        'end_time': slot.end_time.strftime('%H:%M:%S') if slot.end_time else None,
+                        'duration_minutes': slot.duration_minutes,
+                        'start_date': slot.start_date.strftime('%Y-%m-%d') if slot.start_date else None,
+                        'end_date': slot.end_date.strftime('%Y-%m-%d') if slot.end_date else None,
+                        'room': slot.room,
+                        'status': slot.status,
+                        'created_at': slot.created_at.isoformat() if slot.created_at else None,
+                        'require_specific_email': slot.policy.require_specific_email if hasattr(slot, 'policy') else False,
+                        'set_student_limit': slot.policy.set_student_limit if hasattr(slot, 'policy') else None,
+                    } for slot in slots
+                ],
+                'bookings': [
+                    {
+                        'id': book.id,
+                        'student': {
+                            'id': book.student.id,
+                            'username': book.student.username,
+                            'email': book.student.email,
+                            'first_name': book.student.first_name,
+                            'last_name': book.student.last_name,
+                        },
+                        'office_hour': {
+                            'id': book.office_hour.id,
+                            'course_name': book.office_hour.course_name,
+                            'section': book.office_hour.section,
+                            'day_of_week': book.office_hour.day_of_week,
+                            'start_time': book.office_hour.start_time.strftime('%H:%M:%S') if book.office_hour.start_time else None,
+                            'end_time': book.office_hour.end_time.strftime('%H:%M:%S') if book.office_hour.end_time else None,
+                            'duration_minutes': book.office_hour.duration_minutes,
+                            'room': book.office_hour.room,
+                            'status': book.office_hour.status,
+                        },
+                        'date': book.date.strftime('%Y-%m-%d') if book.date else None,
+                        'start_time': book.start_time.strftime('%Y-%m-%d %H:%M:%S') if book.start_time else None,
+                        'is_cancelled': book.is_cancelled,
+                        'created_at': book.created_at.isoformat() if book.created_at else None,
+                    } for book in books
+                ]
+            }, status=200)
         
-        500: 'Internal server error'
-    }
-)
-@api_view(['GET'])
-@permission_classes([IsAuthenticated])
-def search_instructors(request):
-    """
-    Search for instructors by name (first name, last name, or username).
-    Returns a list of matching instructors with
-    their ID and name or list all instructors in alphabetical order.
-    """
-    try:
-        query = request.GET.get('query', '').strip()
-        instructors = User.objects.filter(
-            user_type='instructor',
-            is_superuser=False,
-            is_staff=False
-        )
+        except Exception as e:
+            return Response({'error': f'An error occurred {str(e)}'}, status=500)
 
-        if query:
-            instructors = instructors.filter(
-                Q(first_name__icontains=query) | 
-                Q(last_name__icontains=query) | 
-                Q(username__icontains=query)
+class SearchInstructorsView(GenericAPIView):
+    permission_classes = [IsStudent]
+
+    @swagger_auto_schema(**search_instructors_swagger)
+    def get(self, request):
+        """
+        Search for instructors by name (first name, last name, or username).
+        Returns a list of matching instructors with
+        their ID and name or list all instructors in alphabetical order.
+        """
+        try:
+            query = request.GET.get('query', '').strip()
+            instructors = User.objects.filter(
+                user_type='instructor',
+                is_superuser=False,
+                is_staff=False
             )
 
-        instructors = instructors.order_by('first_name', 'last_name')[:50]
-  
-        return Response({
-            'instructors': [
-                {
-                    'id': instructor.id,
-                    'username': instructor.username,
-                    'full_name': instructor.full_name,
-                    'email': instructor.email,
-                } for instructor in instructors
-            ]
-        }, status=200)
+            if query:
+                instructors = instructors.filter(
+                    Q(first_name__icontains=query) | 
+                    Q(last_name__icontains=query) | 
+                    Q(username__icontains=query)
+                )
+
+            instructors = instructors.order_by('first_name', 'last_name')[:50]
     
-    except Exception as e:
-        return Response({'error': f'An error occurred: {str(e)}'}, status=500)
+            return Response({
+                'instructors': [
+                    {
+                        'id': instructor.id,
+                        'username': instructor.username,
+                        'full_name': instructor.full_name,
+                        'email': instructor.email,
+                    } for instructor in instructors
+                ]
+            }, status=200)
+        
+        except Exception as e:
+            return Response({'error': f'An error occurred: {str(e)}'}, status=500)
 
-@swagger_auto_schema(
-    method='get',
-    operation_description='Get detailed information about a specific instructor including their office hour slots.',
-    manual_parameters=[
-        openapi.Parameter(
-            'user_id',
-            openapi.IN_PATH,
-            description='ID of the instructor',
-            type=openapi.TYPE_INTEGER,
-            required=True
-        )
-    ],
-    responses={
-        200: get_instructor_data_response,
-        404: 'Instructor not found',
-        500: 'Internal server error'
-    }
-)
-@api_view(['GET'])
-@permission_classes([IsAuthenticated])
-def get_instructor_data(request, user_id):
-    """
-    Get detailed information about a specific instructor.
-    """
-    try:
-        instructor = User.objects.get(id=user_id, user_type='instructor')
-        data = {
-            'id': instructor.id,
-            'username': instructor.username,
-            'full_name': instructor.full_name,
-            'email': instructor.email,
-            'slots': [
-                {
-                    'id': slot.id,
-                    'course_name': slot.course_name,
-                    'section': slot.section,
-                    'day_of_week': slot.day_of_week,
-                    'start_time': slot.start_time,
-                    'end_time': slot.end_time,
-                    'duration_minutes': slot.duration_minutes,
-                    'start_date': slot.start_date,
-                    'end_date': slot.end_date,
-                    'room': slot.room,
-                    'status': slot.status,
-                } for slot in OfficeHourSlot.objects.filter(instructor=instructor)
-            ]
-        }
-        return Response(data, status=200)
+class InstructorDataView(GenericAPIView):
+    permission_classes = [IsStudent]
 
-    except User.DoesNotExist:
-        return Response({'error': 'Instructor not found'}, status=404)
-    except Exception as e:
-        return Response({'error': f'An error occurred: {str(e)}'}, status=500)
+    @swagger_auto_schema(**get_instructor_data_swagger)
+    def get(self, request, user_id):
+        """
+        Get detailed information about a specific instructor.
+        """
+        try:
+            instructor = User.objects.get(id=user_id, user_type='instructor')
+            data = {
+                'id': instructor.id,
+                'username': instructor.username,
+                'full_name': instructor.full_name,
+                'email': instructor.email,
+                'slots': [
+                    {
+                        'id': slot.id,
+                        'course_name': slot.course_name,
+                        'section': slot.section,
+                        'day_of_week': slot.day_of_week,
+                        'start_time': slot.start_time,
+                        'end_time': slot.end_time,
+                        'duration_minutes': slot.duration_minutes,
+                        'start_date': slot.start_date,
+                        'end_date': slot.end_date,
+                        'room': slot.room,
+                        'status': slot.status,
+                    } for slot in OfficeHourSlot.objects.filter(instructor=instructor)
+                ]
+            }
+            return Response(data, status=200)
 
+        except User.DoesNotExist:
+            return Response({'error': 'Instructor not found'}, status=404)
+        except Exception as e:
+            return Response({'error': f'An error occurred: {str(e)}'}, status=500)
