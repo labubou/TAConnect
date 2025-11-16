@@ -1,10 +1,7 @@
-from requests import request
 from rest_framework import serializers
-from django.core.exceptions import ValidationError
-from django.core.validators import validate_email
 from instructor.models import OfficeHourSlot, BookingPolicy
 
-class UpdateSlotSerializer(serializers.Serializer):
+class TimeSlotSerializer(serializers.Serializer):
 
     course_name = serializers.CharField(max_length=100)
     section = serializers.CharField(max_length=100, default=" ")
@@ -29,7 +26,28 @@ class UpdateSlotSerializer(serializers.Serializer):
             raise serializers.ValidationError({"date": "Start date must be on or before end date."})
         return data
 
+    def create(self, validated_data):
+        time_slot = OfficeHourSlot.objects.create(
+            instructor=self.context['request'].user,
+            course_name=validated_data['course_name'],
+            section=validated_data['section'],
+            start_time=validated_data['start_time'],
+            end_time=validated_data['end_time'],
+            day_of_week=validated_data['day_of_week'],
+            duration_minutes=validated_data['duration_minutes'],
+            start_date=validated_data['start_date'],
+            end_date=validated_data['end_date'],
+            room=validated_data['room'],
+        )
+
+        time_slot_policy = BookingPolicy.objects.create(
+            office_hour_slot=time_slot,
+            set_student_limit=validated_data['set_student_limit']
+        )
+        return time_slot, time_slot_policy
+    
     def update(self, instance, validated_data):
+
         instance.course_name = validated_data.get('course_name', instance.course_name)
         instance.section = validated_data.get('section', instance.section)
         instance.start_time = validated_data.get('start_time', instance.start_time)
@@ -41,4 +59,5 @@ class UpdateSlotSerializer(serializers.Serializer):
         instance.room = validated_data.get('room', instance.room)
         instance.policy.set_student_limit = validated_data.get('set_student_limit', instance.policy.set_student_limit)
         instance.save()
+        instance.policy.save()
         return instance

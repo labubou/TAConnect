@@ -128,3 +128,68 @@ get_instructor_data_response = openapi.Response(
         }
     )
 )
+
+search_instructors_response = openapi.Response(
+    description='List of matching instructors (matching query or all, in alphabetical order)',
+    schema=openapi.Schema(
+        type=openapi.TYPE_OBJECT,
+        properties={
+            'instructors': openapi.Schema(
+                type=openapi.TYPE_ARRAY,
+                items=openapi.Schema(
+                    type=openapi.TYPE_OBJECT,
+                    properties={
+                        'id': openapi.Schema(type=openapi.TYPE_INTEGER, description='Instructor ID'),
+                        'username': openapi.Schema(type=openapi.TYPE_STRING, description='Username'),
+                        'full_name': openapi.Schema(type=openapi.TYPE_STRING, description='Full name'),
+                        'email': openapi.Schema(type=openapi.TYPE_STRING, description='Email'),
+                    }
+                )
+            )
+        }
+    )
+)
+
+# Swagger decorator configurations
+get_user_slots_swagger = {
+    'operation_description': 'Get all office hour slots for the logged-in instructor.',
+    'responses': {
+        200: get_user_slots_response,
+        500: 'Internal server error'
+    }
+}
+
+search_instructors_swagger = {
+    'operation_description': 'Search for instructors by name (first name, last name, or username).',
+    'manual_parameters': [
+        openapi.Parameter(
+            'query',
+            openapi.IN_QUERY,
+            description='Search query for instructor name (optional)',
+            type=openapi.TYPE_STRING,
+            required=False
+        )
+    ],
+    'responses': {
+        200: search_instructors_response,
+        500: 'Internal server error'
+    }
+}
+
+get_instructor_data_swagger = {
+    'operation_description': 'Get detailed information about a specific instructor including their office hour slots.',
+    'manual_parameters': [
+        openapi.Parameter(
+            'user_id',
+            openapi.IN_PATH,
+            description='ID of the instructor',
+            type=openapi.TYPE_INTEGER,
+            required=True
+        )
+    ],
+    'responses': {
+        200: get_instructor_data_response,
+        404: 'Instructor not found',
+        500: 'Internal server error'
+    }
+}

@@ -9,3 +9,4 @@ requests==2.32.4
 setuptools
 wheel
 drf_yasg==1.21.11
+django-ratelimit==4.1.0

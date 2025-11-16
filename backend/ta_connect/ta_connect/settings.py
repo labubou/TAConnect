@@ -93,12 +93,16 @@ SWAGGER_SETTINGS = {
             'type': 'apiKey',
             'name': 'Authorization',
             'in': 'header',
-            'description': 'JWT Authorization header using the Bearer scheme. Example: "Authorization: Bearer {token}"',
+            'description': 'JWT Authorization header using the Bearer scheme. Example: "Bearer {token}"',
         }
     },
     'SECURITY_REQUIREMENTS': [{
         'Bearer': []
     }],
+    'PERSIST_AUTH': True,
+    'REFETCH_SCHEMA_WITH_AUTH': True,
+    'REFETCH_SCHEMA_ON_LOGOUT': True,
+    'DEFAULT_INFO': 'ta_connect.urls.api_info',
 }
 
 # Simple JWT configuration
@@ -248,13 +252,24 @@ CORS_ALLOWED_ORIGINS = [
     "https://taconnect.pythonanywhere.com",
 ]
 
-# Add logging configuration
+# Create logs directory if it doesn't exist
+LOGS_DIR = BASE_DIR / 'logs'
+if not os.path.exists(LOGS_DIR):
+    os.makedirs(LOGS_DIR, exist_ok=True)
+
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
+    'formatters': {
+        'verbose': {
+            'format': '{levelname} {asctime} {module} {message}',
+            'style': '{',
+        },
+    },
     'handlers': {
         'console': {
             'class': 'logging.StreamHandler',
+            'formatter': 'verbose',
         },
     },
     'root': {
@@ -262,13 +277,44 @@ LOGGING = {
         'level': 'INFO',
     },
     'loggers': {
-        'Chef.views': {
+        'accounts': {
             'handlers': ['console'],
-            'level': 'DEBUG',
+            'level': 'DEBUG' if DEBUG else 'INFO',
+            'propagate': False,
+        },
+        'instructor': {
+            'handlers': ['console'],
+            'level': 'DEBUG' if DEBUG else 'INFO',
+            'propagate': False,
+        },
+        'student': {
+            'handlers': ['console'],
+            'level': 'DEBUG' if DEBUG else 'INFO',
+            'propagate': False,
+        },
+        'django.request': {
+            'handlers': ['console'],
+            'level': 'ERROR',
             'propagate': False,
         },
     },
 }
+
+# Add file handler only in production or if logs directory is writable
+if not DEBUG or os.access(LOGS_DIR, os.W_OK):
+    LOGGING['handlers']['file'] = {
+        'class': 'logging.handlers.RotatingFileHandler',
+        'filename': LOGS_DIR / 'django.log',
+        'maxBytes': 1024 * 1024 * 5,  # 5 MB
+        'backupCount': 5,
+        'formatter': 'verbose',
+    }
+    # Add file handler to loggers
+    LOGGING['root']['handlers'].append('file')
+    LOGGING['loggers']['accounts']['handlers'].append('file')
+    LOGGING['loggers']['instructor']['handlers'].append('file')
+    LOGGING['loggers']['student']['handlers'].append('file')
+    LOGGING['loggers']['django.request']['handlers'].append('file')
 
 # Add this configuration for Google OAuth
 GOOGLE_OAUTH2_CLIENT_ID = config('GOOGLE_CLIENT_ID', default='')

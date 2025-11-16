@@ -3,3 +3,5 @@ __pycache__/
 */migrations/__pycache__/
 */migrations/*.pyc
 migrations/
+logs/
+*.log
