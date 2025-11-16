@@ -21,20 +21,39 @@ from ta_connect.settings import frontend_url
 from drf_yasg import openapi
 from drf_yasg.views import get_schema_view
 from rest_framework import permissions
-
+from rest_framework_simplejwt.authentication import JWTAuthentication
 
 # Define the schema view for Swagger
 schema_view = get_schema_view(
     openapi.Info(
         title="TA Connect API",
         default_version='v1',
-        description="API documentation for TA Connect",
+        description="""
+# TA Connect API Documentation
+
+## Authentication
+This API uses JWT (JSON Web Token) authentication. To access protected endpoints:
+
+1. **Obtain tokens**: POST to `/api/auth/login/` with your credentials
+2. **Use the access token**: Click the "Authorize" button (🔓) at the top right
+3. **Enter**: `Bearer <your_access_token>` (note the space after "Bearer")
+4. **Example**: `Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9...`
+
+## Token Refresh
+- Access tokens expire after 60 minutes
+- Refresh tokens expire after 30 days
+- Refresh your token using POST `/api/auth/token/refresh/`
+
+## Endpoints
+All endpoints requiring authentication are marked with a 🔒 icon.
+        """,
         terms_of_service="https://www.google.com/policies/terms/",
         contact=openapi.Contact(email="taconnect.team@gmail.com"),
         license=openapi.License(name="Dual License: AGPL-3.0 / Commercial"),
     ),
     public=True,
     permission_classes=[permissions.AllowAny],
+    authentication_classes=[JWTAuthentication],
 )
 
 urlpatterns = [

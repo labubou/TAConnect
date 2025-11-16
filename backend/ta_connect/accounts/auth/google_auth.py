@@ -6,6 +6,7 @@ from django.shortcuts import redirect
 from ..models import User
 from rest_framework import status
 from rest_framework.generics import GenericAPIView
+from rest_framework.views import APIView
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.throttling import AnonRateThrottle, UserRateThrottle
@@ -213,7 +214,7 @@ class GoogleAuthView(GenericAPIView):
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
 
-class GoogleCallbackView(GenericAPIView):
+class GoogleCallbackView(APIView):
     """Handles the callback from Google OAuth2 - redirects to frontend with code"""
     permission_classes = [AllowAny]
 

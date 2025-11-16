@@ -93,12 +93,16 @@ SWAGGER_SETTINGS = {
             'type': 'apiKey',
             'name': 'Authorization',
             'in': 'header',
-            'description': 'JWT Authorization header using the Bearer scheme. Example: "Authorization: Bearer {token}"',
+            'description': 'JWT Authorization header using the Bearer scheme. Example: "Bearer {token}"',
         }
     },
     'SECURITY_REQUIREMENTS': [{
         'Bearer': []
     }],
+    'PERSIST_AUTH': True,
+    'REFETCH_SCHEMA_WITH_AUTH': True,
+    'REFETCH_SCHEMA_ON_LOGOUT': True,
+    'DEFAULT_INFO': 'ta_connect.urls.api_info',
 }
 
 # Simple JWT configuration

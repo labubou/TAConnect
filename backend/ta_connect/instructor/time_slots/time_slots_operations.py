@@ -17,7 +17,8 @@ class TimeSlotView(GenericAPIView):
     permission_classes = [IsInstructor]
 
     @swagger_auto_schema(**create_time_slot_swagger)
-    def post(self, request, slot_id=None):
+    def post(self, request):
+        """Create a new time slot"""
         try:
             serializer = self.get_serializer(data=request.data, context={'request': request})
             if not serializer.is_valid():
@@ -38,7 +39,7 @@ class TimeSlotView(GenericAPIView):
     
     @swagger_auto_schema(**update_time_slot_swagger)
     def patch(self, request, slot_id):
-        """Handle update time slot for the logged-in user."""
+        """Update an existing time slot"""
         user = request.user
 
         if not slot_id:
@@ -58,7 +59,7 @@ class TimeSlotView(GenericAPIView):
 
     @swagger_auto_schema(**delete_time_slot_swagger)
     def delete(self, request, slot_id):
-        """Handle delete time slot for the logged-in user."""
+        """Delete an existing time slot"""
         user = request.user
         
         if not slot_id:
