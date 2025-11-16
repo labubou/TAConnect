@@ -1,25 +1,18 @@
 from rest_framework import serializers
-from django.core.exceptions import ValidationError
-from django.core.validators import validate_email
 from accounts.models import User
 
 class LoginSerializer(serializers.Serializer):
+    #validation for login fields
     username = serializers.CharField(max_length=150)
-    password = serializers.CharField(write_only=True, min_length=8)
+    password = serializers.CharField(write_only=True, min_length=8, style={'input_type': 'password'})
 
+    #validate the username field with specific rules
     def validate_username(self, value):
-        if '@' in value: #then it's an email
-            try:
-                user_obj = User.objects.filter(email=value).first()
-                if not user_obj:
-                    raise serializers.ValidationError("Email does not exist.")
-            except Exception as e:
-                raise serializers.ValidationError("Database error occurred.")
-        else: #then it's a username
-            try:
-                if not User.username_exists(value):
-                    raise serializers.ValidationError("Username does not exist.")
-            except Exception as e:
-                raise serializers.ValidationError("Database error occurred.")
-        return value
-
+        v = value.strip()
+        if '@' in v:
+            if not User.objects.filter(email__iexact=v).exists():
+                raise serializers.ValidationError("Email does not exist.")
+        else:
+            if not User.objects.filter(username__iexact=v).exists():
+                raise serializers.ValidationError("Username does not exist.")
+        return v
