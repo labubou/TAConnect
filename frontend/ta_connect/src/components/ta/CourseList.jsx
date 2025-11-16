@@ -15,7 +15,7 @@ export default function CourseList({ slots = [], onEdit, onDeleted, onToggled })
     setError('');
     try {
       console.debug('Deleting slot id:', id);
-      const res = await axios.delete(`/api/instructor/time-slots/delete-slot/${id}/`);
+      const res = await axios.delete(`/api/instructor/time-slots/${id}/`);
       console.debug('Delete response:', res?.data);
       if (res?.data?.success) {
         onDeleted && onDeleted(id);

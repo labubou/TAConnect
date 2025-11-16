@@ -182,7 +182,7 @@ export default function CourseForm({ onCreated, editing, onUpdated, onCancelEdit
       }
       
       console.debug('Creating time slot payload:', payload);
-      const res = await axios.post('/api/instructor/time-slots/create-slot', payload);
+      const res = await axios.post('/api/instructor/time-slots/', payload);
       console.debug('Create response:', res?.data);
       
       if (res?.data?.success && res?.data?.time_slot_id) {
@@ -232,7 +232,7 @@ export default function CourseForm({ onCreated, editing, onUpdated, onCancelEdit
       }
       
       console.debug('Updating slot', editing.id, 'payload:', payload);
-      const res = await axios.post(`/api/instructor/time-slots/update-slot/${editing.id}`, payload);
+      const res = await axios.patch(`/api/instructor/time-slots/${editing.id}`, payload);
       console.debug('Update response:', res?.data);
       
       if (res?.data?.success) {
