@@ -1,9 +1,7 @@
 from django.contrib import messages
 from django.contrib.auth.views import PasswordResetView, PasswordResetDoneView, PasswordResetConfirmView, PasswordResetCompleteView
-from django.core.mail import send_mail
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 from django.utils.encoding import force_bytes, force_str
-from django.template.loader import render_to_string
 from django.contrib.auth.forms import PasswordResetForm, SetPasswordForm
 from ta_connect.settings import SITE_DOMAIN, frontend_url
 from rest_framework import status
@@ -22,6 +20,7 @@ from accounts.schemas.auth_schemas import (
     password_reset_validate_request,
     password_reset_generic_response,
 )
+from .utils.send_password_reset_email import send_password_reset_email
 
 class CustomPasswordResetView(PasswordResetView):
     template_name = 'password_reset.html'
@@ -53,31 +52,8 @@ class CustomPasswordResetView(PasswordResetView):
         active_users = form.get_users(email)
         
         for user in active_users:
-            # Generate token and context
-            context = {
-                'email': email,
-                'domain': SITE_DOMAIN.replace('http://', '').replace('https://', ''),
-                'site_name': 'ta_connect',
-                'protocol': 'https' if 'https://' in SITE_DOMAIN else 'http',
-                'uid': urlsafe_base64_encode(force_bytes(user.pk)),
-                'user': user,
-                'token': self.token_generator.make_token(user),
-                'frontend_url': frontend_url,
-            }
-            
-            # Render email
-            subject = "Reset your TAConnect password"
-            email_message = render_to_string(self.email_template_name, context)
-            html_email = render_to_string(self.html_email_template_name, context)
-            
-            # Send email
-            send_mail(
-                subject,
-                email_message,
-                self.from_email or 'taconnect.team@gmail.com',
-                [user.email],
-                html_message=html_email,
-            )
+            # Send email using the dedicated password reset function
+            send_password_reset_email(user)
             
         # Return success response
         return super().form_valid(form)
@@ -143,26 +119,7 @@ class PasswordResetRequestView(GenericAPIView):
             
             # Generate password reset email
             try:
-                mail_subject = 'Reset your TAConnect password'
-                current_site = SITE_DOMAIN.rstrip('/')
-                
-                context = {
-                    'user': user,
-                    'domain': current_site,
-                    'frontend_url': frontend_url,
-                    'uid': urlsafe_base64_encode(force_bytes(user.pk)),
-                    'token': default_token_generator.make_token(user),
-                }
-                
-                message = render_to_string('password_reset_email.html', context)
-                
-                send_mail(
-                    mail_subject, 
-                    message, 
-                    'taconnect.team@gmail.com', 
-                    [email], 
-                    html_message=message
-                )
+                send_password_reset_email(user)
                 
             except Exception:
                 return Response(
