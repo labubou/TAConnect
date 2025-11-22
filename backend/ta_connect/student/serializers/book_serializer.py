@@ -2,6 +2,7 @@ from rest_framework import serializers
 from instructor.models import OfficeHourSlot, BookingPolicy
 from student.models import Booking
 import datetime
+from django.utils import timezone
 
 class UnifiedBookingSerializer(serializers.Serializer):
     # --- Fields for Booking (Create) ---
@@ -89,13 +90,50 @@ class UnifiedBookingSerializer(serializers.Serializer):
         slot_start = slot.start_time if isinstance(slot.start_time, datetime.time) else slot.start_time.time()
         slot_end = slot.end_time if isinstance(slot.end_time, datetime.time) else slot.end_time.time()
 
+        slot_date = slot.start_date if isinstance(slot.start_date, datetime.date) else slot.start_date.date()
+        slot_end_date = slot.end_date if isinstance(slot.end_date, datetime.date) else slot.end_date.date()
+
         if data['start_time_str'] < slot_start or data['start_time_str'] >= slot_end:
             raise serializers.ValidationError({'error': 'Selected time is outside the slot time range'})
 
+        if data['date_str'] < slot_date or data['date_str'] > slot_end_date:
+            raise serializers.ValidationError({'error': 'Selected date is outside the slot date range'})
+
+        if slot.policy.set_student_limit is not None:
+            active_bookings_count = Booking.objects.filter(
+                office_hour=slot,
+                date=data['date_str'],
+                is_cancelled=False,
+                student=self.context['request'].user
+            ).count()
+            if active_bookings_count >= slot.policy.set_student_limit:
+                raise serializers.ValidationError({'error': 'This student has reached its student limit'})
+        
+        if slot.policy.require_specific_email:
+            user_email = self.context['request'].user.email.lower()
+            allowed_emails = [s.email.lower() for s in slot.policy.allowed_students.all()]
+            if user_email not in allowed_emails:
+                raise serializers.ValidationError({'error': 'This email is not authorized to book this slot'})
+
         # Check duplicate
         start_datetime = datetime.datetime.combine(data['date_str'], data['start_time_str'])
-        if Booking.objects.filter(office_hour=slot, date=data['date_str'], start_time=start_datetime, is_cancelled=False).exists():
-            raise serializers.ValidationError({'error': 'This time is already booked'})
+        
+        # Make start_datetime timezone-aware to match database records
+        if timezone.is_naive(start_datetime):
+            start_datetime = timezone.make_aware(start_datetime)
+
+        # Check if booking end time exceeds slot end time
+        booking_end_datetime = start_datetime + datetime.timedelta(minutes=slot.duration_minutes)
+        slot_end_datetime = datetime.datetime.combine(data['date_str'], slot_end)
+        if timezone.is_naive(slot_end_datetime):
+            slot_end_datetime = timezone.make_aware(slot_end_datetime)
+            
+        if booking_end_datetime > slot_end_datetime:
+            raise serializers.ValidationError({'error': 'Booking duration exceeds the office hour slot end time'})
+
+        # Use the new helper function to check for overlaps (considering duration)
+        if not slot.is_time_available(data['date_str'], start_datetime):
+            raise serializers.ValidationError({'error': 'This time is already booked or overlaps with another booking'})
 
         # Prepare final data
         data['selected_date_str'] = data['date_str']
@@ -114,13 +152,24 @@ class UnifiedBookingSerializer(serializers.Serializer):
 
         new_start_datetime = datetime.datetime.combine(new_date, new_time)
         
-        # Check conflict excluding current booking
-        time_conflict = Booking.objects.filter(
-            office_hour=slot, date=new_date, start_time=new_start_datetime, is_cancelled=False
-        ).exclude(id=existing_booking.id).exists()
-
-        if time_conflict:
-            raise serializers.ValidationError({'error': 'The new time slot is already booked'})
+        # Make new_start_datetime timezone-aware
+        if timezone.is_naive(new_start_datetime):
+            new_start_datetime = timezone.make_aware(new_start_datetime)
+        
+        # Check if booking end time exceeds slot end time
+        booking_end_datetime = new_start_datetime + datetime.timedelta(minutes=slot.duration_minutes)
+        
+        slot_end = slot.end_time if isinstance(slot.end_time, datetime.time) else slot.end_time.time()
+        slot_end_datetime = datetime.datetime.combine(new_date, slot_end)
+        if timezone.is_naive(slot_end_datetime):
+            slot_end_datetime = timezone.make_aware(slot_end_datetime)
+            
+        if booking_end_datetime > slot_end_datetime:
+            raise serializers.ValidationError({'error': 'Booking duration exceeds the office hour slot end time'})
+        
+        # Check conflict excluding current booking using new helper
+        if not slot.is_time_available(new_date, new_start_datetime, exclude_booking_id=existing_booking.id):
+            raise serializers.ValidationError({'error': 'The new time slot is already booked or overlaps with another booking'})
 
         data['new_start_datetime'] = new_start_datetime
         return data

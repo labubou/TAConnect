@@ -11,9 +11,16 @@ class Booking(models.Model):
     office_hour = models.ForeignKey("instructor.OfficeHourSlot", on_delete=models.CASCADE, related_name="bookings")
 
     start_time = models.DateTimeField()
+    end_time = models.DateTimeField(blank=True, null=True)
     date = models.DateField(default=datetime.date.today)
     created_at = models.DateTimeField(auto_now_add=True)
     is_cancelled = models.BooleanField(default=False)
+
+    def save(self, *args, **kwargs):
+        # Calculate end_time based on slot duration if not set
+        if not self.end_time and self.start_time and self.office_hour:
+            self.end_time = self.start_time + datetime.timedelta(minutes=self.office_hour.duration_minutes)
+        super().save(*args, **kwargs)
 
     def __str__(self):
         # office_hour.course_name exists on OfficeHourSlot; section may be optional
