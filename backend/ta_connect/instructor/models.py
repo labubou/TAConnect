@@ -1,6 +1,7 @@
 from django.conf import settings
 from django.db import models
 from django.utils import timezone
+import datetime
 
 # Create your models here.
 class OfficeHourSlot(models.Model):
@@ -28,6 +29,35 @@ class OfficeHourSlot(models.Model):
     status = models.BooleanField(default=True)  # Active or Inactive
     updated_at = models.DateTimeField(auto_now=True)
     created_at = models.DateTimeField(default=timezone.now)
+
+    def is_time_available(self, check_date, check_start_time, exclude_booking_id=None):
+        """
+        Checks if a specific time slot is available by ensuring no overlaps with existing bookings.
+        check_start_time: datetime object
+        """
+        check_end_time = check_start_time + datetime.timedelta(minutes=self.duration_minutes)
+        
+        # Get active bookings for this slot and date
+        bookings = self.bookings.filter(date=check_date, is_cancelled=False)
+        
+        if exclude_booking_id:
+            bookings = bookings.exclude(id=exclude_booking_id)
+        
+        if not bookings.exists():
+            return True
+
+        for booking in bookings:
+            # Existing booking times
+            b_start = booking.start_time
+            # If booking.end_time is not set (legacy records), calculate it
+            b_end = booking.end_time if booking.end_time else b_start + datetime.timedelta(minutes=self.duration_minutes)
+            
+            # Check overlap: (StartA < EndB) and (EndA > StartB)
+            # If the requested slot starts before the existing one ends AND ends after the existing one starts
+            if check_start_time < b_end and check_end_time > b_start:
+                return False
+        
+        return True
 
     def __str__(self):
         return f"{self.course_name} - {self.section} {self.day_of_week} {self.start_time}-{self.end_time}"
