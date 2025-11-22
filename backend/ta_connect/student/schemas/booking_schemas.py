@@ -1,101 +1,131 @@
 from drf_yasg import openapi
 
-book_slot_request = openapi.Schema(
+# Response schemas
+book_slot_response = openapi.Schema(
     type=openapi.TYPE_OBJECT,
-    required=['date', 'time'],
     properties={
-        'date': openapi.Schema(
-            type=openapi.TYPE_STRING,
-            format='date',
-            description='Date in YYYY-MM-DD format',
-            example='2024-01-15'
-        ),
-        'time': openapi.Schema(
-            type=openapi.TYPE_STRING,
-            format='time',
-            description='Start time in HH:MM format',
-            example='14:00'
-        ),
-    },
-)
-
-book_slot_response = openapi.Response(
-    description='Slot booked successfully',
-    schema=openapi.Schema(
-        type=openapi.TYPE_OBJECT,
-        properties={
-            'slot_id': openapi.Schema(type=openapi.TYPE_INTEGER, description='ID of the booked slot', example=1),
-            'date': openapi.Schema(type=openapi.TYPE_STRING, format='date', description='Booking date', example='2024-01-15'),
-            'start_time': openapi.Schema(type=openapi.TYPE_STRING, description='Booking start time', example='14:00'),
-            'message': openapi.Schema(type=openapi.TYPE_STRING, description='Success message', example='Successfully booked slot 1 on 2024-01-15 at 14:00.'),
-        }
-    )
+        'id': openapi.Schema(type=openapi.TYPE_INTEGER, description='Booking ID'),
+        'slot_id': openapi.Schema(type=openapi.TYPE_INTEGER, description='OfficeHourSlot ID'),
+        'date_str': openapi.Schema(type=openapi.TYPE_STRING, description='Booking date'),
+        'start_time_str': openapi.Schema(type=openapi.TYPE_STRING, description='Start time'),
+    }
 )
 
 update_booked_slot_request = openapi.Schema(
     type=openapi.TYPE_OBJECT,
-    required=['new_date', 'new_time'],
     properties={
-        'new_date': openapi.Schema(
-            type=openapi.TYPE_STRING,
-            format='date',
-            description='New booking date in YYYY-MM-DD format (must be today or in the future)',
-            example='2024-01-16'
-        ),
-        'new_time': openapi.Schema(
-            type=openapi.TYPE_STRING,
-            format='time',
-            description='New booking time in HH:MM format (must be in the future if date is today)',
-            example='15:00'
-        ),
-    },
+        'date_str': openapi.Schema(type=openapi.TYPE_STRING, description='New booking date in YYYY-MM-DD format'),
+        'start_time_str': openapi.Schema(type=openapi.TYPE_STRING, description='New start time in HH:MM format'),
+    }
 )
 
-update_booked_slot_response = openapi.Response(
-    description='Booking updated successfully',
-    schema=openapi.Schema(
-        type=openapi.TYPE_OBJECT,
-        properties={
-            'success': openapi.Schema(type=openapi.TYPE_BOOLEAN, example=True),
-            'booking_id': openapi.Schema(type=openapi.TYPE_INTEGER, description='ID of the updated booking', example=1),
-            'new_date': openapi.Schema(type=openapi.TYPE_STRING, format='date', description='New booking date', example='2024-01-16'),
-            'new_time': openapi.Schema(type=openapi.TYPE_STRING, description='New booking time', example='15:00'),
-            'message': openapi.Schema(type=openapi.TYPE_STRING, description='Success message', example='Successfully updated booking to 2024-01-16 at 15:00.'),
-        }
-    )
-)
-
-cancel_booked_slot_request = openapi.Schema(
+update_booked_slot_response = openapi.Schema(
     type=openapi.TYPE_OBJECT,
-    properties={},
-    description='No request body required - booking ID is provided in the URL path'
+    properties={
+        'id': openapi.Schema(type=openapi.TYPE_INTEGER, description='Booking ID'),
+        'date_str': openapi.Schema(type=openapi.TYPE_STRING, description='Updated booking date'),
+        'start_time_str': openapi.Schema(type=openapi.TYPE_STRING, description='Updated start time'),
+    }
 )
 
-cancel_booked_slot_response = openapi.Response(
-    description='Booking cancelled successfully',
+cancel_booked_slot_response = openapi.Schema(
+    type=openapi.TYPE_OBJECT,
+    properties={
+        'message': openapi.Schema(type=openapi.TYPE_STRING, description='Cancellation confirmation message'),
+    }
+)
+
+# Schema matching the CreateBookingSerializer fields
+create_booking_request = openapi.Schema(
+    type=openapi.TYPE_OBJECT,
+    properties={
+        'slot_id': openapi.Schema(type=openapi.TYPE_INTEGER, description='OfficeHourSlot ID', example=1),
+        'date_str': openapi.Schema(type=openapi.TYPE_STRING, description='Booking date in YYYY-MM-DD format', example='2025-12-01'),
+        'start_time_str': openapi.Schema(type=openapi.TYPE_STRING, description='Start time in HH:MM format', example='14:30'),
+    },
+    required=['slot_id', 'date_str', 'start_time_str']
+)
+
+# Swagger configurations
+create_booking_swagger = {
+    'operation_description': 'Create a new booking for a given office hour slot.',
+    'request_body': create_booking_request,
+    'responses': {
+        201: book_slot_response,
+        400: 'Bad Request',
+        500: 'Internal Server Error'
+    }
+}
+
+update_booking_swagger = {
+    'operation_description': "Update an existing booking's date and time.",
+    'manual_parameters': [
+        openapi.Parameter('pk', openapi.IN_PATH, description='Booking ID', type=openapi.TYPE_INTEGER, required=True)
+    ],
+    'request_body': update_booked_slot_request,
+    'responses': {
+        200: update_booked_slot_response,
+        400: 'Bad Request',
+        404: 'Not Found',
+        500: 'Internal Server Error'
+    }
+}
+
+cancel_booking_swagger = {
+    'operation_description': 'Cancel an existing booking.',
+    'manual_parameters': [
+        openapi.Parameter('pk', openapi.IN_PATH, description='Booking ID', type=openapi.TYPE_INTEGER, required=True)
+    ],
+    'responses': {
+        200: cancel_booked_slot_response,
+        400: 'Bad Request',
+        404: 'Not Found',
+        500: 'Internal Server Error'
+    }
+}
+
+# Available Times Schemas
+available_times_request = openapi.Schema(
+    type=openapi.TYPE_OBJECT,
+    properties={
+        'date': openapi.Schema(type=openapi.TYPE_STRING, format='date', description='Date to check availability (YYYY-MM-DD)', example='2025-12-01'),
+    },
+    required=['date']
+)
+
+available_times_response = openapi.Response(
+    description='Available times retrieved successfully',
     schema=openapi.Schema(
         type=openapi.TYPE_OBJECT,
         properties={
-            'success': openapi.Schema(type=openapi.TYPE_BOOLEAN, example=True),
-            'message': openapi.Schema(type=openapi.TYPE_STRING, description='Success message', example='Successfully cancelled booking for Computer Science 101 on January 15, 2024 at 02:00 PM.'),
+            'slot_id': openapi.Schema(type=openapi.TYPE_INTEGER, example=1),
+            'date': openapi.Schema(type=openapi.TYPE_STRING, format='date', example='2025-12-01'),
+            'available_times': openapi.Schema(
+                type=openapi.TYPE_ARRAY,
+                items=openapi.Schema(type=openapi.TYPE_STRING, format='time', example='14:30'),
+                description='List of available start times'
+            ),
         }
     )
 )
 
-book_slot_manual_parameters = [
-    openapi.Parameter(
-        'slot_id',
-        openapi.IN_PATH,
-        description='ID of the office hour slot',
-        type=openapi.TYPE_INTEGER,
-        required=True
-    )
-]
-
-book_slot_responses = {
-    200: book_slot_response,
-    400: 'Invalid request or slot not active',
-    403: 'Student email not allowed to book this slot or booking limit reached',
-    404: 'Slot not found',
-    500: 'Internal server error'
+available_times_swagger = {
+    'operation_description': 'Get available times for a specific office hour slot on a given date.',
+    'manual_parameters': [
+        # Removed 'pk' parameter as it is automatically detected from the URL
+        openapi.Parameter(
+            'date', 
+            openapi.IN_QUERY, 
+            description='Date to check availability (YYYY-MM-DD)', 
+            type=openapi.TYPE_STRING, 
+            format='date', 
+            required=True
+        )
+    ],
+    'responses': {
+        200: available_times_response,
+        400: 'Bad Request',
+        404: 'Slot Not Found',
+        500: 'Internal Server Error'
+    }
 }

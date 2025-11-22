@@ -1,12 +1,12 @@
 from django.urls import path
-from instructor.time_slots.time_slots_operations import TimeSlotView
+from instructor.time_slots.time_slots_operations import TimeSlotCreateView, TimeSlotDetailView
 from .time_slots import update_status_slot
 from .views import GetUserSlotsView, SearchInstructorsView, InstructorDataView
 
 urlpatterns = [
     # URLs for time slots
-    path('time-slots/', TimeSlotView.as_view(), name='time-slots-create'),  # POST to create
-    path('time-slots/<int:slot_id>/', TimeSlotView.as_view(), name='time-slots-detail'),  # PATCH to update, DELETE to delete
+    path('time-slots/', TimeSlotCreateView.as_view(), name='time-slots-create'),  # POST to create
+    path('time-slots/<int:slot_id>/', TimeSlotDetailView.as_view(), name='time-slots-detail'),  # PATCH to update, DELETE to delete
     path('time-slots/toggle-slot-status/<int:slot_id>/', update_status_slot.update_time_slot_status, name='toggle-time-slot-status'),
 
     # URLs for user data
