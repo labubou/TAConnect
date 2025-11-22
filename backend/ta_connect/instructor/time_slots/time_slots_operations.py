@@ -12,7 +12,7 @@ from instructor.schemas.time_slot_schemas import (
 from accounts.permissions import IsInstructor
 from instructor.serializers.time_slots_serializer import TimeSlotSerializer
 
-class TimeSlotView(GenericAPIView):
+class TimeSlotCreateView(GenericAPIView):
     serializer_class = TimeSlotSerializer
     permission_classes = [IsInstructor]
 
@@ -37,6 +37,10 @@ class TimeSlotView(GenericAPIView):
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
     
+class TimeSlotDetailView(GenericAPIView):
+    serializer_class = TimeSlotSerializer
+    permission_classes = [IsInstructor]
+
     @swagger_auto_schema(**update_time_slot_swagger)
     def patch(self, request, slot_id):
         """Update an existing time slot"""

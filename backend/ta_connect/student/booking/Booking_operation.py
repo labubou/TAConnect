@@ -1,46 +1,32 @@
+from datetime import datetime
 from django.shortcuts import get_object_or_404
 from rest_framework import status
 from rest_framework.generics import GenericAPIView
 from rest_framework.response import Response
 from drf_yasg.utils import swagger_auto_schema
-from drf_yasg import openapi
 
 from student.models import Booking
 from student.sendBookingEmail import send_booking_confirmation_email, send_booking_cancelled_email
 from instructor.models import OfficeHourSlot
 from accounts.permissions import IsStudent
-from student.serializers.book_serializer import UnifiedBookingSerializer
-from student.serializers.booking_schemas import (
-    create_booking_response,
-    update_booking_response,
-    cancel_booking_response,
-    error_response_400,
-    error_response_404,
-    error_response_500
+from student.serializers.create_book_serializer import CreateBookingSerializer
+from student.serializers.update_book_serializer import UpdateBookingSerializer
+from student.serializers.cancel_book_serializer import CancelBookingSerializer
+from student.serializers.available_times_serializer import AvailableTimesSerializer
+from student.utils.calculate_available_times import get_available_times
+from student.schemas.booking_schemas import (
+    create_booking_swagger,
+    update_booking_swagger,
+    cancel_booking_swagger,
+    available_times_swagger
 )
 
-class BookingView(GenericAPIView):
-    serializer_class = UnifiedBookingSerializer
-    permission_classes = [IsStudent]
+class BookingCreateView(GenericAPIView):
     queryset = Booking.objects.all()
+    permission_classes = [IsStudent]
+    serializer_class = CreateBookingSerializer
 
-    @swagger_auto_schema(
-        operation_description='Create a new booking for a given office hour slot.',
-        request_body=openapi.Schema(
-            type=openapi.TYPE_OBJECT,
-            properties={
-                'slot_id': openapi.Schema(type=openapi.TYPE_INTEGER, description='OfficeHourSlot ID', example=1),
-                'date_str': openapi.Schema(type=openapi.TYPE_STRING, description='Booking date in YYYY-MM-DD format', example='2025-12-01'),
-                'start_time_str': openapi.Schema(type=openapi.TYPE_STRING, description='Start time in HH:MM format', example='14:30'),
-            },
-            required=['slot_id', 'date_str', 'start_time_str']
-        ),
-        responses={
-            201: create_booking_response,
-            400: error_response_400,
-            500: error_response_500
-        }
-    )
+    @swagger_auto_schema(**create_booking_swagger)
     def post(self, request):
         """Book a new reservation"""
         try:
@@ -61,7 +47,7 @@ class BookingView(GenericAPIView):
             booking = serializer.save()
 
             # Send emails using utility function
-            email_result = send_booking_confirmation_email(
+            send_booking_confirmation_email(
                 student=request.user,
                 instructor=slot.instructor,
                 slot=slot,
@@ -84,30 +70,26 @@ class BookingView(GenericAPIView):
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
 
-    @swagger_auto_schema(
-        operation_description="Update an existing booking's date and time.",
-        manual_parameters=[
-            openapi.Parameter('pk', openapi.IN_PATH, description='Booking ID', type=openapi.TYPE_INTEGER, required=True)
-        ],
-        request_body=openapi.Schema(
-            type=openapi.TYPE_OBJECT,
-            properties={
-                'new_date': openapi.Schema(type=openapi.TYPE_STRING, description='New date in YYYY-MM-DD format', example='2025-12-02'),
-                'new_time': openapi.Schema(type=openapi.TYPE_STRING, description='New time in HH:MM format', example='15:00'),
-            },
-            required=['new_date', 'new_time']
-        ),
-        responses={
-            200: update_booking_response,
-            400: error_response_400,
-            404: error_response_404,
-            500: error_response_500
-        }
-    )
+class BookingDetailView(GenericAPIView):
+    queryset = Booking.objects.all()
+    permission_classes = [IsStudent]
+    pagination_class = None  # Disable pagination to remove 'page' param from Swagger
+    lookup_field = 'pk'
+
+    def get_serializer_class(self):
+        if self.request.method == 'PATCH':
+            return UpdateBookingSerializer
+        if self.request.method == 'DELETE':
+            return CancelBookingSerializer
+        if self.request.method == 'GET':
+            return AvailableTimesSerializer
+        return super().get_serializer_class()
+
+    @swagger_auto_schema(**update_booking_swagger)
     def patch(self, request, pk):
         """
         Update an existing booking.
-        'pk' here refers to the Booking ID, not the Slot ID.
+        'pk' here refers to the Booking ID.
         """
         if not pk:
             return Response({'error': 'Booking ID is required.'}, status=status.HTTP_400_BAD_REQUEST)
@@ -127,18 +109,7 @@ class BookingView(GenericAPIView):
             'message': 'Booking updated successfully.'
         }, status=status.HTTP_200_OK)
 
-    @swagger_auto_schema(
-        operation_description='Cancel an existing booking.',
-        manual_parameters=[
-            openapi.Parameter('pk', openapi.IN_PATH, description='Booking ID', type=openapi.TYPE_INTEGER, required=True)
-        ],
-        responses={
-            200: cancel_booking_response,
-            400: error_response_400,
-            404: error_response_404,
-            500: error_response_500
-        }
-    )
+    @swagger_auto_schema(**cancel_booking_swagger)
     def delete(self, request, pk):
         """
         Cancel an existing booking.
@@ -162,7 +133,7 @@ class BookingView(GenericAPIView):
         cancelled_booking = serializer.save()
 
         # Send cancellation emails using utility function
-        email_result = send_booking_cancelled_email(
+        send_booking_cancelled_email(
             student=request.user,
             instructor=booking.office_hour.instructor,
             slot=booking.office_hour,
@@ -175,3 +146,42 @@ class BookingView(GenericAPIView):
             'booking_id': cancelled_booking.id,
             'message': 'Booking cancelled successfully.'
         }, status=status.HTTP_200_OK)
+    
+    @swagger_auto_schema(**available_times_swagger)
+    def get(self, request, pk):
+        '''
+        Get available times for a specific office hour slot with a date input
+        'pk' here refers to the OfficeHourSlot ID.
+        '''
+        try:
+            if not pk:
+                return Response({'error': 'Slot ID is required.'}, status=status.HTTP_400_BAD_REQUEST)
+            
+            slot = OfficeHourSlot.objects.filter(id=pk).first()
+            # Fix: datetime is imported as the class, so use now().date()
+            today = datetime.now().date()
+
+            if not slot:
+                return Response({'error': 'Slot not found'}, status=404)
+            
+            # Use query_params for GET requests
+            serializer = self.get_serializer(data=request.query_params, context={'request': request, 'slot': slot, 'today': today})
+
+            if not serializer.is_valid():
+                return Response(
+                    {'error': serializer.errors},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+
+            # Use utility function to get available times
+            selected_date = serializer.validated_data.get('date')
+            available_times = get_available_times(slot, selected_date)
+
+            return Response({
+                'slot_id': slot.id,
+                'date': selected_date,
+                'available_times': available_times
+            }, status=200)
+        
+        except Exception as e:
+            return Response({'error': f'An error occurred {str(e)}'}, status=500)

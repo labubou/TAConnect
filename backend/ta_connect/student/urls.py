@@ -1,13 +1,7 @@
 from django.urls import path
-from django.urls import path, include
-from rest_framework.routers import DefaultRouter
-from .views import url_data_slots
-from .booking.Booking_operation import BookingView
-
+from .booking.Booking_operation import BookingCreateView, BookingDetailView
 
 urlpatterns = [
-    path('url/<int:slot_id>/', url_data_slots, name='url_data_slots'),
-    path('booking/', BookingView.as_view(), name='booking_operation'),
-    path('booking/<int:pk>/', BookingView.as_view(), name='booking_operation_detail')
-   
+    path('booking/', BookingCreateView.as_view(), name='booking_create'), # Create booking
+    path('booking/<int:pk>/', BookingDetailView.as_view(), name='booking_detail') # Update, Cancel, and Get Available Times
 ]
