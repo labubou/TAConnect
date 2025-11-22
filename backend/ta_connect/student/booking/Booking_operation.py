@@ -29,7 +29,7 @@ class BookingView(GenericAPIView):
     permission_classes = [IsStudent]
 
     @swagger_auto_schema(
-        method='post',
+        
         operation_description='Create a new booking for a given office hour slot.',
         request_body=openapi.Schema(
             type=openapi.TYPE_OBJECT,
@@ -113,7 +113,7 @@ class BookingView(GenericAPIView):
             )
 
     @swagger_auto_schema(
-        method='patch',
+        
         operation_description="Update an existing booking's date and time.",
         manual_parameters=[
             openapi.Parameter('pk', openapi.IN_PATH, description='Booking ID', type=openapi.TYPE_INTEGER, required=True)
@@ -159,7 +159,7 @@ class BookingView(GenericAPIView):
         }, status=status.HTTP_200_OK)
 
     @swagger_auto_schema(
-        method='delete',
+        
         operation_description='Cancel an existing booking.',
         manual_parameters=[
             openapi.Parameter('pk', openapi.IN_PATH, description='Booking ID', type=openapi.TYPE_INTEGER, required=True)
