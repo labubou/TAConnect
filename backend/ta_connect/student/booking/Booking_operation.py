@@ -27,6 +27,7 @@ from ta_connect.settings import frontend_url
 class BookingView(GenericAPIView):
     serializer_class = UnifiedBookingSerializer
     permission_classes = [IsStudent]
+    queryset = Booking.objects.all()
 
     @swagger_auto_schema(
         
