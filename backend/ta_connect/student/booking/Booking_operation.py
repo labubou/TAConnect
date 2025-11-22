@@ -6,11 +6,20 @@ from rest_framework import status
 from rest_framework.generics import GenericAPIView
 from rest_framework.response import Response
 from drf_yasg.utils import swagger_auto_schema
+from drf_yasg import openapi
 
 from student.models import Booking
 from instructor.models import OfficeHourSlot
 from accounts.permissions import IsStudent
 from student.serializers.book_serializer import UnifiedBookingSerializer
+from student.serializers.booking_schemas import (
+    create_booking_response,
+    update_booking_response,
+    cancel_booking_response,
+    error_response_400,
+    error_response_404,
+    error_response_500
+)
 
 # Define frontend_url (ensure this is in your settings.py or define it here)
 from ta_connect.settings import frontend_url 
@@ -19,6 +28,24 @@ class BookingView(GenericAPIView):
     serializer_class = UnifiedBookingSerializer
     permission_classes = [IsStudent]
 
+    @swagger_auto_schema(
+        method='post',
+        operation_description='Create a new booking for a given office hour slot.',
+        request_body=openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                'slot_id': openapi.Schema(type=openapi.TYPE_INTEGER, description='OfficeHourSlot ID', example=1),
+                'date_str': openapi.Schema(type=openapi.TYPE_STRING, description='Booking date in YYYY-MM-DD format', example='2025-12-01'),
+                'start_time_str': openapi.Schema(type=openapi.TYPE_STRING, description='Start time in HH:MM format', example='14:30'),
+            },
+            required=['slot_id', 'date_str', 'start_time_str']
+        ),
+        responses={
+            201: create_booking_response,
+            400: error_response_400,
+            500: error_response_500
+        }
+    )
     def post(self, request):
         """Book a new reservation"""
         try:
@@ -85,6 +112,27 @@ class BookingView(GenericAPIView):
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
 
+    @swagger_auto_schema(
+        method='patch',
+        operation_description="Update an existing booking's date and time.",
+        manual_parameters=[
+            openapi.Parameter('pk', openapi.IN_PATH, description='Booking ID', type=openapi.TYPE_INTEGER, required=True)
+        ],
+        request_body=openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                'new_date': openapi.Schema(type=openapi.TYPE_STRING, description='New date in YYYY-MM-DD format', example='2025-12-02'),
+                'new_time': openapi.Schema(type=openapi.TYPE_STRING, description='New time in HH:MM format', example='15:00'),
+            },
+            required=['new_date', 'new_time']
+        ),
+        responses={
+            200: update_booking_response,
+            400: error_response_400,
+            404: error_response_404,
+            500: error_response_500
+        }
+    )
     def patch(self, request, pk):
         """
         Update an existing booking.
@@ -110,6 +158,19 @@ class BookingView(GenericAPIView):
             'message': 'Booking updated successfully.'
         }, status=status.HTTP_200_OK)
 
+    @swagger_auto_schema(
+        method='delete',
+        operation_description='Cancel an existing booking.',
+        manual_parameters=[
+            openapi.Parameter('pk', openapi.IN_PATH, description='Booking ID', type=openapi.TYPE_INTEGER, required=True)
+        ],
+        responses={
+            200: cancel_booking_response,
+            400: error_response_400,
+            404: error_response_404,
+            500: error_response_500
+        }
+    )
     def delete(self, request, pk):
         """
         Cancel an existing booking.
