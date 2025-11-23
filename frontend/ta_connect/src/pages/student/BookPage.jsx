@@ -271,7 +271,7 @@ export default function BookPage() {
                   </div>
                   {searchQuery.trim() && searchQuery.trim().length < 2 && (
                     <p className={`text-xs mt-1 ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>
-                      Type at least 2 characters to search
+                      {strings.steps.step1.minCharsHint}
                     </p>
                   )}
                 </div>
@@ -292,16 +292,16 @@ export default function BookPage() {
                           <svg className="w-12 h-12 mx-auto mb-2 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                           </svg>
-                          No instructors found for "{searchQuery}"
+                          {strings.steps.step1.noResultsFor} "{searchQuery}"
                           <br />
-                          <span className="text-sm">Try a different search term</span>
+                          <span className="text-sm">{strings.steps.step1.tryDifferent}</span>
                         </>
                       ) : (
                         <>
                           <svg className="w-12 h-12 mx-auto mb-2 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                           </svg>
-                          Start typing to search for instructors
+                          {strings.steps.step1.startTyping}
                         </>
                       )}
                     </p>

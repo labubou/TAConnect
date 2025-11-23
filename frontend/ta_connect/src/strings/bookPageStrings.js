@@ -11,6 +11,10 @@ export const bookPageStrings = {
       searchPlaceholder: 'Search by name...',
       searchButton: 'Search',
       noInstructors: 'No instructors found',
+      minCharsHint: 'Type at least 2 characters to search',
+      noResultsFor: 'No instructors found for',
+      tryDifferent: 'Try a different search term',
+      startTyping: 'Start typing to search for instructors',
     },
     
     step2: {
