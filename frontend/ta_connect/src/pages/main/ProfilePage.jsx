@@ -40,7 +40,12 @@ export default function ProfilePage() {
       const updated = res.data.user;
 
       if (updated) {
-        updateUser(updated);
+        const mergedUser = {
+          ...user,
+          ...updated,
+          user_type: user.user_type, 
+        };
+        updateUser(mergedUser);
         setMessage(strings.profilePage.success);
       } else {
         setError(strings.profilePage.unexpectedError);

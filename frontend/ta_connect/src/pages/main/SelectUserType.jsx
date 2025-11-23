@@ -9,8 +9,8 @@ function SelectUserType() {
   const [selectedType, setSelectedType] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const { theme, updateUser } = useTheme();
-  const { user } = useAuth();
+  const { theme } = useTheme();
+  const { user, updateUser } = useAuth();
   const navigate = useNavigate();
   const isDark = theme === 'dark';
 
