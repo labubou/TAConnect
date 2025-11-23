@@ -16,6 +16,7 @@ import TAPage from './pages/ta/TAPage';
 import ProfilePage from './pages/main/ProfilePage';
 import ManageCourses from "./pages/ta/ManageCourses";
 import StudentHomePage from './pages/student/studentHomePage';
+import BookPage from './pages/student/BookPage';
 
 function App() {
   return (
@@ -110,8 +111,30 @@ function App() {
               />
 
               {/* Student Routes */}
-              <Route path="/student" element={<StudentHomePage />} />
-              <Route path="/student/profile" element={<ProfilePage />} />
+              <Route 
+                path="/student" 
+                element={
+                  <ProtectedRoute>
+                    <StudentHomePage />
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/student/profile" 
+                element={
+                  <ProtectedRoute>
+                    <ProfilePage />
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/student/book" 
+                element={
+                  <ProtectedRoute>
+                    <BookPage />
+                  </ProtectedRoute>
+                } 
+              />
 
 
               {/* Add more routes here */}

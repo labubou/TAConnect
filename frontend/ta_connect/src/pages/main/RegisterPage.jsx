@@ -104,7 +104,9 @@ function RegisterPage() {
     setSuccess('');
 
     try {
+      console.log('Submitting registration data:', formData);
       const response = await axios.post('/api/auth/register/', formData);
+      console.log('Registration response:', response.data);
       
       if (response.data) {
         setSuccess(response.data.message || strings.messages.success);
@@ -120,11 +122,39 @@ function RegisterPage() {
         });
       }
     } catch (err) {
-      setError(
-        err.response?.data?.error || 
-        err.response?.data?.message || 
-        strings.messages.error
-      );
+      console.error('Registration error:', err);
+      console.error('Error response:', err.response?.data);
+      
+      // Handle rate limiting
+      if (err.response?.status === 429) {
+        setError('Too many registration attempts. Please wait an hour and try again.');
+        return;
+      }
+      
+      // Handle detailed error messages
+      if (err.response?.data) {
+        const errorData = err.response.data;
+        
+        // Check if there are field-specific errors
+        if (typeof errorData === 'object' && !errorData.error && !errorData.message && !errorData.detail) {
+          // Handle field-specific errors
+          const fieldErrors = {};
+          Object.keys(errorData).forEach(key => {
+            if (Array.isArray(errorData[key])) {
+              fieldErrors[key] = errorData[key][0];
+            } else {
+              fieldErrors[key] = errorData[key];
+            }
+          });
+          setErrors(fieldErrors);
+          setError('Please check the form for errors.');
+        } else {
+          // Handle general error message
+          setError(errorData.error || errorData.message || errorData.detail || strings.messages.error);
+        }
+      } else {
+        setError(strings.messages.error);
+      }
     } finally {
       setLoading(false);
     }

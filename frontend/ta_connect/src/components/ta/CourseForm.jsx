@@ -203,10 +203,32 @@ export default function CourseForm({ onCreated, editing, onUpdated, onCancelEdit
       }
     } catch (err) {
       console.error('Create slot error', err);
-      const errorMessage = err.response?.data?.error || 
-                           err.response?.data?.message || 
-                           err.message || 
-                           'Failed to create slot. Please try again.';
+      console.error('Error response:', err.response?.data);
+      
+      let errorMessage = 'Failed to create slot. Please try again.';
+      
+      if (err.response?.data) {
+        const data = err.response.data;
+        
+        // Handle field-specific errors
+        if (typeof data === 'object' && !data.error && !data.message) {
+          const fieldErrors = [];
+          Object.keys(data).forEach(key => {
+            const value = data[key];
+            if (Array.isArray(value)) {
+              fieldErrors.push(`${key}: ${value.join(', ')}`);
+            } else if (typeof value === 'string') {
+              fieldErrors.push(`${key}: ${value}`);
+            }
+          });
+          errorMessage = fieldErrors.length > 0 ? fieldErrors.join('; ') : errorMessage;
+        } else {
+          errorMessage = data.error || data.message || errorMessage;
+        }
+      } else if (err.message) {
+        errorMessage = err.message;
+      }
+      
       setError(errorMessage);
     } finally {
       setLoading(false);
@@ -244,10 +266,32 @@ export default function CourseForm({ onCreated, editing, onUpdated, onCancelEdit
       }
     } catch (err) {
       console.error('Update slot error', err);
-      const errorMessage = err.response?.data?.error || 
-                           err.response?.data?.message || 
-                           err.message || 
-                           'Failed to update slot. Please try again.';
+      console.error('Error response:', err.response?.data);
+      
+      let errorMessage = 'Failed to update slot. Please try again.';
+      
+      if (err.response?.data) {
+        const data = err.response.data;
+        
+        // Handle field-specific errors
+        if (typeof data === 'object' && !data.error && !data.message) {
+          const fieldErrors = [];
+          Object.keys(data).forEach(key => {
+            const value = data[key];
+            if (Array.isArray(value)) {
+              fieldErrors.push(`${key}: ${value.join(', ')}`);
+            } else if (typeof value === 'string') {
+              fieldErrors.push(`${key}: ${value}`);
+            }
+          });
+          errorMessage = fieldErrors.length > 0 ? fieldErrors.join('; ') : errorMessage;
+        } else {
+          errorMessage = data.error || data.message || errorMessage;
+        }
+      } else if (err.message) {
+        errorMessage = err.message;
+      }
+      
       setError(errorMessage);
     } finally {
       setLoading(false);
