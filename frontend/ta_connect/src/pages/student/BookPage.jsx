@@ -14,7 +14,6 @@ export default function BookPage() {
   const navigate = useNavigate();
   const [isNavbarOpen, setIsNavbarOpen] = useState(true);
 
-  // State management
   const [instructors, setInstructors] = useState([]);
   const [selectedInstructor, setSelectedInstructor] = useState(null);
   const [instructorSlots, setInstructorSlots] = useState([]);
@@ -56,7 +55,6 @@ export default function BookPage() {
     }
   };
 
-  // Auto-search as user types (only if there's a search query)
   useEffect(() => {
     if (!searchQuery.trim()) {
       setInstructors([]); 
