@@ -34,19 +34,19 @@ class CSVUploadSerializer(serializers.Serializer):
                 user, created = User.objects.get_or_create(
                     email=email,
                     defaults={
-                        'First name': first_name,
-                        'Last name': last_name,
-                        'ID number': id_number,
+                        'first_name': first_name,
+                        'last_name': last_name,
+                        'id_number': id_number,
                         'user_type': 'instructor'
                     }
                 )
                 
                 if created:
                     created_users.append({
-                        'First name': first_name,
-                        'Last name': last_name,
-                        'ID number': id_number,
-                        'Email address': email,
+                        'first_name': first_name,
+                        'last_name': last_name,
+                        'id_number': id_number,
+                        'email': email,
                     })
                 else:
                     errors.append(f"Row {row_num}: Email {email} already exists")

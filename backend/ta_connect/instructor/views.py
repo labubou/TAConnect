@@ -168,6 +168,7 @@ class CSVUploadView(GenericAPIView):
             try:
                 created_users, errors = serializer.process_csv()
                 return Response({
+                    'message': 'CSV processed successfully',
                     'created_users': created_users,
                     'errors': errors
                 }, status=status.HTTP_200_OK)
