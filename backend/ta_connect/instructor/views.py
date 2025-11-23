@@ -9,6 +9,7 @@ from accounts.models import User
 from student.models import Booking
 from instructor.serializers.csv_files_serializer import CSVUploadSerializer
 from drf_yasg.utils import swagger_auto_schema
+from drf_yasg import openapi
 from .schemas.slot_schemas import (
     get_user_slots_swagger,
     search_instructors_swagger,
@@ -156,13 +157,13 @@ class InstructorDataView(GenericAPIView):
             return Response({'error': 'Instructor not found'}, status=404)
         except Exception as e:
             return Response({'error': f'An error occurred: {str(e)}'}, status=500)
+        
+        
 class CSVUploadView(GenericAPIView):
     permission_classes = [IsInstructor]
-    
-
     @swagger_auto_schema(request_body=CSVUploadSerializer)
     def post(self, request):
-        serializer=CSVUploadSerializer(data=request.data)
+        serializer = CSVUploadSerializer(data=request.FILES)
 
         if serializer.is_valid():
             try:
@@ -171,13 +172,8 @@ class CSVUploadView(GenericAPIView):
                     'message': 'CSV processed successfully',
                     'created_users': created_users,
                     'errors': errors
-                }, status=status.HTTP_200_OK)
+                }, status=status.HTTP_201_CREATED)
             except Exception as e:
-                return Response(
-                    {'error':str(e)},
-                    status=status.HTTP_400_BAD_REQUEST
-                )
-            
-        else:
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-        
+                return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
