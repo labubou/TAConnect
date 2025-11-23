@@ -1,7 +1,7 @@
 from django.urls import path
 from instructor.time_slots.time_slots_operations import TimeSlotView
 from .time_slots import update_status_slot
-from .views import GetUserSlotsView, SearchInstructorsView, InstructorDataView
+from .views import GetUserSlotsView, SearchInstructorsView, InstructorDataView,CSVUploadView
 
 urlpatterns = [
     # URLs for time slots
@@ -13,4 +13,5 @@ urlpatterns = [
     path('get-user-slots/', GetUserSlotsView.as_view(), name='get-user-slots'),
     path('search-instructors/', SearchInstructorsView.as_view(), name='search-instructors'),
     path('get-instructor-data/<int:user_id>/', InstructorDataView.as_view(), name='get-instructor-data'),
+    path('upload-csv/', CSVUploadView.as_view(), name='upload-csv'),
 ]
