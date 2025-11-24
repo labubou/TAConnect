@@ -11,7 +11,6 @@ import GoogleCallback from './pages/main/GoogleCallback';
 import SelectUserType from './pages/main/SelectUserType';
 import ProtectedRoute from './components/ProtectedRoute';
 import PublicRoute from './components/PublicRoute';
-import CreateCourse from './pages/ta/CreateCourse';
 import TAPage from './pages/ta/TAPage';
 import ProfilePage from './pages/main/ProfilePage';
 import ManageCourses from "./pages/ta/ManageCourses";
@@ -90,14 +89,6 @@ function App() {
                 element={
                   <ProtectedRoute>
                     <ProfilePage />
-                  </ProtectedRoute>
-                } 
-              />
-              <Route 
-                path="/ta/create-course" 
-                element={
-                  <ProtectedRoute>
-                    <CreateCourse />
                   </ProtectedRoute>
                 } 
               />
