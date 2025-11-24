@@ -35,6 +35,15 @@ class CreateBookingSerializer(serializers.Serializer):
         if not is_time_available(slot, attrs['date'], start_dt, slot.duration_minutes):
             raise serializers.ValidationError("Time overlaps existing booking")
 
+        if slot.status is False:
+            raise serializers.ValidationError("This slot is inactive")
+        
+        if slot.policy and slot.policy.require_specific_email:
+            student_email = request.user.email
+            is_allowed = slot.policy.allowed_students.filter(email=student_email).exists()
+            if not is_allowed:
+                raise serializers.ValidationError("Your email is not authorized to book this office hour slot")
+        
         attrs['start_datetime'] = start_dt
         return attrs
 
