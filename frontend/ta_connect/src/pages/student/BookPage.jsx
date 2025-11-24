@@ -20,6 +20,8 @@ export default function BookPage() {
   const [selectedSlot, setSelectedSlot] = useState(null);
   const [availableDates, setAvailableDates] = useState([]);
   const [selectedDate, setSelectedDate] = useState('');
+  const [selectedTime, setSelectedTime] = useState('');
+  const [timeSlots, setTimeSlots] = useState([]);
   const [loading, setLoading] = useState(false);
   const [bookingLoading, setBookingLoading] = useState(false);
   const [error, setError] = useState('');
@@ -91,6 +93,7 @@ export default function BookPage() {
   };
 
   const handleSelectInstructor = async (instructor) => {
+    console.log('Selected instructor:', instructor);
     setSelectedInstructor(instructor);
     setSelectedSlot(null);
     setSelectedDate('');
@@ -99,20 +102,57 @@ export default function BookPage() {
     setSuccess('');
 
     try {
+      console.log('Fetching slots for instructor ID:', instructor.id);
       const response = await axios.get(`/api/instructor/get-instructor-data/${instructor.id}/`);
-      setInstructorSlots(response.data.time_slots || []);
+      console.log('Instructor data response:', response.data);
+      console.log('Time slots:', response.data.slots || response.data.time_slots);
+      setInstructorSlots(response.data.slots || response.data.time_slots || []);
     } catch (err) {
       setError(strings.messages.errorFetchSlots);
       console.error('Error fetching slots:', err);
+      console.error('Error response:', err.response?.data);
     }
   };
 
   const handleSelectSlot = (slot) => {
     setSelectedSlot(slot);
     setSelectedDate('');
+    setSelectedTime('');
     setError('');
     setSuccess('');
+    generateTimeSlots(slot);
     generateAvailableDates(slot);
+  };
+
+  const generateTimeSlots = (slot) => {
+    const slots = [];
+    const [startHour, startMin] = slot.start_time.split(':').map(Number);
+    const [endHour, endMin] = slot.end_time.split(':').map(Number);
+    
+    const startMinutes = startHour * 60 + startMin;
+    const endMinutes = endHour * 60 + endMin;
+    const duration = slot.duration_minutes || 30;
+    
+    for (let time = startMinutes; time < endMinutes; time += duration) {
+      const slotStart = time;
+      const slotEnd = time + duration;
+      
+      if (slotEnd <= endMinutes) {
+        slots.push({
+          start: formatMinutesToTime(slotStart),
+          end: formatMinutesToTime(slotEnd),
+          value: formatMinutesToTime(slotStart)
+        });
+      }
+    }
+    
+    setTimeSlots(slots);
+  };
+
+  const formatMinutesToTime = (minutes) => {
+    const hours = Math.floor(minutes / 60);
+    const mins = minutes % 60;
+    return `${String(hours).padStart(2, '0')}:${String(mins).padStart(2, '0')}`;
   };
 
   const generateAvailableDates = (slot) => {
@@ -137,8 +177,8 @@ export default function BookPage() {
   };
 
   const handleBookSlot = async () => {
-    if (!selectedSlot || !selectedDate) {
-      setError(strings.messages.errorSelectSlotDate);
+    if (!selectedSlot || !selectedDate || !selectedTime) {
+      setError('Please select a slot, date, and time');
       return;
     }
 
@@ -149,7 +189,8 @@ export default function BookPage() {
     try {
       const response = await axios.post('/api/student/booking/', {
         slot_id: selectedSlot.id,
-        date: selectedDate
+        date: selectedDate,
+        start_time: selectedTime
       });
 
       setSuccess(strings.messages.successBooking);
@@ -158,7 +199,9 @@ export default function BookPage() {
       setTimeout(() => {
         setSelectedSlot(null);
         setSelectedDate('');
+        setSelectedTime('');
         setAvailableDates([]);
+        setTimeSlots([]);
       }, 2000);
     } catch (err) {
       const errorMsg = err.response?.data?.error || err.response?.data?.message || strings.messages.errorBooking;
@@ -448,8 +491,32 @@ export default function BookPage() {
                       )}
                     </div>
 
-                    {/* Booking Summary */}
+                    {/* Time Selection */}
                     {selectedDate && (
+                      <div className="mb-6">
+                        <h3 className={`font-semibold ${isDark ? 'text-white' : 'text-gray-900'} mb-2`}>
+                          Select Time
+                        </h3>
+                        <div className="grid grid-cols-2 gap-2 max-h-48 overflow-y-auto">
+                          {timeSlots.map((timeSlot, index) => (
+                            <button
+                              key={index}
+                              onClick={() => setSelectedTime(timeSlot.value)}
+                              className={`p-2 rounded-lg border text-center transition-all ${
+                                selectedTime === timeSlot.value
+                                  ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300'
+                                  : `${isDark ? 'border-gray-700 hover:border-gray-600 text-gray-300' : 'border-gray-200 hover:border-gray-300 text-gray-700'}`
+                              }`}
+                            >
+                              {formatTime(timeSlot.start)} - {formatTime(timeSlot.end)}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Booking Summary */}
+                    {selectedDate && selectedTime && (
                       <div className={`p-4 ${isDark ? 'bg-gray-700' : 'bg-gray-50'} rounded-lg mb-4`}>
                         <h3 className={`font-semibold ${isDark ? 'text-white' : 'text-gray-900'} mb-2`}>
                           {strings.steps.step3.summaryTitle}
@@ -458,7 +525,7 @@ export default function BookPage() {
                           <p>👨‍🏫 {selectedInstructor.first_name} {selectedInstructor.last_name}</p>
                           <p>📚 {selectedSlot.course_name || strings.steps.step2.officeHours}</p>
                           <p>📅 {formatDate(selectedDate)}</p>
-                          <p>🕐 {formatTime(selectedSlot.start_time)} - {formatTime(selectedSlot.end_time)}</p>
+                          <p>🕐 {formatTime(selectedTime)} - {formatTime(timeSlots.find(t => t.value === selectedTime)?.end || selectedTime)}</p>
                           <p>📍 {selectedSlot.location || strings.steps.step2.online}</p>
                         </div>
                       </div>
@@ -466,7 +533,7 @@ export default function BookPage() {
 
                     <button
                       onClick={handleBookSlot}
-                      disabled={!selectedDate || bookingLoading}
+                      disabled={!selectedDate || !selectedTime || bookingLoading}
                       className="w-full bg-gradient-to-r from-[#366c6b] to-[#1a3535] text-white py-3 px-6 rounded-lg hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 font-semibold flex items-center justify-center"
                     >
                       {bookingLoading ? (
