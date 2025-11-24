@@ -1,7 +1,7 @@
 from django.contrib import admin
 from django.contrib.auth import get_user_model
 from django.contrib.auth.admin import UserAdmin as DjangoUserAdmin
-from .models import OfficeHourSlot, BookingPolicy, TAAnalytics
+from .models import OfficeHourSlot, BookingPolicy, TAAnalytics, AllowedStudents
 
 User = get_user_model()
 
@@ -24,3 +24,10 @@ class TAAnalyticsAdmin(admin.ModelAdmin):
     list_display = ("id", "instructor", "total_sessions", "total_feedback_count", "average_rating", "last_updated")
     search_fields = ("instructor__username", "instructor__email")
     readonly_fields = ("last_updated",)
+
+@admin.register(AllowedStudents)
+class AllowedStudentsAdmin(admin.ModelAdmin):
+    list_display = ('email', 'first_name', 'last_name', 'id_number', 'booking_policy')
+    list_filter = ('booking_policy__office_hour_slot__course_name', 'booking_policy')
+    search_fields = ('email', 'first_name', 'last_name', 'id_number')
+    readonly_fields = ()
