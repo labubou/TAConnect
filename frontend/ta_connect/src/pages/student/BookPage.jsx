@@ -28,6 +28,17 @@ export default function BookPage() {
   const [success, setSuccess] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
   const [isSearching, setIsSearching] = useState(false);
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
+
+  const handleCloseSuccessModal = () => {
+    setShowSuccessModal(false);
+    setSelectedSlot(null);
+    setSelectedDate('');
+    setSelectedTime('');
+    setAvailableDates([]);
+    setTimeSlots([]);
+    setSuccess('');
+  };
 
   const fetchInstructors = async () => {
     if (!searchQuery.trim()) {
@@ -194,39 +205,66 @@ export default function BookPage() {
       });
 
       setSuccess(strings.messages.successBooking);
-      
-      // Reset selections
-      setTimeout(() => {
-        setSelectedSlot(null);
-        setSelectedDate('');
-        setSelectedTime('');
-        setAvailableDates([]);
-        setTimeSlots([]);
-      }, 2000);
+      setShowSuccessModal(true);
     } catch (err) {
-      const errorMsg = err.response?.data?.error || err.response?.data?.message || strings.messages.errorBooking;
-      setError(errorMsg);
       console.error('Error creating booking:', err);
+      let errorMsg = strings.messages.errorBooking;
+
+      if (err.response?.data) {
+        const data = err.response.data;
+        if (typeof data.error === 'string') {
+          errorMsg = data.error;
+        } else if (data.error && typeof data.error === 'object') {
+          // Handle nested error objects like { non_field_errors: [...] }
+          const values = Object.values(data.error);
+          if (values.length > 0) {
+             const firstVal = values[0];
+             errorMsg = Array.isArray(firstVal) ? firstVal[0] : String(firstVal);
+          }
+        } else if (data.message) {
+          errorMsg = data.message;
+        } else if (data.non_field_errors) {
+          errorMsg = Array.isArray(data.non_field_errors) ? data.non_field_errors[0] : String(data.non_field_errors);
+        } else if (data.detail) {
+          errorMsg = data.detail;
+        }
+      }
+      
+      setError(typeof errorMsg === 'string' ? errorMsg : strings.messages.errorBooking);
     } finally {
       setBookingLoading(false);
     }
   };
 
   const formatTime = (time) => {
-    const [hours, minutes] = time.split(':');
-    const hour = parseInt(hours);
-    const ampm = hour >= 12 ? 'PM' : 'AM';
-    const displayHour = hour % 12 || 12;
-    return `${displayHour}:${minutes} ${ampm}`;
+    if (!time) return '';
+    try {
+      const [hours, minutes] = time.split(':');
+      const hour = parseInt(hours);
+      if (isNaN(hour)) return time;
+      const ampm = hour >= 12 ? 'PM' : 'AM';
+      const displayHour = hour % 12 || 12;
+      return `${displayHour}:${minutes} ${ampm}`;
+    } catch (e) {
+      return time;
+    }
   };
 
   const formatDate = (date) => {
-    return new Date(date).toLocaleDateString('en-US', {
-      weekday: 'short',
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric'
-    });
+    if (!date) return '';
+    try {
+      const d = new Date(date);
+      if (isNaN(d.getTime())) return String(date);
+      return d.toLocaleDateString('en-US', {
+        weekday: 'short',
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric'
+      });
+    } catch (e) {
+      console.error('Error formatting date:', e);
+      return String(date);
+    }
   };
 
   return (
@@ -516,13 +554,13 @@ export default function BookPage() {
                     )}
 
                     {/* Booking Summary */}
-                    {selectedDate && selectedTime && (
+                    {selectedDate && selectedTime && selectedSlot && selectedInstructor && (
                       <div className={`p-4 ${isDark ? 'bg-gray-700' : 'bg-gray-50'} rounded-lg mb-4`}>
                         <h3 className={`font-semibold ${isDark ? 'text-white' : 'text-gray-900'} mb-2`}>
                           {strings.steps.step3.summaryTitle}
                         </h3>
                         <div className={`text-sm ${isDark ? 'text-gray-300' : 'text-gray-700'} space-y-1`}>
-                          <p>👨‍🏫 {selectedInstructor.first_name} {selectedInstructor.last_name}</p>
+                          <p>👨‍🏫 {selectedInstructor.first_name || ''} {selectedInstructor.last_name || ''}</p>
                           <p>📚 {selectedSlot.course_name || strings.steps.step2.officeHours}</p>
                           <p>📅 {formatDate(selectedDate)}</p>
                           <p>🕐 {formatTime(selectedTime)} - {formatTime(timeSlots.find(t => t.value === selectedTime)?.end || selectedTime)}</p>
@@ -555,6 +593,31 @@ export default function BookPage() {
           </div>
         </main>
       </div>
+
+      {/* Success Modal */}
+      {showSuccessModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black bg-opacity-50 backdrop-blur-sm">
+          <div className={`${isDark ? 'bg-gray-800 text-white' : 'bg-white text-gray-900'} rounded-xl shadow-2xl max-w-md w-full p-6 transform transition-all scale-100`}>
+            <div className="text-center">
+              <div className="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-green-100 mb-6">
+                <svg className="h-8 w-8 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
+                </svg>
+              </div>
+              <h3 className="text-2xl font-bold mb-2">Booking Confirmed!</h3>
+              <p className={`text-base ${isDark ? 'text-gray-300' : 'text-gray-500'} mb-8`}>
+                A confirmation has been sent to your email.
+              </p>
+              <button
+                onClick={handleCloseSuccessModal}
+                className="w-full bg-gradient-to-r from-[#366c6b] to-[#1a3535] text-white py-3 px-4 rounded-lg hover:shadow-lg transition-all font-semibold"
+              >
+                Done
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       <Footer />
     </div>
