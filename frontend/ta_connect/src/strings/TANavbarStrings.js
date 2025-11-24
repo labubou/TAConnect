@@ -6,6 +6,7 @@ const TANavbarStrings = {
     createSlot: "Create Course / Slot",
     manageCourses: "Manage Courses",
     logout: "Logout",
+    dashboard: "Dashboard",
   },
 
   user: {
