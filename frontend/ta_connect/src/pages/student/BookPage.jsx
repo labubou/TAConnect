@@ -37,12 +37,23 @@ export default function BookPage() {
     setLoading(true);
     setError('');
     try {
-      console.log('Fetching instructors...');
+      console.log('Fetching instructors with query:', searchQuery);
       const response = await axios.get('/api/instructor/search-instructors/', {
-        params: searchQuery ? { search: searchQuery } : {}
+        params: searchQuery ? { query: searchQuery } : {}
       });
       console.log('Instructors response:', response.data);
-      setInstructors(response.data.instructors || []);
+      
+      // Transform backend data to match frontend expectations
+      const transformedInstructors = (response.data.instructors || []).map(instructor => {
+        const nameParts = (instructor.full_name || '').split(' ');
+        return {
+          ...instructor,
+          first_name: nameParts[0] || '',
+          last_name: nameParts.slice(1).join(' ') || '',
+        };
+      });
+      
+      setInstructors(transformedInstructors);
     } catch (err) {
       console.error('Error fetching instructors:', err);
       console.error('Error response:', err.response?.data);
