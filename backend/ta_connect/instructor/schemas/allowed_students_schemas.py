@@ -72,6 +72,17 @@ delete_allowed_student_response = openapi.Schema(
     },
 )
 
+update_allowed_students_status_response = openapi.Schema(
+    type=openapi.TYPE_OBJECT,
+    properties={
+        'success': openapi.Schema(type=openapi.TYPE_BOOLEAN, example=True),
+        'time_slot_id': openapi.Schema(type=openapi.TYPE_INTEGER, description='ID of the office hour slot', example=1),
+        'require_specific_email': openapi.Schema(type=openapi.TYPE_BOOLEAN, description='Current status of email requirement', example=True),
+        'message': openapi.Schema(type=openapi.TYPE_STRING, example='Email requirement status updated successfully.'),
+        'error': openapi.Schema(type=openapi.TYPE_STRING, description='Error message if any'),
+    },
+)
+
 # Swagger decorator configurations
 add_allowed_student_swagger = {
     'operation_description': 'Add an allowed student to an office hour slot with specific booking policies.',
@@ -146,6 +157,25 @@ delete_allowed_student_swagger = {
     'responses': {
         200: delete_allowed_student_response,
         404: 'Allowed student not found',
+        500: 'Internal server error'
+    }
+}
+
+update_allowed_students_status_swagger = {
+    'operation_description': 'Toggle the email requirement status for allowed students on an office hour slot.',
+    'manual_parameters': [
+        openapi.Parameter(
+            'slot_id',
+            openapi.IN_PATH,
+            description='ID of the office hour slot',
+            type=openapi.TYPE_INTEGER,
+            required=True
+        )
+    ],
+    'responses': {
+        200: update_allowed_students_status_response,
+        400: 'Bad Request - Slot ID is required',
+        404: 'Slot not found',
         500: 'Internal server error'
     }
 }

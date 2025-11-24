@@ -4,6 +4,7 @@ from .time_slots import update_status_slot
 from .views import GetUserSlotsView, SearchInstructorsView, InstructorDataView
 from .allowed_students.import_csv import CSVUploadView
 from .allowed_students.allowed_students_operations import AllowedStudentsUpdateDeleteView, AllowedStudentsAddGetView
+from .allowed_students.update_allowed_students_status import UpdateAllowedStudentsStatusView
 
 urlpatterns = [
     # URLs for time slots
@@ -14,6 +15,7 @@ urlpatterns = [
     # URLs for allowed students
     path('allowed-students/<int:slot_id>/', AllowedStudentsAddGetView.as_view(), name='allowed-students-add-get'),
     path('allowed-students-detail/<int:allowed_student_id>/', AllowedStudentsUpdateDeleteView.as_view(), name='allowed-students-update-delete'),
+    path('allowed-students-status/<int:slot_id>/', UpdateAllowedStudentsStatusView.as_view(), name='allowed-students-status-update'),
 
     # URLs for user data
     path('get-user-slots/', GetUserSlotsView.as_view(), name='get-user-slots'),
