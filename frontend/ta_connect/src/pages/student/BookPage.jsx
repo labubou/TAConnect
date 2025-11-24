@@ -215,7 +215,7 @@ export default function BookPage() {
         if (typeof data.error === 'string') {
           errorMsg = data.error;
         } else if (data.error && typeof data.error === 'object') {
-          // Handle nested error objects like { non_field_errors: [...] }
+       
           const values = Object.values(data.error);
           if (values.length > 0) {
              const firstVal = values[0];
