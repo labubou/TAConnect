@@ -29,8 +29,13 @@ function SelectUserType() {
       });
 
       if (response.data) {
-        // Update user context with new user_type
-        updateUser(response.data.user);
+        // Update user context with new user_type, preserving existing user data
+        const updatedUser = {
+          ...user,
+          ...response.data.user,
+          user_type: selectedType, // Ensure user_type is set
+        };
+        updateUser(updatedUser);
         
         // Redirect based on selected user type
         if (selectedType === 'instructor') {
