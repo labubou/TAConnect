@@ -154,6 +154,31 @@ const TAnavbar = ({ onToggle }) => {
 
               {/* Navigation Links */}
               <div className="space-y-2 mb-8">
+              <Link 
+                  to="/ta" 
+                  className={`navbar-link group flex items-center p-4 rounded-2xl transition-all duration-300 ${
+                    isActive('/ta') 
+                      ? 'bg-gradient-to-r from-[#366c6b] to-[#1a3535] text-white shadow-lg transform scale-105' 
+                      : 'text-gray-700 dark:text-gray-200 hover:bg-white/70 dark:hover:bg-gray-800/60 hover:shadow-md hover:scale-105'
+                  }`}
+                  onClick={closeNavbar}
+                >
+                  <div className={`w-10 h-10 rounded-xl flex items-center justify-center mr-3 transition-colors duration-300 ${
+                    isActive('/ta') 
+                      ? 'bg-white/20' 
+                      : 'bg-gray-100 dark:bg-gray-800 group-hover:bg-[#eaf6f6] group-hover:dark:bg-gray-700'
+                  }`}>
+                    <svg className={`w-5 h-5 ${isActive('/ta') ? 'text-white' : 'text-[#366c6b]'}`} fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                      <rect x="3" y="3" width="8" height="8" rx="1" />
+                      <rect x="13" y="3" width="8" height="8" rx="1" />
+                      <rect x="3" y="13" width="8" height="8" rx="1" />
+                      <rect x="13" y="13" width="8" height="8" rx="1" />
+                    </svg>
+                  </div>
+                  <span className="font-semibold">{strings.navigation.dashboard}</span>
+                </Link>
+
+
                 <Link 
                   to="/ta/profile" 
                   className={`navbar-link group flex items-center p-4 rounded-2xl transition-all duration-300 ${
