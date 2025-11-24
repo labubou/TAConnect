@@ -20,12 +20,25 @@ export default function BookPage() {
   const [selectedSlot, setSelectedSlot] = useState(null);
   const [availableDates, setAvailableDates] = useState([]);
   const [selectedDate, setSelectedDate] = useState('');
+  const [selectedTime, setSelectedTime] = useState('');
+  const [timeSlots, setTimeSlots] = useState([]);
   const [loading, setLoading] = useState(false);
   const [bookingLoading, setBookingLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
   const [isSearching, setIsSearching] = useState(false);
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
+
+  const handleCloseSuccessModal = () => {
+    setShowSuccessModal(false);
+    setSelectedSlot(null);
+    setSelectedDate('');
+    setSelectedTime('');
+    setAvailableDates([]);
+    setTimeSlots([]);
+    setSuccess('');
+  };
 
   const fetchInstructors = async () => {
     if (!searchQuery.trim()) {
@@ -37,12 +50,23 @@ export default function BookPage() {
     setLoading(true);
     setError('');
     try {
-      console.log('Fetching instructors...');
+      console.log('Fetching instructors with query:', searchQuery);
       const response = await axios.get('/api/instructor/search-instructors/', {
-        params: searchQuery ? { search: searchQuery } : {}
+        params: searchQuery ? { query: searchQuery } : {}
       });
       console.log('Instructors response:', response.data);
-      setInstructors(response.data.instructors || []);
+      
+      // Transform backend data to match frontend expectations
+      const transformedInstructors = (response.data.instructors || []).map(instructor => {
+        const nameParts = (instructor.full_name || '').split(' ');
+        return {
+          ...instructor,
+          first_name: nameParts[0] || '',
+          last_name: nameParts.slice(1).join(' ') || '',
+        };
+      });
+      
+      setInstructors(transformedInstructors);
     } catch (err) {
       console.error('Error fetching instructors:', err);
       console.error('Error response:', err.response?.data);
@@ -80,6 +104,7 @@ export default function BookPage() {
   };
 
   const handleSelectInstructor = async (instructor) => {
+    console.log('Selected instructor:', instructor);
     setSelectedInstructor(instructor);
     setSelectedSlot(null);
     setSelectedDate('');
@@ -88,20 +113,57 @@ export default function BookPage() {
     setSuccess('');
 
     try {
+      console.log('Fetching slots for instructor ID:', instructor.id);
       const response = await axios.get(`/api/instructor/get-instructor-data/${instructor.id}/`);
-      setInstructorSlots(response.data.time_slots || []);
+      console.log('Instructor data response:', response.data);
+      console.log('Time slots:', response.data.slots || response.data.time_slots);
+      setInstructorSlots(response.data.slots || response.data.time_slots || []);
     } catch (err) {
       setError(strings.messages.errorFetchSlots);
       console.error('Error fetching slots:', err);
+      console.error('Error response:', err.response?.data);
     }
   };
 
   const handleSelectSlot = (slot) => {
     setSelectedSlot(slot);
     setSelectedDate('');
+    setSelectedTime('');
     setError('');
     setSuccess('');
+    generateTimeSlots(slot);
     generateAvailableDates(slot);
+  };
+
+  const generateTimeSlots = (slot) => {
+    const slots = [];
+    const [startHour, startMin] = slot.start_time.split(':').map(Number);
+    const [endHour, endMin] = slot.end_time.split(':').map(Number);
+    
+    const startMinutes = startHour * 60 + startMin;
+    const endMinutes = endHour * 60 + endMin;
+    const duration = slot.duration_minutes || 30;
+    
+    for (let time = startMinutes; time < endMinutes; time += duration) {
+      const slotStart = time;
+      const slotEnd = time + duration;
+      
+      if (slotEnd <= endMinutes) {
+        slots.push({
+          start: formatMinutesToTime(slotStart),
+          end: formatMinutesToTime(slotEnd),
+          value: formatMinutesToTime(slotStart)
+        });
+      }
+    }
+    
+    setTimeSlots(slots);
+  };
+
+  const formatMinutesToTime = (minutes) => {
+    const hours = Math.floor(minutes / 60);
+    const mins = minutes % 60;
+    return `${String(hours).padStart(2, '0')}:${String(mins).padStart(2, '0')}`;
   };
 
   const generateAvailableDates = (slot) => {
@@ -126,8 +188,8 @@ export default function BookPage() {
   };
 
   const handleBookSlot = async () => {
-    if (!selectedSlot || !selectedDate) {
-      setError(strings.messages.errorSelectSlotDate);
+    if (!selectedSlot || !selectedDate || !selectedTime) {
+      setError('Please select a slot, date, and time');
       return;
     }
 
@@ -138,41 +200,71 @@ export default function BookPage() {
     try {
       const response = await axios.post('/api/student/booking/', {
         slot_id: selectedSlot.id,
-        date: selectedDate
+        date: selectedDate,
+        start_time: selectedTime
       });
 
       setSuccess(strings.messages.successBooking);
-      
-      // Reset selections
-      setTimeout(() => {
-        setSelectedSlot(null);
-        setSelectedDate('');
-        setAvailableDates([]);
-      }, 2000);
+      setShowSuccessModal(true);
     } catch (err) {
-      const errorMsg = err.response?.data?.error || err.response?.data?.message || strings.messages.errorBooking;
-      setError(errorMsg);
       console.error('Error creating booking:', err);
+      let errorMsg = strings.messages.errorBooking;
+
+      if (err.response?.data) {
+        const data = err.response.data;
+        if (typeof data.error === 'string') {
+          errorMsg = data.error;
+        } else if (data.error && typeof data.error === 'object') {
+       
+          const values = Object.values(data.error);
+          if (values.length > 0) {
+             const firstVal = values[0];
+             errorMsg = Array.isArray(firstVal) ? firstVal[0] : String(firstVal);
+          }
+        } else if (data.message) {
+          errorMsg = data.message;
+        } else if (data.non_field_errors) {
+          errorMsg = Array.isArray(data.non_field_errors) ? data.non_field_errors[0] : String(data.non_field_errors);
+        } else if (data.detail) {
+          errorMsg = data.detail;
+        }
+      }
+      
+      setError(typeof errorMsg === 'string' ? errorMsg : strings.messages.errorBooking);
     } finally {
       setBookingLoading(false);
     }
   };
 
   const formatTime = (time) => {
-    const [hours, minutes] = time.split(':');
-    const hour = parseInt(hours);
-    const ampm = hour >= 12 ? 'PM' : 'AM';
-    const displayHour = hour % 12 || 12;
-    return `${displayHour}:${minutes} ${ampm}`;
+    if (!time) return '';
+    try {
+      const [hours, minutes] = time.split(':');
+      const hour = parseInt(hours);
+      if (isNaN(hour)) return time;
+      const ampm = hour >= 12 ? 'PM' : 'AM';
+      const displayHour = hour % 12 || 12;
+      return `${displayHour}:${minutes} ${ampm}`;
+    } catch (e) {
+      return time;
+    }
   };
 
   const formatDate = (date) => {
-    return new Date(date).toLocaleDateString('en-US', {
-      weekday: 'short',
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric'
-    });
+    if (!date) return '';
+    try {
+      const d = new Date(date);
+      if (isNaN(d.getTime())) return String(date);
+      return d.toLocaleDateString('en-US', {
+        weekday: 'short',
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric'
+      });
+    } catch (e) {
+      console.error('Error formatting date:', e);
+      return String(date);
+    }
   };
 
   return (
@@ -437,17 +529,41 @@ export default function BookPage() {
                       )}
                     </div>
 
-                    {/* Booking Summary */}
+                    {/* Time Selection */}
                     {selectedDate && (
+                      <div className="mb-6">
+                        <h3 className={`font-semibold ${isDark ? 'text-white' : 'text-gray-900'} mb-2`}>
+                          Select Time
+                        </h3>
+                        <div className="grid grid-cols-2 gap-2 max-h-48 overflow-y-auto">
+                          {timeSlots.map((timeSlot, index) => (
+                            <button
+                              key={index}
+                              onClick={() => setSelectedTime(timeSlot.value)}
+                              className={`p-2 rounded-lg border text-center transition-all ${
+                                selectedTime === timeSlot.value
+                                  ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300'
+                                  : `${isDark ? 'border-gray-700 hover:border-gray-600 text-gray-300' : 'border-gray-200 hover:border-gray-300 text-gray-700'}`
+                              }`}
+                            >
+                              {formatTime(timeSlot.start)} - {formatTime(timeSlot.end)}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Booking Summary */}
+                    {selectedDate && selectedTime && selectedSlot && selectedInstructor && (
                       <div className={`p-4 ${isDark ? 'bg-gray-700' : 'bg-gray-50'} rounded-lg mb-4`}>
                         <h3 className={`font-semibold ${isDark ? 'text-white' : 'text-gray-900'} mb-2`}>
                           {strings.steps.step3.summaryTitle}
                         </h3>
                         <div className={`text-sm ${isDark ? 'text-gray-300' : 'text-gray-700'} space-y-1`}>
-                          <p>👨‍🏫 {selectedInstructor.first_name} {selectedInstructor.last_name}</p>
+                          <p>👨‍🏫 {selectedInstructor.first_name || ''} {selectedInstructor.last_name || ''}</p>
                           <p>📚 {selectedSlot.course_name || strings.steps.step2.officeHours}</p>
                           <p>📅 {formatDate(selectedDate)}</p>
-                          <p>🕐 {formatTime(selectedSlot.start_time)} - {formatTime(selectedSlot.end_time)}</p>
+                          <p>🕐 {formatTime(selectedTime)} - {formatTime(timeSlots.find(t => t.value === selectedTime)?.end || selectedTime)}</p>
                           <p>📍 {selectedSlot.location || strings.steps.step2.online}</p>
                         </div>
                       </div>
@@ -455,7 +571,7 @@ export default function BookPage() {
 
                     <button
                       onClick={handleBookSlot}
-                      disabled={!selectedDate || bookingLoading}
+                      disabled={!selectedDate || !selectedTime || bookingLoading}
                       className="w-full bg-gradient-to-r from-[#366c6b] to-[#1a3535] text-white py-3 px-6 rounded-lg hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 font-semibold flex items-center justify-center"
                     >
                       {bookingLoading ? (
@@ -477,6 +593,31 @@ export default function BookPage() {
           </div>
         </main>
       </div>
+
+      {/* Success Modal */}
+      {showSuccessModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black bg-opacity-50 backdrop-blur-sm">
+          <div className={`${isDark ? 'bg-gray-800 text-white' : 'bg-white text-gray-900'} rounded-xl shadow-2xl max-w-md w-full p-6 transform transition-all scale-100`}>
+            <div className="text-center">
+              <div className="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-green-100 mb-6">
+                <svg className="h-8 w-8 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
+                </svg>
+              </div>
+              <h3 className="text-2xl font-bold mb-2">Booking Confirmed!</h3>
+              <p className={`text-base ${isDark ? 'text-gray-300' : 'text-gray-500'} mb-8`}>
+                A confirmation has been sent to your email.
+              </p>
+              <button
+                onClick={handleCloseSuccessModal}
+                className="w-full bg-gradient-to-r from-[#366c6b] to-[#1a3535] text-white py-3 px-4 rounded-lg hover:shadow-lg transition-all font-semibold"
+              >
+                Done
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       <Footer />
     </div>

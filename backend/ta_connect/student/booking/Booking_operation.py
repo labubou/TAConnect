@@ -51,16 +51,16 @@ class BookingCreateView(GenericAPIView):
                 student=request.user,
                 instructor=slot.instructor,
                 slot=slot,
-                booking_date=serializer.validated_data['selected_date_str'],
-                booking_time=serializer.validated_data['start_time_str']
+                booking_date=serializer.validated_data['date'],
+                booking_time=serializer.validated_data['start_time']
             )
 
             return Response({
                 'slot_id': slot.id,
                 'booking_id': booking.id,
-                'date': serializer.validated_data['selected_date_str'],
-                'start_time': serializer.validated_data['start_time_str'],
-                'message': f"Successfully booked slot {slot.id} on {serializer.validated_data['selected_date_str']} at {serializer.validated_data['start_time_str']}."
+                'date': serializer.validated_data['date'],
+                'start_time': serializer.validated_data['start_time'],
+                'message': f"Successfully booked slot {slot.id} on {serializer.validated_data['date']} at {serializer.validated_data['start_time']}."
             }, status=status.HTTP_201_CREATED)
         
         except Exception as e:
