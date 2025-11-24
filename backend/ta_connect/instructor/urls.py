@@ -13,5 +13,5 @@ urlpatterns = [
     path('get-user-slots/', GetUserSlotsView.as_view(), name='get-user-slots'),
     path('search-instructors/', SearchInstructorsView.as_view(), name='search-instructors'),
     path('get-instructor-data/<int:user_id>/', InstructorDataView.as_view(), name='get-instructor-data'),
-    path('upload-csv/', CSVUploadView.as_view(), name='upload-csv'),
+    path('upload-csv/<int:slot_id>/', CSVUploadView.as_view(), name='upload-csv'),
 ]

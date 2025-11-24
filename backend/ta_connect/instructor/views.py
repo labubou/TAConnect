@@ -158,12 +158,28 @@ class InstructorDataView(GenericAPIView):
         except Exception as e:
             return Response({'error': f'An error occurred: {str(e)}'}, status=500)
         
-        
 class CSVUploadView(GenericAPIView):
     permission_classes = [IsInstructor]
-    @swagger_auto_schema(request_body=CSVUploadSerializer)
-    def post(self, request):
-        serializer = CSVUploadSerializer(data=request.FILES)
+    serializer_class = CSVUploadSerializer
+    
+    @swagger_auto_schema(
+        manual_parameters=[
+            openapi.Parameter('slot_id', openapi.IN_PATH, description='Office Hour Slot ID', type=openapi.TYPE_INTEGER),
+        ],
+        request_body=CSVUploadSerializer,
+        responses={
+            201: openapi.Response('CSV processed successfully'),
+            400: openapi.Response('Invalid file format'),
+            404: openapi.Response('Slot not found')
+        }
+    )
+    def post(self, request, slot_id):
+        slot = OfficeHourSlot.objects.get(id=slot_id)
+
+        if not slot:
+            return Response({'error': 'Office hour slot not found'}, status=status.HTTP_404_NOT_FOUND)
+        
+        serializer = CSVUploadSerializer(data=request.FILES, context={'slot': slot})
 
         if serializer.is_valid():
             try:

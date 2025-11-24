@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from accounts.models import User
+from instructor.models import OfficeHourSlot, AllowedStudents
 import csv
 from io import TextIOWrapper
 
@@ -19,6 +19,9 @@ class CSVUploadSerializer(serializers.Serializer):
         created_users = []
         errors = []
         
+        slot = self.context.get('slot')
+        policy = slot.policy
+
         for row_num, row in enumerate(csv_reader, start=2):
             try:
                 first_name = row.get('First name', '').strip()
@@ -30,14 +33,14 @@ class CSVUploadSerializer(serializers.Serializer):
                     errors.append(f"Row {row_num}: Missing required fields")
                     continue
                 
-                # Create user
-                user, created = User.objects.get_or_create(
+                # Create AllowedStudent
+                allowed_student, created = AllowedStudents.objects.get_or_create(
+                    booking_policy=policy,
                     email=email,
                     defaults={
                         'first_name': first_name,
                         'last_name': last_name,
                         'id_number': id_number,
-                        'user_type': 'instructor'
                     }
                 )
                 
@@ -49,8 +52,12 @@ class CSVUploadSerializer(serializers.Serializer):
                         'email': email,
                     })
                 else:
-                    errors.append(f"Row {row_num}: Email {email} already exists")
-                    
+                    errors.append(f"Row {row_num}: Email {email} already exists for this policy")
+                
+                if not policy.require_specific_email:
+                    policy.require_specific_email = True
+                    policy.save()
+
             except Exception as e:
                 errors.append(f"Row {row_num}: {str(e)}")
         
