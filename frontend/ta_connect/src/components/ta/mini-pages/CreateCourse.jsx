@@ -466,36 +466,7 @@ export default function CreateCourse({ isDark, onSlotCreated, slots }) {
         </div>
       </form>
 
-      {slots.length > 0 && (
-        <div className="mt-8 pt-6 border-t border-gray-300 dark:border-gray-700">
-          <h3
-            className={`text-lg font-semibold mb-4 ${
-              isDark ? "text-gray-200" : "text-gray-700"
-            }`}
-          >
-            {strings.create.recentSlots}
-          </h3>
-          <div className="space-y-2 max-h-40 overflow-y-auto">
-            {slots.slice(0, 5).map((slot) => (
-              <div
-                key={slot.id}
-                className={`p-3 rounded-lg ${
-                  isDark ? "bg-gray-700" : "bg-gray-100"
-                }`}
-              >
-                <p className={`font-medium ${isDark ? "text-white" : "text-gray-900"}`}>
-                  {slot.course_name}
-                </p>
-                <p
-                  className={`text-sm ${isDark ? "text-gray-400" : "text-gray-600"}`}
-                >
-                  {slot.day_of_week} • {slot.start_time} - {slot.end_time}
-                </p>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
+      
     </div>
   );
 }

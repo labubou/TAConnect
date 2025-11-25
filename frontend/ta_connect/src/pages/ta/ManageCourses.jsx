@@ -47,7 +47,8 @@ export default function ManageCourses() {
       isScrollingRef.current = true;
       setCurrentPage(index);
       
-      const scrollTop = index * window.innerHeight;
+      const containerHeight = scrollContainerRef.current.clientHeight;
+      const scrollTop = index * containerHeight;
       scrollContainerRef.current.scrollTo({
         top: scrollTop,
         behavior: 'smooth',
@@ -64,8 +65,8 @@ export default function ManageCourses() {
     if (isScrollingRef.current || !scrollContainerRef.current) return;
 
     const scrollTop = scrollContainerRef.current.scrollTop;
-    const viewportHeight = scrollContainerRef.current.clientHeight;
-    const newPageIndex = Math.round(scrollTop / viewportHeight);
+    const containerHeight = scrollContainerRef.current.clientHeight;
+    const newPageIndex = Math.round(scrollTop / containerHeight);
 
     if (newPageIndex !== currentPage && newPageIndex < pages.length) {
       setCurrentPage(newPageIndex);
@@ -103,11 +104,11 @@ export default function ManageCourses() {
       <main
         className={`transition-all duration-300 ${
           isNavbarOpen ? "ml-64" : "ml-0"
-        } pt-20`}
+        } pt-20 h-screen flex flex-col`}
       >
         {/* Page Navigation Tabs */}
         <div
-          className={`sticky top-20 z-40 mb-0 rounded-none shadow-md overflow-hidden ${
+          className={`sticky top-0 z-40 mb-0 rounded-none shadow-md overflow-hidden flex-shrink-0 ${
             isDark ? "bg-gray-800" : "bg-white"
           }`}
         >
@@ -240,11 +241,11 @@ export default function ManageCourses() {
         <div
           ref={scrollContainerRef}
           onScroll={handleScroll}
-          className="h-screen overflow-y-scroll snap-y snap-mandatory scroll-smooth"
+          className="flex-1 overflow-y-scroll snap-y snap-mandatory scroll-smooth"
           style={{ scrollBehavior: 'smooth' }}
         >
           {/* Create Course Page */}
-          <div className="h-screen w-full flex-shrink-0 snap-start p-6">
+          <div className="min-h-full w-full flex-shrink-0 snap-start p-6">
             <CreateCourse
               isDark={isDark}
               onSlotCreated={handleSlotCreated}
@@ -253,7 +254,7 @@ export default function ManageCourses() {
           </div>
 
           {/* View Courses Page */}
-          <div className="h-screen w-full flex-shrink-0 snap-start p-6">
+          <div className="min-h-full w-full flex-shrink-0 snap-start p-6">
             <ViewCourses
               isDark={isDark}
               slots={slots}
@@ -264,7 +265,7 @@ export default function ManageCourses() {
           </div>
 
           {/* Edit Courses Page */}
-          <div className="h-screen w-full flex-shrink-0 snap-start p-6">
+          <div className="min-h-full w-full flex-shrink-0 snap-start p-6">
             <EditCourses
               isDark={isDark}
               slots={slots}
@@ -275,7 +276,7 @@ export default function ManageCourses() {
           </div>
 
           {/* Delete Courses Page */}
-          <div className="h-screen w-full flex-shrink-0 snap-start p-6">
+          <div className="min-h-full w-full flex-shrink-0 snap-start p-6">
             <DeleteCourses
               isDark={isDark}
               slots={slots}
