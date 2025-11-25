@@ -19,6 +19,7 @@ export default function EditCourses({
     end_date: "",
     room: "",
     set_student_limit: 1,
+    csv_file: null,
   });
 
   const [error, setError] = useState("");
@@ -46,6 +47,11 @@ export default function EditCourses({
   const handleChange = (e) => {
     const { name, value } = e.target;
     setForm((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleFileChange = (e) => {
+    const file = e.target.files && e.target.files[0];
+    setForm((prev) => ({ ...prev, csv_file: file || null }));
   };
 
   const handleSubmit = async (e) => {
@@ -97,15 +103,36 @@ export default function EditCourses({
         return;
       }
 
-      const payload = {
-        ...form,
+      const payloadObj = {
+        course_name: form.course_name,
         section: form.section.trim() || " ",
+        day_of_week: form.day_of_week,
+        start_time: form.start_time,
+        end_time: form.end_time,
+        start_date: form.start_date,
+        end_date: form.end_date,
+        room: form.room,
+        set_student_limit: form.set_student_limit,
       };
 
-      const res = await axios.patch(
-        `/api/instructor/time-slots/${selectedSlot.id}/`,
-        payload
-      );
+      let res;
+      if (form.csv_file) {
+        // To be implemented: CSV parsing/validation if needed client-side.
+        const formData = new FormData();
+        Object.keys(payloadObj).forEach((k) => formData.append(k, payloadObj[k]));
+        formData.append("csv", form.csv_file);
+
+        res = await axios.patch(
+          `/api/instructor/time-slots/${selectedSlot.id}/`,
+          formData,
+          { headers: { "Content-Type": "multipart/form-data" } }
+        );
+      } else {
+        res = await axios.patch(
+          `/api/instructor/time-slots/${selectedSlot.id}/`,
+          payloadObj
+        );
+      }
 
       if (res?.data?.success) {
         setMessage(strings.edit.success);
@@ -497,6 +524,28 @@ export default function EditCourses({
               isDark ? "text-gray-400" : "text-gray-500"
             }`}>
               {strings.edit.hints.studentLimit}
+            </p>
+          </div>
+
+          {/* CSV Import (optional) */}
+          <div>
+            <label
+              className={`block text-sm font-medium mb-2 ${
+                isDark ? "text-gray-200" : "text-gray-700"
+              }`}
+            >
+              Import CSV (optional)
+            </label>
+            <input
+              type="file"
+              accept=".csv"
+              name="csv"
+              onChange={handleFileChange}
+              className={`w-full text-sm ${isDark ? "text-gray-300" : "text-gray-700"}`}
+            />
+            <p className={`text-xs mt-1 ${isDark ? "text-gray-400" : "text-gray-500"}`}>
+              {/* MATSHOF SHO8LAK 3edel ya karim*/}
+              CSV import is optional. Uploaded file will be sent to the backend.
             </p>
           </div>
         </div>

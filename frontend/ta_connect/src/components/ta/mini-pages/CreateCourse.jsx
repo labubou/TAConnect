@@ -13,6 +13,7 @@ export default function CreateCourse({ isDark, onSlotCreated, slots }) {
     end_date: "",
     room: "",
     set_student_limit: 1,
+    csv_file: null,
   });
 
   const [error, setError] = useState("");
@@ -22,6 +23,11 @@ export default function CreateCourse({ isDark, onSlotCreated, slots }) {
   const handleChange = (e) => {
     const { name, value } = e.target;
     setForm((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleFileChange = (e) => {
+    const file = e.target.files && e.target.files[0];
+    setForm((prev) => ({ ...prev, csv_file: file || null }));
   };
 
   const handleSubmit = async (e) => {
@@ -68,18 +74,40 @@ export default function CreateCourse({ isDark, onSlotCreated, slots }) {
         return;
       }
 
-      const payload = {
-        ...form,
+      // Prepare payload. If a CSV file is provided, send multipart FormData.
+      const payloadObj = {
+        course_name: form.course_name,
         section: form.section.trim() || " ",
+        day_of_week: form.day_of_week,
+        start_time: form.start_time,
+        end_time: form.end_time,
+        start_date: form.start_date,
+        end_date: form.end_date,
+        room: form.room,
+        set_student_limit: form.set_student_limit,
       };
 
-      const res = await axios.post("/api/instructor/time-slots/", payload);
+      let res;
+      if (form.csv_file) {
+        // To be implemented: client-side CSV validation/parsing if desired.
+        const formData = new FormData();
+        Object.keys(payloadObj).forEach((key) => {
+          formData.append(key, payloadObj[key]);
+        });
+        formData.append("csv", form.csv_file);
+
+        res = await axios.post("/api/instructor/time-slots/", formData, {
+          headers: { "Content-Type": "multipart/form-data" },
+        });
+      } else {
+        res = await axios.post("/api/instructor/time-slots/", payloadObj);
+      }
 
       if (res?.data?.success && res?.data?.time_slot_id) {
         setMessage(strings.create.success);
         onSlotCreated &&
           onSlotCreated({
-            ...payload,
+            ...payloadObj,
             time_slot_id: res.data.time_slot_id,
             id: res.data.time_slot_id,
             status: true,
@@ -94,6 +122,7 @@ export default function CreateCourse({ isDark, onSlotCreated, slots }) {
           end_date: "",
           room: "",
           set_student_limit: 1,
+          csv_file: null,
         });
       } else {
         setError(res?.data?.error || strings.create.errors.failed);
@@ -391,6 +420,28 @@ export default function CreateCourse({ isDark, onSlotCreated, slots }) {
               isDark ? "text-gray-400" : "text-gray-500"
             }`}>
               {strings.create.hints.studentLimit}
+            </p>
+          </div>
+
+          {/* CSV Import (optional) */}
+          <div>
+            <label
+              className={`block text-sm font-medium mb-2 ${
+                isDark ? "text-gray-200" : "text-gray-700"
+              }`}
+            >
+              Import CSV (optional)
+            </label>
+            <input
+              type="file"
+              accept=".csv"
+              name="csv"
+              onChange={handleFileChange}
+              className={`w-full text-sm ${isDark ? "text-gray-300" : "text-gray-700"}`}
+            />
+            <p className={`text-xs mt-1 ${isDark ? "text-gray-400" : "text-gray-500"}`}>
+              {/* MATSHOF SHO8LAK 3edel ya karim*/}
+              CSV import is optional. Uploaded file will be sent to the backend.
             </p>
           </div>
         </div>
