@@ -9,6 +9,7 @@ export default function CreateCourse({ isDark, onSlotCreated, slots }) {
     day_of_week: "Mon",
     start_time: "09:00",
     end_time: "10:00",
+    duration_minutes: 10,
     start_date: "",
     end_date: "",
     room: "",
@@ -81,6 +82,7 @@ export default function CreateCourse({ isDark, onSlotCreated, slots }) {
         day_of_week: form.day_of_week,
         start_time: form.start_time,
         end_time: form.end_time,
+        duration_minutes: form.duration_minutes,
         start_date: form.start_date,
         end_date: form.end_date,
         room: form.room,
@@ -118,6 +120,7 @@ export default function CreateCourse({ isDark, onSlotCreated, slots }) {
           day_of_week: "Mon",
           start_time: "09:00",
           end_time: "10:00",
+          duration_minutes: 10,
           start_date: "",
           end_date: "",
           room: "",
@@ -390,6 +393,30 @@ export default function CreateCourse({ isDark, onSlotCreated, slots }) {
                 isDark
                   ? "bg-gray-700 border-gray-600 text-white focus:border-emerald-500"
                   : "bg-white border-gray-300 text-gray-900 focus:border-emerald-500"
+              } focus:outline-none focus:ring-2 focus:ring-emerald-500/20`}
+            />
+          </div>
+
+                    {/* Duration */}
+          <div>
+            <label
+              className={`block text-sm font-medium mb-2 ${
+                isDark ? "text-gray-200" : "text-gray-700"
+              }`}
+            >
+              {strings.create.fields.duration}
+            </label>
+            <input
+              type="number"
+              name="duration_minutes"
+              value={form.duration_minutes}
+              onChange={handleChange}
+              placeholder={strings.create.placeholders.duration}
+              min="1"
+              className={`w-full px-4 py-2 rounded-lg border transition-all ${
+                isDark
+                  ? "bg-gray-700 border-gray-600 text-white placeholder-gray-400 focus:border-emerald-500"
+                  : "bg-white border-gray-300 text-gray-900 placeholder-gray-400 focus:border-emerald-500"
               } focus:outline-none focus:ring-2 focus:ring-emerald-500/20`}
             />
           </div>
