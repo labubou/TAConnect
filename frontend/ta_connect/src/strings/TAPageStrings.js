@@ -10,6 +10,9 @@ const taPageStrings = {
     description:
       "Use the sidebar to navigate to actions for creating and managing slots. The Delete / Update / Toggle actions are placeholders and will be added later.",
     createSlot: "Create Slot",
+    booking: "Booking",
+    bookings: "Bookings",
+    bookedSessions: "Booked Sessions",
     weekSchedule: {
       title: "Weekly Schedule",
       loading: "Loading schedule...",

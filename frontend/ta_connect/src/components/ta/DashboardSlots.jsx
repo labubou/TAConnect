@@ -1,8 +1,29 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import strings from '../../strings/TAPageStrings';
 
 export default function DashboardSlots({ isDark, slots, bookings, loading, error, onCreateSlot }) {
   const [hoveredSlotId, setHoveredSlotId] = useState(null);
+  const [hoveredRect, setHoveredRect] = useState(null);
+  const [stickySlotId, setStickySlotId] = useState(null);
+  const popupRef = useRef(null);
+
+  useEffect(() => {
+    const handleDocClick = (e) => {
+      // If there's no sticky popup, nothing to do
+      if (!stickySlotId) return;
+
+      // If the click was inside the popup, keep it
+      const popupEl = popupRef.current;
+      if (popupEl && popupEl.contains && popupEl.contains(e.target)) return;
+
+      // Otherwise clear sticky state
+      setStickySlotId(null);
+    };
+
+    document.addEventListener('mousedown', handleDocClick);
+    return () => document.removeEventListener('mousedown', handleDocClick);
+  }, [stickySlotId]);
 
   const DAYS_OF_WEEK = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 
@@ -105,6 +126,7 @@ export default function DashboardSlots({ isDark, slots, bookings, loading, error
                   daySlots.map((slot) => {
                     const slotBookings = getBookingsForSlot(slot.id);
                     const isHovered = hoveredSlotId === slot.id;
+                    const isVisible = (stickySlotId === slot.id) || (isHovered && hoveredRect);
 
                     return (
                       <div key={slot.id} className="relative">
@@ -115,8 +137,26 @@ export default function DashboardSlots({ isDark, slots, bookings, loading, error
                               ? 'border-blue-600 bg-blue-900/20 hover:bg-blue-900/40 hover:shadow-lg'
                               : 'border-blue-300 bg-blue-50 hover:bg-blue-100 hover:shadow-lg'
                           } ${isHovered ? 'ring-2 ring-emerald-500' : ''}`}
-                          onMouseEnter={() => setHoveredSlotId(slot.id)}
-                          onMouseLeave={() => setHoveredSlotId(null)}
+                          onMouseEnter={(e) => {
+                            // only set hover state when not sticky for another slot
+                            if (!stickySlotId) {
+                              setHoveredSlotId(slot.id);
+                              const rect = e.currentTarget.getBoundingClientRect();
+                              setHoveredRect(rect);
+                            }
+                          }}
+                          onMouseLeave={() => {
+                            if (!stickySlotId) {
+                              setHoveredSlotId(null);
+                              setHoveredRect(null);
+                            }
+                          }}
+                          onClick={(e) => {
+                            // clicking the slot or popup will make it sticky
+                            setStickySlotId(slot.id);
+                            // prevent the document handler from immediately dismissing
+                            e.stopPropagation();
+                          }}
                         >
                           <div
                             className={`font-semibold text-sm mb-1 ${
@@ -149,50 +189,46 @@ export default function DashboardSlots({ isDark, slots, bookings, loading, error
                           )}
                         </div>
 
-                        {/* Bookings Popup */}
-                        {isHovered && slotBookings.length > 0 && (
+                        {/* Bookings Popup rendered via portal to avoid clipping by scrolling columns */}
+
+                        {isVisible && slotBookings.length > 0 && hoveredRect && createPortal(
                           <div
-                            className={`absolute left-0 top-full mt-2 w-64 rounded-lg shadow-2xl border z-50 ${
-                              isDark
-                                ? 'bg-gray-900 border-gray-700'
-                                : 'bg-white border-gray-300'
-                            }`}
+                            style={{
+                              position: 'absolute',
+                              left: 0,
+                              top: 0,
+                              // We'll position using transform to avoid layout shift
+                              transform: `translate(${Math.min(window.innerWidth - 344, Math.max(8, hoveredRect.right + 8))}px, ${hoveredRect.top + window.scrollY}px)`,
+                              zIndex: 9999,
+                            }}
+                            className={`w-80`}
+                            ref={(el) => { popupRef.current = el; }}
                           >
-                            <div
-                              className={`p-3 border-b font-semibold ${
-                                isDark
-                                  ? 'border-gray-700 bg-gray-800 text-white'
-                                  : 'border-gray-200 bg-gray-100 text-gray-900'
-                              }`}
-                            >
-                              {strings.taPage.bookedSessions}
+                            <div className={`rounded-lg shadow-2xl border overflow-hidden ${isDark ? 'bg-gray-900 border-gray-700' : 'bg-white border-gray-300'}`}>
+                              <div className={`p-3 border-b font-semibold ${isDark ? 'border-gray-700 bg-gray-800 text-white' : 'border-gray-200 bg-gray-100 text-gray-900'}`}>
+                                {strings.taPage.bookedSessions}
+                              </div>
+                              <div className="max-h-64 overflow-y-auto p-3 space-y-2">
+                                {slotBookings.map((booking) => (
+                                  <div key={booking.id} className={`p-3 rounded-lg border ${isDark ? 'border-gray-700 bg-gray-800/50' : 'border-gray-200 bg-gray-50'}`}>
+                                    <div className={`font-semibold text-sm ${isDark ? 'text-emerald-300' : 'text-emerald-700'}`}>
+                                      {booking.student?.first_name || ''} {booking.student?.last_name || ''}
+                                    </div>
+                                    <div className={`text-xs ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
+                                      📧 {booking.student?.email || '—'}
+                                    </div>
+                                    <div className={`text-xs mt-2 ${isDark ? 'text-gray-500' : 'text-gray-500'}`}>
+                                      📅 {booking.date || '—'}
+                                    </div>
+                                    <div className={`text-xs ${isDark ? 'text-gray-500' : 'text-gray-500'}`}>
+                                      🕐 {booking.start_time ? formatTime((booking.start_time + '').split(' ')[1] || '') : ''}
+                                    </div>
+                                  </div>
+                                ))}
+                              </div>
                             </div>
-                            <div className="max-h-64 overflow-y-auto p-3 space-y-2">
-                              {slotBookings.map((booking) => (
-                                <div
-                                  key={booking.id}
-                                  className={`p-3 rounded-lg border ${
-                                    isDark
-                                      ? 'border-gray-700 bg-gray-800/50'
-                                      : 'border-gray-200 bg-gray-50'
-                                  }`}
-                                >
-                                  <div className={`font-semibold text-sm ${isDark ? 'text-emerald-300' : 'text-emerald-700'}`}>
-                                    {booking.student.first_name} {booking.student.last_name}
-                                  </div>
-                                  <div className={`text-xs ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
-                                    📧 {booking.student.email}
-                                  </div>
-                                  <div className={`text-xs mt-2 ${isDark ? 'text-gray-500' : 'text-gray-500'}`}>
-                                    📅 {booking.date}
-                                  </div>
-                                  <div className={`text-xs ${isDark ? 'text-gray-500' : 'text-gray-500'}`}>
-                                    🕐 {formatTime(booking.start_time.split(' ')[1])}
-                                  </div>
-                                </div>
-                              ))}
-                            </div>
-                          </div>
+                          </div>,
+                          document.body
                         )}
                       </div>
                     );
