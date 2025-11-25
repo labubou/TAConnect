@@ -21,6 +21,7 @@ const manageCoursesPageStrings = {
       startDate: "Start Date",
       endDate: "End Date",
       studentLimit: "Student Limit per Slot (Optional)",
+      csvFile: "Import Students (CSV)",
     },
     placeholders: {
       courseName: "e.g., Computer Science 101",
@@ -31,6 +32,19 @@ const manageCoursesPageStrings = {
     },
     hints: {
       studentLimit: "Maximum number of students allowed per booking slot. Default is 1.",
+    },
+    csv: {
+      label: "Import Students (CSV)",
+      dragDrop: "Drag & drop a CSV file here, or click to browse",
+      selectedFile: "Selected file:",
+      removeFile: "Remove",
+      hint: "CSV should contain columns: First name, Last name, ID number, Email address",
+      optional: "Optional - You can add students later",
+      uploading: "Uploading CSV...",
+      uploadSuccess: "CSV uploaded successfully!",
+      uploadError: "Failed to upload CSV.",
+      studentsCreated: "students added",
+      errors: "errors encountered",
     },
     dayOptions: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
     buttons: {
