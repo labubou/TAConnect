@@ -15,6 +15,7 @@ export default function EditCourses({
     day_of_week: "Mon",
     start_time: "09:00",
     end_time: "10:00",
+    duration_minutes: 10,
     start_date: "",
     end_date: "",
     room: "",
@@ -25,6 +26,7 @@ export default function EditCourses({
   const [error, setError] = useState("");
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
+  const [sortBy, setSortBy] = useState("course_name");
 
   useEffect(() => {
     if (selectedSlot) {
@@ -34,6 +36,7 @@ export default function EditCourses({
         day_of_week: selectedSlot.day_of_week || "Mon",
         start_time: selectedSlot.start_time || "09:00",
         end_time: selectedSlot.end_time || "10:00",
+        duration_minutes: selectedSlot.duration_minutes || 10,
         start_date: selectedSlot.start_date || "",
         end_date: selectedSlot.end_date || "",
         room: selectedSlot.room || "",
@@ -109,6 +112,7 @@ export default function EditCourses({
         day_of_week: form.day_of_week,
         start_time: form.start_time,
         end_time: form.end_time,
+        duration_minutes: form.duration_minutes,
         start_date: form.start_date,
         end_date: form.end_date,
         room: form.room,
@@ -156,7 +160,21 @@ export default function EditCourses({
     }
   };
 
-  if (!selectedSlot) {
+  const sortedSlots = [...slots].sort((a, b) => {
+    switch (sortBy) {
+      case "course_name":
+        return a.course_name.localeCompare(b.course_name);
+      case "day_of_week":
+        const days = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+        return days.indexOf(a.day_of_week) - days.indexOf(b.day_of_week);
+      case "start_time":
+        return a.start_time.localeCompare(b.start_time);
+      default:
+        return 0;
+    }
+  });
+
+  if (slots.length === 0) {
     return (
       <div
         className={`p-6 rounded-lg ${
@@ -180,142 +198,155 @@ export default function EditCourses({
           <h3 className={`text-lg font-semibold mb-2 ${isDark ? "text-gray-200" : "text-gray-700"}`}>
             {strings.edit.selectASlot}
           </h3>
-          <p className={`${isDark ? "text-gray-400" : "text-gray-500"} mb-6`}>
+          <p className={`${isDark ? "text-gray-400" : "text-gray-500"}`}>
             {strings.edit.selectDescription}
           </p>
-          {slots.length > 0 && (
-            <div className="space-y-2">
-              <p className={`text-sm font-medium mb-3 ${isDark ? "text-gray-300" : "text-gray-600"}`}>
-                {strings.edit.availableSlots}
-              </p>
-              <div className="max-h-40 overflow-y-auto space-y-2">
-                {slots.map((slot) => (
-                  <button
-                    key={slot.id}
-                    onClick={() => onSelectSlot(slot)}
-                    className={`w-full text-left p-3 rounded-lg transition-all ${
-                      isDark
-                        ? "bg-gray-700 hover:bg-emerald-700 text-gray-200"
-                        : "bg-gray-100 hover:bg-emerald-100 text-gray-900"
-                    }`}
-                  >
-                    <p className="font-medium">{slot.course_name}</p>
-                    <p className="text-sm">
-                      {slot.day_of_week} • {slot.start_time} - {slot.end_time}
-                    </p>
-                  </button>
-                ))}
-              </div>
-            </div>
-          )}
         </div>
       </div>
     );
   }
 
   return (
-    <div
-      className={`p-6 rounded-lg ${
-        isDark ? "bg-gray-800" : "bg-white"
-      } shadow-lg h-full overflow-y-auto`}
-    >
-      <div className="flex items-center justify-between mb-2">
-        <h2
-          className={`text-2xl font-bold ${
-            isDark ? "text-white" : "text-gray-900"
-          }`}
-        >
-          {strings.edit.title}
-        </h2>
-        <button
-          onClick={() => onSelectSlot(null)}
-          className={`p-2 rounded-lg transition-all ${
-            isDark
-              ? "bg-gray-700 hover:bg-gray-600 text-white"
-              : "bg-gray-100 hover:bg-gray-200 text-gray-700"
-          }`}
-          title={strings.edit.deselectSlot}
-        >
-          <svg
-            className="w-5 h-5"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M6 18L18 6M6 6l12 12"
-            />
-          </svg>
-        </button>
-      </div>
-      <p className={`mb-6 ${isDark ? "text-gray-300" : "text-gray-600"}`}>
-        {strings.edit.description}
-      </p>
-
-      {error && (
-        <div
-          className={`mb-4 p-4 rounded-lg ${
-            isDark
-              ? "bg-red-900/30 border border-red-700 text-red-300"
-              : "bg-red-100 border border-red-400 text-red-700"
-          }`}
-        >
-          <div className="flex items-start">
-            <svg
-              className="w-5 h-5 mr-2 mt-0.5 flex-shrink-0"
-              fill="currentColor"
-              viewBox="0 0 20 20"
-            >
-              <path
-                fillRule="evenodd"
-                d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
-                clipRule="evenodd"
-              />
-            </svg>
-            <span>{error}</span>
-          </div>
-        </div>
-      )}
-
-      {message && (
-        <div
-          className={`mb-4 p-4 rounded-lg ${
-            isDark
-              ? "bg-green-900/30 border border-green-700 text-green-300"
-              : "bg-green-100 border border-green-400 text-green-700"
-          }`}
-        >
-          <div className="flex items-start">
-            <svg
-              className="w-5 h-5 mr-2 mt-0.5 flex-shrink-0"
-              fill="currentColor"
-              viewBox="0 0 20 20"
-            >
-              <path
-                fillRule="evenodd"
-                d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-                clipRule="evenodd"
-              />
-            </svg>
-            <span>{message}</span>
-          </div>
-        </div>
-      )}
-
+    <div className={`grid grid-cols-1 lg:grid-cols-3 gap-6 h-full`}>
+      {/* List Panel */}
       <div
-        className={`mb-6 p-4 rounded-lg ${
-          isDark ? "bg-gray-700 border border-gray-600" : "bg-blue-50 border border-blue-200"
-        }`}
+        className={`lg:col-span-1 p-6 rounded-lg ${isDark ? "bg-gray-800" : "bg-white"} shadow-lg overflow-y-auto`}
       >
-        <p className={isDark ? "text-gray-200" : "text-blue-900"}>
-          <span className="font-semibold">{strings.edit.editing}:</span> {selectedSlot.course_name}
-        </p>
+        <div className="mb-4">
+          <h3 className={`text-lg font-bold mb-3 ${isDark ? "text-white" : "text-gray-900"}`}>
+            {strings.edit.availableSlots}
+          </h3>
+          <label className={`block text-sm font-medium mb-2 ${isDark ? "text-gray-200" : "text-gray-700"}`}>
+            {strings.view.sortBy}
+          </label>
+          <select
+            value={sortBy}
+            onChange={(e) => setSortBy(e.target.value)}
+            className={`w-full px-4 py-2 rounded-lg border transition-all ${
+              isDark
+                ? "bg-gray-700 border-gray-600 text-white focus:border-emerald-500"
+                : "bg-white border-gray-300 text-gray-900 focus:border-emerald-500"
+            } focus:outline-none focus:ring-2 focus:ring-emerald-500/20`}
+          >
+            <option value="course_name">{strings.view.sortOptions.courseName}</option>
+            <option value="day_of_week">{strings.view.sortOptions.dayOfWeek}</option>
+            <option value="start_time">{strings.view.sortOptions.startTime}</option>
+          </select>
+        </div>
+
+        {/* Slots List */}
+        <div className="space-y-2">
+          {sortedSlots.map((slot) => (
+            <button
+              key={slot.id}
+              onClick={() => onSelectSlot(slot)}
+              className={`w-full text-left p-3 rounded-lg border-2 transition-all ${
+                selectedSlot?.id === slot.id
+                  ? isDark
+                    ? "border-emerald-500 bg-emerald-900/20"
+                    : "border-emerald-500 bg-emerald-50"
+                  : isDark
+                  ? "border-gray-600 bg-gray-700 hover:border-emerald-500"
+                  : "border-gray-200 bg-gray-50 hover:border-emerald-500"
+              }`}
+            >
+              <p className={`font-medium text-sm ${isDark ? "text-white" : "text-gray-900"}`}>
+                {slot.course_name}
+              </p>
+              <p className={`text-xs mt-1 ${isDark ? "text-gray-400" : "text-gray-600"}`}>
+                {slot.day_of_week} • {slot.start_time}
+              </p>
+            </button>
+          ))}
+        </div>
       </div>
 
-      <form onSubmit={handleSubmit} className="space-y-4">
+      {/* Form Panel */}
+      <div
+        className={`lg:col-span-2 p-6 rounded-lg ${
+          isDark ? "bg-gray-800" : "bg-white"
+        } shadow-lg overflow-y-auto`}
+      >
+        {selectedSlot ? (
+          <>
+            <div className="flex items-center justify-between mb-6">
+              <h2 className={`text-2xl font-bold ${isDark ? "text-white" : "text-gray-900"}`}>
+                {strings.edit.title}
+              </h2>
+              <button
+                onClick={() => onSelectSlot(null)}
+                className={`p-2 rounded-lg transition-all ${
+                  isDark
+                    ? "bg-gray-700 hover:bg-gray-600 text-white"
+                    : "bg-gray-100 hover:bg-gray-200 text-gray-700"
+                }`}
+                title={strings.edit.deselectSlot}
+              >
+                <svg
+                  className="w-5 h-5"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M6 18L18 6M6 6l12 12"
+                  />
+                </svg>
+              </button>
+            </div>
+
+            {error && (
+              <div className={`mb-4 p-4 rounded-lg ${isDark ? "bg-red-900/30 border border-red-700 text-red-300" : "bg-red-100 border border-red-400 text-red-700"}`}>
+                <div className="flex items-start">
+                  <svg
+                    className="w-5 h-5 mr-2 mt-0.5 flex-shrink-0"
+                    fill="currentColor"
+                    viewBox="0 0 20 20"
+                  >
+                    <path
+                      fillRule="evenodd"
+                      d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
+                      clipRule="evenodd"
+                    />
+                  </svg>
+                  <span>{error}</span>
+                </div>
+              </div>
+            )}
+
+            {message && (
+              <div className={`mb-4 p-4 rounded-lg ${isDark ? "bg-green-900/30 border border-green-700 text-green-300" : "bg-green-100 border border-green-400 text-green-700"}`}>
+                <div className="flex items-start">
+                  <svg
+                    className="w-5 h-5 mr-2 mt-0.5 flex-shrink-0"
+                    fill="currentColor"
+                    viewBox="0 0 20 20"
+                  >
+                    <path
+                      fillRule="evenodd"
+                      d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                      clipRule="evenodd"
+                    />
+                  </svg>
+                  <span>{message}</span>
+                </div>
+              </div>
+            )}
+
+            <div
+              className={`mb-6 p-4 rounded-lg ${
+                isDark ? "bg-gray-700 border border-gray-600" : "bg-blue-50 border border-blue-200"
+              }`}
+            >
+              <p className={isDark ? "text-gray-200" : "text-blue-900"}>
+                <span className="font-semibold">{strings.edit.editing}:</span> {selectedSlot.course_name}
+              </p>
+            </div>
+
+            <form onSubmit={handleSubmit} className="space-y-4">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {/* Course Name */}
           <div>
@@ -498,6 +529,30 @@ export default function EditCourses({
             />
           </div>
 
+          {/* Duration */}
+          <div>
+            <label
+              className={`block text-sm font-medium mb-2 ${
+                isDark ? "text-gray-200" : "text-gray-700"
+              }`}
+            >
+              {strings.edit.fields.duration}
+            </label>
+            <input
+              type="number"
+              name="duration_minutes"
+              value={form.duration_minutes}
+              onChange={handleChange}
+              placeholder={strings.edit.placeholders.duration}
+              min="1"
+              className={`w-full px-4 py-2 rounded-lg border transition-all ${
+                isDark
+                  ? "bg-gray-700 border-gray-600 text-white placeholder-gray-400 focus:border-emerald-500"
+                  : "bg-white border-gray-300 text-gray-900 placeholder-gray-400 focus:border-emerald-500"
+              } focus:outline-none focus:ring-2 focus:ring-emerald-500/20`}
+            />
+          </div>
+
           {/* Student Limit */}
           <div>
             <label
@@ -569,6 +624,35 @@ export default function EditCourses({
           </button>
         </div>
       </form>
+          </>
+        ) : (
+          <div className="flex items-center justify-center h-full">
+            <div className="text-center">
+              <svg
+                className={`w-16 h-16 mx-auto mb-4 ${
+                  isDark ? "text-gray-600" : "text-gray-300"
+                }`}
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
+                />
+              </svg>
+              <h3 className={`text-lg font-semibold mb-2 ${isDark ? "text-gray-200" : "text-gray-700"}`}>
+                {strings.edit.selectASlot}
+              </h3>
+              <p className={`${isDark ? "text-gray-400" : "text-gray-500"}`}>
+                {strings.edit.selectDescription}
+              </p>
+            </div>
+          </div>
+        )}
+      </div>
     </div>
   );
 }

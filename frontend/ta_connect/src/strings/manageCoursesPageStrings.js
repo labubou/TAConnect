@@ -17,6 +17,7 @@ const manageCoursesPageStrings = {
       room: "Room/Location",
       startTime: "Start Time",
       endTime: "End Time",
+      duration: "Duration (minutes)",
       startDate: "Start Date",
       endDate: "End Date",
       studentLimit: "Student Limit per Slot (Optional)",
@@ -25,6 +26,7 @@ const manageCoursesPageStrings = {
       courseName: "e.g., Computer Science 101",
       section: "e.g., A1, B2",
       room: "e.g., Room 201",
+      duration: "e.g., 60",
       studentLimit: "e.g., 1",
     },
     hints: {
@@ -105,11 +107,13 @@ const manageCoursesPageStrings = {
       room: "Room/Location",
       startTime: "Start Time",
       endTime: "End Time",
+      duration: "Duration (minutes)",
       startDate: "Start Date",
       endDate: "End Date",
       studentLimit: "Student Limit per Slot (Optional)",
     },
     placeholders: {
+      duration: "e.g., 60",
       studentLimit: "e.g., 1",
     },
     hints: {
