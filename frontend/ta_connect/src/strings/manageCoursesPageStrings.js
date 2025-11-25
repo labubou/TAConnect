@@ -58,9 +58,17 @@ const manageCoursesPageStrings = {
     loading: "Loading your courses...",
     noSlots: "No Courses Yet",
     noSlotsDescription:
-      "Create your first course by going to the Create Course tab.",
+      "Use the Add Course button to start building your schedule.",
     slotsFound: "slots found",
     sortBy: "Sort By",
+    search: "Search",
+    searchPlaceholder: "Search by course, section, or room",
+    statusFilter: "Status",
+    statusOptions: {
+      all: "All",
+      active: "Active",
+      inactive: "Inactive",
+    },
     sortOptions: {
       courseName: "Course Name",
       dayOfWeek: "Day of Week",
@@ -75,6 +83,9 @@ const manageCoursesPageStrings = {
     id: "ID",
     duration: "Duration (minutes)",
     createdAt: "Created At",
+    actions: "Actions",
+    listTitle: "Course List",
+    manageStudentsComingSoon: "Student management is coming soon.",
   
     to: "to",
     backToList: "Back to list",
@@ -87,6 +98,9 @@ const manageCoursesPageStrings = {
       activate: "Activate",
       deactivate: "Deactivate",
       toggling: "Toggling...",
+      manageStudents: "Manage Allowed Students",
+      addCourse: "Add Course",
+      saving: "Saving...",
     },
   },
 
@@ -172,6 +186,14 @@ const manageCoursesPageStrings = {
       noSlotSelected: "Please select a course to delete.",
       failed: "Failed to delete course. Please try again.",
     },
+  },
+  modals: {
+    createTitle: "Create New Course",
+    editTitle: "Edit Course",
+    deleteTitle: "Delete Course",
+    manageStudentsTitle: "Manage Allowed Students",
+    comingSoon: "This feature is coming soon.",
+    close: "Close",
   },
 };
 

@@ -2,7 +2,7 @@ import { useState } from "react";
 import axios from "axios";
 import strings from "../../../strings/manageCoursesPageStrings";
 
-export default function CreateCourse({ isDark, onSlotCreated, slots }) {
+export default function CreateCourse({ isDark, onSlotCreated, slots, onClose }) {
   const [form, setForm] = useState({
     course_name: "",
     section: "",
@@ -127,6 +127,9 @@ export default function CreateCourse({ isDark, onSlotCreated, slots }) {
           set_student_limit: 1,
           csv_file: null,
         });
+        if (onClose) {
+          onClose();
+        }
       } else {
         setError(res?.data?.error || strings.create.errors.failed);
       }
@@ -142,12 +145,10 @@ export default function CreateCourse({ isDark, onSlotCreated, slots }) {
     }
   };
 
+  const containerClasses = `p-6 rounded-lg ${isDark ? "bg-gray-800" : "bg-white"} shadow-lg`;
+
   return (
-    <div
-      className={`p-6 rounded-lg ${
-        isDark ? "bg-gray-800" : "bg-white"
-      } shadow-lg h-full`}
-    >
+    <div className={containerClasses}>
       <h2
         className={`text-2xl font-bold mb-2 ${
           isDark ? "text-white" : "text-gray-900"
@@ -491,9 +492,20 @@ export default function CreateCourse({ isDark, onSlotCreated, slots }) {
             {loading ? strings.create.buttons.creating : strings.create.buttons.create}
           </button>
         </div>
+        {onClose && (
+          <button
+            type="button"
+            onClick={onClose}
+            className={`w-full mt-4 py-3 px-4 rounded-lg font-semibold transition-all ${
+              isDark
+                ? "bg-gray-700 hover:bg-gray-600 text-white"
+                : "bg-gray-200 hover:bg-gray-300 text-gray-900"
+            }`}
+          >
+            {strings.modals.close}
+          </button>
+        )}
       </form>
-
-      
     </div>
   );
 }
