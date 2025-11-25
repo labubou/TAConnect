@@ -139,7 +139,7 @@ export default function EditCourses({
         onSlotUpdated &&
           onSlotUpdated({
             ...selectedSlot,
-            ...payload,
+            ...payloadObj,
           });
       } else {
         setError(res?.data?.error || strings.edit.errors.failed);
