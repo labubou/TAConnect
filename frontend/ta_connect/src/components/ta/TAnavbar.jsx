@@ -201,28 +201,6 @@ const TAnavbar = ({ onToggle }) => {
                 </Link>
 
                 <Link 
-                  to="/ta/create-course"
-                  className={`navbar-link group flex items-center p-4 rounded-2xl transition-all duration-300 ${
-                    isActive('/ta/create-course') 
-                      ? 'bg-gradient-to-r from-[#366c6b] to-[#1a3535] text-white shadow-lg transform scale-105' 
-                      : 'text-gray-700 dark:text-gray-200 hover:bg-white/70 dark:hover:bg-gray-800/60 hover:shadow-md hover:scale-105'
-                  }`}
-                  onClick={closeNavbar}
-                >
-                  <div className={`w-10 h-10 rounded-xl flex items-center justify-center mr-3 transition-colors duration-300 ${
-                    isActive('/ta/create-course') 
-                      ? 'bg-white/20' 
-                      : 'bg-gray-100 dark:bg-gray-800 group-hover:bg-[#eaf6f6] group-hover:dark:bg-gray-700'
-                  }`}>
-                    <svg className={`w-5 h-5 ${isActive('/ta/create-course') ? 'text-white' : 'text-[#366c6b]'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-                    </svg>
-                  </div>
-                  <span className="font-semibold">{strings.navigation.createSlot}</span>
-                </Link>
-
-
-                <Link 
                   to="/ta/manage-courses"
                   className={`navbar-link group flex items-center p-4 rounded-2xl transition-all duration-300 ${
                     isActive('/ta/manage-courses') 
