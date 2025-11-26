@@ -6,6 +6,7 @@ import CreateCourse from "../../components/ta/mini-pages/CreateCourse";
 import ViewCourses from "../../components/ta/mini-pages/ViewCourses";
 import EditCourses from "../../components/ta/mini-pages/EditCourses";
 import DeleteCourses from "../../components/ta/mini-pages/DeleteCourses";
+import ManageAllowedStudentsModal from "../../components/ta/mini-pages/ManageAllowedStudentsModal";
 import strings from "../../strings/manageCoursesPageStrings";
 
 const Modal = ({ title, onClose, isDark, children }) => (
@@ -102,7 +103,7 @@ export default function ManageCourses() {
   };
 
   const handleManageStudents = (slot) => {
-    setInfoBanner(`${strings.modals.manageStudentsTitle}: ${slot.course_name}. ${strings.modals.comingSoon}`);
+    openModal("manageStudents", slot);
   };
 
   return (
@@ -194,6 +195,20 @@ export default function ManageCourses() {
             isDark={isDark}
             slot={modalState.slot}
             onSlotDeleted={handleSlotDeleted}
+            onClose={closeModal}
+          />
+        </Modal>
+      )}
+
+      {modalState.type === "manageStudents" && modalState.slot && (
+        <Modal
+          title={`${strings.modals.manageStudentsTitle}: ${modalState.slot.course_name}`}
+          onClose={closeModal}
+          isDark={isDark}
+        >
+          <ManageAllowedStudentsModal
+            isDark={isDark}
+            slot={modalState.slot}
             onClose={closeModal}
           />
         </Modal>
