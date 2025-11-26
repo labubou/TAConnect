@@ -7,11 +7,12 @@ from accounts.permissions import IsInstructor, IsStudent
 from instructor.models import OfficeHourSlot
 from accounts.models import User
 from student.models import Booking
-from instructor.serializers.csv_files_serializer import CSVUploadSerializer
+from instructor.serializers.get_user_booking_serializer import GetUserBookingSerializer
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
 from .schemas.slot_schemas import (
     get_user_slots_swagger,
+    get_user_bookings_swagger,
     search_instructors_swagger,
     get_instructor_data_swagger
 )
@@ -47,6 +48,54 @@ class GetUserSlotsView(GenericAPIView):
                         'set_student_limit': slot.policy.set_student_limit if hasattr(slot, 'policy') else None,
                     } for slot in slots
                 ],
+            }, status=200)
+        
+        except Exception as e:
+            return Response({'error': f'An error occurred {str(e)}'}, status=500)
+
+class GetUserBookingView(GenericAPIView):
+    permission_classes = [IsInstructor]
+    serializer_class = GetUserBookingSerializer
+
+    @swagger_auto_schema(**get_user_bookings_swagger)
+    def get(self, request):
+        try:
+            user = request.user
+
+            # Use query_params for GET request instead of request.data
+            serializer = self.get_serializer(data=request.query_params, context={'request': request})
+            if not serializer.is_valid():
+                return Response(
+                    {'error': serializer.errors},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            
+            start_date = serializer.validated_data.get('start_date')
+            end_date = serializer.validated_data.get('end_date')
+
+            # Get all slots for the instructor
+            slots = OfficeHourSlot.objects.filter(instructor=user)
+
+            # Filter bookings based on date range if provided
+            if start_date and end_date:
+                books = Booking.objects.filter(
+                    office_hour__in=slots,
+                    date__range=(start_date, end_date)
+                )
+            elif start_date:
+                books = Booking.objects.filter(
+                    office_hour__in=slots,
+                    date__gte=start_date
+                )
+            elif end_date:
+                books = Booking.objects.filter(
+                    office_hour__in=slots,
+                    date__lte=end_date
+                )
+            else:
+                books = Booking.objects.filter(office_hour__in=slots)
+            
+            return Response({
                 'bookings': [
                     {
                         'id': book.id,
@@ -77,7 +126,8 @@ class GetUserSlotsView(GenericAPIView):
             }, status=200)
         
         except Exception as e:
-            return Response({'error': f'An error occurred {str(e)}'}, status=500)
+            print(f"Error: {str(e)}")
+            return Response({'error': f'An error occurred'}, status=500)
 
 class SearchInstructorsView(GenericAPIView):
     permission_classes = [IsStudent]
@@ -157,4 +207,4 @@ class InstructorDataView(GenericAPIView):
             return Response({'error': 'Instructor not found'}, status=404)
         except Exception as e:
             return Response({'error': f'An error occurred: {str(e)}'}, status=500)
-        
+

@@ -27,8 +27,9 @@ export default function TAPage() {
       setLoading(true);
       setError('');
       const res = await axios.get('/api/instructor/get-user-slots');
+      const bookingsRes = await axios.get('/api/instructor/get-user-bookings');
       setSlots(res?.data?.slots || []);
-      setBookings(res?.data?.bookings || []);
+      setBookings(bookingsRes?.data?.bookings || []);
     } catch (err) {
       console.error('Failed to fetch slots:', err);
       setError(err.response?.data?.error || strings.taPage.weekSchedule.errorLoading);

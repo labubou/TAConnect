@@ -159,6 +159,79 @@ get_user_slots_swagger = {
     }
 }
 
+get_user_bookings_swagger = {
+    'operation_description': 'Get all bookings for the logged-in instructor. Optionally filter by date range.',
+    'manual_parameters': [
+        openapi.Parameter(
+            'start_date',
+            openapi.IN_QUERY,
+            description='Start date for filtering bookings (YYYY-MM-DD). Optional.',
+            type=openapi.TYPE_STRING,
+            format='date',
+            required=False,
+            example='2025-01-01'
+        ),
+        openapi.Parameter(
+            'end_date',
+            openapi.IN_QUERY,
+            description='End date for filtering bookings (YYYY-MM-DD). Optional.',
+            type=openapi.TYPE_STRING,
+            format='date',
+            required=False,
+            example='2025-01-31'
+        )
+    ],
+    'responses': {
+        200: openapi.Response(
+            description='Bookings retrieved successfully',
+            schema=openapi.Schema(
+                type=openapi.TYPE_OBJECT,
+                properties={
+                    'bookings': openapi.Schema(
+                        type=openapi.TYPE_ARRAY,
+                        items=openapi.Schema(
+                            type=openapi.TYPE_OBJECT,
+                            properties={
+                                'id': openapi.Schema(type=openapi.TYPE_INTEGER),
+                                'student': openapi.Schema(
+                                    type=openapi.TYPE_OBJECT,
+                                    properties={
+                                        'id': openapi.Schema(type=openapi.TYPE_INTEGER),
+                                        'username': openapi.Schema(type=openapi.TYPE_STRING),
+                                        'email': openapi.Schema(type=openapi.TYPE_STRING),
+                                        'first_name': openapi.Schema(type=openapi.TYPE_STRING),
+                                        'last_name': openapi.Schema(type=openapi.TYPE_STRING),
+                                    }
+                                ),
+                                'office_hour': openapi.Schema(
+                                    type=openapi.TYPE_OBJECT,
+                                    properties={
+                                        'id': openapi.Schema(type=openapi.TYPE_INTEGER),
+                                        'course_name': openapi.Schema(type=openapi.TYPE_STRING),
+                                        'section': openapi.Schema(type=openapi.TYPE_STRING, nullable=True),
+                                        'day_of_week': openapi.Schema(type=openapi.TYPE_STRING),
+                                        'start_time': openapi.Schema(type=openapi.TYPE_STRING, format='time'),
+                                        'end_time': openapi.Schema(type=openapi.TYPE_STRING, format='time'),
+                                        'duration_minutes': openapi.Schema(type=openapi.TYPE_INTEGER),
+                                        'room': openapi.Schema(type=openapi.TYPE_STRING),
+                                        'status': openapi.Schema(type=openapi.TYPE_BOOLEAN),
+                                    }
+                                ),
+                                'date': openapi.Schema(type=openapi.TYPE_STRING, format='date'),
+                                'start_time': openapi.Schema(type=openapi.TYPE_STRING, format='date-time'),
+                                'is_cancelled': openapi.Schema(type=openapi.TYPE_BOOLEAN),
+                                'created_at': openapi.Schema(type=openapi.TYPE_STRING, format='date-time'),
+                            }
+                        )
+                    )
+                }
+            )
+        ),
+        400: 'Bad Request - Invalid date format',
+        500: 'Internal server error'
+    }
+}
+
 search_instructors_swagger = {
     'operation_description': 'Search for instructors by name (first name, last name, or username).',
     'manual_parameters': [
