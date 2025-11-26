@@ -116,7 +116,7 @@ export default function EditCourses({ isDark, slot, onSlotUpdated, onClose }) {
       if (form.csv_file) {
         const formData = new FormData();
         Object.keys(payloadObj).forEach((k) => formData.append(k, payloadObj[k]));
-        formData.append("csv", form.csv_file);
+        formData.append("file", form.csv_file);
 
         res = await axios.patch(
           `/api/instructor/time-slots/${slot.id}/`,
