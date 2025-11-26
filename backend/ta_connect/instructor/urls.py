@@ -1,7 +1,7 @@
 from django.urls import path
 from instructor.time_slots.time_slots_operations import TimeSlotCreateView, TimeSlotDetailView
 from .time_slots import update_status_slot
-from .views import GetUserSlotsView, SearchInstructorsView, InstructorDataView
+from .views import GetUserSlotsView, GetUserBookingView, SearchInstructorsView, InstructorDataView
 from .allowed_students.import_csv import CSVUploadView
 from .allowed_students.allowed_students_operations import AllowedStudentsUpdateDeleteView, AllowedStudentsAddGetView
 from .allowed_students.update_allowed_students_status import UpdateAllowedStudentsStatusView
@@ -19,6 +19,7 @@ urlpatterns = [
 
     # URLs for user data
     path('get-user-slots/', GetUserSlotsView.as_view(), name='get-user-slots'),
+    path('get-user-bookings/', GetUserBookingView.as_view(), name='get-user-bookings'),
     path('search-instructors/', SearchInstructorsView.as_view(), name='search-instructors'),
     path('get-instructor-data/<int:user_id>/', InstructorDataView.as_view(), name='get-instructor-data'),
     path('upload-csv/<int:slot_id>/', CSVUploadView.as_view(), name='upload-csv'),

@@ -18,7 +18,7 @@ add_time_slot_request = openapi.Schema(
         'start_date': openapi.Schema(type=openapi.TYPE_STRING, format='date', description='Start date of office hours', example='2024-01-15'),
         'end_date': openapi.Schema(type=openapi.TYPE_STRING, format='date', description='End date of office hours', example='2024-05-15'),
         'room': openapi.Schema(type=openapi.TYPE_STRING, description='Room location for office hours', example='Building A, Room 101'),
-        'set_student_limit': openapi.Schema(type=openapi.TYPE_INTEGER, description='Maximum number of students per booking slot', example=1, default=1),
+        'set_student_limit': openapi.Schema(type=openapi.TYPE_INTEGER, description='Maximum number of  times a student can book per booking slot', example=1, default=1),
     },
 )
 
@@ -49,7 +49,7 @@ update_time_slot_request = openapi.Schema(
         'start_date': openapi.Schema(type=openapi.TYPE_STRING, format='date', description='Start date of office hours', example='2024-01-15'),
         'end_date': openapi.Schema(type=openapi.TYPE_STRING, format='date', description='End date of office hours', example='2024-05-15'),
         'room': openapi.Schema(type=openapi.TYPE_STRING, description='Room location for office hours', example='Building A, Room 101'),
-        'set_student_limit': openapi.Schema(type=openapi.TYPE_INTEGER, description='Maximum number of students per booking slot', example=1, default=1),
+        'set_student_limit': openapi.Schema(type=openapi.TYPE_INTEGER, description='Maximum number of  times a student can book per booking slot', example=1, default=1),
     },
 )
 
