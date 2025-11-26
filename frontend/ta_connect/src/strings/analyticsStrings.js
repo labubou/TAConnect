@@ -1,0 +1,55 @@
+const analyticsStrings = {
+  dashboard: {
+    title: "TA Analytics Dashboard",
+    description: "Comprehensive analytics of your bookings, feedback, and student engagement",
+    errorLoading: "Failed to load analytics data. Please try again.",
+    startDate: "Start Date",
+    endDate: "End Date",
+    applyFilter: "Apply Filter",
+    clearFilter: "Clear Filter",
+    stats: {
+      totalBookings: "Total Bookings",
+      activeBookings: "Active Bookings",
+      cancelledBookings: "Cancelled Bookings",
+      uniqueStudents: "Unique Students",
+      totalSlots: "Total Slots",
+    },
+    charts: {
+      bookingsOverTime: "Bookings Over Time",
+      feedbackDistribution: "Feedback Distribution",
+      studentActivity: "Student Activity Trend",
+    },
+    noData: "No data available",
+    noDataMessage: "Unable to load analytics data. Please try refreshing the page.",
+    loading: "Loading analytics...",
+  },
+  bookingsChart: {
+    title: "Bookings Over Time",
+    description: "Number of bookings per day",
+    xAxisLabel: "Date",
+    yAxisLabel: "Number of Bookings",
+    legend: "Number of Bookings",
+    noDataAvailable: "No booking data available",
+  },
+  feedbackChart: {
+    title: "Feedback Distribution",
+    description: "Distribution of student ratings",
+    fiveStars: "5 Stars",
+    fourStars: "4 Stars",
+    threeStars: "3 Stars",
+    twoStars: "2 Stars",
+    oneStar: "1 Star",
+    noDataAvailable: "No feedback data available",
+    averageRating: "Average Rating",
+  },
+  activityChart: {
+    title: "Student Activity Trend",
+    description: "Number of active students per day",
+    xAxisLabel: "Date",
+    yAxisLabel: "Number of Students",
+    legend: "Active Students",
+    noDataAvailable: "No activity data available",
+  },
+};
+
+export default analyticsStrings;

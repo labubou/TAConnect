@@ -5,6 +5,7 @@ const TANavbarStrings = {
     profile: "Profile",
     createSlot: "Create Course / Slot",
     manageCourses: "Manage Courses",
+    analytics: "Analytics",
     logout: "Logout",
     dashboard: "Dashboard",
   },
