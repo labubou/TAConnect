@@ -14,6 +14,7 @@ import PublicRoute from './components/PublicRoute';
 import TAPage from './pages/ta/TAPage';
 import ProfilePage from './pages/main/ProfilePage';
 import ManageCourses from "./pages/ta/ManageCourses";
+import AnalyticsDashboard from "./pages/ta/AnalyticsDashboard";
 import StudentHomePage from './pages/student/studentHomePage';
 import BookPage from './pages/student/BookPage';
 
@@ -97,6 +98,14 @@ function App() {
                 element={
                   <ProtectedRoute>
                     <ManageCourses />
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/ta/analytics" 
+                element={
+                  <ProtectedRoute>
+                    <AnalyticsDashboard />
                   </ProtectedRoute>
                 } 
               />
