@@ -12,9 +12,9 @@ const FeedbackChart = ({ data, isDark }) => {
   }
 
   return (
-    <div className="w-full h-80 sm:h-96 lg:h-[450px]">
+    <div className="w-full h-64 sm:h-80 lg:h-[450px]">
       <ResponsiveContainer width="100%" height="100%">
-        <PieChart margin={{ top: 20, right: 30, bottom: 20, left: 30 }}>
+        <PieChart margin={{ top: 10, right: 10, bottom: 10, left: 10 }}>
           <Pie
             data={data.ratingDistribution}
             cx="50%"

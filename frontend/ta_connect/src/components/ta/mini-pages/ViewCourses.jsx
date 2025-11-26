@@ -103,7 +103,7 @@ export default function ViewCourses({
             <div className="flex flex-col sm:flex-row gap-3">
               <button
                 onClick={onRefresh}
-                className={`px-4 py-2 rounded-xl font-semibold transition-all flex items-center justify-center gap-2 ${
+                className={`w-full sm:w-auto px-4 py-2 rounded-xl font-semibold transition-all flex items-center justify-center gap-2 text-sm sm:text-base ${
                   isDark
                     ? "bg-gray-800 hover:bg-gray-700 text-white"
                     : "bg-gray-100 hover:bg-gray-200 text-gray-800"
@@ -126,7 +126,7 @@ export default function ViewCourses({
               </button>
               <button
                 onClick={onAddCourse}
-                className={`px-4 py-2 rounded-xl font-semibold transition-all flex items-center justify-center gap-2 ${
+                className={`w-full sm:w-auto px-4 py-2 rounded-xl font-semibold transition-all flex items-center justify-center gap-2 text-sm sm:text-base ${
                   isDark
                     ? "bg-emerald-600 hover:bg-emerald-500 text-white"
                     : "bg-emerald-500 hover:bg-emerald-600 text-white"
@@ -321,7 +321,7 @@ export default function ViewCourses({
                       <button
                         onClick={() => onManageStudents && onManageStudents(slot)}
                         disabled={!onManageStudents}
-                        className={`w-full py-2 px-3 rounded-lg font-semibold text-sm flex items-center justify-center gap-2 border ${
+                        className={`flex-1 py-2 px-3 rounded-lg font-semibold text-xs sm:text-sm flex items-center justify-center gap-2 border whitespace-nowrap ${
                           isDark
                             ? "border-gray-700 text-gray-200 hover:bg-gray-800"
                             : "border-gray-200 text-gray-700 hover:bg-gray-100"
@@ -333,7 +333,7 @@ export default function ViewCourses({
                       <button
                         onClick={() => handleToggleStatus(slot.id)}
                         disabled={toggleLoading[slot.id]}
-                        className={`w-full py-2 px-3 rounded-lg font-semibold text-sm flex items-center justify-center gap-2 ${
+                        className={`flex-1 py-2 px-3 rounded-lg font-semibold text-xs sm:text-sm flex items-center justify-center gap-2 whitespace-nowrap ${
                           toggleLoading[slot.id] ? "opacity-50 cursor-not-allowed" : ""
                         } ${
                           slot.status

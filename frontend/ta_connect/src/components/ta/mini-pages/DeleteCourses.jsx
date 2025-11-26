@@ -65,13 +65,13 @@ export default function DeleteCourses({ isDark, slot, onSlotDeleted, onClose }) 
 
   return (
     <div
-      className={`p-6 rounded-lg ${
+      className={`p-4 sm:p-6 rounded-lg ${
         isDark ? "bg-gray-800" : "bg-white"
       } shadow-lg`}
     >
-      <div className="flex items-center justify-between mb-6">
-        <div>
-          <h2 className={`text-2xl font-bold ${isDark ? "text-white" : "text-gray-900"}`}>
+      <div className="flex items-center justify-between mb-6 gap-4">
+        <div className="flex-1 min-w-0">
+          <h2 className={`text-xl sm:text-2xl font-bold ${isDark ? "text-white" : "text-gray-900"}`}>
             {strings.delete.title}
           </h2>
           <p className={`${isDark ? "text-gray-400" : "text-gray-600"}`}>

@@ -200,19 +200,19 @@ export default function CreateCourse({ isDark, onSlotCreated, slots, onClose }) 
     }
   };
 
-  const containerClasses = `p-6 rounded-lg ${isDark ? "bg-gray-800" : "bg-white"} shadow-lg`;
+  const containerClasses = `p-4 sm:p-6 rounded-lg max-h-[90vh] overflow-y-auto ${isDark ? "bg-gray-800" : "bg-white"} shadow-lg`;
 
   return (
     <div className={containerClasses}>
       <h2
-        className={`text-2xl font-bold mb-2 ${
+        className={`text-xl sm:text-2xl font-bold mb-2 ${
           isDark ? "text-white" : "text-gray-900"
         }`}
       >
         {strings.create.title}
       </h2>
       <p
-        className={`mb-6 ${isDark ? "text-gray-300" : "text-gray-600"}`}
+        className={`mb-6 text-sm sm:text-base ${isDark ? "text-gray-300" : "text-gray-600"}`}
       >
         {strings.create.description}
       </p>
