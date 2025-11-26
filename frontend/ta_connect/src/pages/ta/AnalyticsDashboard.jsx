@@ -100,22 +100,22 @@ export default function AnalyticsDashboard() {
         className={`flex-1 transition-all duration-300 ${isNavbarOpen ? 'ml-0 sm:ml-64' : 'ml-0'} pt-20`}
         style={{ minHeight: 'calc(100vh - 4rem)' }}
       >
-        <main className={`${isDark ? 'bg-gray-900' : 'bg-gray-50'} p-4 sm:p-8`}>
-          <div className={`max-w-7xl mx-auto ${isDark ? 'bg-gray-800' : 'bg-white'} p-4 sm:p-8 rounded-xl shadow-lg`}>
+        <main className={`${isDark ? 'bg-gray-900' : 'bg-gray-50'} p-3 sm:p-6 lg:p-8`}>
+          <div className={`max-w-7xl mx-auto ${isDark ? 'bg-gray-800' : 'bg-white'} p-4 sm:p-6 lg:p-8 rounded-xl shadow-lg`}>
             
             {/* Header */}
-            <div className="mb-8">
-              <h1 className={`text-3xl sm:text-4xl font-bold mb-2 ${isDark ? 'text-white' : 'text-gray-900'}`}>
+            <div className="mb-6 sm:mb-8">
+              <h1 className={`text-2xl sm:text-3xl lg:text-4xl font-bold mb-2 ${isDark ? 'text-white' : 'text-gray-900'}`}>
                 {strings.dashboard.title}
               </h1>
-              <p className={`${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
+              <p className={`text-sm sm:text-base ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
                 {strings.dashboard.description}
               </p>
             </div>
 
             {/* Date Filter */}
-            <div className={`mb-8 p-4 rounded-xl ${isDark ? 'bg-gray-700' : 'bg-gray-50'}`}>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
+            <div className={`mb-6 sm:mb-8 p-3 sm:p-4 rounded-xl ${isDark ? 'bg-gray-700' : 'bg-gray-50'}`}>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 mb-4">
                 <div>
                   <label className={`block text-sm font-medium mb-2 ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
                     {strings.dashboard.startDate}
@@ -171,7 +171,7 @@ export default function AnalyticsDashboard() {
 
             {/* Error Message */}
             {error && (
-              <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg dark:bg-red-950 dark:border-red-900">
+              <div className="mb-4 sm:mb-6 p-3 sm:p-4 bg-red-50 border border-red-200 rounded-lg dark:bg-red-950 dark:border-red-900 text-sm">
                 <p className="text-red-700 dark:text-red-300">{error}</p>
               </div>
             )}

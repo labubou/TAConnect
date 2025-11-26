@@ -10,11 +10,11 @@ const StudentActivityChart = ({ data, isDark }) => {
   }
 
   return (
-    <div className="w-full h-80 sm:h-96 lg:h-[450px]">
+    <div className="w-full h-64 sm:h-80 lg:h-[450px]">
       <ResponsiveContainer width="100%" height="100%">
         <LineChart
           data={data}
-          margin={{ top: 20, right: 30, left: 0, bottom: 20 }}
+          margin={{ top: 10, right: 10, left: -20, bottom: 20 }}
         >
           <CartesianGrid 
             strokeDasharray="3 3" 

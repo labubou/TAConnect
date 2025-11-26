@@ -15,14 +15,14 @@ const Modal = ({ title, onClose, isDark, children }) => (
       onClick={onClose}
     ></div>
     <div
-      className={`relative w-full max-w-4xl max-h-[85vh] overflow-hidden rounded-3xl shadow-2xl ${
+      className={`relative w-full max-w-2xl sm:max-w-3xl lg:max-w-4xl max-h-[85vh] overflow-hidden rounded-2xl sm:rounded-3xl shadow-2xl ${
         isDark
           ? "bg-gray-900 border border-gray-800"
           : "bg-white border border-gray-100"
       }`}
     >
-      <div className="flex items-center justify-between px-6 py-4 border-b border-white/10">
-        <h3 className={`text-xl font-semibold ${isDark ? "text-white" : "text-gray-900"}`}>
+      <div className="flex items-center justify-between px-4 sm:px-6 py-4 border-b border-white/10 gap-4">
+        <h3 className={`text-lg sm:text-xl font-semibold flex-1 truncate ${isDark ? "text-white" : "text-gray-900"}`}>
           {title}
         </h3>
         <button
@@ -111,19 +111,19 @@ export default function ManageCourses() {
 
       <main
         className={`transition-all duration-300 ${
-          isNavbarOpen ? "ml-64" : "ml-0"
+          isNavbarOpen ? "ml-0 sm:ml-64" : "ml-0"
         } pt-20 min-h-screen`}
       >
-        <div className="px-4 sm:px-6 lg:px-10 py-6 space-y-6">
+        <div className="px-3 sm:px-6 lg:px-10 py-4 sm:py-6 space-y-4 sm:space-y-6">
           {infoBanner && (
             <div
-              className={`rounded-2xl px-4 py-3 border flex items-center justify-between gap-4 ${
+              className={`rounded-2xl px-3 sm:px-4 py-2 sm:py-3 border flex items-center justify-between gap-2 sm:gap-4 text-sm ${
                 isDark
                   ? "bg-emerald-900/20 border-emerald-700 text-emerald-200"
                   : "bg-emerald-50 border-emerald-200 text-emerald-800"
               }`}
             >
-              <p className="text-sm font-medium">{infoBanner}</p>
+              <p className="text-xs sm:text-sm font-medium">{infoBanner}</p>
               <button
                 onClick={() => setInfoBanner("")}
                 className={`p-2 rounded-lg ${

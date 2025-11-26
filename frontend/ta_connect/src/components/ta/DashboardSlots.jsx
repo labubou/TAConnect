@@ -92,8 +92,8 @@ export default function DashboardSlots({ isDark, slots, bookings, loading, error
   }
 
   return (
-    <div className="overflow-x-auto">
-      <div className="min-w-full grid grid-cols-7 gap-4">
+    <div className="overflow-x-auto -mx-4 sm:mx-0 px-4 sm:px-0">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-7 gap-3 sm:gap-4">
         {DAYS_OF_WEEK.map((day) => {
           const daySlots = getSlotsForDay(day);
           return (

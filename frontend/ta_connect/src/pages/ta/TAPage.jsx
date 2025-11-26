@@ -47,23 +47,23 @@ export default function TAPage() {
       <TAnavbar onToggle={setIsNavbarOpen} />
       
       <div 
-        className={`flex-1 transition-all duration-300 ${isNavbarOpen ? 'ml-64' : 'ml-0'} pt-20`}
+        className={`flex-1 transition-all duration-300 ${isNavbarOpen ? 'ml-0 sm:ml-64' : 'ml-0'} pt-20`}
         style={{ minHeight: 'calc(100vh - 4rem)' }}
       >
-        <main className={`${isDark ? 'bg-gray-900' : 'bg-gray-50'} p-8`}>
-          <div className={`max-w-full mx-auto ${isDark ? 'bg-gray-800' : 'bg-white'} p-8 rounded-xl shadow-lg`}> 
-            <div className="flex justify-between items-center mb-8">
-              <div>
-                <h1 className={`text-4xl font-bold mb-2 ${isDark ? 'text-white' : 'text-gray-900'}`}>
+        <main className={`${isDark ? 'bg-gray-900' : 'bg-gray-50'} p-4 sm:p-8`}>
+          <div className={`max-w-full mx-auto ${isDark ? 'bg-gray-800' : 'bg-white'} p-4 sm:p-8 rounded-xl shadow-lg`}> 
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
+              <div className="flex-1 min-w-0">
+                <h1 className={`text-2xl sm:text-4xl font-bold mb-2 ${isDark ? 'text-white' : 'text-gray-900'}`}>
                   {strings.taPage.weekSchedule.title}
                 </h1>
-                <p className={`${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
+                <p className={`text-sm sm:text-base ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
                   {strings.taPage.description}
                 </p>
               </div>
               <button
                 onClick={handleCreateSlot}
-                className="px-6 py-3 bg-gradient-to-r from-[#366c6b] to-[#1a3535] text-white rounded-lg hover:shadow-lg transition-all duration-300 hover:scale-105 whitespace-nowrap ml-4"
+                className="w-full sm:w-auto px-4 sm:px-6 py-3 bg-gradient-to-r from-[#366c6b] to-[#1a3535] text-white rounded-lg hover:shadow-lg transition-all duration-300 hover:scale-105 whitespace-nowrap text-sm sm:text-base"
               >
                 {strings.taPage.createSlot}
               </button>
