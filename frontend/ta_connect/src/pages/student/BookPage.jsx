@@ -278,46 +278,46 @@ export default function BookPage() {
         <main className={`${isDark ? 'bg-gray-900' : 'bg-gray-50'} p-6`}>
           <div className="max-w-7xl mx-auto">
             {/* Header */}
-            <div className={`${isDark ? 'bg-gray-800' : 'bg-white'} p-6 rounded-xl shadow-lg mb-6`}>
-              <h1 className={`text-3xl font-bold ${isDark ? 'text-white' : 'text-gray-900'} mb-2`}>
+            <div className={`${isDark ? 'bg-gray-800' : 'bg-white border border-gray-200'} p-8 rounded-xl ${isDark ? 'shadow-lg' : 'shadow-md'} mb-6`}>
+              <h1 className={`text-3xl font-bold ${isDark ? 'text-white' : 'text-gray-800'} mb-2`}>
                 {strings.header.title}
               </h1>
-              <p className={`${isDark ? 'text-gray-300' : 'text-gray-600'}`}>
+              <p className={`${isDark ? 'text-gray-300' : 'text-gray-500'} text-lg`}>
                 {strings.header.subtitle}
               </p>
             </div>
 
             {/* Error/Success Messages */}
             {error && (
-              <div className={`mb-6 p-4 ${isDark ? 'bg-red-900/30 border-red-600' : 'bg-red-100 border-red-400'} border rounded-xl`}>
+              <div className={`mb-6 p-4 ${isDark ? 'bg-red-900/30 border-red-600' : 'bg-red-50 border-red-300'} border-2 rounded-xl ${isDark ? '' : 'shadow-sm'}`}>
                 <div className="flex items-start">
-                  <svg className="w-5 h-5 mr-3 mt-0.5 text-red-600" fill="currentColor" viewBox="0 0 20 20">
+                  <svg className={`w-5 h-5 mr-3 mt-0.5 ${isDark ? 'text-red-600' : 'text-red-500'}`} fill="currentColor" viewBox="0 0 20 20">
                     <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
                   </svg>
-                  <span className={`${isDark ? 'text-red-200' : 'text-red-700'}`}>{error}</span>
+                  <span className={`${isDark ? 'text-red-200' : 'text-red-700'} font-medium`}>{error}</span>
                 </div>
               </div>
             )}
 
             {success && (
-              <div className={`mb-6 p-4 ${isDark ? 'bg-green-900/30 border-green-600' : 'bg-green-100 border-green-400'} border rounded-xl`}>
+              <div className={`mb-6 p-4 ${isDark ? 'bg-green-900/30 border-green-600' : 'bg-green-50 border-green-300'} border-2 rounded-xl ${isDark ? '' : 'shadow-sm'}`}>
                 <div className="flex items-start">
-                  <svg className="w-5 h-5 mr-3 mt-0.5 text-green-600" fill="currentColor" viewBox="0 0 20 20">
+                  <svg className={`w-5 h-5 mr-3 mt-0.5 ${isDark ? 'text-green-600' : 'text-green-500'}`} fill="currentColor" viewBox="0 0 20 20">
                     <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
                   </svg>
-                  <span className={`${isDark ? 'text-green-200' : 'text-green-700'}`}>{success}</span>
+                  <span className={`${isDark ? 'text-green-200' : 'text-green-700'} font-medium`}>{success}</span>
                 </div>
               </div>
             )}
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
               {/* Step 1: Select Instructor */}
-              <div className={`${isDark ? 'bg-gray-800' : 'bg-white'} p-6 rounded-xl shadow-lg`}>
+              <div className={`${isDark ? 'bg-gray-800' : 'bg-white border border-white-200'} p-6 rounded-xl ${isDark ? 'shadow-lg' : 'shadow-md hover:shadow-lg transition-shadow'}`}>
                 <div className="flex items-center mb-4">
-                  <div className="w-8 h-8 bg-gradient-to-r from-[#366c6b] to-[#1a3535] text-white rounded-full flex items-center justify-center font-bold mr-3">
+                  <div className={`w-8 h-8 ${isDark ? 'bg-gradient-to-r from-[#366c6b] to-[#1a3535]' : 'bg-gradient-to-r from-[#4a9d9c] to-[#366c6b]'} text-white rounded-full flex items-center justify-center font-bold mr-3 shadow-sm`}>
                     {strings.steps.step1.number}
                   </div>
-                  <h2 className={`text-xl font-bold ${isDark ? 'text-white' : 'text-gray-900'}`}>
+                  <h2 className={`text-xl font-bold ${isDark ? 'text-white' : 'text-gray-800'}`}>
                     {strings.steps.step1.title}
                   </h2>
                 </div>
@@ -332,7 +332,7 @@ export default function BookPage() {
                         onChange={(e) => setSearchQuery(e.target.value)}
                         onKeyPress={(e) => e.key === 'Enter' && handleSearchInstructors()}
                         placeholder={strings.steps.step1.searchPlaceholder}
-                        className={`w-full px-3 py-2 pr-10 border ${isDark ? 'border-gray-600 bg-gray-700 text-white placeholder-gray-400' : 'border-gray-300 bg-white text-black placeholder-gray-500'} rounded-lg focus:ring-2 focus:ring-blue-500`}
+                        className={`w-full px-4 py-2.5 pr-10 border ${isDark ? 'border-gray-600 bg-gray-700 text-white placeholder-gray-400' : 'border-gray-300 bg-white text-gray-900 placeholder-gray-400 focus:border-blue-400'} rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none transition-all`}
                       />
                       {isSearching && (
                         <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
@@ -356,13 +356,13 @@ export default function BookPage() {
                     <button
                       onClick={handleSearchInstructors}
                       disabled={!searchQuery.trim() || isSearching}
-                      className="px-4 py-2 bg-gradient-to-r from-[#366c6b] to-[#1a3535] text-white rounded-lg hover:shadow-lg transition disabled:opacity-50 disabled:cursor-not-allowed"
+                      className={`px-4 py-2 ${isDark ? 'bg-gradient-to-r from-[#366c6b] to-[#1a3535] hover:from-[#2d5857] hover:to-[#152a2a]' : 'bg-gradient-to-r from-[#4a9d9c] to-[#366c6b] hover:from-[#3d8584] hover:to-[#2d5857]'} text-white rounded-lg hover:shadow-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed font-medium`}
                     >
                       {strings.steps.step1.searchButton}
                     </button>
                   </div>
                   {searchQuery.trim() && searchQuery.trim().length < 2 && (
-                    <p className={`text-xs mt-1 ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>
+                    <p className={`text-xs mt-1 ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
                       {strings.steps.step1.minCharsHint}
                     </p>
                   )}
@@ -378,10 +378,10 @@ export default function BookPage() {
                       </svg>
                     </div>
                   ) : instructors.length === 0 ? (
-                    <p className={`text-center py-8 ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
+                    <p className={`text-center py-8 ${isDark ? 'text-gray-400' : 'text-gray-700'}`}>
                       {searchQuery.trim() ? (
                         <>
-                          <svg className="w-12 h-12 mx-auto mb-2 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <svg className={`w-12 h-12 mx-auto mb-2 ${isDark ? 'opacity-50' : 'opacity-40'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                           </svg>
                           {strings.steps.step1.noResultsFor} "{searchQuery}"
@@ -390,7 +390,7 @@ export default function BookPage() {
                         </>
                       ) : (
                         <>
-                          <svg className="w-12 h-12 mx-auto mb-2 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <svg className={`w-12 h-12 mx-auto mb-2 ${isDark ? 'opacity-50' : 'opacity-40'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                           </svg>
                           {strings.steps.step1.startTyping}
@@ -402,18 +402,18 @@ export default function BookPage() {
                       <button
                         key={instructor.id}
                         onClick={() => handleSelectInstructor(instructor)}
-                        className={`w-full p-4 rounded-lg border-2 text-left transition-all ${
+                        className={`w-full p-4 rounded-lg border-2 bg-white dark:bg-gray-900 text-left transition-all ${
                           selectedInstructor?.id === instructor.id
-                            ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20'
-                            : `${isDark ? 'border-gray-700 hover:border-gray-600' : 'border-gray-200 hover:border-gray-300'}`
+                            ? isDark ? 'border-blue-500 bg-blue-900/20' : 'border-blue-500 bg-blue-50 shadow-sm'
+                            : `${isDark ? 'border-gray-700 hover:border-gray-600' : 'border-gray-200 hover:border-gray-300 hover:shadow-sm'}`
                         }`}
                       >
                         <div className="flex items-center space-x-3">
-                          <div className="w-10 h-10 bg-gradient-to-br from-[#366c6b] to-[#1a3535] rounded-full flex items-center justify-center text-white font-bold">
+                          <div className={`w-10 h-10 ${isDark ? 'bg-gradient-to-br from-[#366c6b] to-[#1a3535]' : 'bg-gradient-to-br from-[#4a9d9c] to-[#366c6b]'} rounded-full flex items-center justify-center text-white font-bold shadow-sm`}>
                             {instructor.first_name?.[0]}{instructor.last_name?.[0]}
                           </div>
                           <div>
-                            <p className={`font-semibold ${isDark ? 'text-white' : 'text-gray-900'}`}>
+                            <p className={`font-semibold ${isDark ? 'text-white' : 'text-gray-800'}`}>
                               {instructor.first_name} {instructor.last_name}
                             </p>
                             <p className={`text-sm ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
@@ -428,23 +428,23 @@ export default function BookPage() {
               </div>
 
               {/* Step 2: Select Time Slot */}
-              <div className={`${isDark ? 'bg-gray-800' : 'bg-white'} p-6 rounded-xl shadow-lg`}>
+              <div className={`${isDark ? 'bg-gray-800' : 'bg-white border border-gray-200'} p-6 rounded-xl ${isDark ? 'shadow-lg' : 'shadow-md hover:shadow-lg transition-shadow'}`}>
                 <div className="flex items-center mb-4">
-                  <div className="w-8 h-8 bg-gradient-to-r from-[#366c6b] to-[#1a3535] text-white rounded-full flex items-center justify-center font-bold mr-3">
+                  <div className={`w-8 h-8 ${isDark ? 'bg-gradient-to-r from-[#366c6b] to-[#1a3535]' : 'bg-gradient-to-r from-[#4a9d9c] to-[#366c6b]'} text-white rounded-full flex items-center justify-center font-bold mr-3 shadow-sm`}>
                     {strings.steps.step2.number}
                   </div>
-                  <h2 className={`text-xl font-bold ${isDark ? 'text-white' : 'text-gray-900'}`}>
+                  <h2 className={`text-xl font-bold ${isDark ? 'text-white' : 'text-gray-800'}`}>
                     {strings.steps.step2.title}
                   </h2>
                 </div>
 
                 <div className="space-y-2 max-h-96 overflow-y-auto">
                   {!selectedInstructor ? (
-                    <p className={`text-center py-8 ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
+                    <p className={`text-center py-8 ${isDark ? 'text-gray-400' : 'text-gray-700'}`}>
                       {strings.steps.step2.selectInstructorFirst}
                     </p>
                   ) : instructorSlots.length === 0 ? (
-                    <p className={`text-center py-8 ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
+                    <p className={`text-center py-8 ${isDark ? 'text-gray-400' : 'text-gray-700'}`}>
                       {strings.steps.step2.noSlots}
                     </p>
                   ) : (
@@ -453,20 +453,20 @@ export default function BookPage() {
                         key={slot.id}
                         onClick={() => handleSelectSlot(slot)}
                         disabled={!slot.status}
-                        className={`w-full p-4 rounded-lg border-2 text-left transition-all ${
+                        className={`w-full p-4 rounded-lg border-2 bg-white dark:bg-gray-900 text-left transition-all ${
                           selectedSlot?.id === slot.id
-                            ? 'border-green-500 bg-green-50 dark:bg-green-900/20'
+                            ? isDark ? 'border-green-500 bg-green-900/20' : 'border-green-500 bg-green-50 shadow-sm'
                             : slot.status
-                              ? `${isDark ? 'border-gray-700 hover:border-gray-600' : 'border-gray-200 hover:border-gray-300'}`
-                              : 'border-gray-300 opacity-50 cursor-not-allowed'
+                              ? `${isDark ? 'border-gray-700 hover:border-gray-600' : 'border-gray-200 hover:border-gray-300 hover:shadow-sm'}`
+                              : isDark ? 'border-gray-300 opacity-50 cursor-not-allowed' : 'border-gray-200 bg-gray-50 opacity-60 cursor-not-allowed'
                         }`}
                       >
-                        <div className="flex items-start justify-between">
+                        <div className="flex items-start justify-between ">
                           <div className="flex-1">
-                            <p className={`font-semibold ${isDark ? 'text-white' : 'text-gray-900'} mb-1`}>
+                            <p className={`font-semibold ${isDark ? 'text-white' : 'text-gray-800'} mb-1`}>
                               {slot.course_name || strings.steps.step2.officeHours}
                             </p>
-                            <div className={`text-sm ${isDark ? 'text-gray-400' : 'text-gray-600'} space-y-1`}>
+                            <div className={`text-sm ${isDark ? 'text-gray-400' : 'text-gray-700'} space-y-0.5 font-medium`}>
                               <p>📅 {slot.day_of_week}</p>
                               <p>🕐 {formatTime(slot.start_time)} - {formatTime(slot.end_time)}</p>
                               <p>📍 {slot.location || strings.steps.step2.online}</p>
@@ -474,7 +474,7 @@ export default function BookPage() {
                             </div>
                           </div>
                           {!slot.status && (
-                            <span className="text-xs bg-red-100 text-red-700 px-2 py-1 rounded">
+                            <span className={`text-xs ${isDark ? 'bg-red-100 text-red-700' : 'bg-red-100 text-red-600'} px-2 py-1 rounded font-medium`}>
                               {strings.steps.step2.inactive}
                             </span>
                           )}
@@ -486,25 +486,25 @@ export default function BookPage() {
               </div>
 
               {/* Step 3: Select Date & Book */}
-              <div className={`${isDark ? 'bg-gray-800' : 'bg-white'} p-6 rounded-xl shadow-lg`}>
+              <div className={`${isDark ? 'bg-gray-800' : 'bg-white border border-gray-200'} p-6 rounded-xl ${isDark ? 'shadow-lg' : 'shadow-md hover:shadow-lg transition-shadow'}`}>
                 <div className="flex items-center mb-4">
-                  <div className="w-8 h-8 bg-gradient-to-r from-[#366c6b] to-[#1a3535] text-white rounded-full flex items-center justify-center font-bold mr-3">
+                  <div className={`w-8 h-8 ${isDark ? 'bg-gradient-to-r from-[#366c6b] to-[#1a3535]' : 'bg-gradient-to-r from-[#4a9d9c] to-[#366c6b]'} text-white rounded-full flex items-center justify-center font-bold mr-3 shadow-sm`}>
                     {strings.steps.step3.number}
                   </div>
-                  <h2 className={`text-xl font-bold ${isDark ? 'text-white' : 'text-gray-900'}`}>
+                  <h2 className={`text-xl font-bold ${isDark ? 'text-white' : 'text-gray-800'}`}>
                     {strings.steps.step3.title}
                   </h2>
                 </div>
 
                 {!selectedSlot ? (
-                  <p className={`text-center py-8 ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
+                  <p className={`text-center py-8 ${isDark ? 'text-gray-400' : 'text-gray-700'}`}>
                     {strings.steps.step3.selectSlotFirst}
                   </p>
                 ) : (
                   <>
                     <div className="space-y-2 mb-6 max-h-64 overflow-y-auto">
                       {availableDates.length === 0 ? (
-                        <p className={`text-center py-4 ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
+                        <p className={`text-center py-4 ${isDark ? 'text-gray-400' : 'text-gray-700'}`}>
                           {strings.steps.step3.noDates}
                         </p>
                       ) : (
@@ -514,13 +514,13 @@ export default function BookPage() {
                             <button
                               key={index}
                               onClick={() => setSelectedDate(dateStr)}
-                              className={`w-full p-3 rounded-lg border-2 text-left transition-all ${
+                              className={`w-full p-3 rounded-lg border-2 bg-white dark:bg-gray-900 text-left transition-all ${
                                 selectedDate === dateStr
-                                  ? 'border-purple-500 bg-purple-50 dark:bg-purple-900/20'
-                                  : `${isDark ? 'border-gray-700 hover:border-gray-600' : 'border-gray-200 hover:border-gray-300'}`
+                                  ? isDark ? 'border-purple-500 bg-purple-900/20' : 'border-purple-500 bg-purple-50 shadow-sm'
+                                  : `${isDark ? 'border-gray-700 hover:border-gray-600' : 'border-gray-200 hover:border-gray-300 hover:shadow-sm'}`
                               }`}
                             >
-                              <p className={`font-semibold ${isDark ? 'text-white' : 'text-gray-900'}`}>
+                              <p className={`font-semibold ${isDark ? 'text-white' : 'text-gray-800'}`}>
                                 {formatDate(date)}
                               </p>
                             </button>
@@ -532,7 +532,7 @@ export default function BookPage() {
                     {/* Time Selection */}
                     {selectedDate && (
                       <div className="mb-6">
-                        <h3 className={`font-semibold ${isDark ? 'text-white' : 'text-gray-900'} mb-2`}>
+                        <h3 className={`font-semibold ${isDark ? 'text-white' : 'text-gray-800'} mb-3`}>
                           Select Time
                         </h3>
                         <div className="grid grid-cols-2 gap-2 max-h-48 overflow-y-auto">
@@ -540,10 +540,10 @@ export default function BookPage() {
                             <button
                               key={index}
                               onClick={() => setSelectedTime(timeSlot.value)}
-                              className={`p-2 rounded-lg border text-center transition-all ${
+                              className={`p-2.5 rounded-lg border-2 bg-white dark:bg-gray-900 text-center transition-all font-medium text-sm ${
                                 selectedTime === timeSlot.value
-                                  ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300'
-                                  : `${isDark ? 'border-gray-700 hover:border-gray-600 text-gray-300' : 'border-gray-200 hover:border-gray-300 text-gray-700'}`
+                                  ? isDark ? 'border-blue-500 bg-blue-900/20 text-blue-300' : 'border-blue-500 bg-blue-50 text-blue-700 shadow-sm'
+                                  : `${isDark ? 'border-gray-700 hover:border-gray-600 text-gray-300' : 'border-gray-200 hover:border-gray-300 text-gray-700 hover:shadow-sm'}`
                               }`}
                             >
                               {formatTime(timeSlot.start)} - {formatTime(timeSlot.end)}
@@ -555,11 +555,11 @@ export default function BookPage() {
 
                     {/* Booking Summary */}
                     {selectedDate && selectedTime && selectedSlot && selectedInstructor && (
-                      <div className={`p-4 ${isDark ? 'bg-gray-700' : 'bg-gray-50'} rounded-lg mb-4`}>
-                        <h3 className={`font-semibold ${isDark ? 'text-white' : 'text-gray-900'} mb-2`}>
+                      <div className={`p-4 ${isDark ? 'bg-gray-700' : 'bg-gradient-to-br from-blue-50 to-purple-50 border border-blue-200'} rounded-lg mb-4 ${isDark ? '' : 'shadow-sm'}`}>
+                        <h3 className={`font-semibold ${isDark ? 'text-white' : 'text-gray-800'} mb-3`}>
                           {strings.steps.step3.summaryTitle}
                         </h3>
-                        <div className={`text-sm ${isDark ? 'text-gray-300' : 'text-gray-700'} space-y-1`}>
+                        <div className={`text-sm ${isDark ? 'text-gray-300' : 'text-gray-800'} space-y-1.5 font-medium`}>
                           <p>👨‍🏫 {selectedInstructor.first_name || ''} {selectedInstructor.last_name || ''}</p>
                           <p>📚 {selectedSlot.course_name || strings.steps.step2.officeHours}</p>
                           <p>📅 {formatDate(selectedDate)}</p>
@@ -572,7 +572,7 @@ export default function BookPage() {
                     <button
                       onClick={handleBookSlot}
                       disabled={!selectedDate || !selectedTime || bookingLoading}
-                      className="w-full bg-gradient-to-r from-[#366c6b] to-[#1a3535] text-white py-3 px-6 rounded-lg hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 font-semibold flex items-center justify-center"
+                      className={`w-full ${isDark ? 'bg-gradient-to-r from-[#366c6b] to-[#1a3535]' : 'bg-gradient-to-r from-[#4a9d9c] to-[#366c6b]'} text-white py-3 px-6 rounded-lg ${isDark ? 'hover:from-[#2d5857] hover:to-[#152a2a]' : 'hover:from-[#3d8584] hover:to-[#2d5857]'} hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 font-semibold flex items-center justify-center transform hover:scale-[1.02]`}
                     >
                       {bookingLoading ? (
                         <>
@@ -597,7 +597,7 @@ export default function BookPage() {
       {/* Success Modal */}
       {showSuccessModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black bg-opacity-50 backdrop-blur-sm">
-          <div className={`${isDark ? 'bg-gray-800 text-white' : 'bg-white text-gray-900'} rounded-xl shadow-2xl max-w-md w-full p-6 transform transition-all scale-100`}>
+          <div className={`${isDark ? 'bg-gray-800 text-white' : 'bg-white text-gray-900 border border-gray-200'} rounded-xl shadow-2xl max-w-md w-full p-8 transform transition-all scale-100`}>
             <div className="text-center">
               <div className="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-green-100 mb-6">
                 <svg className="h-8 w-8 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -605,12 +605,12 @@ export default function BookPage() {
                 </svg>
               </div>
               <h3 className="text-2xl font-bold mb-2">Booking Confirmed!</h3>
-              <p className={`text-base ${isDark ? 'text-gray-300' : 'text-gray-500'} mb-8`}>
+              <p className={`text-base ${isDark ? 'text-gray-300' : 'text-gray-600'} mb-8`}>
                 A confirmation has been sent to your email.
               </p>
               <button
                 onClick={handleCloseSuccessModal}
-                className="w-full bg-gradient-to-r from-[#366c6b] to-[#1a3535] text-white py-3 px-4 rounded-lg hover:shadow-lg transition-all font-semibold"
+                className={`w-full ${isDark ? 'bg-gradient-to-r from-[#366c6b] to-[#1a3535] hover:from-[#2d5857] hover:to-[#152a2a]' : 'bg-gradient-to-r from-[#4a9d9c] to-[#366c6b] hover:from-[#3d8584] hover:to-[#2d5857]'} text-white py-3 px-4 rounded-lg hover:shadow-lg transition-all font-semibold transform hover:scale-[1.02]`}
               >
                 Done
               </button>

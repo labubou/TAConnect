@@ -329,7 +329,7 @@ function ResetPasswordPage() {
                 <button
                   onClick={handleSubmit}
                   disabled={loading || !newPassword.trim() || !confirmPassword.trim()}
-                  className="w-full bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 disabled:bg-blue-400 disabled:cursor-not-allowed transition flex items-center justify-center"
+                  className={`w-full ${isDark ? 'bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400' : 'bg-blue-500 hover:bg-blue-600 disabled:bg-blue-300'} text-white py-2 px-4 rounded-lg disabled:cursor-not-allowed transition flex items-center justify-center font-medium`}
                 >
                   {loading ? (
                     <>
@@ -348,7 +348,7 @@ function ResetPasswordPage() {
               <div className="mt-6 text-center">
                 <button
                   onClick={() => navigate('/login')}
-                  className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition flex items-center justify-center mx-auto focus:outline-none"
+                  className={`px-6 py-2 ${isDark ? 'bg-blue-600 hover:bg-blue-700' : 'bg-blue-500 hover:bg-blue-600'} text-white rounded-lg transition flex items-center justify-center mx-auto focus:outline-none font-medium`}
                 >
                   <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
