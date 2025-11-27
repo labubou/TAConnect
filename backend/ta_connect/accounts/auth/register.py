@@ -19,7 +19,7 @@ from .utils.send_verification_email import send_verification_email
 from .utils.send_welcome_email import send_welcome_email
 
 class RegisterRateThrottle(AnonRateThrottle):
-    rate = '3/hour'  # Limit registration to prevent abuse
+    rate = '5/hour'  # Limit registration to prevent abuse
 
 class VerifyEmailRateThrottle(AnonRateThrottle):
     rate = '5/hour'  # Limit email verification attempts
