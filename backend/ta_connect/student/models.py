@@ -15,6 +15,7 @@ class Booking(models.Model):
     date = models.DateField(default=datetime.date.today)
     created_at = models.DateTimeField(auto_now_add=True)
     is_cancelled = models.BooleanField(default=False)
+    is_completed = models.BooleanField(default=False)
 
     def save(self, *args, **kwargs):
         # Calculate end_time based on slot duration if not set
