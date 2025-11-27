@@ -1,0 +1,442 @@
+import { useState, useEffect } from 'react';
+import { useTheme } from '../../contexts/ThemeContext';
+import TAnavbar from '../../components/ta/TAnavbar';
+import ErrorBoundary from '../../components/ErrorBoundary';
+import Footer from '../../components/Footer';
+import { SkeletonLoader } from '../../components/SkeletonLoader';
+import strings from '../../strings/manageBookingsStrings';
+import { useInstructorBookings, useCancelInstructorBooking } from '../../hooks/useApi';
+import CancelBookingModal from '../../components/ta/CancelBookingModal';
+
+export default function ManageBookings() {
+  const { theme } = useTheme();
+  const isDark = theme === 'dark';
+  const [isNavbarOpen, setIsNavbarOpen] = useState(true);
+  const [filteredBookings, setFilteredBookings] = useState([]);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [statusFilter, setStatusFilter] = useState('all');
+  const [dateRange, setDateRange] = useState({ start: '', end: '' });
+  const [selectedBooking, setSelectedBooking] = useState(null);
+  const [showCancelModal, setShowCancelModal] = useState(false);
+
+  // Fetch bookings data
+  const { data: bookings = [], isLoading, error, refetch } = useInstructorBookings();
+  
+  // Cancel booking mutation
+  const { mutate: cancelBooking, isPending: isCancelling } = useCancelInstructorBooking();
+
+  // Filter and search bookings
+  useEffect(() => {
+    let filtered = bookings;
+
+    // Filter by status
+    if (statusFilter === 'active') {
+      filtered = filtered.filter(b => !b.is_cancelled);
+    } else if (statusFilter === 'cancelled') {
+      filtered = filtered.filter(b => b.is_cancelled);
+    }
+
+    // Filter by date range
+    if (dateRange.start) {
+      filtered = filtered.filter(b => new Date(b.date) >= new Date(dateRange.start));
+    }
+    if (dateRange.end) {
+      filtered = filtered.filter(b => new Date(b.date) <= new Date(dateRange.end));
+    }
+
+    // Search by student name or email
+    if (searchTerm) {
+      const search = searchTerm.toLowerCase();
+      filtered = filtered.filter(b => 
+        b.student.first_name.toLowerCase().includes(search) ||
+        b.student.last_name.toLowerCase().includes(search) ||
+        b.student.email.toLowerCase().includes(search) ||
+        b.student.username.toLowerCase().includes(search)
+      );
+    }
+
+    setFilteredBookings(filtered);
+  }, [bookings, statusFilter, dateRange, searchTerm]);
+
+  const handleCancelClick = (booking) => {
+    setSelectedBooking(booking);
+    setShowCancelModal(true);
+  };
+
+  const handleConfirmCancel = () => {
+    if (selectedBooking) {
+      cancelBooking(selectedBooking.id, {
+        onSuccess: () => {
+          setShowCancelModal(false);
+          setSelectedBooking(null);
+          refetch();
+        },
+        onError: (error) => {
+          console.error('Failed to cancel booking:', error);
+          // Show error in UI
+          if (error.response?.status === 403) {
+            alert('⚠️ Backend Limitation: The current backend only allows students to cancel their own bookings. Instructors cannot cancel bookings directly. Please ask the student to cancel, or the backend needs to be updated to support instructor cancellation.');
+          }
+        }
+      });
+    }
+  };
+
+  const handleClearFilters = () => {
+    setSearchTerm('');
+    setStatusFilter('all');
+    setDateRange({ start: '', end: '' });
+  };
+
+  const formatDate = (dateString) => {
+    return new Date(dateString).toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric'
+    });
+  };
+
+  const formatTime = (timeString) => {
+    if (!timeString) return 'N/A';
+    const [hours, minutes] = timeString.split(':');
+    return `${hours}:${minutes}`;
+  };
+
+  const getStatusColor = (booking) => {
+    if (booking.is_cancelled) {
+      return isDark ? 'bg-red-900/20 text-red-300' : 'bg-red-50 text-red-700';
+    }
+    return isDark ? 'bg-green-900/20 text-green-300' : 'bg-green-50 text-green-700';
+  };
+
+  const getStatusIcon = (booking) => {
+    if (booking.is_cancelled) {
+      return (
+        <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+          <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
+        </svg>
+      );
+    }
+    return (
+      <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+      </svg>
+    );
+  };
+
+  return (
+    <div className={`min-h-screen flex flex-col ${isDark ? 'bg-gray-900' : 'bg-gray-50'}`}>
+      <TAnavbar onToggle={setIsNavbarOpen} />
+      
+      <div 
+        className={`flex-1 transition-all duration-300 ${isNavbarOpen ? 'ml-0 sm:ml-64' : 'ml-0'} pt-20`}
+        style={{ minHeight: 'calc(100vh - 4rem)' }}
+      >
+        <main className={`${isDark ? 'bg-gray-900' : 'bg-gray-50'} p-4 sm:p-8`}>
+          <div className={`max-w-7xl mx-auto ${isDark ? 'bg-gray-800' : 'bg-white'} p-4 sm:p-8 rounded-xl shadow-lg`}>
+            
+            {/* Header */}
+            <div className="mb-8">
+              <h1 className={`text-2xl sm:text-4xl font-bold mb-2 ${isDark ? 'text-white' : 'text-gray-900'}`}>
+                {strings.page.title}
+              </h1>
+              <p className={`text-sm sm:text-base ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
+                {strings.page.description}
+              </p>
+            </div>
+
+            {/* Filters Section */}
+            <div className={`mb-8 p-4 sm:p-6 rounded-lg ${isDark ? 'bg-gray-700' : 'bg-gray-50'}`}>
+              <h2 className={`text-lg font-semibold mb-4 ${isDark ? 'text-white' : 'text-gray-900'}`}>
+                {strings.filters.filterByStatus}
+              </h2>
+              
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
+                {/* Search */}
+                <div className="sm:col-span-2 lg:col-span-2">
+                  <input
+                    type="text"
+                    placeholder={strings.filters.search}
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className={`w-full px-4 py-2 rounded-lg border transition-colors ${
+                      isDark
+                        ? 'bg-gray-600 border-gray-500 text-white placeholder-gray-400'
+                        : 'bg-white border-gray-300 text-gray-900 placeholder-gray-500'
+                    } focus:outline-none focus:ring-2 focus:ring-[#366c6b]`}
+                  />
+                </div>
+
+                {/* Status Filter */}
+                <select
+                  value={statusFilter}
+                  onChange={(e) => setStatusFilter(e.target.value)}
+                  className={`px-4 py-2 rounded-lg border transition-colors ${
+                    isDark
+                      ? 'bg-gray-600 border-gray-500 text-white'
+                      : 'bg-white border-gray-300 text-gray-900'
+                  } focus:outline-none focus:ring-2 focus:ring-[#366c6b]`}
+                >
+                  <option value="all">{strings.filters.all}</option>
+                  <option value="active">{strings.filters.active}</option>
+                  <option value="cancelled">{strings.filters.cancelled}</option>
+                </select>
+              </div>
+
+              {/* Date Range */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
+                <input
+                  type="date"
+                  name="start"
+                  value={dateRange.start}
+                  onChange={(e) => setDateRange(prev => ({ ...prev, start: e.target.value }))}
+                  className={`px-4 py-2 rounded-lg border transition-colors ${
+                    isDark
+                      ? 'bg-gray-600 border-gray-500 text-white'
+                      : 'bg-white border-gray-300 text-gray-900'
+                  } focus:outline-none focus:ring-2 focus:ring-[#366c6b]`}
+                />
+                <input
+                  type="date"
+                  name="end"
+                  value={dateRange.end}
+                  onChange={(e) => setDateRange(prev => ({ ...prev, end: e.target.value }))}
+                  className={`px-4 py-2 rounded-lg border transition-colors ${
+                    isDark
+                      ? 'bg-gray-600 border-gray-500 text-white'
+                      : 'bg-white border-gray-300 text-gray-900'
+                  } focus:outline-none focus:ring-2 focus:ring-[#366c6b]`}
+                />
+              </div>
+
+              {/* Action Buttons */}
+              <div className="flex flex-col sm:flex-row gap-2">
+                <button
+                  onClick={handleClearFilters}
+                  className={`px-4 py-2 rounded-lg border transition-all ${
+                    isDark
+                      ? 'border-gray-500 text-gray-300 hover:bg-gray-600'
+                      : 'border-gray-300 text-gray-700 hover:bg-gray-100'
+                  }`}
+                >
+                  {strings.filters.clear}
+                </button>
+              </div>
+            </div>
+
+            {/* Loading State */}
+            {isLoading && (
+              <SkeletonLoader isDark={isDark} count={5} height="h-24" className="mb-6" />
+            )}
+
+            {/* Error State */}
+            {error && !isLoading && (
+              <div className={`p-4 rounded-lg mb-6 ${isDark ? 'bg-red-900/20 text-red-300' : 'bg-red-50 text-red-700'}`}>
+                <p className="text-sm font-medium">{strings.messages.error}</p>
+              </div>
+            )}
+
+            {/* Bookings List */}
+            {!isLoading && (
+              <ErrorBoundary>
+                {filteredBookings.length === 0 ? (
+                  <div className={`text-center py-12 ${isDark ? 'bg-gray-700' : 'bg-gray-50'} rounded-lg`}>
+                    <svg className={`w-16 h-16 mx-auto mb-4 ${isDark ? 'text-gray-500' : 'text-gray-300'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <p className={`text-lg font-semibold ${isDark ? 'text-gray-300' : 'text-gray-600'}`}>
+                      {strings.page.noBookings}
+                    </p>
+                    <p className={`text-sm ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>
+                      {strings.page.noBookingsDescription}
+                    </p>
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    {/* Desktop View - Table */}
+                    <div className="hidden md:block overflow-x-auto rounded-lg border" style={{borderColor: isDark ? '#374151' : '#e5e7eb'}}>
+                      <table className="w-full">
+                        <thead>
+                          <tr className={isDark ? 'bg-gray-700' : 'bg-gray-100'}>
+                            <th className={`px-6 py-3 text-left text-sm font-semibold ${isDark ? 'text-gray-200' : 'text-gray-900'}`}>
+                              {strings.table.headers.studentName}
+                            </th>
+                            <th className={`px-6 py-3 text-left text-sm font-semibold ${isDark ? 'text-gray-200' : 'text-gray-900'}`}>
+                              {strings.table.headers.course}
+                            </th>
+                            <th className={`px-6 py-3 text-left text-sm font-semibold ${isDark ? 'text-gray-200' : 'text-gray-900'}`}>
+                              {strings.table.headers.date}
+                            </th>
+                            <th className={`px-6 py-3 text-left text-sm font-semibold ${isDark ? 'text-gray-200' : 'text-gray-900'}`}>
+                              {strings.table.headers.status}
+                            </th>
+                            <th className={`px-6 py-3 text-left text-sm font-semibold ${isDark ? 'text-gray-200' : 'text-gray-900'}`}>
+                              {strings.table.headers.actions}
+                            </th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {filteredBookings.map((booking) => (
+                            <tr 
+                              key={booking.id}
+                              className={`border-t ${isDark ? 'border-gray-700 hover:bg-gray-700/50' : 'border-gray-200 hover:bg-gray-50'} transition-colors`}
+                            >
+                              <td className={`px-6 py-4 text-sm ${isDark ? 'text-gray-300' : 'text-gray-900'}`}>
+                                <div>
+                                  <p className="font-medium">
+                                    {booking.student.first_name} {booking.student.last_name}
+                                  </p>
+                                  <p className={`text-xs ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
+                                    {booking.student.email}
+                                  </p>
+                                </div>
+                              </td>
+                              <td className={`px-6 py-4 text-sm ${isDark ? 'text-gray-300' : 'text-gray-900'}`}>
+                                <div>
+                                  <p className="font-medium">{booking.office_hour.course_name}</p>
+                                  {booking.office_hour.section && (
+                                    <p className={`text-xs ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
+                                      {strings.bookingCard.section}: {booking.office_hour.section}
+                                    </p>
+                                  )}
+                                </div>
+                              </td>
+                              <td className={`px-6 py-4 text-sm ${isDark ? 'text-gray-300' : 'text-gray-900'}`}>
+                                <div>
+                                  <p className="font-medium">{formatDate(booking.date)}</p>
+                                  <p className={`text-xs ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
+                                    {formatTime(booking.office_hour.start_time)} - {formatTime(booking.office_hour.end_time)}
+                                  </p>
+                                </div>
+                              </td>
+                              <td className={`px-6 py-4`}>
+                                <div className={`inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(booking)}`}>
+                                  {getStatusIcon(booking)}
+                                  {booking.is_cancelled ? strings.status.cancelled : strings.status.active}
+                                </div>
+                              </td>
+                              <td className={`px-6 py-4 text-sm`}>
+                                {!booking.is_cancelled && (
+                                  <button
+                                    onClick={() => handleCancelClick(booking)}
+                                    disabled={isCancelling}
+                                    className="px-4 py-2 bg-red-50 text-red-600 hover:bg-red-100 dark:bg-red-900/20 dark:text-red-400 dark:hover:bg-red-900/40 rounded-lg transition-all font-medium text-sm disabled:opacity-50"
+                                    aria-label={strings.aria.cancelBooking}
+                                  >
+                                    {isCancelling ? 'Cancelling...' : strings.buttons.cancel}
+                                  </button>
+                                )}
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+
+                    {/* Mobile View - Cards */}
+                    <div className="md:hidden space-y-4">
+                      {filteredBookings.map((booking) => (
+                        <div
+                          key={booking.id}
+                          className={`p-4 rounded-lg border transition-all ${
+                            isDark
+                              ? 'bg-gray-700 border-gray-600'
+                              : 'bg-white border-gray-200'
+                          } hover:shadow-lg`}
+                        >
+                          {/* Status Badge */}
+                          <div className="flex justify-between items-start mb-3">
+                            <div className={`inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(booking)}`}>
+                              {getStatusIcon(booking)}
+                              {booking.is_cancelled ? strings.status.cancelled : strings.status.active}
+                            </div>
+                            {!booking.is_cancelled && (
+                              <button
+                                onClick={() => handleCancelClick(booking)}
+                                disabled={isCancelling}
+                                className="px-3 py-1 bg-red-50 text-red-600 hover:bg-red-100 dark:bg-red-900/20 dark:text-red-400 dark:hover:bg-red-900/40 rounded-lg transition-all font-medium text-xs disabled:opacity-50"
+                                aria-label={strings.aria.cancelBooking}
+                              >
+                                {isCancelling ? 'Cancelling...' : strings.buttons.cancel}
+                              </button>
+                            )}
+                          </div>
+
+                          {/* Student Info */}
+                          <div className="mb-3">
+                            <p className={`text-sm font-semibold ${isDark ? 'text-white' : 'text-gray-900'}`}>
+                              {booking.student.first_name} {booking.student.last_name}
+                            </p>
+                            <p className={`text-xs ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
+                              {booking.student.email}
+                            </p>
+                          </div>
+
+                          {/* Course Info */}
+                          <div className="mb-3">
+                            <p className={`text-xs font-semibold ${isDark ? 'text-gray-400' : 'text-gray-600'} uppercase`}>
+                              {strings.bookingCard.course}
+                            </p>
+                            <p className={`text-sm ${isDark ? 'text-white' : 'text-gray-900'}`}>
+                              {booking.office_hour.course_name}
+                              {booking.office_hour.section && ` - ${booking.office_hour.section}`}
+                            </p>
+                          </div>
+
+                          {/* Date and Time */}
+                          <div className="grid grid-cols-2 gap-3">
+                            <div>
+                              <p className={`text-xs font-semibold ${isDark ? 'text-gray-400' : 'text-gray-600'} uppercase`}>
+                                {strings.bookingCard.date}
+                              </p>
+                              <p className={`text-sm ${isDark ? 'text-white' : 'text-gray-900'}`}>
+                                {formatDate(booking.date)}
+                              </p>
+                            </div>
+                            <div>
+                              <p className={`text-xs font-semibold ${isDark ? 'text-gray-400' : 'text-gray-600'} uppercase`}>
+                                {strings.bookingCard.time}
+                              </p>
+                              <p className={`text-sm ${isDark ? 'text-white' : 'text-gray-900'}`}>
+                                {formatTime(booking.office_hour.start_time)} - {formatTime(booking.office_hour.end_time)}
+                              </p>
+                            </div>
+                          </div>
+
+                          {/* Room Info */}
+                          {booking.office_hour.room && (
+                            <div className={`mt-3 pt-3 border-t ${isDark ? 'border-gray-600' : 'border-gray-200'}`}>
+                              <p className={`text-xs font-semibold ${isDark ? 'text-gray-400' : 'text-gray-600'} uppercase`}>
+                                {strings.bookingCard.room}
+                              </p>
+                              <p className={`text-sm ${isDark ? 'text-white' : 'text-gray-900'}`}>
+                                {booking.office_hour.room}
+                              </p>
+                            </div>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </ErrorBoundary>
+            )}
+          </div>
+        </main>
+      </div>
+
+      <Footer />
+
+      {/* Cancel Booking Modal */}
+      {showCancelModal && selectedBooking && (
+        <CancelBookingModal
+          booking={selectedBooking}
+          isDark={isDark}
+          onConfirm={handleConfirmCancel}
+          onCancel={() => setShowCancelModal(false)}
+          isLoading={isCancelling}
+        />
+      )}
+    </div>
+  );
+}

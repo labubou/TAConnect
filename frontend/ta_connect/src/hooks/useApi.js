@@ -275,3 +275,25 @@ export const useUpdateEmailPreferences = () => {
   });
 };
 
+/**
+ * Hook to cancel an instructor booking
+ * Invalidates bookings cache on success
+ */
+export const useCancelInstructorBooking = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (bookingId) => {
+      const response = await axios.delete(`/api/student/booking/${bookingId}/`, {
+        data: {
+          confirm: true,
+        },
+      });
+      return response.data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['instructor', 'bookings'] });
+    },
+  });
+};
+
