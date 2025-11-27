@@ -9,6 +9,8 @@ export default function BookingsCalendar() {
   const [bookings, setBookings] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedDate, setSelectedDate] = useState(null);
+  const [hoveredDay, setHoveredDay] = useState(null);
+  const [tooltipPosition, setTooltipPosition] = useState({ x: 0, y: 0 });
 
   useEffect(() => {
     fetchBookings();
@@ -17,14 +19,12 @@ export default function BookingsCalendar() {
   const fetchBookings = async () => {
     try {
       setLoading(true);
-      // Note: This requires a backend endpoint that returns student bookings
-      // The endpoint should filter bookings by the authenticated student user
-      // Expected response format: { bookings: [...] }
-      // Each booking should have: id, date, start_time, end_time, is_cancelled, 
-      // and nested office_hour with: course_name, location, instructor details
-      
-      // Placeholder - replace with actual endpoint when available
-      setBookings([]);
+      const response = await axios.get('/api/student/booking/');
+      if (response.data && response.data.bookings) {
+        setBookings(response.data.bookings);
+      } else {
+        setBookings([]);
+      }
     } catch (error) {
       console.error('Error fetching bookings:', error);
       setBookings([]);
@@ -49,13 +49,18 @@ export default function BookingsCalendar() {
     return bookings.filter(booking => {
       // Handle both formats: YYYY-MM-DD from backend or Date object
       const bookingDate = typeof booking.date === 'string' ? booking.date : booking.date.toISOString().split('T')[0];
-      return bookingDate === dateStr && !booking.is_cancel;
+      return bookingDate === dateStr && !booking.is_cancelled;
     });
   };
 
   const formatTime = (time) => {
     if (!time) return '';
     try {
+      // Handle ISO date strings
+      if (time.includes && time.includes('T')) {
+        const date = new Date(time);
+        return date.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
+      }
       const [hours, minutes] = time.split(':');
       const hour = parseInt(hours);
       const ampm = hour >= 12 ? 'PM' : 'AM';
@@ -106,15 +111,36 @@ export default function BookingsCalendar() {
         <div
           key={day}
           onClick={() => setSelectedDate(hasBookings ? date : null)}
-          className={`aspect-square p-1 border ${isDark ? 'border-gray-700' : 'border-gray-200'} rounded-lg relative cursor-pointer transition-all ${
+          onMouseEnter={(e) => {
+            if (hasBookings) {
+              const rect = e.currentTarget.getBoundingClientRect();
+              setTooltipPosition({ 
+                x: rect.left + rect.width / 2, 
+                y: rect.top 
+              });
+              setHoveredDay(day);
+            }
+          }}
+          onMouseLeave={() => setHoveredDay(null)}
+          className={`aspect-square p-1 sm:p-2 border rounded-lg relative cursor-pointer transition-all duration-300 ${
             isTodayDate 
-              ? isDark ? 'bg-blue-900/30 border-blue-500' : 'bg-blue-50 border-blue-400' 
+              ? isDark 
+                ? 'bg-gradient-to-br from-[#366c6b]/30 to-[#1a3535]/30 border-[#366c6b] hover:shadow-lg' 
+                : 'bg-gradient-to-br from-[#366c6b]/10 to-[#1a3535]/10 border-[#366c6b] hover:shadow-lg' 
               : hasBookings 
-                ? isDark ? 'bg-teal-900/20 hover:bg-teal-900/30 border-teal-600/50' : 'bg-teal-50 hover:bg-teal-100 border-teal-400/50'
-                : isDark ? 'hover:bg-gray-800' : 'hover:bg-gray-50'
+                ? isDark 
+                  ? 'bg-[#366c6b]/20 hover:bg-[#366c6b]/30 border-[#366c6b]/50 hover:border-[#366c6b] hover:shadow-md' 
+                  : 'bg-[#366c6b]/10 hover:bg-[#366c6b]/20 border-[#366c6b]/30 hover:border-[#366c6b] hover:shadow-md'
+                : isDark 
+                  ? 'border-gray-600 hover:bg-gray-600 hover:border-gray-500' 
+                  : 'border-gray-200 hover:bg-gray-50 hover:border-gray-300'
           }`}
         >
-          <div className={`text-sm font-medium ${isTodayDate ? isDark ? 'text-blue-300' : 'text-blue-700' : isDark ? 'text-gray-300' : 'text-gray-700'}`}>
+          <div className={`text-xs sm:text-sm font-medium ${
+            isTodayDate 
+              ? isDark ? 'text-[#366c6b]' : 'text-[#366c6b]' 
+              : isDark ? 'text-gray-300' : 'text-gray-700'
+          }`}>
             {day}
           </div>
           {hasBookings && (
@@ -122,15 +148,18 @@ export default function BookingsCalendar() {
               {dayBookings.slice(0, 2).map((booking, idx) => (
                 <div
                   key={idx}
-                  className={`text-xs px-1 py-0.5 rounded truncate ${isDark ? 'bg-teal-700/50 text-teal-200' : 'bg-teal-600 text-white'}`}
-                  title={`${formatTime(booking.start_time)} - ${booking.course_name || 'Office Hours'}`}
+                  className={`text-xs px-1 py-0.5 rounded truncate ${
+                    isDark 
+                      ? 'bg-gradient-to-r from-[#366c6b] to-[#1a3535] text-white' 
+                      : 'bg-gradient-to-r from-[#366c6b] to-[#1a3535] text-white'
+                  }`}
                 >
                   {formatTime(booking.start_time)}
                 </div>
               ))}
               {dayBookings.length > 2 && (
-                <div className={`text-xs px-1 ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
-                  +{dayBookings.length - 2} more
+                <div className={`text-xs px-1 font-semibold ${isDark ? 'text-[#366c6b]' : 'text-[#366c6b]'}`}>
+                  +{dayBookings.length - 2}
                 </div>
               )}
             </div>
@@ -143,53 +172,95 @@ export default function BookingsCalendar() {
   };
 
   return (
-    <div className={`${isDark ? 'bg-gray-800' : 'bg-white border border-gray-200'} rounded-xl ${isDark ? 'shadow-lg' : 'shadow-md'} p-6`}>
+    <div className={`${isDark ? 'bg-gray-700' : 'bg-white'} rounded-xl shadow-md p-4 sm:p-6 border border-opacity-10 relative`}>
+      {/* Tooltip */}
+      {hoveredDay !== null && (
+        <div 
+          className={`fixed z-50 pointer-events-none transform -translate-x-1/2 -translate-y-full mb-2 ${
+            isDark ? 'bg-gray-800 border-gray-600' : 'bg-white border-gray-200'
+          } border rounded-lg shadow-2xl p-3 min-w-[250px] max-w-[350px]`}
+          style={{ 
+            left: `${tooltipPosition.x}px`, 
+            top: `${tooltipPosition.y - 10}px` 
+          }}
+        >
+          <div className="space-y-2">
+            {getBookingsForDate(new Date(year, month, hoveredDay)).map((booking, idx) => (
+              <div 
+                key={idx} 
+                className={`pb-2 ${idx !== getBookingsForDate(new Date(year, month, hoveredDay)).length - 1 ? `border-b ${isDark ? 'border-gray-700' : 'border-gray-200'}` : ''}`}
+              >
+                <p className={`font-semibold text-sm ${isDark ? 'text-white' : 'text-gray-900'}`}>
+                  {booking.course_name || 'Office Hours'}
+                </p>
+                <p className={`text-xs ${isDark ? 'text-gray-300' : 'text-gray-600'} mt-1`}>
+                  🕐 {formatTime(booking.start_time)} - {formatTime(booking.end_time)}
+                </p>
+                <p className={`text-xs ${isDark ? 'text-gray-300' : 'text-gray-600'}`}>
+                  👨‍🏫 {booking.instructor?.full_name || 'Instructor'}
+                </p>
+                {booking.room && (
+                  <p className={`text-xs ${isDark ? 'text-gray-300' : 'text-gray-600'}`}>
+                    📍 {booking.room}
+                  </p>
+                )}
+                {booking.section && (
+                  <p className={`text-xs ${isDark ? 'text-gray-300' : 'text-gray-600'}`}>
+                    📚 Section {booking.section}
+                  </p>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+      
       {/* Header */}
-      <div className="flex items-center justify-between mb-6">
-        <h3 className={`text-xl font-bold ${isDark ? 'text-white' : 'text-gray-800'}`}>
+      <div className="flex items-center justify-between mb-4 sm:mb-6">
+        <h3 className={`text-lg sm:text-xl lg:text-2xl font-semibold ${isDark ? 'text-white' : 'text-gray-900'}`}>
           My Bookings Calendar
         </h3>
         <button
           onClick={goToToday}
-          className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${
-            isDark 
-              ? 'bg-blue-900/30 text-blue-300 hover:bg-blue-900/50' 
-              : 'bg-blue-100 text-blue-700 hover:bg-blue-200'
-          }`}
+          className="px-4 py-2 bg-gradient-to-r from-[#366c6b] to-[#1a3535] text-white rounded-lg hover:shadow-lg transition-all duration-300 hover:scale-105 text-sm font-medium"
         >
           Today
         </button>
       </div>
 
       {/* Month Navigation */}
-      <div className="flex items-center justify-between mb-4">
+      <div className="flex items-center justify-between mb-4 sm:mb-6">
         <button
           onClick={previousMonth}
-          className={`p-2 rounded-lg transition-all ${isDark ? 'hover:bg-gray-700' : 'hover:bg-gray-100'}`}
+          className={`p-2 sm:p-3 rounded-lg transition-all duration-300 hover:scale-105 ${
+            isDark ? 'hover:bg-gray-600 text-gray-300' : 'hover:bg-gray-100 text-gray-700'
+          }`}
         >
-          <svg className={`w-5 h-5 ${isDark ? 'text-gray-300' : 'text-gray-700'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg className="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
           </svg>
         </button>
         
-        <h4 className={`text-lg font-semibold ${isDark ? 'text-white' : 'text-gray-800'}`}>
+        <h4 className={`text-base sm:text-lg lg:text-xl font-semibold ${isDark ? 'text-white' : 'text-gray-900'}`}>
           {monthNames[month]} {year}
         </h4>
 
         <button
           onClick={nextMonth}
-          className={`p-2 rounded-lg transition-all ${isDark ? 'hover:bg-gray-700' : 'hover:bg-gray-100'}`}
+          className={`p-2 sm:p-3 rounded-lg transition-all duration-300 hover:scale-105 ${
+            isDark ? 'hover:bg-gray-600 text-gray-300' : 'hover:bg-gray-100 text-gray-700'
+          }`}
         >
-          <svg className={`w-5 h-5 ${isDark ? 'text-gray-300' : 'text-gray-700'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg className="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
           </svg>
         </button>
       </div>
 
       {/* Day Names */}
-      <div className="grid grid-cols-7 gap-1 mb-2">
+      <div className="grid grid-cols-7 gap-1 sm:gap-2 mb-2">
         {dayNames.map(day => (
-          <div key={day} className={`text-center text-sm font-semibold py-2 ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
+          <div key={day} className={`text-center text-xs sm:text-sm font-semibold py-2 ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
             {day}
           </div>
         ))}
@@ -197,43 +268,48 @@ export default function BookingsCalendar() {
 
       {/* Calendar Grid */}
       {loading ? (
-        <div className="grid grid-cols-7 gap-1">
+        <div className="grid grid-cols-7 gap-1 sm:gap-2">
           {[...Array(35)].map((_, i) => (
-            <div key={i} className={`aspect-square ${isDark ? 'bg-gray-700' : 'bg-gray-100'} rounded-lg animate-pulse`} />
+            <div key={i} className={`aspect-square ${isDark ? 'bg-gray-600' : 'bg-gray-100'} rounded-lg animate-pulse`} />
           ))}
         </div>
       ) : (
-        <div className="grid grid-cols-7 gap-1">
+        <div className="grid grid-cols-7 gap-1 sm:gap-2">
           {renderCalendarDays()}
         </div>
       )}
 
       {/* Selected Date Details */}
       {selectedDate && (
-        <div className={`mt-4 p-4 rounded-lg ${isDark ? 'bg-gray-700' : 'bg-gray-50'}`}>
-          <h4 className={`font-semibold mb-3 ${isDark ? 'text-white' : 'text-gray-800'}`}>
+        <div className={`mt-4 sm:mt-6 p-4 sm:p-6 rounded-xl ${isDark ? 'bg-gray-600' : 'bg-gray-50'} shadow-md`}>
+          <h4 className={`font-semibold mb-3 sm:mb-4 text-base sm:text-lg ${isDark ? 'text-white' : 'text-gray-900'}`}>
             {selectedDate.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
           </h4>
-          <div className="space-y-2">
+          <div className="space-y-3">
             {getBookingsForDate(selectedDate).map((booking, idx) => (
               <div
                 key={idx}
-                className={`p-3 rounded-lg ${isDark ? 'bg-gray-800 border border-gray-600' : 'bg-white border border-gray-200'}`}
+                className={`p-4 rounded-lg transition-all duration-300 hover:shadow-lg ${
+                  isDark ? 'bg-gray-700 border border-gray-600' : 'bg-white border border-gray-200'
+                }`}
               >
                 <div className="flex items-start justify-between">
                   <div className="flex-1">
-                    <p className={`font-medium ${isDark ? 'text-white' : 'text-gray-800'}`}>
+                    <p className={`font-semibold text-base sm:text-lg ${isDark ? 'text-white' : 'text-gray-900'}`}>
                       {booking.course_name || 'Office Hours'}
                     </p>
-                    <p className={`text-sm ${isDark ? 'text-gray-400' : 'text-gray-600'} mt-1`}>
-                      🕐 {formatTime(booking.start_time)} - {formatTime(booking.end_time)}
+                    <p className={`text-sm ${isDark ? 'text-gray-300' : 'text-gray-600'} mt-2 flex items-center gap-2`}>
+                      <span>🕐</span>
+                      <span>{formatTime(booking.start_time)} - {formatTime(booking.end_time)}</span>
                     </p>
-                    <p className={`text-sm ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
-                      👨‍🏫 {booking.instructor_name || 'Instructor'}
+                    <p className={`text-sm ${isDark ? 'text-gray-300' : 'text-gray-600'} flex items-center gap-2`}>
+                      <span>👨‍🏫</span>
+                      <span>{booking.instructor?.full_name || 'Instructor'}</span>
                     </p>
-                    {booking.location && (
-                      <p className={`text-sm ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
-                        📍 {booking.location}
+                    {booking.room && (
+                      <p className={`text-sm ${isDark ? 'text-gray-300' : 'text-gray-600'} flex items-center gap-2`}>
+                        <span>📍</span>
+                        <span>{booking.room}</span>
                       </p>
                     )}
                   </div>
@@ -245,14 +321,14 @@ export default function BookingsCalendar() {
       )}
 
       {/* Legend */}
-      <div className={`mt-4 pt-4 border-t ${isDark ? 'border-gray-700' : 'border-gray-200'} flex items-center gap-4 text-sm`}>
+      <div className={`mt-4 sm:mt-6 pt-4 border-t ${isDark ? 'border-gray-600' : 'border-gray-200'} flex flex-wrap items-center gap-4 text-xs sm:text-sm`}>
         <div className="flex items-center gap-2">
-          <div className={`w-4 h-4 rounded ${isDark ? 'bg-blue-900/30 border border-blue-500' : 'bg-blue-50 border border-blue-400'}`}></div>
-          <span className={isDark ? 'text-gray-400' : 'text-gray-600'}>Today</span>
+          <div className={`w-4 h-4 rounded ${isDark ? 'bg-gradient-to-br from-[#366c6b]/30 to-[#1a3535]/30 border border-[#366c6b]' : 'bg-gradient-to-br from-[#366c6b]/10 to-[#1a3535]/10 border border-[#366c6b]'}`}></div>
+          <span className={isDark ? 'text-gray-300' : 'text-gray-700'}>Today</span>
         </div>
         <div className="flex items-center gap-2">
-          <div className={`w-4 h-4 rounded ${isDark ? 'bg-teal-900/20 border border-teal-600/50' : 'bg-teal-50 border border-teal-400/50'}`}></div>
-          <span className={isDark ? 'text-gray-400' : 'text-gray-600'}>Has Bookings</span>
+          <div className={`w-4 h-4 rounded ${isDark ? 'bg-[#366c6b]/20 border border-[#366c6b]/50' : 'bg-[#366c6b]/10 border border-[#366c6b]/30'}`}></div>
+          <span className={isDark ? 'text-gray-300' : 'text-gray-700'}>Has Bookings</span>
         </div>
       </div>
     </div>

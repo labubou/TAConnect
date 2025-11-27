@@ -26,6 +26,37 @@ class BookingCreateView(GenericAPIView):
     permission_classes = [IsStudent]
     serializer_class = CreateBookingSerializer
 
+    @swagger_auto_schema(
+        operation_description="Get all bookings for the current student",
+        responses={200: "List of bookings"}
+    )
+    def get(self, request):
+        """Get all bookings for the current student"""
+        try:
+            bookings = Booking.objects.filter(student=request.user).order_by('-date', '-start_time')
+            
+            return Response({
+                'bookings': [
+                    {
+                        'id': booking.id,
+                        'instructor': {
+                            'id': booking.office_hour.instructor.id,
+                            'full_name': booking.office_hour.instructor.full_name,
+                            'email': booking.office_hour.instructor.email,
+                        },
+                        'course_name': booking.office_hour.course_name,
+                        'section': booking.office_hour.section,
+                        'room': booking.office_hour.room,
+                        'date': booking.date,
+                        'start_time': booking.start_time,
+                        'end_time': booking.end_time,
+                        'is_cancelled': booking.is_cancelled,
+                    } for booking in bookings
+                ]
+            }, status=status.HTTP_200_OK)
+        except Exception as e:
+            return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
     @swagger_auto_schema(**create_booking_swagger)
     def post(self, request):
         """Book a new reservation"""

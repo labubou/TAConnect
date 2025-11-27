@@ -129,41 +129,40 @@ export default function BookPage() {
     setSelectedSlot(slot);
     setSelectedDate('');
     setSelectedTime('');
+    setTimeSlots([]);
     setError('');
     setSuccess('');
-    generateTimeSlots(slot);
     generateAvailableDates(slot);
   };
 
-  const generateTimeSlots = (slot) => {
-    const slots = [];
-    const [startHour, startMin] = slot.start_time.split(':').map(Number);
-    const [endHour, endMin] = slot.end_time.split(':').map(Number);
-    
-    const startMinutes = startHour * 60 + startMin;
-    const endMinutes = endHour * 60 + endMin;
-    const duration = slot.duration_minutes || 30;
-    
-    for (let time = startMinutes; time < endMinutes; time += duration) {
-      const slotStart = time;
-      const slotEnd = time + duration;
+  const fetchAvailableTimes = async (slotId, date) => {
+    try {
+      const response = await axios.get(`/api/student/booking/${slotId}/`, {
+        params: { date }
+      });
       
-      if (slotEnd <= endMinutes) {
-        slots.push({
-          start: formatMinutesToTime(slotStart),
-          end: formatMinutesToTime(slotEnd),
-          value: formatMinutesToTime(slotStart)
-        });
+      if (response.data && response.data.available_times) {
+        const times = response.data.available_times.map(time => ({
+          start: time,
+          value: time
+        }));
+        setTimeSlots(times);
+      } else {
+        setTimeSlots([]);
       }
+    } catch (err) {
+      console.error('Error fetching available times:', err);
+      setError('Failed to load available times for this date');
+      setTimeSlots([]);
     }
-    
-    setTimeSlots(slots);
   };
 
-  const formatMinutesToTime = (minutes) => {
-    const hours = Math.floor(minutes / 60);
-    const mins = minutes % 60;
-    return `${String(hours).padStart(2, '0')}:${String(mins).padStart(2, '0')}`;
+  const handleDateSelect = (dateStr) => {
+    setSelectedDate(dateStr);
+    setSelectedTime('');
+    if (selectedSlot) {
+      fetchAvailableTimes(selectedSlot.id, dateStr);
+    }
   };
 
   const generateAvailableDates = (slot) => {
@@ -247,6 +246,19 @@ export default function BookPage() {
       return `${displayHour}:${minutes} ${ampm}`;
     } catch (e) {
       return time;
+    }
+  };
+
+  const calculateEndTime = (startTime, durationMinutes) => {
+    if (!startTime || !durationMinutes) return '';
+    try {
+      const [hours, minutes] = startTime.split(':').map(Number);
+      const totalMinutes = hours * 60 + minutes + durationMinutes;
+      const endHours = Math.floor(totalMinutes / 60);
+      const endMinutes = totalMinutes % 60;
+      return `${String(endHours).padStart(2, '0')}:${String(endMinutes).padStart(2, '0')}`;
+    } catch (e) {
+      return '';
     }
   };
 
@@ -513,7 +525,7 @@ export default function BookPage() {
                           return (
                             <button
                               key={index}
-                              onClick={() => setSelectedDate(dateStr)}
+                              onClick={() => handleDateSelect(dateStr)}
                               className={`w-full p-3 rounded-lg border-2 bg-white dark:bg-gray-900 text-left transition-all ${
                                 selectedDate === dateStr
                                   ? isDark ? 'border-purple-500 bg-purple-900/20' : 'border-purple-500 bg-purple-50 shadow-sm'
@@ -535,21 +547,27 @@ export default function BookPage() {
                         <h3 className={`font-semibold ${isDark ? 'text-white' : 'text-gray-800'} mb-3`}>
                           Select Time
                         </h3>
-                        <div className="grid grid-cols-2 gap-2 max-h-48 overflow-y-auto">
-                          {timeSlots.map((timeSlot, index) => (
-                            <button
-                              key={index}
-                              onClick={() => setSelectedTime(timeSlot.value)}
-                              className={`p-2.5 rounded-lg border-2 bg-white dark:bg-gray-900 text-center transition-all font-medium text-sm ${
-                                selectedTime === timeSlot.value
-                                  ? isDark ? 'border-blue-500 bg-blue-900/20 text-blue-300' : 'border-blue-500 bg-blue-50 text-blue-700 shadow-sm'
-                                  : `${isDark ? 'border-gray-700 hover:border-gray-600 text-gray-300' : 'border-gray-200 hover:border-gray-300 text-gray-700 hover:shadow-sm'}`
-                              }`}
-                            >
-                              {formatTime(timeSlot.start)} - {formatTime(timeSlot.end)}
-                            </button>
-                          ))}
-                        </div>
+                        {timeSlots.length === 0 ? (
+                          <p className={`text-center py-4 ${isDark ? 'text-gray-400' : 'text-gray-700'}`}>
+                            No available times for this date
+                          </p>
+                        ) : (
+                          <div className="grid grid-cols-2 gap-2 max-h-48 overflow-y-auto">
+                            {timeSlots.map((timeSlot, index) => (
+                              <button
+                                key={index}
+                                onClick={() => setSelectedTime(timeSlot.value)}
+                                className={`p-2.5 rounded-lg border-2 bg-white dark:bg-gray-900 text-center transition-all font-medium text-sm ${
+                                  selectedTime === timeSlot.value
+                                    ? isDark ? 'border-blue-500 bg-blue-900/20 text-blue-300' : 'border-blue-500 bg-blue-50 text-blue-700 shadow-sm'
+                                    : `${isDark ? 'border-gray-700 hover:border-gray-600 text-gray-300' : 'border-gray-200 hover:border-gray-300 text-gray-700 hover:shadow-sm'}`
+                                }`}
+                              >
+                                {formatTime(timeSlot.start)}
+                              </button>
+                            ))}
+                          </div>
+                        )}
                       </div>
                     )}
 
@@ -563,8 +581,8 @@ export default function BookPage() {
                           <p>👨‍🏫 {selectedInstructor.first_name || ''} {selectedInstructor.last_name || ''}</p>
                           <p>📚 {selectedSlot.course_name || strings.steps.step2.officeHours}</p>
                           <p>📅 {formatDate(selectedDate)}</p>
-                          <p>🕐 {formatTime(selectedTime)} - {formatTime(timeSlots.find(t => t.value === selectedTime)?.end || selectedTime)}</p>
-                          <p>📍 {selectedSlot.location || strings.steps.step2.online}</p>
+                          <p>🕐 {formatTime(selectedTime)} - {formatTime(calculateEndTime(selectedTime, selectedSlot.duration_minutes))}</p>
+                          <p>📍 {selectedSlot.room || strings.steps.step2.online}</p>
                         </div>
                       </div>
                     )}
