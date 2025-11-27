@@ -121,9 +121,22 @@ export default function AllowedStudents() {
     setInfoBanner(strings.messages.deleteSuccess);
   };
 
-  const handleStatusUpdated = () => {
-    if (selectedSlot) {
-      handleSlotChange(selectedSlot);
+  const handleStatusUpdated = async () => {
+    try {
+      // Refresh slots to get updated status
+      const res = await axios.get("/api/instructor/get-user-slots");
+      const updatedSlots = res?.data?.slots || [];
+      setSlots(updatedSlots);
+      
+      // Update the selected slot with the new data
+      if (selectedSlot) {
+        const updatedSelectedSlot = updatedSlots.find(s => s.id === selectedSlot.id);
+        if (updatedSelectedSlot) {
+          setSelectedSlot(updatedSelectedSlot);
+        }
+      }
+    } catch (err) {
+      console.error("Failed to refresh slots:", err);
     }
     setModalState({ type: null, student: null });
   };
@@ -178,35 +191,65 @@ export default function AllowedStudents() {
               {strings.slots.title}
             </h2>
             {slots.length > 0 ? (
-              <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center">
-                <select
-                  value={selectedSlot?.id || ""}
-                  onChange={(e) => {
-                    const slot = slots.find((s) => s.id === parseInt(e.target.value));
-                    if (slot) handleSlotChange(slot);
-                  }}
-                  className={`flex-1 px-4 py-2 rounded-lg border transition-all ${
-                    isDark
-                      ? "bg-gray-800 border-gray-700 text-white focus:border-emerald-500"
-                      : "bg-white border-gray-200 text-gray-900 focus:border-emerald-500"
-                  } focus:outline-none focus:ring-2 focus:ring-emerald-500/20`}
-                >
-                  {slots.map((slot) => (
-                    <option key={slot.id} value={slot.id}>
-                      {slot.course_name} - {slot.section || "N/A"} ({slot.day_of_week} {slot.start_time})
-                    </option>
-                  ))}
-                </select>
-                <button
-                  onClick={() => openModal("status")}
-                  className={`px-4 py-2 rounded-lg font-semibold transition-all whitespace-nowrap ${
-                    isDark
-                      ? "bg-blue-600 hover:bg-blue-500 text-white"
-                      : "bg-blue-500 hover:bg-blue-600 text-white"
-                  }`}
-                >
-                  {strings.buttons.toggle}
-                </button>
+              <div className="flex flex-col gap-4">
+                <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center">
+                  <select
+                    value={selectedSlot?.id || ""}
+                    onChange={(e) => {
+                      const slot = slots.find((s) => s.id === parseInt(e.target.value));
+                      if (slot) handleSlotChange(slot);
+                    }}
+                    className={`flex-1 px-4 py-2 rounded-lg border transition-all ${
+                      isDark
+                        ? "bg-gray-800 border-gray-700 text-white focus:border-emerald-500"
+                        : "bg-white border-gray-200 text-gray-900 focus:border-emerald-500"
+                    } focus:outline-none focus:ring-2 focus:ring-emerald-500/20`}
+                  >
+                    {slots.map((slot) => (
+                      <option key={slot.id} value={slot.id}>
+                        {slot.course_name} - {slot.section || "N/A"} ({slot.day_of_week} {slot.start_time})
+                      </option>
+                    ))}
+                  </select>
+                  <button
+                    onClick={() => openModal("status")}
+                    className={`px-4 py-2 rounded-lg font-semibold transition-all whitespace-nowrap ${
+                      isDark
+                        ? "bg-blue-600 hover:bg-blue-500 text-white"
+                        : "bg-blue-500 hover:bg-blue-600 text-white"
+                    }`}
+                  >
+                    {strings.buttons.toggle}
+                  </button>
+                </div>
+                
+                {/* Status Badge */}
+                {selectedSlot && (
+                  <div
+                    className={`inline-flex items-center gap-2 px-4 py-2 rounded-lg border w-fit ${
+                      selectedSlot.require_specific_email
+                        ? isDark
+                          ? "bg-amber-900/20 border-amber-700 text-amber-200"
+                          : "bg-amber-50 border-amber-200 text-amber-800"
+                        : isDark
+                        ? "bg-emerald-900/20 border-emerald-700 text-emerald-200"
+                        : "bg-emerald-50 border-emerald-200 text-emerald-800"
+                    }`}
+                  >
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      {selectedSlot.require_specific_email ? (
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                      ) : (
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 11V7a4 4 0 118 0m-4 8v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2z" />
+                      )}
+                    </svg>
+                    <span className="font-semibold text-sm">
+                      {selectedSlot.require_specific_email
+                        ? strings.status.allowedOnly
+                        : strings.status.allStudents}
+                    </span>
+                  </div>
+                )}
               </div>
             ) : (
               <div className={`text-center py-8 ${isDark ? "text-gray-400" : "text-gray-600"}`}>
