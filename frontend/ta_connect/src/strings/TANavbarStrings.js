@@ -8,6 +8,7 @@ const TANavbarStrings = {
     analytics: "Analytics",
     logout: "Logout",
     dashboard: "Dashboard",
+    emailPreferences: "Email Preferences",
   },
 
   user: {
@@ -19,6 +20,17 @@ const TANavbarStrings = {
     toggleNav: "Toggle navigation sidebar",
     expandSidebar: "Expand sidebar",
     collapseSidebar: "Collapse sidebar",
+  },
+
+  emailPreferences: {
+    title: "Email Notifications",
+    bookingLabel: "Email on Booking",
+    bookingDescription: "Get notified when students book a session",
+    cancellationLabel: "Email on Cancellation",
+    cancellationDescription: "Get notified when sessions are cancelled",
+    save: "Save Preferences",
+    saving: "Saving...",
+    saved: "Preferences saved successfully",
   }
 };
 
