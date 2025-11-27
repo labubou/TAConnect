@@ -23,6 +23,7 @@ const TAPage = lazy(() => import('./pages/ta/TAPage'));
 const ManageCourses = lazy(() => import('./pages/ta/ManageCourses'));
 const AnalyticsDashboard = lazy(() => import('./pages/ta/AnalyticsDashboard'));
 const EmailPreferencesPage = lazy(() => import('./pages/ta/EmailPreferencesPage'));
+const InstructorManageBookings = lazy(() => import('./pages/ta/ManageBookings'));
 const StudentHomePage = lazy(() => import('./pages/student/studentHomePage'));
 const BookPage = lazy(() => import('./pages/student/BookPage'));
 const ManageBookingsPage = lazy(() => import('./pages/student/ManageBookingsPage'));
@@ -162,6 +163,16 @@ function App() {
                   <ProtectedRoute>
                     <Suspense fallback={<PageLoader />}>
                       <EmailPreferencesPage />
+                    </Suspense>
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/ta/manage-bookings" 
+                element={
+                  <ProtectedRoute>
+                    <Suspense fallback={<PageLoader />}>
+                      <InstructorManageBookings />
                     </Suspense>
                   </ProtectedRoute>
                 } 
