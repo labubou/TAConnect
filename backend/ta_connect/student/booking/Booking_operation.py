@@ -52,12 +52,9 @@ class BookingCreateView(GenericAPIView):
 
             bookings = Booking.objects.filter(student=request.user, date__range=[date_from, date_to]).order_by('-date', '-start_time')
 
-            complete_bookings = []
             for booking in bookings:
                 if not booking.is_completed:
                     success, message = complete_booking(booking)
-                    if success:
-                        complete_bookings.append(booking)
 
             return Response({
                 'bookings': [
