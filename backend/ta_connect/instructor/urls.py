@@ -5,6 +5,7 @@ from .views import GetUserSlotsView, GetUserBookingView, SearchInstructorsView, 
 from .allowed_students.import_csv import CSVUploadView
 from .allowed_students.allowed_students_operations import AllowedStudentsUpdateDeleteView, AllowedStudentsAddGetView
 from .allowed_students.update_allowed_students_status import UpdateAllowedStudentsStatusView
+from .analytics import BookingAnalyticsView
 
 urlpatterns = [
     # URLs for time slots
@@ -23,4 +24,7 @@ urlpatterns = [
     path('search-instructors/', SearchInstructorsView.as_view(), name='search-instructors'),
     path('get-instructor-data/<int:user_id>/', InstructorDataView.as_view(), name='get-instructor-data'),
     path('upload-csv/<int:slot_id>/', CSVUploadView.as_view(), name='upload-csv'),
+
+    # URLs for booking analytics
+    path('booking-analytics/', BookingAnalyticsView.as_view(), name='booking-analytics'),
 ]

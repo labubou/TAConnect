@@ -8,6 +8,7 @@ from instructor.models import OfficeHourSlot
 from accounts.models import User
 from student.models import Booking
 from instructor.serializers.get_user_booking_serializer import GetUserBookingSerializer
+from instructor.serializers.booking_analytics_serializer import BookingAnalyticsSerializer
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
 from .schemas.slot_schemas import (
@@ -16,7 +17,7 @@ from .schemas.slot_schemas import (
     search_instructors_swagger,
     get_instructor_data_swagger
 )
-from django.db.models import Q
+from django.db.models import Q, Count
 from student.utils.complete_book import complete_booking
 
 # Create your views here.
