@@ -1,10 +1,11 @@
 from django.urls import path
 from instructor.time_slots.time_slots_operations import TimeSlotCreateView, TimeSlotDetailView
 from .time_slots import update_status_slot
-from .views import GetUserSlotsView, GetUserBookingView, SearchInstructorsView, InstructorDataView, BookingAnalyticsView
+from .views import GetUserSlotsView, GetUserBookingView, SearchInstructorsView, InstructorDataView
 from .allowed_students.import_csv import CSVUploadView
 from .allowed_students.allowed_students_operations import AllowedStudentsUpdateDeleteView, AllowedStudentsAddGetView
 from .allowed_students.update_allowed_students_status import UpdateAllowedStudentsStatusView
+from .analytics import BookingAnalyticsView
 
 urlpatterns = [
     # URLs for time slots
