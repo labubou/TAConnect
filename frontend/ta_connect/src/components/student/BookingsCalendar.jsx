@@ -56,17 +56,28 @@ export default function BookingsCalendar() {
   const formatTime = (time) => {
     if (!time) return '';
     try {
-      // Handle ISO date strings
-      if (time.includes && time.includes('T')) {
-        const date = new Date(time);
-        return date.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
+      // Handle ISO datetime string (e.g., "2024-11-27T14:30:00Z")
+      if (typeof time === 'string' && time.includes('T')) {
+        // Extract just the time portion to avoid timezone conversion
+        const timePart = time.split('T')[1].split('.')[0].split('Z')[0];
+        const [hours, minutes] = timePart.split(':');
+        const hour = parseInt(hours);
+        const ampm = hour >= 12 ? 'PM' : 'AM';
+        const displayHour = hour % 12 || 12;
+        return `${displayHour}:${minutes} ${ampm}`;
       }
-      const [hours, minutes] = time.split(':');
-      const hour = parseInt(hours);
-      const ampm = hour >= 12 ? 'PM' : 'AM';
-      const displayHour = hour % 12 || 12;
-      return `${displayHour}:${minutes} ${ampm}`;
+      // Handle time-only string (e.g., "14:30:00" or "14:30")
+      const timeParts = time.toString().split(':');
+      if (timeParts.length >= 2) {
+        const hours = parseInt(timeParts[0]);
+        const minutes = timeParts[1];
+        const ampm = hours >= 12 ? 'PM' : 'AM';
+        const displayHour = hours % 12 || 12;
+        return `${displayHour}:${minutes} ${ampm}`;
+      }
+      return time;
     } catch (e) {
+      console.error('Error formatting time:', e, time);
       return time;
     }
   };
