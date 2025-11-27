@@ -1,7 +1,7 @@
 from django.urls import path
 from instructor.time_slots.time_slots_operations import TimeSlotCreateView, TimeSlotDetailView
 from .time_slots import update_status_slot
-from .views import GetUserSlotsView, GetUserBookingView, SearchInstructorsView, InstructorDataView
+from .views import GetUserSlotsView, GetUserBookingView, SearchInstructorsView, InstructorDataView, BookingAnalyticsView
 from .allowed_students.import_csv import CSVUploadView
 from .allowed_students.allowed_students_operations import AllowedStudentsUpdateDeleteView, AllowedStudentsAddGetView
 from .allowed_students.update_allowed_students_status import UpdateAllowedStudentsStatusView
@@ -23,4 +23,7 @@ urlpatterns = [
     path('search-instructors/', SearchInstructorsView.as_view(), name='search-instructors'),
     path('get-instructor-data/<int:user_id>/', InstructorDataView.as_view(), name='get-instructor-data'),
     path('upload-csv/<int:slot_id>/', CSVUploadView.as_view(), name='upload-csv'),
+
+    # URLs for booking analytics
+    path('booking-analytics/', BookingAnalyticsView.as_view(), name='booking-analytics'),
 ]
