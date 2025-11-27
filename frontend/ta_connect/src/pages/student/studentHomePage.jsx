@@ -3,6 +3,7 @@ import { useTheme } from '../../contexts/ThemeContext';
 import { useNavigate } from 'react-router-dom';
 import StudentNavbar from '../../components/student/studentNavbar';
 import Footer from '../../components/Footer';
+import BookingsCalendar from '../../components/student/BookingsCalendar';
 import strings from '../../strings/studentPageStrings'; 
 
 
@@ -21,7 +22,7 @@ export default function StudentHomePage() {
         style={{ minHeight: 'calc(100vh - 4rem)' }}
       >
         <main className={`${isDark ? 'bg-gray-900' : 'bg-gray-50'} p-6`}>
-          <div className={`max-w-4xl mx-auto`}>
+          <div className={`max-w-7xl mx-auto`}>
 
 
             <div className={`${isDark ? 'bg-gray-800' : 'bg-white'} p-8 rounded-xl shadow-lg mb-6`}> 
@@ -79,6 +80,11 @@ export default function StudentHomePage() {
                   </div>
                 </div>
               </div>
+            </div>
+
+            {/* Bookings Calendar */}
+            <div className="mb-6">
+              <BookingsCalendar />
             </div>
 
             {/* Quick Tips Card */}
