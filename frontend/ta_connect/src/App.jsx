@@ -1,22 +1,45 @@
 import { AuthProvider } from './contexts/AuthContext'
 import { ThemeProvider } from './contexts/ThemeContext'
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
+import { lazy, Suspense } from 'react'
+import ProtectedRoute from './components/ProtectedRoute';
+import PublicRoute from './components/PublicRoute';
+import { SkeletonLoader } from './components/SkeletonLoader';
+import { useTheme } from './contexts/ThemeContext';
+
+// Eager-loaded critical pages
 import LandingPage from './pages/main/LandingPage'
 import LoginPage from './pages/main/LoginPage';
 import RegisterPage from './pages/main/RegisterPage';
-import VerifyEmailPage from './pages/main/VerifyEmailPage';
-import ForgotPasswordPage from './pages/main/ForgotPasswordPage';
-import ResetPasswordPage from './pages/main/ResetPasswordPage';
 import GoogleCallback from './pages/main/GoogleCallback';
 import SelectUserType from './pages/main/SelectUserType';
-import ProtectedRoute from './components/ProtectedRoute';
-import PublicRoute from './components/PublicRoute';
-import TAPage from './pages/ta/TAPage';
-import ProfilePage from './pages/main/ProfilePage';
-import ManageCourses from "./pages/ta/ManageCourses";
-import AnalyticsDashboard from "./pages/ta/AnalyticsDashboard";
-import StudentHomePage from './pages/student/studentHomePage';
-import BookPage from './pages/student/BookPage';
+
+// Lazy-loaded pages for better code splitting
+const VerifyEmailPage = lazy(() => import('./pages/main/VerifyEmailPage'));
+const ForgotPasswordPage = lazy(() => import('./pages/main/ForgotPasswordPage'));
+const ResetPasswordPage = lazy(() => import('./pages/main/ResetPasswordPage'));
+const ProfilePage = lazy(() => import('./pages/main/ProfilePage'));
+const TAPage = lazy(() => import('./pages/ta/TAPage'));
+const ManageCourses = lazy(() => import('./pages/ta/ManageCourses'));
+const AnalyticsDashboard = lazy(() => import('./pages/ta/AnalyticsDashboard'));
+const StudentHomePage = lazy(() => import('./pages/student/studentHomePage'));
+const BookPage = lazy(() => import('./pages/student/BookPage'));
+
+/**
+ * Fallback component displayed while lazy-loaded pages are loading
+ */
+const PageLoader = () => {
+  const { theme } = useTheme();
+  const isDark = theme === 'dark';
+  
+  return (
+    <div className={`min-h-screen flex items-center justify-center ${isDark ? 'bg-gray-900' : 'bg-gray-50'}`}>
+      <div className="w-full max-w-md mx-auto px-4">
+        <SkeletonLoader isDark={isDark} count={5} height="h-16" className="mb-4" />
+      </div>
+    </div>
+  );
+};
 
 function App() {
   return (
@@ -51,23 +74,37 @@ function App() {
               />
               <Route 
                 path="/verify-email"
-                element={<VerifyEmailPage />}
+                element={
+                  <Suspense fallback={<PageLoader />}>
+                    <VerifyEmailPage />
+                  </Suspense>
+                }
               />  
               <Route 
                 path="/verify-email/:uid/:token"
-                element={<VerifyEmailPage />}
+                element={
+                  <Suspense fallback={<PageLoader />}>
+                    <VerifyEmailPage />
+                  </Suspense>
+                }
               />
               <Route
                 path="/forgot-password"
                 element={
                   <PublicRoute>
-                    <ForgotPasswordPage />
+                    <Suspense fallback={<PageLoader />}>
+                      <ForgotPasswordPage />
+                    </Suspense>
                   </PublicRoute>
                 }
               />
               <Route
                 path="/reset-password"
-                element={<ResetPasswordPage />}
+                element={
+                  <Suspense fallback={<PageLoader />}>
+                    <ResetPasswordPage />
+                  </Suspense>
+                }
               />
               <Route
                 path="/auth/google/callback"
@@ -81,7 +118,9 @@ function App() {
                 path="/ta" 
                 element={
                   <ProtectedRoute>
-                    <TAPage />
+                    <Suspense fallback={<PageLoader />}>
+                      <TAPage />
+                    </Suspense>
                   </ProtectedRoute>
                 } 
               />
@@ -89,7 +128,9 @@ function App() {
                 path="/ta/profile" 
                 element={
                   <ProtectedRoute>
-                    <ProfilePage />
+                    <Suspense fallback={<PageLoader />}>
+                      <ProfilePage />
+                    </Suspense>
                   </ProtectedRoute>
                 } 
               />
@@ -97,7 +138,9 @@ function App() {
                 path="/ta/manage-courses" 
                 element={
                   <ProtectedRoute>
-                    <ManageCourses />
+                    <Suspense fallback={<PageLoader />}>
+                      <ManageCourses />
+                    </Suspense>
                   </ProtectedRoute>
                 } 
               />
@@ -105,7 +148,9 @@ function App() {
                 path="/ta/analytics" 
                 element={
                   <ProtectedRoute>
-                    <AnalyticsDashboard />
+                    <Suspense fallback={<PageLoader />}>
+                      <AnalyticsDashboard />
+                    </Suspense>
                   </ProtectedRoute>
                 } 
               />
@@ -115,7 +160,9 @@ function App() {
                 path="/student" 
                 element={
                   <ProtectedRoute>
-                    <StudentHomePage />
+                    <Suspense fallback={<PageLoader />}>
+                      <StudentHomePage />
+                    </Suspense>
                   </ProtectedRoute>
                 } 
               />
@@ -123,7 +170,9 @@ function App() {
                 path="/student/profile" 
                 element={
                   <ProtectedRoute>
-                    <ProfilePage />
+                    <Suspense fallback={<PageLoader />}>
+                      <ProfilePage />
+                    </Suspense>
                   </ProtectedRoute>
                 } 
               />
@@ -131,13 +180,12 @@ function App() {
                 path="/student/book" 
                 element={
                   <ProtectedRoute>
-                    <BookPage />
+                    <Suspense fallback={<PageLoader />}>
+                      <BookPage />
+                    </Suspense>
                   </ProtectedRoute>
                 } 
               />
-
-
-              {/* Add more routes here */}
             </Routes>
           </div>
         </Router>

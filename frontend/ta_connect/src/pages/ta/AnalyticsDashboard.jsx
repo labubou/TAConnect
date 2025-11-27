@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react';
-import axios from 'axios';
 import { useTheme } from '../../contexts/ThemeContext';
 import TAnavbar from '../../components/ta/TAnavbar';
 import BookingsChart from '../../components/ta/BookingsChart';
@@ -7,38 +6,39 @@ import FeedbackChart from '../../components/ta/FeedbackChart';
 import StudentActivityChart from '../../components/ta/StudentActivityChart';
 import ErrorBoundary from '../../components/ErrorBoundary';
 import Footer from '../../components/Footer';
+import { SkeletonLoader } from '../../components/SkeletonLoader';
 import {
-  getAnalyticsData,
   processBookingsForChart,
   processFeedbackForChart,
   processStudentActivityForChart,
   calculateStatistics
 } from '../../services/analyticsService';
 import strings from '../../strings/analyticsStrings';
+import { useAnalyticsData } from '../../hooks/useApi';
 
 export default function AnalyticsDashboard() {
   const { theme } = useTheme();
   const isDark = theme === 'dark';
   const [isNavbarOpen, setIsNavbarOpen] = useState(true);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
   const [bookingsData, setBookingsData] = useState([]);
   const [feedbackData, setFeedbackData] = useState(null);
   const [studentActivityData, setStudentActivityData] = useState([]);
   const [statistics, setStatistics] = useState(null);
   const [dateRange, setDateRange] = useState({ start: '', end: '' });
 
-  useEffect(() => {
-    fetchAnalyticsData();
-  }, []);
+  // Use React Query hook for analytics data with caching
+  const { 
+    data: analyticsData, 
+    isLoading: loading, 
+    error, 
+    refetch 
+  } = useAnalyticsData(dateRange.start, dateRange.end, {
+    enabled: true, // Always fetch initially
+  });
 
-  const fetchAnalyticsData = async () => {
-    try {
-      setLoading(true);
-      setError('');
-      const analyticsData = await getAnalyticsData(dateRange.start, dateRange.end);
-      
-      // Process data for charts
+  // Process analytics data whenever it changes
+  useEffect(() => {
+    if (analyticsData) {
       const bookings = processBookingsForChart(analyticsData.bookings);
       const feedback = processFeedbackForChart(analyticsData.slots);
       const activity = processStudentActivityForChart(analyticsData.bookings);
@@ -48,13 +48,8 @@ export default function AnalyticsDashboard() {
       setFeedbackData(feedback);
       setStudentActivityData(activity);
       setStatistics(stats);
-    } catch (err) {
-      console.error('Failed to fetch analytics data:', err);
-      setError(err.response?.data?.error || strings.dashboard.errorLoading);
-    } finally {
-      setLoading(false);
     }
-  };
+  }, [analyticsData]);
 
   const handleDateFilterChange = (e) => {
     const { name, value } = e.target;
@@ -65,12 +60,12 @@ export default function AnalyticsDashboard() {
   };
 
   const handleApplyFilter = () => {
-    fetchAnalyticsData();
+    refetch();
   };
 
   const handleClearFilter = () => {
     setDateRange({ start: '', end: '' });
-    fetchAnalyticsData();
+    refetch();
   };
 
   // StatCard Component
@@ -112,6 +107,13 @@ export default function AnalyticsDashboard() {
                 {strings.dashboard.description}
               </p>
             </div>
+
+            {/* Error state */}
+            {error && !loading && (
+              <div className={`mb-6 p-4 rounded-lg ${isDark ? 'bg-red-900/20 text-red-300' : 'bg-red-50 text-red-700'}`}>
+                <p className="text-sm font-medium">{error.message || 'Failed to load analytics data'}</p>
+              </div>
+            )}
 
             {/* Date Filter */}
             <div className={`mb-6 sm:mb-8 p-3 sm:p-4 rounded-xl ${isDark ? 'bg-gray-700' : 'bg-gray-50'}`}>
@@ -214,11 +216,48 @@ export default function AnalyticsDashboard() {
 
             {/* Loading State */}
             {loading && (
-              <div className="flex items-center justify-center py-12">
-                <div className="relative w-12 h-12">
-                  <div className={`absolute inset-0 rounded-full border-4 border-transparent border-t-[#366c6b] animate-spin`}></div>
-                  <div className={`absolute inset-2 rounded-full border-4 border-transparent border-r-[#1a3535] animate-spin`} style={{ animationDirection: 'reverse', animationDuration: '1s' }}></div>
+              <div>
+                <SkeletonLoader isDark={isDark} count={5} height="h-20" className="mb-8" />
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                  <SkeletonLoader isDark={isDark} count={1} height="h-80" />
+                  <SkeletonLoader isDark={isDark} count={1} height="h-80" />
                 </div>
+              </div>
+            )}
+
+            {/* Statistics Cards */}
+            {!loading && statistics && (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 mb-8">
+                <StatCard
+                  label={strings.dashboard.stats.totalBookings}
+                  value={statistics.totalBookings}
+                  icon={<svg className="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 20 20"><path d="M5 3a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2V5a2 2 0 00-2-2H5zM15 3a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2V5a2 2 0 00-2-2h-2zM5 13a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2v-2a2 2 0 00-2-2H5zM15 13a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2v-2a2 2 0 00-2-2h-2z" /></svg>}
+                  color="bg-blue-500"
+                />
+                <StatCard
+                  label={strings.dashboard.stats.activeBookings}
+                  value={statistics.activeBookings}
+                  icon={<svg className="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" /></svg>}
+                  color="bg-green-500"
+                />
+                <StatCard
+                  label={strings.dashboard.stats.cancelledBookings}
+                  value={statistics.cancelledBookings}
+                  icon={<svg className="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" /></svg>}
+                  color="bg-red-500"
+                />
+                <StatCard
+                  label={strings.dashboard.stats.uniqueStudents}
+                  value={statistics.uniqueStudents}
+                  icon={<svg className="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 20 20"><path d="M9 6a3 3 0 11-6 0 3 3 0 016 0zM9 12a6 6 0 11-12 0 6 6 0 0112 0z" /><path d="M14.5 12a2.5 2.5 0 100-5 2.5 2.5 0 000 5z" /></svg>}
+                  color="bg-purple-500"
+                />
+                <StatCard
+                  label={strings.dashboard.stats.totalSlots}
+                  value={statistics.totalSlots}
+                  icon={<svg className="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 20 20"><path d="M5.5 13a3.5 3.5 0 01-.369-6.98 4 4 0 117.753-1.3A4.5 4.5 0 1113.5 13H11V9.413l1.293 1.293a1 1 0 001.414-1.414l-3-3a1 1 0 00-1.414 0l-3 3a1 1 0 001.414 1.414L9 9.414V13H5.5z" /></svg>}
+                  color="bg-yellow-500"
+                />
               </div>
             )}
 
