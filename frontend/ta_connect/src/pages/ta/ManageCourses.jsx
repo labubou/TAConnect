@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import axios from "axios";
 import { useTheme } from "../../contexts/ThemeContext";
 import TAnavbar from "../../components/ta/TAnavbar";
 import CreateCourse from "../../components/ta/mini-pages/CreateCourse";
@@ -7,7 +6,9 @@ import ViewCourses from "../../components/ta/mini-pages/ViewCourses";
 import EditCourses from "../../components/ta/mini-pages/EditCourses";
 import DeleteCourses from "../../components/ta/mini-pages/DeleteCourses";
 import ManageAllowedStudentsModal from "../../components/ta/mini-pages/ManageAllowedStudentsModal";
+import { SkeletonLoader } from "../../components/SkeletonLoader";
 import strings from "../../strings/manageCoursesPageStrings";
+import { useInstructorSlots } from "../../hooks/useApi";
 
 const Modal = ({ title, onClose, isDark, children }) => (
   <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
@@ -51,14 +52,17 @@ export default function ManageCourses() {
   const { theme } = useTheme();
   const isDark = theme === "dark";
   const [isNavbarOpen, setIsNavbarOpen] = useState(true);
-  const [slots, setSlots] = useState([]);
-  const [loading, setLoading] = useState(true);
   const [modalState, setModalState] = useState({ type: null, slot: null });
   const [infoBanner, setInfoBanner] = useState("");
 
-  useEffect(() => {
-    fetchSlots();
-  }, []);
+  // Use React Query for efficient data fetching with caching
+  const { 
+    data: slots = [], 
+    isLoading, 
+    error, 
+    refetch,
+    invalidateQueries 
+  } = useInstructorSlots();
 
   useEffect(() => {
     if (!infoBanner) return;
@@ -66,31 +70,21 @@ export default function ManageCourses() {
     return () => clearTimeout(timer);
   }, [infoBanner]);
 
-  const fetchSlots = async () => {
-    try {
-      const res = await axios.get("/api/instructor/get-user-slots");
-      setSlots(res?.data?.slots || []);
-    } catch (err) {
-      console.error("Failed to fetch slots:", err);
-    } finally {
-      setLoading(false);
-    }
-  };
-
   const handleSlotCreated = (newSlot) => {
-    setSlots((prev) => [...prev, newSlot]);
+    // Refetch to get updated list from server
+    refetch();
     setModalState({ type: null, slot: null });
   };
 
   const handleSlotDeleted = (id) => {
-    setSlots((prev) => prev.filter((slot) => slot.id !== id));
+    // Refetch to get updated list from server
+    refetch();
     setModalState({ type: null, slot: null });
   };
 
   const handleSlotUpdated = (updatedSlot) => {
-    setSlots((prev) =>
-      prev.map((slot) => (slot.id === updatedSlot.id ? updatedSlot : slot))
-    );
+    // Refetch to get updated list from server
+    refetch();
     setModalState({ type: null, slot: null });
   };
 
@@ -116,6 +110,24 @@ export default function ManageCourses() {
         } pt-20 min-h-screen`}
       >
         <div className="px-3 sm:px-6 lg:px-10 py-4 sm:py-6 space-y-4 sm:space-y-6">
+          {/* Loading skeleton while fetching data */}
+          {isLoading && (
+            <div className="space-y-4">
+              <SkeletonLoader isDark={isDark} count={5} height="h-20" />
+            </div>
+          )}
+
+          {/* Error state */}
+          {error && !isLoading && (
+            <div className={`rounded-2xl px-4 py-3 border text-sm ${
+              isDark
+                ? "bg-red-900/20 border-red-700 text-red-200"
+                : "bg-red-50 border-red-200 text-red-800"
+            }`}>
+              <p className="font-medium">{error.message || 'Failed to load courses'}</p>
+            </div>
+          )}
+
           {infoBanner && (
             <div
               className={`rounded-2xl px-3 sm:px-4 py-2 sm:py-3 border flex items-center justify-between gap-2 sm:gap-4 text-sm ${
@@ -140,18 +152,21 @@ export default function ManageCourses() {
             </div>
           )}
 
-          <section>
-            <ViewCourses
-              isDark={isDark}
-              slots={slots}
-              loading={loading}
-              onRefresh={fetchSlots}
-              onAddCourse={() => openModal("create")}
-              onEditSlot={(slot) => openModal("edit", slot)}
-              onDeleteSlot={(slot) => openModal("delete", slot)}
-              onManageStudents={handleManageStudents}
-            />
-          </section>
+          {/* Main content - only show when not loading */}
+          {!isLoading && (
+            <section>
+              <ViewCourses
+                isDark={isDark}
+                slots={slots}
+                loading={isLoading}
+                onRefresh={refetch}
+                onAddCourse={() => openModal("create")}
+                onEditSlot={(slot) => openModal("edit", slot)}
+                onDeleteSlot={(slot) => openModal("delete", slot)}
+                onManageStudents={handleManageStudents}
+              />
+            </section>
+          )}
         </div>
       </main>
 

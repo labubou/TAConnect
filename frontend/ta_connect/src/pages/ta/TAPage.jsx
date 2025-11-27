@@ -1,42 +1,26 @@
-import { useState, useEffect } from 'react';
-import axios from 'axios';
+import { useState } from 'react';
 import { useTheme } from '../../contexts/ThemeContext';
 import { useNavigate } from 'react-router-dom';
 import TAnavbar from '../../components/ta/TAnavbar';
 import DashboardSlots from '../../components/ta/DashboardSlots';
 import ErrorBoundary from '../../components/ErrorBoundary';
 import Footer from '../../components/Footer';
+import { SkeletonLoader } from '../../components/SkeletonLoader';
 import strings from '../../strings/TAPageStrings';
+import { useInstructorSlots, useInstructorBookings } from '../../hooks/useApi';
 
 export default function TAPage() {
   const { theme } = useTheme();
   const isDark = theme === 'dark';
   const navigate = useNavigate();
   const [isNavbarOpen, setIsNavbarOpen] = useState(true);
-  const [slots, setSlots] = useState([]);
-  const [bookings, setBookings] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
 
-  useEffect(() => {
-    fetchSlots();
-  }, []);
+  // Use React Query hooks for data fetching with caching
+  const { data: slots = [], isLoading: slotsLoading, error: slotsError, refetch: refetchSlots } = useInstructorSlots();
+  const { data: bookings = [], isLoading: bookingsLoading, error: bookingsError } = useInstructorBookings();
 
-  const fetchSlots = async () => {
-    try {
-      setLoading(true);
-      setError('');
-      const res = await axios.get('/api/instructor/get-user-slots');
-      const bookingsRes = await axios.get('/api/instructor/get-user-bookings');
-      setSlots(res?.data?.slots || []);
-      setBookings(bookingsRes?.data?.bookings || []);
-    } catch (err) {
-      console.error('Failed to fetch slots:', err);
-      setError(err.response?.data?.error || strings.taPage.weekSchedule.errorLoading);
-    } finally {
-      setLoading(false);
-    }
-  };
+  const loading = slotsLoading || bookingsLoading;
+  const error = slotsError?.message || bookingsError?.message || '';
 
   const handleCreateSlot = () => {
     navigate('/ta/manage-courses');
@@ -69,17 +53,31 @@ export default function TAPage() {
               </button>
             </div>
 
+            {/* Loading State */}
+            {loading && (
+              <SkeletonLoader isDark={isDark} count={3} height="h-24" className="mb-6" />
+            )}
+
+            {/* Error State */}
+            {error && !loading && (
+              <div className={`p-4 rounded-lg mb-6 ${isDark ? 'bg-red-900/20 text-red-300' : 'bg-red-50 text-red-700'}`}>
+                <p className="text-sm font-medium">{error}</p>
+              </div>
+            )}
+
             {/* Dashboard Slots Component */}
-            <ErrorBoundary>
-              <DashboardSlots 
-                isDark={isDark}
-                slots={slots}
-                bookings={bookings}
-                loading={loading}
-                error={error}
-                onCreateSlot={handleCreateSlot}
-              />
-            </ErrorBoundary>
+            {!loading && (
+              <ErrorBoundary>
+                <DashboardSlots 
+                  isDark={isDark}
+                  slots={slots}
+                  bookings={bookings}
+                  loading={loading}
+                  error={error}
+                  onCreateSlot={handleCreateSlot}
+                />
+              </ErrorBoundary>
+            )}
           </div>
         </main>
       </div>
