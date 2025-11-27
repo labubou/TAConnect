@@ -235,3 +235,43 @@ export const useStudentBookings = (options = {}) => {
     ...options,
   });
 };
+
+/**
+ * Hook to fetch email notification preferences
+ */
+export const useEmailPreferences = (options = {}) => {
+  return useQuery({
+    queryKey: ['emailPreferences'],
+    queryFn: async () => {
+      const response = await axios.get('/api/profile/');
+      return {
+        email_on_booking: response.data.email_on_booking !== false,
+        email_on_cancellation: response.data.email_on_cancellation !== false,
+      };
+    },
+    staleTime: 30 * 60 * 1000, // 30 minutes
+    ...options,
+  });
+};
+
+/**
+ * Hook to update email notification preferences
+ */
+export const useUpdateEmailPreferences = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (preferences) => {
+      const response = await axios.put('/api/profile/update/', {
+        email_on_booking: preferences.email_on_booking,
+        email_on_cancellation: preferences.email_on_cancellation,
+      });
+      return response.data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['emailPreferences'] });
+      queryClient.invalidateQueries({ queryKey: ['user', 'profile'] });
+    },
+  });
+};
+
