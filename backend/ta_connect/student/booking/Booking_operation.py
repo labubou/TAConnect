@@ -20,7 +20,8 @@ from student.schemas.booking_schemas import (
     create_booking_swagger,
     update_booking_swagger,
     cancel_booking_swagger,
-    available_times_swagger
+    available_times_swagger,
+    get_bookings_swagger
 )
 
 class BookingCreateView(GenericAPIView):
@@ -28,10 +29,7 @@ class BookingCreateView(GenericAPIView):
     permission_classes = [IsStudent]
     serializer_class = CreateBookingSerializer
 
-    @swagger_auto_schema(
-        operation_description="Get all bookings for the current student in a specific date range.",
-        responses={200: "List of bookings"}
-    )
+    @swagger_auto_schema(**get_bookings_swagger)
     def get(self, request):
         """Get all bookings for the current student"""
         try:
