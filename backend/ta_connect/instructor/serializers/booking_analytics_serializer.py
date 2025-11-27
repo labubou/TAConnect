@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from instructor.models import Booking
+from student.models import Booking
 from datetime import datetime,date
 from dateutil.relativedelta import relativedelta
 
