@@ -1,6 +1,7 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useTheme } from '../../contexts/ThemeContext';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../../contexts/AuthContext';
 import StudentNavbar from '../../components/student/studentNavbar';
 import Footer from '../../components/Footer';
 import BookingsCalendar from '../../components/student/BookingsCalendar';
@@ -12,6 +13,12 @@ export default function StudentHomePage() {
   const isDark = theme === 'dark';
   const navigate = useNavigate();
   const [isNavbarOpen, setIsNavbarOpen] = useState(true);
+  const { refreshUser } = useAuth();
+
+  // Refresh user data on mount to get latest email verification status
+  useEffect(() => {
+    refreshUser().catch(err => console.error('Failed to refresh user:', err));
+  }, []);
 
   return (
     <div className={`min-h-screen flex flex-col ${isDark ? 'bg-gray-900' : 'bg-gray-50'}`}>

@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useSearchParams, useParams } from 'react-router-dom';
 import { useTheme } from '../../contexts/ThemeContext';
+import { useAuth } from '../../contexts/AuthContext';
 import ThemeToggle from '../../components/ThemeToggle';
 import Footer from '../../components/Footer';
 import Logo2 from '../../assets/Logo2.png';
@@ -9,6 +10,7 @@ import axios from 'axios';
 function VerifyEmailPage() {
   const navigate = useNavigate();
   const { theme } = useTheme();
+  const { refreshUser, isAuthenticated } = useAuth();
   const [searchParams] = useSearchParams();
   const params = useParams();
   const [status, setStatus] = useState('verifying'); // verifying, success, error
@@ -38,6 +40,15 @@ function VerifyEmailPage() {
           setStatus('success');
           setMessage(response.data.message || 'Your email has been verified successfully!');
           
+          // If user is logged in, refresh their data to update email_verify status
+          if (isAuthenticated) {
+            try {
+              await refreshUser();
+            } catch (err) {
+              console.error('Failed to refresh user after verification:', err);
+            }
+          }
+          
           // Redirect to login after 3 seconds
           setTimeout(() => {
             navigate('/login');
@@ -53,7 +64,7 @@ function VerifyEmailPage() {
     };
 
     verifyEmail();
-  }, [searchParams, navigate]);
+  }, [searchParams, navigate, isAuthenticated, refreshUser]);
 
   const isDark = theme === 'dark';
 

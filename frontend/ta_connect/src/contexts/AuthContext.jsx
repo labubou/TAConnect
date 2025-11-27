@@ -89,9 +89,21 @@ export const AuthProvider = ({ children }) => {
 
   const fetchUser = async () => {
     const res = await axios.get('/api/user-data/');
-    setUser(res.data);
-    localStorage.setItem('user', JSON.stringify(res.data));
-    return res.data;
+    const userData = res.data;
+    setUser(userData);
+    localStorage.setItem('user', JSON.stringify(userData));
+    return userData;
+  };
+
+  // Add this new method to refresh user data
+  const refreshUser = async () => {
+    try {
+      const userData = await fetchUser();
+      return userData;
+    } catch (error) {
+      console.error('Failed to refresh user data:', error);
+      throw error;
+    }
   };
 
   // Initial auth check
@@ -153,6 +165,7 @@ export const AuthProvider = ({ children }) => {
     login,
     logout,
     updateUser,
+    refreshUser, // Export the new method
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
