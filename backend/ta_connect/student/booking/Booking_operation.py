@@ -1,10 +1,12 @@
-from datetime import datetime
+from datetime import datetime, date
+from calendar import monthrange
 from django.shortcuts import get_object_or_404
+from django.utils import timezone
 from rest_framework import status
 from rest_framework.generics import GenericAPIView
 from rest_framework.response import Response
 from drf_yasg.utils import swagger_auto_schema
-
+from student.utils.complete_book import complete_booking
 from student.models import Booking
 from student.sendBookingEmail import send_booking_confirmation_email, send_booking_cancelled_email
 from instructor.models import OfficeHourSlot
@@ -18,7 +20,8 @@ from student.schemas.booking_schemas import (
     create_booking_swagger,
     update_booking_swagger,
     cancel_booking_swagger,
-    available_times_swagger
+    available_times_swagger,
+    get_bookings_swagger
 )
 
 class BookingCreateView(GenericAPIView):
@@ -26,15 +29,31 @@ class BookingCreateView(GenericAPIView):
     permission_classes = [IsStudent]
     serializer_class = CreateBookingSerializer
 
-    @swagger_auto_schema(
-        operation_description="Get all bookings for the current student",
-        responses={200: "List of bookings"}
-    )
+    @swagger_auto_schema(**get_bookings_swagger)
     def get(self, request):
         """Get all bookings for the current student"""
         try:
-            bookings = Booking.objects.filter(student=request.user).order_by('-date', '-start_time')
-            
+            date_from = request.query_params.get('date_from')
+            date_to = request.query_params.get('date_to')
+
+            if date_from == None or date_to == None:
+                today = timezone.now().date()
+                # First day of current month
+                date_from = today.replace(day=1)
+                # Last day of current month
+                last_day = monthrange(today.year, today.month)[1]
+                date_to = today.replace(day=last_day)
+            else:
+                # Convert ISO string to date object
+                date_from = date.fromisoformat(date_from)
+                date_to = date.fromisoformat(date_to)
+
+            bookings = Booking.objects.filter(student=request.user, date__range=[date_from, date_to]).order_by('-date', '-start_time')
+
+            for booking in bookings:
+                if not booking.is_completed:
+                    success, message = complete_booking(booking)
+
             return Response({
                 'bookings': [
                     {
@@ -51,11 +70,13 @@ class BookingCreateView(GenericAPIView):
                         'start_time': booking.start_time,
                         'end_time': booking.end_time,
                         'is_cancelled': booking.is_cancelled,
+                        'is_completed': booking.is_completed,
                     } for booking in bookings
                 ]
             }, status=status.HTTP_200_OK)
         except Exception as e:
-            return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            print(f"Error fetching bookings: {e}")
+            return Response({'error': "something went wrong!"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     @swagger_auto_schema(**create_booking_swagger)
     def post(self, request):
@@ -189,8 +210,8 @@ class BookingDetailView(GenericAPIView):
                 return Response({'error': 'Slot ID is required.'}, status=status.HTTP_400_BAD_REQUEST)
             
             slot = OfficeHourSlot.objects.filter(id=pk).first()
-            # Fix: datetime is imported as the class, so use now().date()
-            today = datetime.now().date()
+            # Fix: use timezone.now() for timezone-aware datetime
+            today = timezone.now().date()
 
             if not slot:
                 return Response({'error': 'Slot not found'}, status=404)

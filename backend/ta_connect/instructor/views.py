@@ -17,6 +17,7 @@ from .schemas.slot_schemas import (
     get_instructor_data_swagger
 )
 from django.db.models import Q
+from student.utils.complete_book import complete_booking
 
 # Create your views here.
 class GetUserSlotsView(GenericAPIView):
@@ -95,6 +96,10 @@ class GetUserBookingView(GenericAPIView):
             else:
                 books = Booking.objects.filter(office_hour__in=slots)
             
+            for book in books:
+                if not book.is_completed:
+                    success, msg = complete_booking(book)
+                
             return Response({
                 'bookings': [
                     {

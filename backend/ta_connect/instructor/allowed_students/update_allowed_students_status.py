@@ -3,12 +3,19 @@ from rest_framework import status
 from rest_framework.generics import GenericAPIView
 from rest_framework.response import Response
 from drf_yasg.utils import swagger_auto_schema
+from rest_framework import serializers
 from instructor.models import OfficeHourSlot
 from instructor.schemas.allowed_students_schemas import update_allowed_students_status_swagger
 from accounts.permissions import IsInstructor
 
+# Simple serializer for Swagger schema generation
+class AllowedStudentsStatusSerializer(serializers.Serializer):
+    """Serializer for allowed students status toggle - used for Swagger docs only"""
+    pass
+
 class UpdateAllowedStudentsStatusView(GenericAPIView):
     permission_classes = [IsInstructor]
+    serializer_class = AllowedStudentsStatusSerializer
 
     @swagger_auto_schema(**update_allowed_students_status_swagger)
     def patch(self, request, slot_id):
