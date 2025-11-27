@@ -1,7 +1,7 @@
 from rest_framework import serializers
 from student.models import Booking
 from datetime import datetime,date
-
+from dateutil.relativedelta import relativedelta
 
 class BookingAnalyticsSerializer(serializers.Serializer):
     start_date = serializers.DateField(required=False, allow_null=True)
