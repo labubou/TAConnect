@@ -191,7 +191,7 @@ export default function ProfilePage() {
               <button
                 type="button"
                 onClick={() => navigate('/forgot-password')}
-                className="px-4 py-2 rounded-lg border border-gray-400 text-gray-700 dark:text-gray-200 hover:bg-gray-200 dark:hover:bg-gray-700 transition-all"
+                className="px-4 py-2 rounded-lg bg-white dark:bg-gray-900 border border-gray-400 text-gray-700 dark:text-gray-200 hover:bg-gray-200 dark:hover:bg-gray-700 transition-all"
               >
                 {strings.profilePage.resetPassword}
               </button>
