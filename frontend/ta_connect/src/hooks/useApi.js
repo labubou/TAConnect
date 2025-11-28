@@ -34,25 +34,41 @@ export const useInstructorBookings = (options = {}) => {
 /**
  * Hook for analytics data
  * Supports date range filtering
+ * Handles errors gracefully with fallbacks
  */
 export const useAnalyticsData = (startDate = null, endDate = null, options = {}) => {
   return useQuery({
     queryKey: ['analytics', startDate, endDate],
     queryFn: async () => {
-      const params = {};
-      if (startDate) params.start_date = startDate;
-      if (endDate) params.end_date = endDate;
+      try {
+        const params = {};
+        if (startDate) params.start_date = startDate;
+        if (endDate) params.end_date = endDate;
 
-      const [bookingsRes, slotsRes] = await Promise.all([
-        axios.get('/api/instructor/get-user-bookings', { params }),
-        axios.get('/api/instructor/get-user-slots'),
-      ]);
+        const [bookingsRes, slotsRes] = await Promise.all([
+          axios.get('/api/instructor/get-user-bookings', { params }).catch(err => {
+            console.error('Error fetching bookings:', err);
+            // Return empty bookings on error
+            return { data: { bookings: [] } };
+          }),
+          axios.get('/api/instructor/get-user-slots').catch(err => {
+            console.error('Error fetching slots:', err);
+            // Return empty slots on error
+            return { data: { slots: [] } };
+          }),
+        ]);
 
-      return {
-        bookings: bookingsRes?.data?.bookings || [],
-        slots: slotsRes?.data?.slots || [],
-      };
+        return {
+          bookings: bookingsRes?.data?.bookings || [],
+          slots: slotsRes?.data?.slots || [],
+        };
+      } catch (error) {
+        console.error('Analytics query failed:', error);
+        throw new Error('Failed to load analytics data. Please try again.');
+      }
     },
+    retry: 2, // Retry twice on failure
+    retryDelay: attemptIndex => Math.min(1000 * 2 ** attemptIndex, 30000),
     ...options,
   });
 };
