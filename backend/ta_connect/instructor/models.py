@@ -91,13 +91,3 @@ class AllowedStudents(models.Model):
 
     def __str__(self):
         return f"{self.email} - {self.booking_policy}"
-
-class TAAnalytics(models.Model):
-    instructor = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
-    total_sessions = models.PositiveIntegerField(default=0)
-    total_feedback_count = models.PositiveIntegerField(default=0)
-    average_rating = models.FloatField(default=0.0)
-    last_updated = models.DateTimeField(auto_now=True)
-
-    def __str__(self):
-        return f"Analytics for {self.instructor.username}"
