@@ -3,7 +3,7 @@ from django.core.mail import send_mail
 from django.conf import settings
 
 
-def send_booking_confirmation_email(student, instructor, slot, booking_date, booking_time, send_to_student=True):
+def send_booking_confirmation_email(student, instructor, slot, booking_date, booking_time):
     """
     Send booking confirmation emails to both student and instructor.
     
@@ -13,7 +13,6 @@ def send_booking_confirmation_email(student, instructor, slot, booking_date, boo
         slot: OfficeHourSlot object
         booking_date: Date object or string (YYYY-MM-DD)
         booking_time: Time object or string (HH:MM)
-        send_to_student: bool - Whether to send email to student (default: True)
     
     Returns:
         dict: {'success': bool, 'student_sent': bool, 'instructor_sent': bool, 'errors': []}
@@ -110,7 +109,6 @@ def send_booking_cancelled_email(student, instructor, slot, booking_date, bookin
         slot: OfficeHourSlot object
         booking_date: Date object or string (YYYY-MM-DD)
         booking_time: Time object or string (HH:MM)
-        send_to_student: bool - Whether to send email to student (default: True)
     
     Returns:
         dict: {'success': bool, 'student_sent': bool, 'instructor_sent': bool, 'errors': []}

@@ -104,15 +104,13 @@ class BookingCreateView(GenericAPIView):
             
             booking = serializer.save()
 
-            # Always send email to instructor, optionally to student based on send_email preference
-            send_to_student = serializer.validated_data.get('send_email', True)
+            # Send booking confirmation emails
             send_booking_confirmation_email(
                 student=request.user,
                 instructor=slot.instructor,
                 slot=slot,
                 booking_date=serializer.validated_data['date'],
-                booking_time=serializer.validated_data['start_time'],
-                send_to_student=send_to_student
+                booking_time=serializer.validated_data['start_time']
             )
 
             return Response({
@@ -180,14 +178,9 @@ class BookingDetailView(GenericAPIView):
 
         booking = get_object_or_404(Booking, id=pk, student=request.user)
 
-        # Merge request data with default cancel flag
-        cancel_data = {'is_cancel': True}
-        if request.data:
-            cancel_data.update(request.data)
-
         serializer = self.get_serializer(
             instance=booking, 
-            data=cancel_data, 
+            data={'is_cancelled': True}, 
             partial=True, 
             context={'request': request}
         )
@@ -197,15 +190,13 @@ class BookingDetailView(GenericAPIView):
 
         cancelled_booking = serializer.save()
 
-        # Always send email to instructor, optionally to student based on send_email preference
-        send_to_student = serializer.validated_data.get('send_email', True)
+        #send email notifications
         send_booking_cancelled_email(
             student=request.user,
             instructor=booking.office_hour.instructor,
             slot=booking.office_hour,
             booking_date=booking.date,
-            booking_time=booking.start_time,
-            send_to_student=send_to_student
+            booking_time=booking.start_time
         )
 
         return Response({
