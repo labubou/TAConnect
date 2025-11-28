@@ -1,18 +1,21 @@
 from django.urls import path
 from instructor.time_slots.time_slots_operations import TimeSlotCreateView, TimeSlotDetailView
+from instructor.time_slots.export_time_slots import TimeSlotsExport
+from instructor.bookings.export_bookings import BookingsExport
 from .time_slots import update_status_slot
 from .views import GetUserSlotsView, GetUserBookingView, SearchInstructorsView, InstructorDataView
 from .allowed_students.import_csv import CSVUploadView
 from .allowed_students.allowed_students_operations import AllowedStudentsUpdateDeleteView, AllowedStudentsAddGetView
 from .allowed_students.update_allowed_students_status import UpdateAllowedStudentsStatusView
 from .analytics import BookingAnalyticsView
-from .cancel_book import InstructorCancelBookingView
+from .bookings.cancel_book import InstructorCancelBookingView
 
 urlpatterns = [
     # URLs for time slots
     path('time-slots/', TimeSlotCreateView.as_view(), name='time-slots-create'),  # POST to create
     path('time-slots/<int:slot_id>/', TimeSlotDetailView.as_view(), name='time-slots-detail'),  # PATCH to update, DELETE to delete
     path('time-slots/toggle-slot-status/<int:slot_id>/', update_status_slot.update_time_slot_status, name='toggle-time-slot-status'),
+    path('time-slots/export/', TimeSlotsExport.as_view(), name='time-slots-export'),
 
     # URLs for allowed students
     path('allowed-students/<int:slot_id>/', AllowedStudentsAddGetView.as_view(), name='allowed-students-add-get'),
@@ -31,4 +34,7 @@ urlpatterns = [
     
     # URL for cancelling bookings
     path('cancel-booking/<int:pk>/', InstructorCancelBookingView.as_view(), name='instructor-cancel-booking'),
+    
+    # URL for exporting bookings
+    path('bookings/export/', BookingsExport.as_view(), name='bookings-export'),
 ]
