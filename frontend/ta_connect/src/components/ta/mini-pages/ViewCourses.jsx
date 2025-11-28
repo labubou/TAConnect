@@ -1,6 +1,7 @@
 import { useState, useMemo } from "react";
 import axios from "axios";
 import strings from "../../../strings/manageCoursesPageStrings";
+import WarningModal from "../../WarningModal";
 
 export default function ViewCourses({
   isDark,
@@ -16,18 +17,34 @@ export default function ViewCourses({
   const [sortBy, setSortBy] = useState("course_name");
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
+  const [warningModal, setWarningModal] = useState({ show: false, slotId: null, isDeactivating: false });
 
-  const handleToggleStatus = async (slotId) => {
+  const handleToggleStatus = (slotId, isDeactivating) => {
+    // Show warning modal first
+    setWarningModal({
+      show: true,
+      slotId: slotId,
+      isDeactivating: isDeactivating,
+    });
+  };
+
+  const handleConfirmToggleStatus = async () => {
+    const { slotId } = warningModal;
+    setWarningModal({ show: false, slotId: null, isDeactivating: false });
     setToggleLoading((prev) => ({ ...prev, [slotId]: true }));
+
     try {
       const res = await axios.post(
         `/api/instructor/time-slots/toggle-slot-status/${slotId}/`
       );
       if (res?.data?.success) {
         onRefresh && onRefresh();
+      } else {
+        console.error("Failed to toggle status:", res?.data?.error);
       }
     } catch (err) {
       console.error("Failed to toggle status:", err);
+      // TODO: Add error handling UI to show to user
     } finally {
       setToggleLoading((prev) => ({ ...prev, [slotId]: false }));
     }
@@ -83,6 +100,36 @@ export default function ViewCourses({
     <div
       className={`p-0 sm:p-6 rounded-lg ${isDark ? "bg-transparent" : "bg-transparent"} h-full`}
     >
+      {warningModal.show && (
+        <WarningModal
+          isDark={isDark}
+          title={
+            warningModal.isDeactivating
+              ? strings.warningModal.deactivateTitle
+              : strings.warningModal.editTitle
+          }
+          message={
+            warningModal.isDeactivating
+              ? strings.warningModal.deactivateMessage
+              : strings.warningModal.activateMessage
+          }
+          warningText={
+            warningModal.isDeactivating
+              ? strings.warningModal.deactivateWarning
+              : strings.warningModal.activateWarning
+          }
+          onConfirm={handleConfirmToggleStatus}
+          onCancel={() => setWarningModal({ show: false, slotId: null, isDeactivating: false })}
+          confirmText={
+            warningModal.isDeactivating
+              ? strings.warningModal.deactivateConfirm
+              : strings.warningModal.activateConfirm
+          }
+          cancelText={strings.warningModal.editCancel}
+          isLoading={toggleLoading[warningModal.slotId]}
+        />
+      )}
+
       <div
         className={`rounded-2xl ${isDark ? "bg-gray-900/60" : "bg-white"} shadow-lg border ${isDark ? "border-gray-800" : "border-gray-100"}`}
       >
@@ -331,7 +378,7 @@ export default function ViewCourses({
                         {strings.view.buttons.manageStudents}
                       </button>
                       <button
-                        onClick={() => handleToggleStatus(slot.id)}
+                        onClick={() => handleToggleStatus(slot.id, slot.status)}
                         disabled={toggleLoading[slot.id]}
                         className={`flex-1 py-2 px-3 rounded-lg font-semibold text-xs sm:text-sm flex items-center justify-center gap-2 whitespace-nowrap ${
                           toggleLoading[slot.id] ? "opacity-50 cursor-not-allowed" : ""
