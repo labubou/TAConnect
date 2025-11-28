@@ -27,7 +27,7 @@ const InstructorManageBookings = lazy(() => import('./pages/ta/ManageBookings'))
 const StudentHomePage = lazy(() => import('./pages/student/studentHomePage'));
 const BookPage = lazy(() => import('./pages/student/BookPage'));
 const ManageBookingsPage = lazy(() => import('./pages/student/ManageBookingsPage'));
-const StudentEmailPreferencesPage = lazy(() => import('./pages/student/EmailPreferencesPage'));
+const StudentEmailPreferencesPage = lazy(() => import('./pages/student/EmailPreferencesPageS'));
 
 /**
  * Fallback component displayed while lazy-loaded pages are loading
