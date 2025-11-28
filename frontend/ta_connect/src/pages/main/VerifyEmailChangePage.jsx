@@ -24,22 +24,11 @@ function VerifyEmailChangePage() {
         return;
       }
 
-      // Decode the new email from base64
-      let decodedEmail = '';
-      try {
-        decodedEmail = atob(decodeURIComponent(newEmail));
-      } catch (err) {
-        console.error('Failed to decode email:', err);
-        setStatus('error');
-        setMessage('Invalid verification link. Please check your email and try again.');
-        return;
-      }
-
       try {
         const response = await axios.post('/api/profile/verify-email-change/', {
           uid,
           token,
-          new_email_encoded: newEmail,
+          new_email: decodeURIComponent(newEmail),
         });
 
         if (response.data) {
@@ -66,11 +55,20 @@ function VerifyEmailChangePage() {
         }
       } catch (err) {
         console.error('Email change verification error:', err);
+        console.error('Response data:', err.response?.data);
+        console.error('Request data sent:', { uid, token, new_email: decodeURIComponent(newEmail) });
         setStatus('error');
-        setMessage(
-          err.response?.data?.error || 
-          'Failed to verify email change. The link may be invalid or expired.'
-        );
+        
+        // Handle rate limiting specifically
+        if (err.response?.status === 429) {
+          setMessage('Too many verification attempts. Please wait a while before trying again.');
+        } else if (err.response?.data?.detail) {
+          setMessage(err.response.data.detail);
+        } else if (err.response?.data?.error) {
+          setMessage(err.response.data.error);
+        } else {
+          setMessage('Failed to verify email change. The link may be invalid or expired.');
+        }
       }
     };
 
