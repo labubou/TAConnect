@@ -6,6 +6,7 @@ import StudentNavbar from '../../components/student/studentNavbar';
 import Footer from '../../components/Footer';
 import { bookPageStrings as strings } from '../../strings/bookPageStrings';
 import axios from 'axios';
+import { useCreateBooking } from '../../hooks/useApi';
 
 export default function BookPage() {
   const { theme } = useTheme();
@@ -23,12 +24,14 @@ export default function BookPage() {
   const [selectedTime, setSelectedTime] = useState('');
   const [timeSlots, setTimeSlots] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [bookingLoading, setBookingLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
   const [isSearching, setIsSearching] = useState(false);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
+
+  // Use mutation for creating booking
+  const { mutate: createBooking, isPending: isCreatingBooking } = useCreateBooking();
 
   const handleCloseSuccessModal = () => {
     setShowSuccessModal(false);
@@ -192,47 +195,47 @@ export default function BookPage() {
       return;
     }
 
-    setBookingLoading(true);
     setError('');
     setSuccess('');
 
-    try {
-      const response = await axios.post('/api/student/booking/', {
+    createBooking(
+      {
         slot_id: selectedSlot.id,
         date: selectedDate,
         start_time: selectedTime
-      });
+      },
+      {
+        onSuccess: (response) => {
+          setSuccess(strings.messages.successBooking);
+          setShowSuccessModal(true);
+        },
+        onError: (err) => {
+          console.error('Error creating booking:', err);
+          let errorMsg = strings.messages.errorBooking;
 
-      setSuccess(strings.messages.successBooking);
-      setShowSuccessModal(true);
-    } catch (err) {
-      console.error('Error creating booking:', err);
-      let errorMsg = strings.messages.errorBooking;
-
-      if (err.response?.data) {
-        const data = err.response.data;
-        if (typeof data.error === 'string') {
-          errorMsg = data.error;
-        } else if (data.error && typeof data.error === 'object') {
-       
-          const values = Object.values(data.error);
-          if (values.length > 0) {
-             const firstVal = values[0];
-             errorMsg = Array.isArray(firstVal) ? firstVal[0] : String(firstVal);
+          if (err.response?.data) {
+            const data = err.response.data;
+            if (typeof data.error === 'string') {
+              errorMsg = data.error;
+            } else if (data.error && typeof data.error === 'object') {
+              const values = Object.values(data.error);
+              if (values.length > 0) {
+                const firstVal = values[0];
+                errorMsg = Array.isArray(firstVal) ? firstVal[0] : String(firstVal);
+              }
+            } else if (data.message) {
+              errorMsg = data.message;
+            } else if (data.non_field_errors) {
+              errorMsg = Array.isArray(data.non_field_errors) ? data.non_field_errors[0] : String(data.non_field_errors);
+            } else if (data.detail) {
+              errorMsg = data.detail;
+            }
           }
-        } else if (data.message) {
-          errorMsg = data.message;
-        } else if (data.non_field_errors) {
-          errorMsg = Array.isArray(data.non_field_errors) ? data.non_field_errors[0] : String(data.non_field_errors);
-        } else if (data.detail) {
-          errorMsg = data.detail;
+          
+          setError(typeof errorMsg === 'string' ? errorMsg : strings.messages.errorBooking);
         }
       }
-      
-      setError(typeof errorMsg === 'string' ? errorMsg : strings.messages.errorBooking);
-    } finally {
-      setBookingLoading(false);
-    }
+    );
   };
 
   const formatTime = (time) => {
@@ -589,10 +592,10 @@ export default function BookPage() {
 
                     <button
                       onClick={handleBookSlot}
-                      disabled={!selectedDate || !selectedTime || bookingLoading}
+                      disabled={!selectedDate || !selectedTime || isCreatingBooking}
                       className={`w-full ${isDark ? 'bg-gradient-to-r from-[#366c6b] to-[#1a3535]' : 'bg-gradient-to-r from-[#4a9d9c] to-[#366c6b]'} text-white py-3 px-6 rounded-lg ${isDark ? 'hover:from-[#2d5857] hover:to-[#152a2a]' : 'hover:from-[#3d8584] hover:to-[#2d5857]'} hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 font-semibold flex items-center justify-center transform hover:scale-[1.02]`}
                     >
-                      {bookingLoading ? (
+                      {isCreatingBooking ? (
                         <>
                           <svg className="animate-spin -ml-1 mr-2 h-5 w-5 text-white" fill="none" viewBox="0 0 24 24">
                             <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>

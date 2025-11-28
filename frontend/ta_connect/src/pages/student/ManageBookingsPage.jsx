@@ -3,13 +3,12 @@ import { useTheme } from '../../contexts/ThemeContext';
 import StudentNavbar from '../../components/student/studentNavbar';
 import Footer from '../../components/Footer';
 import axios from 'axios';
+import { useStudentBookings, useCancelInstructorBooking } from '../../hooks/useApi';
 
 export default function ManageBookingsPage() {
   const { theme } = useTheme();
   const isDark = theme === 'dark';
   const [isNavbarOpen, setIsNavbarOpen] = useState(window.innerWidth >= 1024);
-  const [bookings, setBookings] = useState([]);
-  const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [selectedBooking, setSelectedBooking] = useState(null);
@@ -30,34 +29,28 @@ export default function ManageBookingsPage() {
     return saved ? new Set(JSON.parse(saved)) : new Set();
   });
 
+  // Use React Query to fetch bookings with auto-refresh
+  const { data: allBookings = [], isLoading: loading, error: apiError, refetch } = useStudentBookings();
+  
+  // Use mutation for cancelling bookings
+  const { mutate: cancelBookingMutation, isPending: isCancelling } = useCancelInstructorBooking();
+
   // Save cleared IDs to localStorage whenever they change
   useEffect(() => {
     localStorage.setItem('clearedCancelledIds', JSON.stringify([...clearedCancelledIds]));
   }, [clearedCancelledIds]);
 
-  const fetchBookings = async () => {
-    try {
-      setLoading(true);
-      const response = await axios.get('/api/student/booking/');
-      if (response.data && response.data.bookings) {
-        // Filter out any cancelled bookings that were cleared by the user
-        const filteredBookings = response.data.bookings.filter(
-          booking => !(booking.is_cancelled && clearedCancelledIds.has(booking.id))
-        );
-        setBookings(filteredBookings);
-      }
-    } catch (err) {
-      console.error('Error fetching bookings:', err);
-      setError('Failed to load bookings');
-    } finally {
-      setLoading(false);
-    }
-  };
+  // Filter out cancelled bookings that were cleared by user
+  const bookings = allBookings.filter(
+    booking => !(booking.is_cancelled && clearedCancelledIds.has(booking.id))
+  );
 
+  // Show error if API call fails
   useEffect(() => {
-    fetchBookings();
-
-  }, []);
+    if (apiError) {
+      setError('Failed to load bookings');
+    }
+  }, [apiError]);
 
   const handleCancelClick = (booking) => {
     setSelectedBooking(booking);
@@ -124,23 +117,26 @@ export default function ManageBookingsPage() {
     }
   };
 
-  const handleCancelBooking = async () => {
+  const handleCancelBooking = () => {
     if (!selectedBooking) return;
 
     setCancelLoading(true);
-    try {
-      await axios.delete(`/api/student/booking/${selectedBooking.id}/`);
-      setSuccess('Booking cancelled successfully');
-      setShowCancelModal(false);
-      // Refetch from server to get accurate data
-      await fetchBookings();
-      setTimeout(() => setSuccess(''), 3000);
-    } catch (err) {
-      console.error('Error cancelling booking:', err);
-      setError(err.response?.data?.error || 'Failed to cancel booking');
-    } finally {
-      setCancelLoading(false);
-    }
+    cancelBookingMutation(selectedBooking.id, {
+      onSuccess: () => {
+        setSuccess('Booking cancelled successfully');
+        setShowCancelModal(false);
+        setSelectedBooking(null);
+        refetch();
+        setTimeout(() => setSuccess(''), 3000);
+      },
+      onError: (err) => {
+        console.error('Error cancelling booking:', err);
+        setError(err.response?.data?.error || 'Failed to cancel booking');
+      },
+      onSettled: () => {
+        setCancelLoading(false);
+      }
+    });
   };
 
   const handleUpdateBooking = async () => {
@@ -157,7 +153,7 @@ export default function ManageBookingsPage() {
       });
       setSuccess('Booking updated successfully');
       setShowUpdateModal(false);
-      fetchBookings();
+      refetch();
       setTimeout(() => setSuccess(''), 3000);
     } catch (err) {
       console.error('Error updating booking:', err);
