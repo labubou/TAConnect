@@ -7,6 +7,7 @@ from rest_framework_simplejwt.views import (
     TokenVerifyView,
 )
 from . import views
+from .auth.email_sending_preference import ProfileEmailPreferenceView
 
 urlpatterns = [
 
@@ -36,5 +37,8 @@ urlpatterns = [
     path('profile/update/', profile.UpdateProfileView.as_view(), name='update_profile'),
     path('profile/change-password/', profile.ChangePasswordView.as_view(), name='change_password'),
     path('profile/verify-email-change/', profile.VerifyEmailChangeView.as_view(), name='verify_email_change'),
+    
+    path('profile/email-preferences/', ProfileEmailPreferenceView.as_view(), name='email_preferences'),
+
 
 ]

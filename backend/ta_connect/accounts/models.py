@@ -41,3 +41,29 @@ class User(AbstractUser):
     class Meta:
         verbose_name = "User"
         verbose_name_plural = "Users"
+
+class InstructorProfile(models.Model):
+    """
+    Profile model for Instructors (TAs).
+    Extends the User model with additional fields specific to instructors
+    """
+    
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name="instructor_profile")
+    email_notifications_on_booking = models.BooleanField(default=True, verbose_name="Email Notifications on Booking")
+    email_notifications_on_cancellation = models.BooleanField(default=True, verbose_name="Email Notifications on Cancellation")
+
+    def __str__(self):
+        return f"Instructor Profile: {self.user.username}"
+
+class StudentProfile(models.Model):
+    """
+    Profile model for Students.
+    Extends the User model with additional fields specific to students
+    """
+    
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name="student_profile")
+    email_notifications_on_booking = models.BooleanField(default=True, verbose_name="Email Notifications on Booking")
+    email_notifications_on_cancellation = models.BooleanField(default=True, verbose_name="Email Notifications on Cancellation")
+    
+    def __str__(self):
+        return f"Student Profile: {self.user.username}"

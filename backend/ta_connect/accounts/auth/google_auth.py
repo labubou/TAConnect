@@ -3,7 +3,7 @@
 #it's updated on 16 Nov 2025 by Karim Bassem
 
 from django.shortcuts import redirect
-from ..models import User
+from ..models import StudentProfile, User, InstructorProfile
 from rest_framework import status
 from rest_framework.generics import GenericAPIView
 from rest_framework.views import APIView
@@ -277,11 +277,18 @@ class SetUserTypeView(GenericAPIView):
                     {'error': 'User type has already been set and cannot be changed.'}, 
                     status=status.HTTP_400_BAD_REQUEST
                 )
-            
+
             # Update user_type
             user.user_type = user_type
             user.save()
             
+            #create the profile based on user type for the settings
+            if user.user_type == 'instructor':
+                InstructorProfile.objects.create(user=user)
+
+            elif user.user_type == 'student':
+                StudentProfile.objects.create(user=user)
+                
             # Send welcome email now that user_type is set
             try:
                 send_welcome_email(user)
