@@ -5,8 +5,9 @@ import ErrorBoundary from '../../components/ErrorBoundary';
 import Footer from '../../components/Footer';
 import { SkeletonLoader } from '../../components/SkeletonLoader';
 import strings from '../../strings/manageBookingsStrings';
-import { useInstructorBookings, useCancelInstructorBooking } from '../../hooks/useApi';
+import { useInstructorBookings } from '../../hooks/useApi';
 import CancelBookingModal from '../../components/ta/CancelBookingModal';
+import axios from 'axios';
 
 export default function ManageBookings() {
   const { theme } = useTheme();
@@ -18,12 +19,12 @@ export default function ManageBookings() {
   const [dateRange, setDateRange] = useState({ start: '', end: '' });
   const [selectedBooking, setSelectedBooking] = useState(null);
   const [showCancelModal, setShowCancelModal] = useState(false);
+  const [isCancelling, setIsCancelling] = useState(false);
+  const [successMessage, setSuccessMessage] = useState('');
+  const [errorMessage, setErrorMessage] = useState('');
 
   // Fetch bookings data
   const { data: bookings = [], isLoading, error, refetch } = useInstructorBookings();
-  
-  // Cancel booking mutation
-  const { mutate: cancelBooking, isPending: isCancelling } = useCancelInstructorBooking();
 
   // Filter and search bookings
   useEffect(() => {
@@ -58,27 +59,52 @@ export default function ManageBookings() {
     setFilteredBookings(filtered);
   }, [bookings, statusFilter, dateRange, searchTerm]);
 
+  // Auto-clear messages after 5 seconds
+  useEffect(() => {
+    if (successMessage) {
+      const timer = setTimeout(() => setSuccessMessage(''), 5000);
+      return () => clearTimeout(timer);
+    }
+  }, [successMessage]);
+
+  useEffect(() => {
+    if (errorMessage) {
+      const timer = setTimeout(() => setErrorMessage(''), 5000);
+      return () => clearTimeout(timer);
+    }
+  }, [errorMessage]);
+
   const handleCancelClick = (booking) => {
     setSelectedBooking(booking);
     setShowCancelModal(true);
+    setErrorMessage('');
+    setSuccessMessage('');
   };
 
-  const handleConfirmCancel = () => {
-    if (selectedBooking) {
-      cancelBooking(selectedBooking.id, {
-        onSuccess: () => {
-          setShowCancelModal(false);
-          setSelectedBooking(null);
-          refetch();
-        },
-        onError: (error) => {
-          console.error('Failed to cancel booking:', error);
-          // Show error in UI
-          if (error.response?.status === 403) {
-            alert('⚠️ Backend Limitation: The current backend only allows students to cancel their own bookings. Instructors cannot cancel bookings directly. Please ask the student to cancel, or the backend needs to be updated to support instructor cancellation.');
-          }
-        }
-      });
+  const handleConfirmCancel = async () => {
+    if (!selectedBooking || isCancelling) return;
+
+    setIsCancelling(true);
+    setErrorMessage('');
+
+    try {
+      const response = await axios.delete(`/api/instructor/cancel-booking/${selectedBooking.id}/`);
+      
+      if (response.data.success) {
+        setSuccessMessage(strings.messages.success);
+        setShowCancelModal(false);
+        setSelectedBooking(null);
+        // Refresh the bookings list
+        await refetch();
+      }
+    } catch (err) {
+      console.error('Failed to cancel booking:', err);
+      const errorMsg = err.response?.data?.error || strings.messages.error;
+      setErrorMessage(errorMsg);
+      setShowCancelModal(false);
+      setSelectedBooking(null);
+    } finally {
+      setIsCancelling(false);
     }
   };
 
@@ -224,6 +250,34 @@ export default function ManageBookings() {
               </div>
             </div>
 
+            {/* Success Message */}
+            {successMessage && (
+              <div className={`mb-6 p-4 rounded-lg ${
+                isDark ? 'bg-green-900/30 border-green-600' : 'bg-green-50 border-green-300'
+              } border-2`}>
+                <div className="flex items-start">
+                  <svg className={`w-5 h-5 mr-3 mt-0.5 ${isDark ? 'text-green-400' : 'text-green-600'}`} fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                  </svg>
+                  <span className={`${isDark ? 'text-green-200' : 'text-green-700'} font-medium`}>{successMessage}</span>
+                </div>
+              </div>
+            )}
+
+            {/* Error Message */}
+            {errorMessage && (
+              <div className={`mb-6 p-4 rounded-lg ${
+                isDark ? 'bg-red-900/30 border-red-600' : 'bg-red-50 border-red-300'
+              } border-2`}>
+                <div className="flex items-start">
+                  <svg className={`w-5 h-5 mr-3 mt-0.5 ${isDark ? 'text-red-400' : 'text-red-600'}`} fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+                  </svg>
+                  <span className={`${isDark ? 'text-red-200' : 'text-red-700'} font-medium`}>{errorMessage}</span>
+                </div>
+              </div>
+            )}
+
             {/* Loading State */}
             {isLoading && (
               <SkeletonLoader isDark={isDark} count={5} height="h-24" className="mb-6" />
@@ -277,10 +331,7 @@ export default function ManageBookings() {
                         </thead>
                         <tbody>
                           {filteredBookings.map((booking) => (
-                            <tr 
-                              key={booking.id}
-                              className={`border-t ${isDark ? 'border-gray-700 hover:bg-gray-700/50' : 'border-gray-200 hover:bg-gray-50'} transition-colors`}
-                            >
+                            <tr key={booking.id}>
                               <td className={`px-6 py-4 text-sm ${isDark ? 'text-gray-300' : 'text-gray-900'}`}>
                                 <div>
                                   <p className="font-medium">
@@ -433,8 +484,10 @@ export default function ManageBookings() {
           booking={selectedBooking}
           isDark={isDark}
           onConfirm={handleConfirmCancel}
-          onCancel={() => setShowCancelModal(false)}
-          isLoading={isCancelling}
+          onCancel={() => {
+            setShowCancelModal(false);
+            setSelectedBooking(null);
+          }}
         />
       )}
     </div>
