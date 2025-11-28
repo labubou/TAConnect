@@ -40,7 +40,7 @@ class LoginView(GenericAPIView):
             serializer = self.get_serializer(data=request.data)
             if not serializer.is_valid():
                 return Response(
-                    {'error': serializer.errors}, 
+                    format_serializer_errors(serializer.errors),
                     status=status.HTTP_400_BAD_REQUEST
                 )
             
