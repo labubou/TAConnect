@@ -46,4 +46,11 @@ export const bookPageStrings = {
     successBooking: 'Booking created successfully! Check your email for confirmation.',
     loading: 'Loading...',
   },
+  
+  successModal: {
+    title: 'Booking Confirmed!',
+    emailSent: 'A confirmation has been sent to your email.',
+    emailDisabled: 'Your booking is confirmed. Email notifications are disabled in your preferences.',
+    doneButton: 'Done',
+  },
 };
