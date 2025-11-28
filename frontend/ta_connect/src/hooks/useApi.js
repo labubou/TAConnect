@@ -314,3 +314,22 @@ export const useCancelInstructorBooking = () => {
   });
 };
 
+/**
+ * Hook to update a booking
+ * Invalidates bookings cache on success
+ */
+export const useUpdateBooking = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({ bookingId, data }) => {
+      const response = await axios.patch(`/api/student/booking/${bookingId}/`, data);
+      return response.data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['student', 'bookings'] });
+      queryClient.invalidateQueries({ queryKey: ['instructor', 'bookings'] });
+    },
+  });
+};
+
