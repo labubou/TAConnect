@@ -29,6 +29,7 @@ export default function BookPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [isSearching, setIsSearching] = useState(false);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [sendEmailNotification, setSendEmailNotification] = useState(true);
 
   // Use mutation for creating booking
   const { mutate: createBooking, isPending: isCreatingBooking } = useCreateBooking();
@@ -202,7 +203,8 @@ export default function BookPage() {
       {
         slot_id: selectedSlot.id,
         date: selectedDate,
-        start_time: selectedTime
+        start_time: selectedTime,
+        send_email: sendEmailNotification
       },
       {
         onSuccess: (response) => {
@@ -590,6 +592,44 @@ export default function BookPage() {
                       </div>
                     )}
 
+                    {/* Email Notification Toggle */}
+                    {selectedDate && selectedTime && (
+                      <div className={`p-5 ${isDark ? 'bg-gradient-to-br from-gray-800 to-gray-700 border border-gray-600' : 'bg-gradient-to-br from-white to-gray-50 border-2 border-gray-200'} rounded-xl mb-4 shadow-sm hover:shadow-md transition-all duration-300`}>
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-3">
+                            <div className={`p-2.5 rounded-lg ${sendEmailNotification ? 'bg-blue-100 dark:bg-blue-900/30' : 'bg-gray-100 dark:bg-gray-800'} transition-colors duration-300`}>
+                              <svg className={`w-5 h-5 ${sendEmailNotification ? 'text-blue-600 dark:text-blue-400' : isDark ? 'text-gray-500' : 'text-gray-400'} transition-colors duration-300`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                              </svg>
+                            </div>
+                            <div>
+                              <p className={`text-sm font-semibold ${isDark ? 'text-white' : 'text-gray-900'} mb-0.5`}>
+                                Email Confirmation
+                              </p>
+                              <p className={`text-xs ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>
+                                {sendEmailNotification ? 'Receive booking confirmation email' : 'No confirmation email'}
+                              </p>
+                            </div>
+                          </div>
+                          <button
+                            onClick={() => setSendEmailNotification(!sendEmailNotification)}
+                            className={`relative inline-flex h-7 w-12 items-center rounded-full transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-offset-2 shadow-inner ${
+                              sendEmailNotification
+                                ? 'bg-gradient-to-r from-blue-500 to-blue-600 focus:ring-blue-500'
+                                : isDark ? 'bg-gray-600 focus:ring-gray-500' : 'bg-gray-300 focus:ring-gray-400'
+                            }`}
+                            aria-label="Toggle email confirmation"
+                          >
+                            <span
+                              className={`inline-block h-5 w-5 transform rounded-full bg-white shadow-lg transition-transform duration-300 ease-in-out ${
+                                sendEmailNotification ? 'translate-x-6' : 'translate-x-1'
+                              }`}
+                            />
+                          </button>
+                        </div>
+                      </div>
+                    )}
+
                     <button
                       onClick={handleBookSlot}
                       disabled={!selectedDate || !selectedTime || isCreatingBooking}
@@ -627,7 +667,9 @@ export default function BookPage() {
               </div>
               <h3 className="text-2xl font-bold mb-2">Booking Confirmed!</h3>
               <p className={`text-base ${isDark ? 'text-gray-300' : 'text-gray-600'} mb-8`}>
-                A confirmation has been sent to your email.
+                {sendEmailNotification 
+                  ? 'A confirmation has been sent to your email.' 
+                  : 'Your booking is confirmed. No email notification was sent.'}
               </p>
               <button
                 onClick={handleCloseSuccessModal}

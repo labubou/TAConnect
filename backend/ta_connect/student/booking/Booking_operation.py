@@ -104,13 +104,15 @@ class BookingCreateView(GenericAPIView):
             
             booking = serializer.save()
 
-            # Send emails using utility function
+            # Always send email to instructor, optionally to student based on send_email preference
+            send_to_student = serializer.validated_data.get('send_email', True)
             send_booking_confirmation_email(
                 student=request.user,
                 instructor=slot.instructor,
                 slot=slot,
                 booking_date=serializer.validated_data['date'],
-                booking_time=serializer.validated_data['start_time']
+                booking_time=serializer.validated_data['start_time'],
+                send_to_student=send_to_student
             )
 
             return Response({
