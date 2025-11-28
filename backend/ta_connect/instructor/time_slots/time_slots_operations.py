@@ -11,6 +11,7 @@ from instructor.schemas.time_slot_schemas import (
 )
 from accounts.permissions import IsInstructor
 from instructor.serializers.time_slots_serializer import TimeSlotSerializer
+from utils.error_formatter import format_serializer_errors
 
 class TimeSlotCreateView(GenericAPIView):
     serializer_class = TimeSlotSerializer
@@ -23,17 +24,25 @@ class TimeSlotCreateView(GenericAPIView):
             serializer = self.get_serializer(data=request.data, context={'request': request})
             if not serializer.is_valid():
                 return Response(
-                    {'error': serializer.errors},
+                    format_serializer_errors(serializer.errors),
                     status=status.HTTP_400_BAD_REQUEST
                 )
+            
             time_slot, time_slot_policy = serializer.save()
 
-            return Response({'success': True, 'time_slot_id': time_slot.id}, status=status.HTTP_201_CREATED)
+            return Response({
+                'success': True, 
+                'time_slot_id': time_slot.id,
+                'message': 'Time slot created successfully'
+            }, status=status.HTTP_201_CREATED)
 
         except Exception as e:
             print(f"Error in add_time_slot: {e}")
             return Response(
-                {'error': 'An error occurred while creating the time slot'},
+                {
+                    'error': 'An unexpected error occurred while creating the time slot',
+                    'message': 'Please try again or contact support if the problem persists.'
+                },
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
     
@@ -48,18 +57,28 @@ class TimeSlotDetailView(GenericAPIView):
 
         if not slot_id:
             return Response(
-                {'error': 'Slot ID is required.'},
-                status=status.HTTP_400_BAD_REQUEST)
+                {
+                    'error': 'Slot ID is required.',
+                    'message': 'Please provide a valid slot ID to update.'
+                },
+                status=status.HTTP_400_BAD_REQUEST
+            )
 
         time_slot = get_object_or_404(OfficeHourSlot, id=slot_id, instructor=user)
-
         serializer = self.get_serializer(instance=time_slot, data=request.data)
 
         if not serializer.is_valid():
-            return Response({'error': serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+            return Response(
+                format_serializer_errors(serializer.errors),
+                status=status.HTTP_400_BAD_REQUEST
+            )
 
         updated_slot = serializer.save()
-        return Response({'success': True, 'time_slot_id': updated_slot.id, 'message': 'Time slot updated successfully.'}, status=status.HTTP_200_OK)
+        return Response({
+            'success': True, 
+            'time_slot_id': updated_slot.id, 
+            'message': 'Time slot updated successfully.'
+        }, status=status.HTTP_200_OK)
 
     @swagger_auto_schema(**delete_time_slot_swagger)
     def delete(self, request, slot_id):
@@ -68,14 +87,29 @@ class TimeSlotDetailView(GenericAPIView):
         
         if not slot_id:
             return Response(
-                {'error': 'Slot ID is required.'},
-                status=status.HTTP_400_BAD_REQUEST)
+                {
+                    'error': 'Slot ID is required.',
+                    'message': 'Please provide a valid slot ID to delete.'
+                },
+                status=status.HTTP_400_BAD_REQUEST
+            )
 
         time_slot = get_object_or_404(OfficeHourSlot, id=slot_id, instructor=user)
 
         try:
             time_slot.delete()
         except Exception as e:
-            return Response({'error': 'Failed to delete time slot'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            print(f"Error deleting time slot {slot_id}: {e}")
+            return Response(
+                {
+                    'error': 'Failed to delete time slot',
+                    'message': 'An error occurred while deleting the time slot. Please try again.'
+                },
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
 
-        return Response({'success': True, 'time_slot_id': time_slot.id}, status=status.HTTP_200_OK)
+        return Response({
+            'success': True, 
+            'time_slot_id': slot_id,
+            'message': 'Time slot deleted successfully'
+        }, status=status.HTTP_200_OK)

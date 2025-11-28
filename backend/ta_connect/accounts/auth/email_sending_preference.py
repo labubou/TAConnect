@@ -8,6 +8,7 @@ from accounts.schemas.email_preference_schemas import (
     update_email_preferences_swagger,
 )
 from ..serializers.update_profile_notifications_serializer import UpdateProfileNotificationsSerializer
+from utils.error_formatter import format_serializer_errors
 
 class ProfileEmailPreferenceView(GenericAPIView):
     """
@@ -64,28 +65,17 @@ class ProfileEmailPreferenceView(GenericAPIView):
 
     @swagger_auto_schema(**update_email_preferences_swagger)
     def patch(self, request):
-        """
-        Update user email notification preferences.
-        
-        Accepts partial updates - only provided fields will be updated.
-        """
+        """Update user email notification preferences"""
         try:
             user = request.user
             serializer = self.get_serializer(data=request.data, context={'user': user})
             
             if not serializer.is_valid():
-                errors = []
-                for field, field_errors in serializer.errors.items():
-                    if isinstance(field_errors, list):
-                        errors.extend(field_errors)
-                    else:
-                        errors.append(str(field_errors))
                 return Response(
-                    {'error': errors[0] if len(errors) == 1 else errors},
+                    format_serializer_errors(serializer.errors),
                     status=status.HTTP_400_BAD_REQUEST
                 )
 
-            # Update the user preferences
             serializer.update(user, serializer.validated_data)
 
             return Response(

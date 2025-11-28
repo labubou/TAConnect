@@ -4,7 +4,7 @@ from instructor.models import OfficeHourSlot, BookingPolicy
 class TimeSlotSerializer(serializers.Serializer):
 
     course_name = serializers.CharField(max_length=100)
-    section = serializers.CharField(max_length=100, default=" ")
+    section = serializers.CharField(max_length=100, default=" ", allow_blank=True, required=False)
     day_of_week = serializers.ChoiceField(choices=['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'])
     start_time = serializers.TimeField()
     end_time = serializers.TimeField()
