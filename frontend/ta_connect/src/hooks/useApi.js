@@ -19,14 +19,21 @@ export const useInstructorSlots = (options = {}) => {
 /**
  * Hook to fetch bookings for instructor
  * Caches bookings with separate query key
+ * Supports optional date range filtering
  */
-export const useInstructorBookings = (options = {}) => {
+export const useInstructorBookings = (startDate = null, endDate = null, options = {}) => {
   return useQuery({
-    queryKey: ['instructor', 'bookings'],
+    queryKey: ['instructor', 'bookings', startDate, endDate],
     queryFn: async () => {
-      const res = await axios.get('/api/instructor/get-user-bookings');
+      const params = {};
+      if (startDate) params.start_date = startDate;
+      if (endDate) params.end_date = endDate;
+
+      const res = await axios.get('/api/instructor/get-user-bookings', { params });
       return res?.data?.bookings || [];
     },
+    // Let react-query surface errors to the caller so the UI can show a proper message
+    retry: 1,
     ...options,
   });
 };
