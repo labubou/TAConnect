@@ -79,9 +79,9 @@ Frontend Developer | Omar Salama
 
 ## 🛣️ Future Roadmap
 
+- 🔤 Add multi-language support - Add multiple language (Arabic, French, etc..)
 - 📅 Calendar Integrations – Google Calendar & Outlook sync
-- 🔔 Smart Notifications – Email and push reminders
-- 🧠 AI Scheduling Assistant – Suggest optimal time slots
+- 🧠 AI Scheduling Assistant – Suggest optimal time slots based on the existing data
 - 🧩 University Integrations – LMS and academic APIs
 
 ---
