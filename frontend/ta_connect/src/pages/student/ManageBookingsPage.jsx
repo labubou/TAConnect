@@ -219,10 +219,7 @@ export default function ManageBookingsPage() {
     const cancelledIds = bookings.filter(b => b.is_cancelled).map(b => b.id);
     const newClearedIds = new Set([...clearedCancelledIds, ...cancelledIds]);
     setClearedCancelledIds(newClearedIds);
-    
-    const remainingBookings = bookings.filter(b => !b.is_cancelled);
-    setBookings(remainingBookings);
-    setSuccess('All cancelled bookings have been deleted');
+    setSuccess('All cancelled bookings have been cleared from view');
     setTimeout(() => setSuccess(''), 3000);
   };
 
@@ -235,9 +232,11 @@ export default function ManageBookingsPage() {
 
     // Status filter
     if (filterStatus === 'active') {
-      filtered = filtered.filter(b => !b.is_cancelled);
+      filtered = filtered.filter(b => !b.is_cancelled && !b.is_completed);
     } else if (filterStatus === 'cancelled') {
       filtered = filtered.filter(b => b.is_cancelled);
+    } else if (filterStatus === 'completed') {
+      filtered = filtered.filter(b => b.is_completed);
     }
 
     // Course filter
@@ -275,7 +274,8 @@ export default function ManageBookingsPage() {
         style={{ minHeight: 'calc(100vh - 4rem)' }}
       >
         <main className={`${isDark ? 'bg-gray-900' : 'bg-gray-50'} p-3 sm:p-6`}>
-          <div className="max-w-7xl mx-auto">\n            {/* Header */}
+          <div className="max-w-7xl mx-auto">
+            {/* Header */}
             {/* Header */}
             <div className={`${isDark ? 'bg-gray-800' : 'bg-white'} p-4 sm:p-6 md:p-8 rounded-xl shadow-lg mb-4 sm:mb-6`}>
               <h1 className={`text-2xl sm:text-3xl font-bold ${isDark ? 'text-white' : 'text-gray-900'} mb-2`}>
@@ -308,6 +308,7 @@ export default function ManageBookingsPage() {
                       <option value="all">All Bookings</option>
                       <option value="active">Active Only</option>
                       <option value="cancelled">Cancelled Only</option>
+                      <option value="completed">Completed Only</option>
                     </select>
                   </div>
 
