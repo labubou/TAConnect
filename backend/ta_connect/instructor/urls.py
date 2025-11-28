@@ -6,6 +6,7 @@ from .allowed_students.import_csv import CSVUploadView
 from .allowed_students.allowed_students_operations import AllowedStudentsUpdateDeleteView, AllowedStudentsAddGetView
 from .allowed_students.update_allowed_students_status import UpdateAllowedStudentsStatusView
 from .analytics import BookingAnalyticsView
+from .cancel_book import InstructorCancelBookingView
 
 urlpatterns = [
     # URLs for time slots
@@ -27,4 +28,7 @@ urlpatterns = [
 
     # URLs for booking analytics
     path('booking-analytics/', BookingAnalyticsView.as_view(), name='booking-analytics'),
+    
+    # URL for cancelling bookings
+    path('cancel-booking/<int:pk>/', InstructorCancelBookingView.as_view(), name='instructor-cancel-booking'),
 ]
