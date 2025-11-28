@@ -3,20 +3,19 @@ import { useTheme } from '../../contexts/ThemeContext';
 import StudentNavbar from '../../components/student/studentNavbar';
 import Footer from '../../components/Footer';
 import axios from 'axios';
+import { useStudentBookings, useCancelInstructorBooking, useUpdateBooking } from '../../hooks/useApi';
 
 export default function ManageBookingsPage() {
   const { theme } = useTheme();
   const isDark = theme === 'dark';
   const [isNavbarOpen, setIsNavbarOpen] = useState(window.innerWidth >= 1024);
-  const [bookings, setBookings] = useState([]);
-  const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [selectedBooking, setSelectedBooking] = useState(null);
   const [showCancelModal, setShowCancelModal] = useState(false);
   const [showUpdateModal, setShowUpdateModal] = useState(false);
   const [cancelLoading, setCancelLoading] = useState(false);
-  const [updateLoading, setUpdateLoading] = useState(false);
+  const [sendCancelEmail, setSendCancelEmail] = useState(true);
   const [availableDates, setAvailableDates] = useState([]);
   const [availableTimes, setAvailableTimes] = useState([]);
   const [newDate, setNewDate] = useState('');
@@ -30,34 +29,31 @@ export default function ManageBookingsPage() {
     return saved ? new Set(JSON.parse(saved)) : new Set();
   });
 
+  // Use React Query to fetch bookings with auto-refresh
+  const { data: allBookings = [], isLoading: loading, error: apiError, refetch } = useStudentBookings();
+  
+  // Use mutation for cancelling bookings
+  const { mutate: cancelBookingMutation, isPending: isCancelling } = useCancelInstructorBooking();
+
+  // Use mutation for updating bookings
+  const { mutate: updateBookingMutation, isPending: isUpdating } = useUpdateBooking();
+
   // Save cleared IDs to localStorage whenever they change
   useEffect(() => {
     localStorage.setItem('clearedCancelledIds', JSON.stringify([...clearedCancelledIds]));
   }, [clearedCancelledIds]);
 
-  const fetchBookings = async () => {
-    try {
-      setLoading(true);
-      const response = await axios.get('/api/student/booking/');
-      if (response.data && response.data.bookings) {
-        // Filter out any cancelled bookings that were cleared by the user
-        const filteredBookings = response.data.bookings.filter(
-          booking => !(booking.is_cancelled && clearedCancelledIds.has(booking.id))
-        );
-        setBookings(filteredBookings);
-      }
-    } catch (err) {
-      console.error('Error fetching bookings:', err);
-      setError('Failed to load bookings');
-    } finally {
-      setLoading(false);
-    }
-  };
+  // Filter out cancelled bookings that were cleared by user
+  const bookings = allBookings.filter(
+    booking => !(booking.is_cancelled && clearedCancelledIds.has(booking.id))
+  );
 
+  // Show error if API call fails
   useEffect(() => {
-    fetchBookings();
-
-  }, []);
+    if (apiError) {
+      setError('Failed to load bookings');
+    }
+  }, [apiError]);
 
   const handleCancelClick = (booking) => {
     setSelectedBooking(booking);
@@ -124,23 +120,29 @@ export default function ManageBookingsPage() {
     }
   };
 
-  const handleCancelBooking = async () => {
+  const handleCancelBooking = () => {
     if (!selectedBooking) return;
 
     setCancelLoading(true);
-    try {
-      await axios.delete(`/api/student/booking/${selectedBooking.id}/`);
-      setSuccess('Booking cancelled successfully');
-      setShowCancelModal(false);
-      // Refetch from server to get accurate data
-      await fetchBookings();
-      setTimeout(() => setSuccess(''), 3000);
-    } catch (err) {
-      console.error('Error cancelling booking:', err);
-      setError(err.response?.data?.error || 'Failed to cancel booking');
-    } finally {
-      setCancelLoading(false);
-    }
+    cancelBookingMutation(
+      { bookingId: selectedBooking.id, sendEmail: sendCancelEmail },
+      {
+        onSuccess: () => {
+          setSuccess('Booking cancelled successfully');
+          setShowCancelModal(false);
+          setSelectedBooking(null);
+          refetch();
+          setTimeout(() => setSuccess(''), 3000);
+        },
+        onError: (err) => {
+          console.error('Error cancelling booking:', err);
+          setError(err.response?.data?.error || 'Failed to cancel booking');
+        },
+        onSettled: () => {
+          setCancelLoading(false);
+        }
+      }
+    );
   };
 
   const handleUpdateBooking = async () => {
@@ -149,22 +151,24 @@ export default function ManageBookingsPage() {
       return;
     }
 
-    setUpdateLoading(true);
-    try {
-      await axios.patch(`/api/student/booking/${selectedBooking.id}/`, {
+    updateBookingMutation({
+      bookingId: selectedBooking.id,
+      data: {
         new_date: newDate,
-        new_start_time: newTime
-      });
-      setSuccess('Booking updated successfully');
-      setShowUpdateModal(false);
-      fetchBookings();
-      setTimeout(() => setSuccess(''), 3000);
-    } catch (err) {
-      console.error('Error updating booking:', err);
-      setError(err.response?.data?.error || 'Failed to update booking');
-    } finally {
-      setUpdateLoading(false);
-    }
+        new_time: newTime
+      }
+    }, {
+      onSuccess: () => {
+        setSuccess('Booking updated successfully');
+        setShowUpdateModal(false);
+        refetch();
+        setTimeout(() => setSuccess(''), 3000);
+      },
+      onError: (err) => {
+        console.error('Error updating booking:', err);
+        setError(err.response?.data?.error || 'Failed to update booking');
+      }
+    });
   };
 
   const formatTime = (time) => {
@@ -215,10 +219,7 @@ export default function ManageBookingsPage() {
     const cancelledIds = bookings.filter(b => b.is_cancelled).map(b => b.id);
     const newClearedIds = new Set([...clearedCancelledIds, ...cancelledIds]);
     setClearedCancelledIds(newClearedIds);
-    
-    const remainingBookings = bookings.filter(b => !b.is_cancelled);
-    setBookings(remainingBookings);
-    setSuccess('All cancelled bookings have been deleted');
+    setSuccess('All cancelled bookings have been cleared from view');
     setTimeout(() => setSuccess(''), 3000);
   };
 
@@ -231,9 +232,11 @@ export default function ManageBookingsPage() {
 
     // Status filter
     if (filterStatus === 'active') {
-      filtered = filtered.filter(b => !b.is_cancelled);
+      filtered = filtered.filter(b => !b.is_cancelled && !b.is_completed);
     } else if (filterStatus === 'cancelled') {
       filtered = filtered.filter(b => b.is_cancelled);
+    } else if (filterStatus === 'completed') {
+      filtered = filtered.filter(b => b.is_completed);
     }
 
     // Course filter
@@ -259,8 +262,9 @@ export default function ManageBookingsPage() {
   };
 
   const filteredBookings = getFilteredBookings();
-  const activeBookings = filteredBookings.filter(b => !b.is_cancelled);
+  const activeBookings = filteredBookings.filter(b => !b.is_cancelled && !b.is_completed);
   const cancelledBookings = filteredBookings.filter(b => b.is_cancelled);
+  const completedBookings = filteredBookings.filter(b => b.is_completed);
 
   return (
     <div className={`min-h-screen flex flex-col ${isDark ? 'bg-gray-900' : 'bg-gray-50'}`}>
@@ -271,7 +275,8 @@ export default function ManageBookingsPage() {
         style={{ minHeight: 'calc(100vh - 4rem)' }}
       >
         <main className={`${isDark ? 'bg-gray-900' : 'bg-gray-50'} p-3 sm:p-6`}>
-          <div className="max-w-7xl mx-auto">\n            {/* Header */}
+          <div className="max-w-7xl mx-auto">
+            {/* Header */}
             {/* Header */}
             <div className={`${isDark ? 'bg-gray-800' : 'bg-white'} p-4 sm:p-6 md:p-8 rounded-xl shadow-lg mb-4 sm:mb-6`}>
               <h1 className={`text-2xl sm:text-3xl font-bold ${isDark ? 'text-white' : 'text-gray-900'} mb-2`}>
@@ -304,6 +309,7 @@ export default function ManageBookingsPage() {
                       <option value="all">All Bookings</option>
                       <option value="active">Active Only</option>
                       <option value="cancelled">Cancelled Only</option>
+                      <option value="completed">Completed Only</option>
                     </select>
                   </div>
 
@@ -400,7 +406,7 @@ export default function ManageBookingsPage() {
             ) : (
               <>
                 {/* Active Bookings */}
-                {filterStatus !== 'cancelled' && (
+                {filterStatus !== 'cancelled' && filterStatus !== 'completed' && (
                   <div className={`${isDark ? 'bg-gray-800' : 'bg-white'} rounded-xl shadow-lg mb-4 sm:mb-6 p-4 sm:p-6`}>
                     <h2 className={`text-xl sm:text-2xl font-bold ${isDark ? 'text-white' : 'text-gray-900'} mb-4 sm:mb-6`}>
                       Active Bookings ({activeBookings.length})
@@ -478,12 +484,22 @@ export default function ManageBookingsPage() {
                 )}
 
                 {/* Cancelled Bookings */}
-                {filterStatus !== 'active' && cancelledBookings.length > 0 && (
-                  <div className={`${isDark ? 'bg-gray-800' : 'bg-white'} rounded-xl shadow-lg p-4 sm:p-6`}>
+                {filterStatus !== 'active' && filterStatus !== 'completed' && (
+                  <div className={`${isDark ? 'bg-gray-800' : 'bg-white'} rounded-xl shadow-lg mb-4 sm:mb-6 p-4 sm:p-6`}>
                     <h2 className={`text-xl sm:text-2xl font-bold ${isDark ? 'text-white' : 'text-gray-900'} mb-4 sm:mb-6`}>
                       Cancelled Bookings ({cancelledBookings.length})
                     </h2>
                     
+                  {cancelledBookings.length === 0 ? (
+                    <div className="text-center py-12">
+                      <svg className={`mx-auto h-12 w-12 ${isDark ? 'text-gray-600' : 'text-gray-400'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                      </svg>
+                      <p className={`mt-4 text-lg ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
+                        No cancelled bookings
+                      </p>
+                    </div>
+                  ) : (
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 sm:gap-4">
                       {cancelledBookings.map((booking) => (
                         <div
@@ -518,6 +534,68 @@ export default function ManageBookingsPage() {
                         </div>
                       ))}
                     </div>
+                  )}
+                  </div>
+                )}
+
+                {/* Completed Bookings */}
+                {filterStatus !== 'active' && filterStatus !== 'cancelled' && (
+                  <div className={`${isDark ? 'bg-gray-800' : 'bg-white'} rounded-xl shadow-lg p-4 sm:p-6`}>
+                    <h2 className={`text-xl sm:text-2xl font-bold ${isDark ? 'text-white' : 'text-gray-900'} mb-4 sm:mb-6`}>
+                      Completed Bookings ({completedBookings.length})
+                    </h2>
+                    
+                  {completedBookings.length === 0 ? (
+                    <div className="text-center py-12">
+                      <svg className={`mx-auto h-12 w-12 ${isDark ? 'text-gray-600' : 'text-gray-400'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                      <p className={`mt-4 text-lg ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
+                        No completed bookings
+                      </p>
+                    </div>
+                  ) : (
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
+                      {completedBookings.map((booking) => (
+                        <div
+                          key={booking.id}
+                          className={`${isDark ? 'bg-gradient-to-br from-gray-700 to-gray-750 border-green-600/30' : 'bg-gradient-to-br from-green-50 to-white border-green-300'} border-2 rounded-xl p-4 transition-all duration-300 hover:shadow-lg`}
+                        >
+                          <div className="flex justify-between items-start mb-3">
+                            <div>
+                              <h3 className={`text-base sm:text-lg font-bold ${isDark ? 'text-white' : 'text-gray-900'}`}>
+                                {booking.course_name}
+                              </h3>
+                              <span className={`inline-block mt-1 px-2 py-0.5 text-xs font-semibold rounded ${isDark ? 'bg-green-900/30 text-green-300' : 'bg-green-100 text-green-700'}`}>
+                                ✓ Completed
+                              </span>
+                            </div>
+                          </div>
+                          
+                          <div className={`space-y-1.5 text-sm ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
+                            <p className="flex items-center gap-2">
+                              <span>👨‍🏫</span>
+                              <span className="truncate">{booking.instructor?.full_name || 'Instructor'}</span>
+                            </p>
+                            <p className="flex items-center gap-2">
+                              <span>📅</span>
+                              <span>{formatDate(booking.date)}</span>
+                            </p>
+                            <p className="flex items-center gap-2">
+                              <span>🕐</span>
+                              <span>{formatTime(booking.start_time)} - {formatTime(booking.end_time)}</span>
+                            </p>
+                            {booking.room && (
+                              <p className="flex items-center gap-2">
+                                <span>📍</span>
+                                <span className="truncate">{booking.room}</span>
+                              </p>
+                            )}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
                   </div>
                 )}
               </>
@@ -539,7 +617,7 @@ export default function ManageBookingsPage() {
               Are you sure you want to cancel this booking? This action cannot be undone.
             </p>
             
-            <div className={`${isDark ? 'bg-gray-700' : 'bg-gray-50'} p-3 sm:p-4 rounded-lg mb-4 sm:mb-6`}>
+            <div className={`${isDark ? 'bg-gray-700' : 'bg-gray-50'} p-3 sm:p-4 rounded-lg mb-4`}>
               <p className={`font-semibold ${isDark ? 'text-white' : 'text-gray-900'}`}>
                 {selectedBooking.course_name}
               </p>
@@ -549,6 +627,63 @@ export default function ManageBookingsPage() {
               <p className={`text-sm ${isDark ? 'text-gray-300' : 'text-gray-600'}`}>
                 🕐 {formatTime(selectedBooking.start_time)} - {formatTime(selectedBooking.end_time)}
               </p>
+            </div>
+
+            {/* Email Notification Toggle */}
+            <div className={`relative p-5 ${isDark ? 'bg-gradient-to-br from-gray-750 to-gray-700 border-2 border-gray-600' : 'bg-gradient-to-br from-red-50 via-white to-orange-50 border-2 border-red-100'} rounded-xl mb-4 shadow-lg overflow-hidden group`}>
+              {/* Decorative background */}
+              <div className={`absolute -top-8 -right-8 w-24 h-24 rounded-full ${sendCancelEmail ? 'bg-red-400/10' : 'bg-gray-400/5'} blur-xl transition-all duration-500`}></div>
+              
+              <div className="relative flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  {/* Icon container */}
+                  <div className={`relative p-2.5 rounded-xl ${sendCancelEmail ? 'bg-gradient-to-br from-red-500 to-red-600 shadow-lg shadow-red-500/30' : isDark ? 'bg-gray-700 shadow-md' : 'bg-gray-100 shadow-md'} transition-all duration-300`}>
+                    {sendCancelEmail && (
+                      <div className="absolute inset-0 rounded-xl bg-red-400 animate-ping opacity-20"></div>
+                    )}
+                    <svg className={`w-5 h-5 relative z-10 ${sendCancelEmail ? 'text-white' : isDark ? 'text-gray-400' : 'text-gray-500'} transition-all duration-300`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                      {sendCancelEmail && (
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+                      )}
+                    </svg>
+                  </div>
+                  
+                  {/* Text */}
+                  <div className="flex flex-col">
+                    <div className="flex items-center gap-2 mb-0.5">
+                      <p className={`text-sm font-bold ${isDark ? 'text-white' : 'text-gray-900'}`}>
+                        Cancellation Email
+                      </p>
+                    </div>
+                    <p className={`text-xs ${isDark ? 'text-gray-400' : 'text-gray-600'} font-medium`}>
+                      {sendCancelEmail ? '✓ You will receive a cancellation email' : '✗ No cancellation email'}
+                    </p>
+                    <p className={`text-[9px] ${isDark ? 'text-gray-500' : 'text-gray-500'} mt-0.5 italic`}>
+                      Instructor always gets notified
+                    </p>
+                  </div>
+                </div>
+                
+                {/* Toggle switch */}
+                <button
+                  onClick={() => setSendCancelEmail(!sendCancelEmail)}
+                  className={`relative inline-flex h-7 w-14 flex-shrink-0 items-center rounded-full border-2 border-transparent transition-colors duration-300 focus:outline-none focus:ring-4 focus:ring-offset-2 shadow-lg ${sendCancelEmail ? 'bg-gradient-to-r from-red-500 via-red-600 to-red-700 focus:ring-red-400/50 shadow-red-500/40' : isDark ? 'bg-gradient-to-r from-gray-600 to-gray-700 focus:ring-gray-500/50 shadow-gray-800/40' : 'bg-gradient-to-r from-gray-300 to-gray-400 focus:ring-gray-400/50 shadow-gray-400/40'} transform hover:scale-105 active:scale-95`}
+                  aria-label="Toggle cancellation email"
+                >
+                  <span className={`pointer-events-none inline-flex items-center justify-center h-5 w-5 transform rounded-full bg-white shadow-xl transition-all duration-300 ease-out`}>
+                    {sendCancelEmail ? (
+                      <svg className="w-3 h-3 text-red-600" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                      </svg>
+                    ) : (
+                      <svg className="w-3 h-3 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
+                      </svg>
+                    )}
+                  </span>
+                </button>
+              </div>
             </div>
 
             <div className="flex gap-3">
@@ -656,17 +791,17 @@ export default function ManageBookingsPage() {
             <div className="flex gap-3">
               <button
                 onClick={() => setShowUpdateModal(false)}
-                disabled={updateLoading}
+                disabled={isUpdating}
                 className={`flex-1 px-4 py-2 ${isDark ? 'bg-gray-700 text-white hover:bg-gray-600' : 'bg-gray-200 text-gray-900 hover:bg-gray-300'} rounded-lg transition-all duration-300 font-medium`}
               >
                 Cancel
               </button>
               <button
                 onClick={handleUpdateBooking}
-                disabled={updateLoading || !newDate || !newTime}
+                disabled={isUpdating || !newDate || !newTime}
                 className="flex-1 px-4 py-2 bg-gradient-to-r from-[#366c6b] to-[#1a3535] text-white rounded-lg hover:shadow-lg transition-all duration-300 font-medium disabled:opacity-50 flex items-center justify-center"
               >
-                {updateLoading ? (
+                {isUpdating ? (
                   <svg className="animate-spin h-5 w-5" fill="none" viewBox="0 0 24 24">
                     <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                     <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>

@@ -125,7 +125,7 @@ export const useCreateBooking = () => {
 
   return useMutation({
     mutationFn: async (bookingData) => {
-      const response = await axios.post('/api/student/book-slot/', bookingData);
+      const response = await axios.post('/api/student/booking/', bookingData);
       return response.data;
     },
     onSuccess: () => {
@@ -229,9 +229,26 @@ export const useStudentBookings = (options = {}) => {
   return useQuery({
     queryKey: ['student', 'bookings'],
     queryFn: async () => {
-      const response = await axios.get('/api/student/my-bookings/');
+      // Calculate date range to fetch all relevant bookings
+      // Default backend behavior only returns current month, so we need to specify a wide range
+      const today = new Date();
+      const lastYear = new Date(today.getFullYear() - 1, 0, 1); // Jan 1st of last year
+      const nextYear = new Date(today.getFullYear() + 1, 11, 31); // Dec 31st of next year
+      
+      const formatDate = (date) => {
+        return date.toISOString().split('T')[0];
+      };
+
+      const response = await axios.get('/api/student/booking/', {
+        params: {
+          date_from: formatDate(lastYear),
+          date_to: formatDate(nextYear)
+        }
+      });
       return response?.data?.bookings || [];
     },
+    staleTime: 0, // Always consider data stale to ensure fresh data
+    refetchOnMount: true, // Always refetch when component mounts
     ...options,
   });
 };
@@ -283,15 +300,36 @@ export const useCancelInstructorBooking = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (bookingId) => {
+    mutationFn: async ({ bookingId, sendEmail = true }) => {
       const response = await axios.delete(`/api/student/booking/${bookingId}/`, {
         data: {
           confirm: true,
+          send_email: sendEmail,
         },
       });
       return response.data;
     },
     onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['instructor', 'bookings'] });
+      queryClient.invalidateQueries({ queryKey: ['student', 'bookings'] });
+    },
+  });
+};
+
+/**
+ * Hook to update a booking
+ * Invalidates bookings cache on success
+ */
+export const useUpdateBooking = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({ bookingId, data }) => {
+      const response = await axios.patch(`/api/student/booking/${bookingId}/`, data);
+      return response.data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['student', 'bookings'] });
       queryClient.invalidateQueries({ queryKey: ['instructor', 'bookings'] });
     },
   });
