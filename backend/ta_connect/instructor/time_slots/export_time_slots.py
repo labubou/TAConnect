@@ -35,9 +35,10 @@ class TimeSlotsExport(GenericAPIView):
             
             # Write CSV data
             writer = csv.writer(response)
-            writer.writerow(['Course Name', 'Section', 'Day of Week', 'Start Time', 'End Time', 'Duration (mins)', 'Start Date', 'End Date', 'Room', 'Status'])  # CSV Header
+            writer.writerow(['ID', 'Course Name', 'Section', 'Day of Week', 'Start Time', 'End Time', 'Duration (mins)', 'Start Date', 'End Date', 'Room', 'Require Specific Email', 'Set Student Limit', 'Status'])  # CSV Header
             for slot in office_hours:
                 writer.writerow([
+                    slot.id,
                     slot.course_name,
                     slot.section or '',
                     slot.day_of_week,
@@ -47,6 +48,8 @@ class TimeSlotsExport(GenericAPIView):
                     slot.start_date,
                     slot.end_date,
                     slot.room,
+                    slot.policy.require_specific_email,
+                    slot.policy.set_student_limit,
                     'Active' if slot.status else 'Inactive'
                 ])
             
