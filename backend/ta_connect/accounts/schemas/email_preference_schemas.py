@@ -36,6 +36,11 @@ get_email_preferences_response = openapi.Schema(
             description='Whether to send email notifications when a booking is cancelled',
             example=True
         ),
+        'email_on_update': openapi.Schema(
+            type=openapi.TYPE_BOOLEAN,
+            description='Whether to send email notifications when a booking is updated',
+            example=True
+        ),
     },
 )
 
@@ -52,6 +57,11 @@ update_email_preferences_request = openapi.Schema(
             type=openapi.TYPE_BOOLEAN,
             description='Enable/disable email notifications for booking cancellations',
             example=False
+        ),
+        'email_on_update': openapi.Schema(
+            type=openapi.TYPE_BOOLEAN,
+            description='Enable/disable email notifications for booking updates',
+            example=True
         ),
     },
 )
@@ -79,10 +89,12 @@ Get email notification preferences for the current authenticated user.
 **For Instructors:**
 - `email_on_booking`: Receive emails when students book office hours
 - `email_on_cancellation`: Receive emails when students cancel bookings
+- `email_on_update`: Receive emails when students update their bookings
 
 **For Students:**
 - `email_on_booking`: Receive emails when booking confirmation is sent
 - `email_on_cancellation`: Receive emails when cancellation confirmation is sent
+- `email_on_update`: Receive emails when booking update confirmation is sent
 
 **Note:** User must be authenticated and have either an instructor or student profile.
     ''',
@@ -107,6 +119,7 @@ Update email notification preferences for the current authenticated user.
 **Request Body Fields:**
 - `email_on_booking`: Set to `true` to receive booking notifications, `false` to disable
 - `email_on_cancellation`: Set to `true` to receive cancellation notifications, `false` to disable
+- `email_on_update`: Set to `true` to receive booking update notifications, `false` to disable
 
 **Behavior:**
 - Only provided fields will be updated
@@ -117,14 +130,15 @@ Update email notification preferences for the current authenticated user.
 ```json
 {
   "email_on_booking": true,
-  "email_on_cancellation": false
+  "email_on_cancellation": false,
+  "email_on_update": true
 }
 ```
 
 **Use Cases:**
-- Instructor wants to be notified of new bookings but not cancellations
+- Instructor wants to be notified of new bookings and updates but not cancellations
 - Student wants to disable all email notifications
-- User wants to enable only cancellation notifications
+- User wants to enable only cancellation and update notifications
     ''',
     'request_body': update_email_preferences_request,
     'responses': {

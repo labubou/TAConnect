@@ -31,6 +31,7 @@ class ProfileEmailPreferenceView(GenericAPIView):
         Returns the user's current settings for:
         - Email notifications on booking
         - Email notifications on cancellation
+        - Email notifications on updates booking
         """
         try:
             user = request.user
@@ -38,14 +39,17 @@ class ProfileEmailPreferenceView(GenericAPIView):
             # Initialize default values
             email_on_booking = True
             email_on_cancellation = True
+            email_on_update = True
             
             # Get preferences based on user type
             if user.is_instructor():
                 email_on_booking = user.instructor_profile.email_notifications_on_booking
                 email_on_cancellation = user.instructor_profile.email_notifications_on_cancellation
+                email_on_update = user.instructor_profile.email_notifications_on_update
             elif user.is_student():
                 email_on_booking = user.student_profile.email_notifications_on_booking
                 email_on_cancellation = user.student_profile.email_notifications_on_cancellation
+                email_on_update = user.student_profile.email_notifications_on_update
 
             return Response({
                 'id': user.id,
@@ -54,6 +58,7 @@ class ProfileEmailPreferenceView(GenericAPIView):
                 'user_type': user.user_type,
                 'email_on_booking': email_on_booking,
                 'email_on_cancellation': email_on_cancellation,
+                'email_on_update': email_on_update,
             }, status=status.HTTP_200_OK)
             
         except Exception as e:

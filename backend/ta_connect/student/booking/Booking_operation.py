@@ -8,7 +8,7 @@ from rest_framework.response import Response
 from drf_yasg.utils import swagger_auto_schema
 from student.utils.complete_book import complete_booking
 from student.models import Booking
-from student.sendBookingEmail import send_booking_confirmation_email, send_booking_cancelled_email
+from student.sendBookingEmail import send_booking_confirmation_email, send_booking_cancelled_email,send_booking_update_email
 from instructor.models import OfficeHourSlot
 from accounts.permissions import IsStudent
 from student.serializers.create_book_serializer import CreateBookingSerializer
@@ -160,12 +160,22 @@ class BookingDetailView(GenericAPIView):
             return Response(format_serializer_errors(serializer.errors), status=status.HTTP_400_BAD_REQUEST)
 
         updated_booking = serializer.save()
+        #send email notifications
+        send_booking_update_email(
+            student=request.user,
+            instructor=booking.office_hour.instructor,
+            slot=booking.office_hour,
+            booking_date=updated_booking.date,
+            booking_time=updated_booking.start_time
+        )
+        
         
         return Response({
             'success': True, 
             'booking_id': updated_booking.id, 
             'message': 'Booking updated successfully.'
         }, status=status.HTTP_200_OK)
+       
 
     @swagger_auto_schema(**cancel_booking_swagger)
     def delete(self, request, pk):
@@ -243,3 +253,5 @@ class BookingDetailView(GenericAPIView):
         
         except Exception as e:
             return Response({'error': f'An error occurred {str(e)}'}, status=500)
+    
+    

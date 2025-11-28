@@ -8,9 +8,11 @@ class UpdateProfileNotificationsSerializer(serializers.Serializer):
     Fields:
     - email_on_booking: Boolean flag for booking notifications
     - email_on_cancellation: Boolean flag for cancellation notifications
+    - email_on_update: Boolean flag for update notifications
     """
     email_on_booking = serializers.BooleanField(required=False)
     email_on_cancellation = serializers.BooleanField(required=False)
+    email_on_update = serializers.BooleanField(required=False)
 
     def validate(self, data):
         """
@@ -49,6 +51,8 @@ class UpdateProfileNotificationsSerializer(serializers.Serializer):
         
         if 'email_on_cancellation' in validated_data:
             profile.email_notifications_on_cancellation = validated_data['email_on_cancellation']
+        if 'email_on_update' in validated_data:
+            profile.email_notifications_on_update = validated_data['email_on_update']
         
         profile.save()
         return user
