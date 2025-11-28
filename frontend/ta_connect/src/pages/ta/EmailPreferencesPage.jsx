@@ -35,14 +35,14 @@ export default function EmailPreferencesPage() {
 
   // ==================================================================================
   // BACKEND CONNECTION - FETCH PREFERENCES
-  // Endpoint: GET /api/profile/
+  // Endpoint: GET /api/profile/email-preferences/
   // Expected Response: { email_on_booking: boolean, email_on_cancellation: boolean }
   // This fetches the user's current email notification preferences from the backend
   // ==================================================================================
   const fetchPreferences = async () => {
     try {
       setLoading(true);
-      const response = await axios.get('/api/profile/');
+      const response = await axios.get('/api/profile/email-preferences/');
       const data = response.data;
       
       setPreferences({
@@ -84,7 +84,7 @@ export default function EmailPreferencesPage() {
 
   // ==================================================================================
   // BACKEND CONNECTION - SAVE PREFERENCES
-  // Endpoint: PUT /api/profile/update/
+  // Endpoint: PATCH /api/profile/email-preferences/
   // Request Payload: { email_on_booking: boolean, email_on_cancellation: boolean }
   // Expected Response: { status: 200 } or { error: string }
   // This sends the updated preferences to the backend and saves them to the database
@@ -94,7 +94,7 @@ export default function EmailPreferencesPage() {
       setSaving(true);
       setMessage({ type: '', text: '' });
 
-      const response = await axios.put('/api/profile/update/', {
+      const response = await axios.patch('/api/profile/email-preferences/', {
         email_on_booking: preferences.email_on_booking,
         email_on_cancellation: preferences.email_on_cancellation,
       });

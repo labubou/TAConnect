@@ -1,7 +1,7 @@
 from rest_framework import serializers
 from django.core.exceptions import ValidationError
 from django.core.validators import validate_email
-from accounts.models import User
+from accounts.models import User, InstructorProfile, StudentProfile
 
 class RegisterSerializer(serializers.Serializer):
     username = serializers.CharField(max_length=150)
@@ -39,4 +39,12 @@ class RegisterSerializer(serializers.Serializer):
             **validated_data,
             email_verify=False
         )
+        
+        #create the profile based on user type for the settings
+        if validated_data['user_type'] == 'instructor':
+            InstructorProfile.objects.create(user=user)
+
+        elif validated_data['user_type'] == 'student':
+            StudentProfile.objects.create(user=user)
+
         return user
