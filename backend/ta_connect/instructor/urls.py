@@ -1,5 +1,6 @@
 from django.urls import path
 from instructor.time_slots.time_slots_operations import TimeSlotCreateView, TimeSlotDetailView
+from instructor.time_slots.export_time_slots import TimeSlotsExport
 from .time_slots import update_status_slot
 from .views import GetUserSlotsView, GetUserBookingView, SearchInstructorsView, InstructorDataView
 from .allowed_students.import_csv import CSVUploadView
@@ -13,6 +14,7 @@ urlpatterns = [
     path('time-slots/', TimeSlotCreateView.as_view(), name='time-slots-create'),  # POST to create
     path('time-slots/<int:slot_id>/', TimeSlotDetailView.as_view(), name='time-slots-detail'),  # PATCH to update, DELETE to delete
     path('time-slots/toggle-slot-status/<int:slot_id>/', update_status_slot.update_time_slot_status, name='toggle-time-slot-status'),
+    path('time-slots/export/', TimeSlotsExport.as_view(), name='time-slots-export'),
 
     # URLs for allowed students
     path('allowed-students/<int:slot_id>/', AllowedStudentsAddGetView.as_view(), name='allowed-students-add-get'),
