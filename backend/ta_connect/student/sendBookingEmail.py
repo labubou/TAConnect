@@ -21,6 +21,12 @@ def send_booking_confirmation_email(student, instructor, slot, booking_date, boo
     student_sent = False
     instructor_sent = False
     
+    if student.student_profile.email_notifications_on_booking is False:
+        student_sent = True
+
+    if instructor.instructor_profile.email_notifications_on_booking is False:
+        instructor_sent = True
+
     try:
         from ta_connect.settings import frontend_url
     except ImportError:
@@ -50,39 +56,41 @@ def send_booking_confirmation_email(student, instructor, slot, booking_date, boo
         'frontend_url': frontend_url,
     }
 
-    # Send email to student
-    try:
-        mail_subject = 'Booking Confirmation - TA Connect'
-        message = render_to_string('booking_confirmation_email_Student.html', email_context)
-        send_mail(
-            mail_subject,
-            message,
-            'taconnect.team@gmail.com',
-            [student.email],
-            html_message=message
-        )
-        student_sent = True
-    except Exception as email_error:
-        error_msg = f"Failed to send booking confirmation email to student: {str(email_error)}"
-        print(error_msg)
-        errors.append(error_msg)
+    if student_sent is False:
+        # Send email to student
+        try:
+            mail_subject = 'Booking Confirmation - TA Connect'
+            message = render_to_string('booking_confirmation_email_Student.html', email_context)
+            send_mail(
+                mail_subject,
+                message,
+                'taconnect.team@gmail.com',
+                [student.email],
+                html_message=message
+            )
+            student_sent = True
+        except Exception as email_error:
+            error_msg = f"Failed to send booking confirmation email to student: {str(email_error)}"
+            print(error_msg)
+            errors.append(error_msg)
 
-    # Send email to instructor/TA
-    try:
-        mail_subject = 'New Booking Received - TA Connect'
-        message = render_to_string('booking_confirmation_email_TA.html', email_context)
-        send_mail(
-            mail_subject,
-            message,
-            'taconnect.team@gmail.com',
-            [instructor.email],
-            html_message=message
-        )
-        instructor_sent = True
-    except Exception as email_error:
-        error_msg = f"Failed to send booking confirmation email to instructor: {str(email_error)}"
-        print(error_msg)
-        errors.append(error_msg)
+    if instructor_sent is False:
+        # Send email to instructor/TA
+        try:
+            mail_subject = 'New Booking Received - TA Connect'
+            message = render_to_string('booking_confirmation_email_TA.html', email_context)
+            send_mail(
+                mail_subject,
+                message,
+                'taconnect.team@gmail.com',
+                [instructor.email],
+                html_message=message
+            )
+            instructor_sent = True
+        except Exception as email_error:
+            error_msg = f"Failed to send booking confirmation email to instructor: {str(email_error)}"
+            print(error_msg)
+            errors.append(error_msg)
 
     return {
         'success': student_sent and instructor_sent,
@@ -90,7 +98,6 @@ def send_booking_confirmation_email(student, instructor, slot, booking_date, boo
         'instructor_sent': instructor_sent,
         'errors': errors
     }
-
 
 def send_booking_cancelled_email(student, instructor, slot, booking_date, booking_time):
     """
@@ -110,6 +117,12 @@ def send_booking_cancelled_email(student, instructor, slot, booking_date, bookin
     student_sent = False
     instructor_sent = False
     
+    if student.student_profile.email_notifications_on_cancellation is False:
+        student_sent = True
+
+    if instructor.instructor_profile.email_notifications_on_cancellation is False:
+        instructor_sent = True
+
     try:
         from ta_connect.settings import frontend_url
     except ImportError:
@@ -139,39 +152,41 @@ def send_booking_cancelled_email(student, instructor, slot, booking_date, bookin
         'frontend_url': frontend_url,
     }
 
-    # Send email to student
-    try:
-        mail_subject = 'Booking Cancellation - TA Connect'
-        message = render_to_string('booking_cancellation_email_Student.html', email_context)
-        send_mail(
-            mail_subject,
-            message,
-            'taconnect.team@gmail.com',
-            [student.email],
-            html_message=message
-        )
-        student_sent = True
-    except Exception as email_error:
-        error_msg = f"Failed to send booking cancellation email to student: {str(email_error)}"
-        print(error_msg)
-        errors.append(error_msg)
+    if student_sent is False:
+        # Send email to student
+        try:
+            mail_subject = 'Booking Cancellation - TA Connect'
+            message = render_to_string('booking_cancellation_email_Student.html', email_context)
+            send_mail(
+                mail_subject,
+                message,
+                'taconnect.team@gmail.com',
+                [student.email],
+                html_message=message
+            )
+            student_sent = True
+        except Exception as email_error:
+            error_msg = f"Failed to send booking cancellation email to student: {str(email_error)}"
+            print(error_msg)
+            errors.append(error_msg)
 
-    # Send email to instructor/TA
-    try:
-        mail_subject = 'Booking Cancellation Received - TA Connect'
-        message = render_to_string('booking_cancellation_email_TA.html', email_context)
-        send_mail(
-            mail_subject,
-            message,
-            'taconnect.team@gmail.com',
-            [instructor.email],
-            html_message=message
-        )
-        instructor_sent = True
-    except Exception as email_error:
-        error_msg = f"Failed to send booking cancellation email to instructor: {str(email_error)}"
-        print(error_msg)
-        errors.append(error_msg)
+    if instructor_sent is False:
+        # Send email to instructor/TA
+        try:
+            mail_subject = 'Booking Cancellation Received - TA Connect'
+            message = render_to_string('booking_cancellation_email_TA.html', email_context)
+            send_mail(
+                mail_subject,
+                message,
+                'taconnect.team@gmail.com',
+                [instructor.email],
+                html_message=message
+            )
+            instructor_sent = True
+        except Exception as email_error:
+            error_msg = f"Failed to send booking cancellation email to instructor: {str(email_error)}"
+            print(error_msg)
+            errors.append(error_msg)
 
     return {
         'success': student_sent and instructor_sent,
