@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
 import strings from "../../../strings/manageCoursesPageStrings";
+import WarningModal from "../../WarningModal";
 
 export default function EditCourses({ isDark, slot, onSlotUpdated, onClose }) {
   const [form, setForm] = useState({
@@ -20,6 +21,7 @@ export default function EditCourses({ isDark, slot, onSlotUpdated, onClose }) {
   const [error, setError] = useState("");
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
+  const [showWarningModal, setShowWarningModal] = useState(false);
 
   useEffect(() => {
     if (slot) {
@@ -51,16 +53,28 @@ export default function EditCourses({ isDark, slot, onSlotUpdated, onClose }) {
     setForm((prev) => ({ ...prev, csv_file: file || null }));
   };
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = (e) => {
     e.preventDefault();
     if (!slot) {
       setError(strings.edit.errors.noSlotSelected);
       return;
     }
 
+    // Show warning modal instead of immediately submitting
+    setShowWarningModal(true);
+  };
+
+  const handleConfirmEdit = async () => {
+    if (!slot) {
+      setError(strings.edit.errors.noSlotSelected);
+      setShowWarningModal(false);
+      return;
+    }
+
     setError("");
     setMessage("");
     setLoading(true);
+    setShowWarningModal(false);
 
     try {
       if (!form.course_name.trim()) {
@@ -180,6 +194,20 @@ export default function EditCourses({ isDark, slot, onSlotUpdated, onClose }) {
         isDark ? "bg-gray-800" : "bg-white"
       } shadow-lg`}
     >
+      {showWarningModal && (
+        <WarningModal
+          isDark={isDark}
+          title={strings.warningModal.editTitle}
+          message={strings.warningModal.editMessage}
+          warningText={strings.warningModal.editWarning}
+          onConfirm={handleConfirmEdit}
+          onCancel={() => setShowWarningModal(false)}
+          confirmText={strings.warningModal.editConfirm}
+          cancelText={strings.warningModal.editCancel}
+          isLoading={loading}
+        />
+      )}
+
       <div className="flex items-center justify-between mb-6">
         <div>
           <h2 className={`text-2xl font-bold ${isDark ? "text-white" : "text-gray-900"}`}>

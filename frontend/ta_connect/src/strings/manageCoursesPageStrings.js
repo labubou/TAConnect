@@ -209,6 +209,25 @@ const manageCoursesPageStrings = {
     comingSoon: "This feature is coming soon.",
     close: "Close",
   },
+
+  // Warning Modal Strings
+  warningModal: {
+    editTitle: "Confirm Course Edit",
+    editMessage: "Editing this course may affect existing student bookings. Changes to date, time, or duration may cancel related bookings.",
+    editWarning: "This action might cancel some student bookings and could take a moment to process.",
+    editConfirm: "Continue Editing",
+    editCancel: "Cancel",
+
+    deactivateTitle: "Confirm Course Deactivation",
+    deactivateMessage: "Deactivating this course will cancel all active student bookings.",
+    deactivateWarning: "All students with bookings will be notified about the cancellation. This process might take a while.",
+    deactivateConfirm: "Deactivate Course",
+    deactivateCancel: "Cancel",
+
+    activateMessage: "Activating this course will make it available for new bookings.",
+    activateWarning: "Make sure the course details are correct before activating.",
+    activateConfirm: "Activate Course",
+  },
 };
 
 export default manageCoursesPageStrings;
