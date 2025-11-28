@@ -69,9 +69,9 @@ class TimeSlotDetailView(GenericAPIView):
 
         if not serializer.is_valid():
             return Response(
-                format_serializer_errors(serializer.errors),
-                status=status.HTTP_400_BAD_REQUEST
-            )
+                    format_serializer_errors(serializer.errors),
+                    status=status.HTTP_400_BAD_REQUEST
+                )
 
         updated_slot = serializer.save()
         return Response({

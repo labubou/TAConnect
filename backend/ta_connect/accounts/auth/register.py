@@ -46,7 +46,7 @@ class RegisterView(GenericAPIView):
 
             if not serializer.is_valid():
                 return Response(
-                    {'error': serializer.errors}, 
+                    format_serializer_errors(serializer.errors),
                     status=status.HTTP_400_BAD_REQUEST
                 )
             

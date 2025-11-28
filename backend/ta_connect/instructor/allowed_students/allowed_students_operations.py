@@ -31,7 +31,7 @@ class AllowedStudentsAddGetView(GenericAPIView):
             serializer = self.get_serializer(data=request.data, context={'request': request, "slot": slot})
             if not serializer.is_valid():
                 return Response(
-                    {'error': serializer.errors},
+                    format_serializer_errors(serializer.errors),
                     status=status.HTTP_400_BAD_REQUEST
                 )
             allowed_students = serializer.save()
@@ -87,7 +87,7 @@ class AllowedStudentsUpdateDeleteView(GenericAPIView):
         serializer = self.get_serializer(instance=allowed_student, data=request.data, context={'request': request, 'slot': slot})
 
         if not serializer.is_valid():
-            return Response({'error': serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+            return Response(format_serializer_errors(serializer.errors), status=status.HTTP_400_BAD_REQUEST)
 
         updated_student = serializer.save()
         return Response({'success': True, 'time_slot_id': updated_student.id, 'message': 'Allowed student updated successfully.'}, status=status.HTTP_200_OK)

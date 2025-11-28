@@ -98,7 +98,7 @@ class BookingCreateView(GenericAPIView):
             
             if not serializer.is_valid():
                 return Response(
-                    {'error': serializer.errors},
+                    format_serializer_errors(serializer.errors),
                     status=status.HTTP_400_BAD_REQUEST
                 )
             
@@ -157,7 +157,7 @@ class BookingDetailView(GenericAPIView):
         serializer = self.get_serializer(instance=booking, data=request.data, context={'request': request})
 
         if not serializer.is_valid():
-            return Response({'error': serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+            return Response(format_serializer_errors(serializer.errors), status=status.HTTP_400_BAD_REQUEST)
 
         updated_booking = serializer.save()
         
@@ -186,7 +186,7 @@ class BookingDetailView(GenericAPIView):
         )
         
         if not serializer.is_valid():
-            return Response({'error': serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+            return Response(format_serializer_errors(serializer.errors), status=status.HTTP_400_BAD_REQUEST)
 
         cancelled_booking = serializer.save()
 
@@ -227,7 +227,7 @@ class BookingDetailView(GenericAPIView):
 
             if not serializer.is_valid():
                 return Response(
-                    {'error': serializer.errors},
+                    format_serializer_errors(serializer.errors),
                     status=status.HTTP_400_BAD_REQUEST
                 )
 

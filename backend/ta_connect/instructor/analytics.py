@@ -8,6 +8,7 @@ from instructor.serializers.booking_analytics_serializer import BookingAnalytics
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
 from django.db.models import Count
+from utils.error_formatter import format_serializer_errors
 
 class BookingAnalyticsView(GenericAPIView):
 
@@ -101,7 +102,7 @@ class BookingAnalyticsView(GenericAPIView):
             
             if not serializer.is_valid():
                 return Response(
-                    {'error': serializer.errors},
+                    format_serializer_errors(serializer.errors),
                     status=status.HTTP_400_BAD_REQUEST
                 )
             
