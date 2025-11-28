@@ -262,8 +262,9 @@ export default function ManageBookingsPage() {
   };
 
   const filteredBookings = getFilteredBookings();
-  const activeBookings = filteredBookings.filter(b => !b.is_cancelled);
+  const activeBookings = filteredBookings.filter(b => !b.is_cancelled && !b.is_completed);
   const cancelledBookings = filteredBookings.filter(b => b.is_cancelled);
+  const completedBookings = filteredBookings.filter(b => b.is_completed);
 
   return (
     <div className={`min-h-screen flex flex-col ${isDark ? 'bg-gray-900' : 'bg-gray-50'}`}>
@@ -405,7 +406,7 @@ export default function ManageBookingsPage() {
             ) : (
               <>
                 {/* Active Bookings */}
-                {filterStatus !== 'cancelled' && (
+                {filterStatus !== 'cancelled' && filterStatus !== 'completed' && (
                   <div className={`${isDark ? 'bg-gray-800' : 'bg-white'} rounded-xl shadow-lg mb-4 sm:mb-6 p-4 sm:p-6`}>
                     <h2 className={`text-xl sm:text-2xl font-bold ${isDark ? 'text-white' : 'text-gray-900'} mb-4 sm:mb-6`}>
                       Active Bookings ({activeBookings.length})
@@ -483,12 +484,22 @@ export default function ManageBookingsPage() {
                 )}
 
                 {/* Cancelled Bookings */}
-                {filterStatus !== 'active' && cancelledBookings.length > 0 && (
-                  <div className={`${isDark ? 'bg-gray-800' : 'bg-white'} rounded-xl shadow-lg p-4 sm:p-6`}>
+                {filterStatus !== 'active' && filterStatus !== 'completed' && (
+                  <div className={`${isDark ? 'bg-gray-800' : 'bg-white'} rounded-xl shadow-lg mb-4 sm:mb-6 p-4 sm:p-6`}>
                     <h2 className={`text-xl sm:text-2xl font-bold ${isDark ? 'text-white' : 'text-gray-900'} mb-4 sm:mb-6`}>
                       Cancelled Bookings ({cancelledBookings.length})
                     </h2>
                     
+                  {cancelledBookings.length === 0 ? (
+                    <div className="text-center py-12">
+                      <svg className={`mx-auto h-12 w-12 ${isDark ? 'text-gray-600' : 'text-gray-400'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                      </svg>
+                      <p className={`mt-4 text-lg ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
+                        No cancelled bookings
+                      </p>
+                    </div>
+                  ) : (
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 sm:gap-4">
                       {cancelledBookings.map((booking) => (
                         <div
@@ -523,6 +534,68 @@ export default function ManageBookingsPage() {
                         </div>
                       ))}
                     </div>
+                  )}
+                  </div>
+                )}
+
+                {/* Completed Bookings */}
+                {filterStatus !== 'active' && filterStatus !== 'cancelled' && (
+                  <div className={`${isDark ? 'bg-gray-800' : 'bg-white'} rounded-xl shadow-lg p-4 sm:p-6`}>
+                    <h2 className={`text-xl sm:text-2xl font-bold ${isDark ? 'text-white' : 'text-gray-900'} mb-4 sm:mb-6`}>
+                      Completed Bookings ({completedBookings.length})
+                    </h2>
+                    
+                  {completedBookings.length === 0 ? (
+                    <div className="text-center py-12">
+                      <svg className={`mx-auto h-12 w-12 ${isDark ? 'text-gray-600' : 'text-gray-400'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                      <p className={`mt-4 text-lg ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
+                        No completed bookings
+                      </p>
+                    </div>
+                  ) : (
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
+                      {completedBookings.map((booking) => (
+                        <div
+                          key={booking.id}
+                          className={`${isDark ? 'bg-gradient-to-br from-gray-700 to-gray-750 border-green-600/30' : 'bg-gradient-to-br from-green-50 to-white border-green-300'} border-2 rounded-xl p-4 transition-all duration-300 hover:shadow-lg`}
+                        >
+                          <div className="flex justify-between items-start mb-3">
+                            <div>
+                              <h3 className={`text-base sm:text-lg font-bold ${isDark ? 'text-white' : 'text-gray-900'}`}>
+                                {booking.course_name}
+                              </h3>
+                              <span className={`inline-block mt-1 px-2 py-0.5 text-xs font-semibold rounded ${isDark ? 'bg-green-900/30 text-green-300' : 'bg-green-100 text-green-700'}`}>
+                                ✓ Completed
+                              </span>
+                            </div>
+                          </div>
+                          
+                          <div className={`space-y-1.5 text-sm ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
+                            <p className="flex items-center gap-2">
+                              <span>👨‍🏫</span>
+                              <span className="truncate">{booking.instructor?.full_name || 'Instructor'}</span>
+                            </p>
+                            <p className="flex items-center gap-2">
+                              <span>📅</span>
+                              <span>{formatDate(booking.date)}</span>
+                            </p>
+                            <p className="flex items-center gap-2">
+                              <span>🕐</span>
+                              <span>{formatTime(booking.start_time)} - {formatTime(booking.end_time)}</span>
+                            </p>
+                            {booking.room && (
+                              <p className="flex items-center gap-2">
+                                <span>📍</span>
+                                <span className="truncate">{booking.room}</span>
+                              </p>
+                            )}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
                   </div>
                 )}
               </>
@@ -582,11 +655,6 @@ export default function ManageBookingsPage() {
                       <p className={`text-sm font-bold ${isDark ? 'text-white' : 'text-gray-900'}`}>
                         Cancellation Email
                       </p>
-                      {sendCancelEmail && (
-                        <span className="px-1.5 py-0.5 text-[9px] font-semibold rounded-full bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400 animate-pulse">
-                          Active
-                        </span>
-                      )}
                     </div>
                     <p className={`text-xs ${isDark ? 'text-gray-400' : 'text-gray-600'} font-medium`}>
                       {sendCancelEmail ? '✓ You will receive a cancellation email' : '✗ No cancellation email'}
@@ -600,10 +668,10 @@ export default function ManageBookingsPage() {
                 {/* Toggle switch */}
                 <button
                   onClick={() => setSendCancelEmail(!sendCancelEmail)}
-                  className={`relative inline-flex h-7 w-12 flex-shrink-0 items-center rounded-full border-2 border-transparent transition-colors duration-300 focus:outline-none focus:ring-4 focus:ring-offset-2 shadow-lg ${sendCancelEmail ? 'bg-gradient-to-r from-red-500 via-red-600 to-red-700 focus:ring-red-400/50 shadow-red-500/40' : isDark ? 'bg-gradient-to-r from-gray-600 to-gray-700 focus:ring-gray-500/50 shadow-gray-800/40' : 'bg-gradient-to-r from-gray-300 to-gray-400 focus:ring-gray-400/50 shadow-gray-400/40'} transform hover:scale-105 active:scale-95`}
+                  className={`relative inline-flex h-7 w-14 flex-shrink-0 items-center rounded-full border-2 border-transparent transition-colors duration-300 focus:outline-none focus:ring-4 focus:ring-offset-2 shadow-lg ${sendCancelEmail ? 'bg-gradient-to-r from-red-500 via-red-600 to-red-700 focus:ring-red-400/50 shadow-red-500/40' : isDark ? 'bg-gradient-to-r from-gray-600 to-gray-700 focus:ring-gray-500/50 shadow-gray-800/40' : 'bg-gradient-to-r from-gray-300 to-gray-400 focus:ring-gray-400/50 shadow-gray-400/40'} transform hover:scale-105 active:scale-95`}
                   aria-label="Toggle cancellation email"
                 >
-                  <span className={`pointer-events-none inline-flex items-center justify-center h-5 w-5 transform rounded-full bg-white shadow-xl transition-all duration-300 ease-out ${sendCancelEmail ? 'translate-x-[24px]' : 'translate-x-[2px]'}`}>
+                  <span className={`pointer-events-none inline-flex items-center justify-center h-5 w-5 transform rounded-full bg-white shadow-xl transition-all duration-300 ease-out`}>
                     {sendCancelEmail ? (
                       <svg className="w-3 h-3 text-red-600" fill="currentColor" viewBox="0 0 20 20">
                         <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />

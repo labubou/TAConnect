@@ -633,11 +633,7 @@ export default function BookPage() {
                                 <p className={`text-base font-bold ${isDark ? 'text-white' : 'text-gray-900'}`}>
                                   Email Confirmation
                                 </p>
-                                {sendEmailNotification && (
-                                  <span className="px-2 py-0.5 text-[10px] font-semibold rounded-full bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400 animate-pulse">
-                                    Active
-                                  </span>
-                                )}
+      
                               </div>
                               <p className={`text-xs ${isDark ? 'text-gray-400' : 'text-gray-600'} font-medium`}>
                                 {sendEmailNotification 
@@ -664,8 +660,8 @@ export default function BookPage() {
                           >
                             {/* Toggle indicator with icon */}
                             <span
-                              className={`pointer-events-none inline-flex items-center justify-center h-6 w-6 transform rounded-full bg-white shadow-xl transition-all duration-300 ease-out ${
-                                sendEmailNotification ? 'translate-x-[28px]' : 'translate-x-[2px]'
+                              className={`pointer-events-none inline-flex items-center justify-center h-6 w-6 transform rounded-full bg-white shadow-xl transition-all duration-300 ease-out {
+
                               }`}
                             >
                               {sendEmailNotification ? (
