@@ -46,6 +46,13 @@ class InstructorCancelBookingView(GenericAPIView):
                 {'error': 'Booking is already cancelled.'},
                 status=status.HTTP_400_BAD_REQUEST
             )
+        
+        # Check if already completed
+        if booking.is_completed:
+            return Response(
+                {'error': 'Booking is already completed and cannot be cancelled.'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
 
         # Validate and cancel the booking
         serializer = self.get_serializer(
@@ -63,7 +70,7 @@ class InstructorCancelBookingView(GenericAPIView):
 
         cancelled_booking = serializer.save()
 
-        # Send email notification to the student
+        # Send email notification to the student and the instructor
         try:
             send_booking_cancelled_email(
                 student=booking.student,

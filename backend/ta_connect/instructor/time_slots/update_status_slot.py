@@ -7,6 +7,7 @@ from instructor.models import OfficeHourSlot
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
 from instructor.schemas.time_slot_schemas import update_status_time_slot_response
+from student.utils.cancel_student_bookings import cancel_student_bookings
 
 @swagger_auto_schema(
     method='POST',
@@ -44,5 +45,11 @@ def update_time_slot_status(request, slot_id):
         time_slot.save()
     except Exception as e:
         return Response({'error': f'Failed to update time slot'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+    
+    message, error = cancel_student_bookings(time_slot)
 
-    return Response({'success': True, 'time_slot_id': time_slot.id}, status=status.HTTP_200_OK)
+    if error:
+        print(f"Error cancelling bookings for time slot {time_slot.id}: {error}")
+        return Response({'error': "something went wrong"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+    return Response({'success': True, 'time_slot_id': time_slot.id, 'message': message}, status=status.HTTP_200_OK)
