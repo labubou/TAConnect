@@ -9,6 +9,7 @@ class CreateBookingSerializer(serializers.Serializer):
     slot_id = serializers.IntegerField(write_only=True)
     date = serializers.DateField()
     start_time = serializers.TimeField()
+    send_email = serializers.BooleanField(default=True, required=False)
 
     def validate(self, attrs):
         request = self.context.get('request')

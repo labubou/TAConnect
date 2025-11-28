@@ -1,37 +1,17 @@
 import { useState, useEffect } from 'react';
 import { useTheme } from '../../contexts/ThemeContext';
-import axios from 'axios';
+import { useStudentBookings } from '../../hooks/useApi';
 
 export default function BookingsCalendar() {
   const { theme } = useTheme();
   const isDark = theme === 'dark';
   const [currentDate, setCurrentDate] = useState(new Date());
-  const [bookings, setBookings] = useState([]);
-  const [loading, setLoading] = useState(true);
   const [selectedDate, setSelectedDate] = useState(null);
   const [hoveredDay, setHoveredDay] = useState(null);
   const [tooltipPosition, setTooltipPosition] = useState({ x: 0, y: 0 });
 
-  useEffect(() => {
-    fetchBookings();
-  }, []);
-
-  const fetchBookings = async () => {
-    try {
-      setLoading(true);
-      const response = await axios.get('/api/student/booking/');
-      if (response.data && response.data.bookings) {
-        setBookings(response.data.bookings);
-      } else {
-        setBookings([]);
-      }
-    } catch (error) {
-      console.error('Error fetching bookings:', error);
-      setBookings([]);
-    } finally {
-      setLoading(false);
-    }
-  };
+  // Use React Query to fetch bookings
+  const { data: bookings = [], isLoading: loading } = useStudentBookings();
 
   const getDaysInMonth = (date) => {
     const year = date.getFullYear();

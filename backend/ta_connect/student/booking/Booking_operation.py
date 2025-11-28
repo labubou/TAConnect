@@ -71,6 +71,12 @@ class BookingCreateView(GenericAPIView):
                         'end_time': booking.end_time,
                         'is_cancelled': booking.is_cancelled,
                         'is_completed': booking.is_completed,
+                        'office_hour': {
+                            'id': booking.office_hour.id,
+                            'start_date': booking.office_hour.start_date,
+                            'end_date': booking.office_hour.end_date,
+                            'day_of_week': booking.office_hour.day_of_week,
+                        }
                     } for booking in bookings
                 ]
             }, status=status.HTTP_200_OK)
@@ -98,13 +104,15 @@ class BookingCreateView(GenericAPIView):
             
             booking = serializer.save()
 
-            # Send emails using utility function
+            # Always send email to instructor, optionally to student based on send_email preference
+            send_to_student = serializer.validated_data.get('send_email', True)
             send_booking_confirmation_email(
                 student=request.user,
                 instructor=slot.instructor,
                 slot=slot,
                 booking_date=serializer.validated_data['date'],
-                booking_time=serializer.validated_data['start_time']
+                booking_time=serializer.validated_data['start_time'],
+                send_to_student=send_to_student
             )
 
             return Response({
@@ -172,9 +180,14 @@ class BookingDetailView(GenericAPIView):
 
         booking = get_object_or_404(Booking, id=pk, student=request.user)
 
+        # Merge request data with default cancel flag
+        cancel_data = {'is_cancel': True}
+        if request.data:
+            cancel_data.update(request.data)
+
         serializer = self.get_serializer(
             instance=booking, 
-            data={'is_cancel': True}, 
+            data=cancel_data, 
             partial=True, 
             context={'request': request}
         )
@@ -184,13 +197,15 @@ class BookingDetailView(GenericAPIView):
 
         cancelled_booking = serializer.save()
 
-        # Send cancellation emails using utility function
+        # Always send email to instructor, optionally to student based on send_email preference
+        send_to_student = serializer.validated_data.get('send_email', True)
         send_booking_cancelled_email(
             student=request.user,
             instructor=booking.office_hour.instructor,
             slot=booking.office_hour,
             booking_date=booking.date,
-            booking_time=booking.start_time
+            booking_time=booking.start_time,
+            send_to_student=send_to_student
         )
 
         return Response({
