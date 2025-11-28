@@ -39,7 +39,7 @@ export default function EmailPreferencesPage() {
   // Expected Response: { email_on_booking: boolean, email_on_cancellation: boolean }
   // This fetches the user's current email notification preferences from the backend
   // ==================================================================================
-  /*const fetchPreferences = async () => {
+  const fetchPreferences = async () => {
     try {
       setLoading(true);
       const response = await axios.get('/api/profile/');
@@ -80,7 +80,7 @@ export default function EmailPreferencesPage() {
       type: 'success', 
       text: 'Preferences reset to default'
     });
-  };*/
+  };
 
   // ==================================================================================
   // BACKEND CONNECTION - SAVE PREFERENCES
@@ -89,7 +89,7 @@ export default function EmailPreferencesPage() {
   // Expected Response: { status: 200 } or { error: string }
   // This sends the updated preferences to the backend and saves them to the database
   // ==================================================================================
-  /*const handleSave = async () => {
+  const handleSave = async () => {
     try {
       setSaving(true);
       setMessage({ type: '', text: '' });
@@ -115,7 +115,7 @@ export default function EmailPreferencesPage() {
     } finally {
       setSaving(false);
     }
-  };*/
+  };
 
   return (
     <div className={`min-h-screen flex flex-col ${isDark ? 'bg-gray-950' : 'bg-gray-50'}`}>

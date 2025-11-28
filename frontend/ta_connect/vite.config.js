@@ -18,6 +18,7 @@ export default defineConfig({
           'vendor-query': ['@tanstack/react-query'],
           'vendor-charts': ['recharts'],
           'vendor-axios': ['axios'],
+          'vendor-icons': ['lucide-react'],
           
           // Feature chunks
           'pages-auth': ['./src/pages/main/LoginPage.jsx', './src/pages/main/RegisterPage.jsx'],
