@@ -74,6 +74,46 @@ export const useAnalyticsData = (startDate = null, endDate = null, options = {})
 };
 
 /**
+ * Hook to fetch booking analytics from backend
+ * Returns most booked slots, times, and comprehensive booking statistics
+ * Supports date range filtering
+ */
+export const useBookingAnalytics = (startDate = null, endDate = null, options = {}) => {
+  return useQuery({
+    queryKey: ['bookingAnalytics', startDate, endDate],
+    queryFn: async () => {
+      try {
+        const params = {};
+        if (startDate) params.start_date = startDate;
+        if (endDate) params.end_date = endDate;
+
+        const res = await axios.get('/api/instructor/booking-analytics/', { params });
+        
+        return {
+          period: res?.data?.period || { start_date: null, end_date: null },
+          totalBookings: res?.data?.total_bookings || 0,
+          mostBookedSlot: res?.data?.most_booked_slot || null,
+          mostBookedTime: res?.data?.most_booked_time || null,
+          allSlotsAnalytics: res?.data?.all_slots_analytics || [],
+          allTimesAnalytics: res?.data?.all_times_analytics || [],
+          summary: res?.data?.summary || {
+            average_bookings_per_slot: 0,
+            total_unique_slots: 0,
+            total_unique_times: 0,
+          },
+        };
+      } catch (error) {
+        console.error('Booking analytics query failed:', error);
+        throw new Error('Failed to load booking analytics. Please try again.');
+      }
+    },
+    retry: 2,
+    retryDelay: attemptIndex => Math.min(1000 * 2 ** attemptIndex, 30000),
+    ...options,
+  });
+};
+
+/**
  * Hook to search instructors
  * Debounced to avoid excessive API calls
  */

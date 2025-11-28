@@ -2,50 +2,64 @@ import { useState, useEffect } from 'react';
 import { useTheme } from '../../contexts/ThemeContext';
 import TAnavbar from '../../components/ta/TAnavbar';
 import BookingsChart from '../../components/ta/BookingsChart';
-import FeedbackChart from '../../components/ta/FeedbackChart';
 import StudentActivityChart from '../../components/ta/StudentActivityChart';
+import MostBookedSlotCard from '../../components/ta/MostBookedSlotCard';
+import MostBookedTimeCard from '../../components/ta/MostBookedTimeCard';
+import AllSlotsAnalytics from '../../components/ta/AllSlotsAnalytics';
+import AllTimesAnalytics from '../../components/ta/AllTimesAnalytics';
+import SummaryStatistics from '../../components/ta/SummaryStatistics';
 import ErrorBoundary from '../../components/ErrorBoundary';
 import Footer from '../../components/Footer';
 import { SkeletonLoader } from '../../components/SkeletonLoader';
 import {
   processBookingsForChart,
-  processFeedbackForChart,
   processStudentActivityForChart,
-  calculateStatistics
+  calculateStatistics,
+  processAllSlotsAnalytics,
+  processAllTimesAnalytics
 } from '../../services/analyticsService';
 import strings from '../../strings/analyticsStrings';
-import { useAnalyticsData } from '../../hooks/useApi';
+import { useAnalyticsData, useBookingAnalytics } from '../../hooks/useApi';
 
 export default function AnalyticsDashboard() {
   const { theme } = useTheme();
   const isDark = theme === 'dark';
   const [isNavbarOpen, setIsNavbarOpen] = useState(true);
   const [bookingsData, setBookingsData] = useState([]);
-  const [feedbackData, setFeedbackData] = useState(null);
   const [studentActivityData, setStudentActivityData] = useState([]);
   const [statistics, setStatistics] = useState(null);
   const [dateRange, setDateRange] = useState({ start: '', end: '' });
 
-  // Use React Query hook for analytics data with caching
+  // Use React Query hooks for both analytics endpoints
   const { 
     data: analyticsData, 
-    isLoading: loading, 
-    error, 
-    refetch 
+    isLoading: loadingOld, 
+    error: errorOld, 
+    refetch: refetchOld 
   } = useAnalyticsData(dateRange.start, dateRange.end, {
-    enabled: true, // Always fetch initially
+    enabled: true,
   });
+
+  const { 
+    data: backendAnalytics, 
+    isLoading: loadingBackend, 
+    error: errorBackend, 
+    refetch: refetchBackend 
+  } = useBookingAnalytics(dateRange.start, dateRange.end, {
+    enabled: true,
+  });
+
+  const loading = loadingOld || loadingBackend;
+  const error = errorOld || errorBackend;
 
   // Process analytics data whenever it changes
   useEffect(() => {
     if (analyticsData) {
       const bookings = processBookingsForChart(analyticsData.bookings);
-      const feedback = processFeedbackForChart(analyticsData.slots);
       const activity = processStudentActivityForChart(analyticsData.bookings);
       const stats = calculateStatistics(analyticsData.bookings, analyticsData.slots);
 
       setBookingsData(bookings);
-      setFeedbackData(feedback);
       setStudentActivityData(activity);
       setStatistics(stats);
     }
@@ -60,12 +74,14 @@ export default function AnalyticsDashboard() {
   };
 
   const handleApplyFilter = () => {
-    refetch();
+    refetchOld();
+    refetchBackend();
   };
 
   const handleClearFilter = () => {
     setDateRange({ start: '', end: '' });
-    refetch();
+    refetchOld();
+    refetchBackend();
   };
 
   // StatCard Component
@@ -86,6 +102,10 @@ export default function AnalyticsDashboard() {
       </div>
     </div>
   );
+
+  // Process backend analytics data
+  const allSlotsAnalytics = backendAnalytics?.allSlotsAnalytics ? processAllSlotsAnalytics(backendAnalytics.allSlotsAnalytics) : [];
+  const allTimesAnalytics = backendAnalytics?.allTimesAnalytics ? processAllTimesAnalytics(backendAnalytics.allTimesAnalytics) : [];
 
   return (
     <div className={`min-h-screen flex flex-col ${isDark ? 'bg-gray-900' : 'bg-gray-50'}`}>
@@ -117,7 +137,7 @@ export default function AnalyticsDashboard() {
                   </svg>
                   <div className="flex-1">
                     <p className="font-medium">Failed to load analytics data</p>
-                    <p className="text-sm mt-1">{error.message || 'Please try again or contact support if the problem persists.'}</p>
+                    <p className="text-sm mt-1">{error?.message || 'Please try again or contact support if the problem persists.'}</p>
                   </div>
                 </div>
               </div>
@@ -179,18 +199,29 @@ export default function AnalyticsDashboard() {
               </div>
             </div>
 
-            {/* Error Message */}
-            {error && !loading && (
-              <div className="mb-4 sm:mb-6 p-3 sm:p-4 rounded-lg border flex items-center gap-3"
-                style={{
-                  backgroundColor: isDark ? 'rgba(153, 27, 27, 0.1)' : 'rgb(254, 242, 242)',
-                  borderColor: isDark ? 'rgba(239, 68, 68, 0.3)' : 'rgb(254, 205, 211)',
-                  color: isDark ? 'rgb(248, 113, 113)' : 'rgb(220, 38, 38)'
-                }}>
-                <svg className="w-5 h-5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                  <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+            {/* Loading State */}
+            {loading && (
+              <div>
+                <SkeletonLoader isDark={isDark} count={5} height="h-20" className="mb-8" />
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                  <SkeletonLoader isDark={isDark} count={1} height="h-80" />
+                  <SkeletonLoader isDark={isDark} count={1} height="h-80" />
+                </div>
+              </div>
+            )}
+
+            {/* No data state when loaded but statistics is null */}
+            {!loading && !statistics && !error && (
+              <div className={`p-8 text-center rounded-xl border-2 border-dashed ${isDark ? 'border-gray-700 bg-gray-800' : 'border-gray-300 bg-gray-50'}`}>
+                <svg className={`w-12 h-12 mx-auto mb-4 ${isDark ? 'text-gray-500' : 'text-gray-400'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
-                <span className="text-sm font-medium">{error}</span>
+                <p className={`text-lg font-medium ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
+                  {strings.dashboard.noData}
+                </p>
+                <p className={`text-sm mt-2 ${isDark ? 'text-gray-500' : 'text-gray-500'}`}>
+                  {strings.dashboard.noDataMessage}
+                </p>
               </div>
             )}
 
@@ -230,67 +261,90 @@ export default function AnalyticsDashboard() {
               </div>
             )}
 
-            {/* No data state when loaded but stats is null */}
-            {!loading && !statistics && !error && (
-              <div className={`p-8 text-center rounded-xl border-2 border-dashed ${isDark ? 'border-gray-700 bg-gray-800' : 'border-gray-300 bg-gray-50'}`}>
-                <svg className={`w-12 h-12 mx-auto mb-4 ${isDark ? 'text-gray-500' : 'text-gray-400'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-                <p className={`text-lg font-medium ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
-                  {strings.dashboard.noData}
-                </p>
-                <p className={`text-sm mt-2 ${isDark ? 'text-gray-500' : 'text-gray-500'}`}>
-                  {strings.dashboard.noDataMessage}
-                </p>
-              </div>
-            )}
-
-            {/* Loading State */}
-            {loading && (
-              <div>
-                <SkeletonLoader isDark={isDark} count={5} height="h-20" className="mb-8" />
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                  <SkeletonLoader isDark={isDark} count={1} height="h-80" />
-                  <SkeletonLoader isDark={isDark} count={1} height="h-80" />
-                </div>
-              </div>
-            )}
-
             {/* Charts Grid */}
             {!loading && statistics && (
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-                {/* Bookings Chart */}
-                <div className={`p-4 sm:p-6 rounded-xl ${isDark ? 'bg-gray-700' : 'bg-white'} border border-opacity-10 shadow-sm`}>
-                  <h2 className={`text-lg sm:text-xl font-semibold mb-4 sm:mb-6 ${isDark ? 'text-white' : 'text-gray-900'}`}>
-                    {strings.dashboard.charts.bookingsOverTime}
-                  </h2>
-                  <ErrorBoundary>
-                    <BookingsChart data={bookingsData} isDark={isDark} />
-                  </ErrorBoundary>
+              <>
+                {/* First Row: Bookings Chart and Student Activity */}
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+                  {/* Bookings Chart */}
+                  <div className={`p-4 sm:p-6 rounded-xl ${isDark ? 'bg-gray-700' : 'bg-white'} border border-opacity-10 shadow-sm`}>
+                    <h2 className={`text-lg sm:text-xl font-semibold mb-4 sm:mb-6 ${isDark ? 'text-white' : 'text-gray-900'}`}>
+                      {strings.dashboard.charts.bookingsOverTime}
+                    </h2>
+                    <ErrorBoundary>
+                      <BookingsChart data={bookingsData} isDark={isDark} />
+                    </ErrorBoundary>
+                  </div>
+
+                  {/* Most Booked Time */}
+                  <div>
+                    <ErrorBoundary>
+                      <MostBookedTimeCard 
+                        timeData={backendAnalytics?.mostBookedTime}
+                        isDark={isDark}
+                      />
+                    </ErrorBoundary>
+                  </div>
                 </div>
 
-                {/* Feedback Chart */}
-                <div className={`p-4 sm:p-6 rounded-xl ${isDark ? 'bg-gray-700' : 'bg-white'} border border-opacity-10 shadow-sm`}>
-                  <h2 className={`text-lg sm:text-xl font-semibold mb-4 sm:mb-6 ${isDark ? 'text-white' : 'text-gray-900'}`}>
-                    {strings.dashboard.charts.feedbackDistribution}
-                  </h2>
+                {/* Second Row: Most Booked Slot and All Times Analytics */}
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+                  {/* Most Booked Slot */}
+                  <div>
+                    <ErrorBoundary>
+                      <MostBookedSlotCard 
+                        slotData={backendAnalytics?.mostBookedSlot}
+                        isDark={isDark}
+                      />
+                    </ErrorBoundary>
+                  </div>
+
+                  {/* All Times Analytics */}
+                  <div>
+                    <ErrorBoundary>
+                      <AllTimesAnalytics 
+                        timesData={allTimesAnalytics}
+                        isDark={isDark}
+                        isLoading={loadingBackend}
+                      />
+                    </ErrorBoundary>
+                  </div>
+                </div>
+
+                {/* Third Row: Summary Statistics and Student Activity */}
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+                  {/* Summary Statistics */}
+                  <div>
+                    <ErrorBoundary>
+                      <SummaryStatistics 
+                        summary={backendAnalytics?.summary}
+                        isDark={isDark}
+                      />
+                    </ErrorBoundary>
+                  </div>
+
+                  {/* Student Activity Chart */}
+                  <div className={`p-4 sm:p-6 rounded-xl ${isDark ? 'bg-gray-700' : 'bg-white'} border border-opacity-10 shadow-sm`}>
+                    <h2 className={`text-lg sm:text-xl font-semibold mb-4 sm:mb-6 ${isDark ? 'text-white' : 'text-gray-900'}`}>
+                      {strings.dashboard.charts.studentActivity}
+                    </h2>
+                    <ErrorBoundary>
+                      <StudentActivityChart data={studentActivityData} isDark={isDark} />
+                    </ErrorBoundary>
+                  </div>
+                </div>
+
+                {/* Fourth Row: All Slots Analytics */}
+                <div>
                   <ErrorBoundary>
-                    <FeedbackChart data={feedbackData} isDark={isDark} />
+                    <AllSlotsAnalytics 
+                      slotsData={allSlotsAnalytics}
+                      isDark={isDark}
+                      isLoading={loadingBackend}
+                    />
                   </ErrorBoundary>
                 </div>
-              </div>
-            )}
-
-            {/* Student Activity Chart - Full Width */}
-            {!loading && statistics && (
-              <div className={`p-4 sm:p-6 rounded-xl ${isDark ? 'bg-gray-700' : 'bg-white'} border border-opacity-10 shadow-sm`}>
-                <h2 className={`text-lg sm:text-xl font-semibold mb-4 sm:mb-6 ${isDark ? 'text-white' : 'text-gray-900'}`}>
-                  {strings.dashboard.charts.studentActivity}
-                </h2>
-                <ErrorBoundary>
-                  <StudentActivityChart data={studentActivityData} isDark={isDark} />
-                </ErrorBoundary>
-              </div>
+              </>
             )}
           </div>
         </main>
