@@ -8,7 +8,7 @@ from rest_framework.response import Response
 from drf_yasg.utils import swagger_auto_schema
 from student.utils.complete_book import complete_booking
 from student.models import Booking
-from student.sendBookingEmail import send_booking_confirmation_email, send_booking_cancelled_email
+from student.sendBookingEmail import send_booking_confirmation_email, send_booking_cancelled_email,send_booking_update_email
 from instructor.models import OfficeHourSlot
 from accounts.permissions import IsStudent
 from student.serializers.create_book_serializer import CreateBookingSerializer
@@ -243,3 +243,5 @@ class BookingDetailView(GenericAPIView):
         
         except Exception as e:
             return Response({'error': f'An error occurred {str(e)}'}, status=500)
+    
+    
