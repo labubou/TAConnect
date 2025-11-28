@@ -15,6 +15,7 @@ export default function ManageBookingsPage() {
   const [showCancelModal, setShowCancelModal] = useState(false);
   const [showUpdateModal, setShowUpdateModal] = useState(false);
   const [cancelLoading, setCancelLoading] = useState(false);
+  const [sendCancelEmail, setSendCancelEmail] = useState(true);
   const [availableDates, setAvailableDates] = useState([]);
   const [availableTimes, setAvailableTimes] = useState([]);
   const [newDate, setNewDate] = useState('');
@@ -123,22 +124,25 @@ export default function ManageBookingsPage() {
     if (!selectedBooking) return;
 
     setCancelLoading(true);
-    cancelBookingMutation(selectedBooking.id, {
-      onSuccess: () => {
-        setSuccess('Booking cancelled successfully');
-        setShowCancelModal(false);
-        setSelectedBooking(null);
-        refetch();
-        setTimeout(() => setSuccess(''), 3000);
-      },
-      onError: (err) => {
-        console.error('Error cancelling booking:', err);
-        setError(err.response?.data?.error || 'Failed to cancel booking');
-      },
-      onSettled: () => {
-        setCancelLoading(false);
+    cancelBookingMutation(
+      { bookingId: selectedBooking.id, sendEmail: sendCancelEmail },
+      {
+        onSuccess: () => {
+          setSuccess('Booking cancelled successfully');
+          setShowCancelModal(false);
+          setSelectedBooking(null);
+          refetch();
+          setTimeout(() => setSuccess(''), 3000);
+        },
+        onError: (err) => {
+          console.error('Error cancelling booking:', err);
+          setError(err.response?.data?.error || 'Failed to cancel booking');
+        },
+        onSettled: () => {
+          setCancelLoading(false);
+        }
       }
-    });
+    );
   };
 
   const handleUpdateBooking = async () => {
@@ -539,7 +543,7 @@ export default function ManageBookingsPage() {
               Are you sure you want to cancel this booking? This action cannot be undone.
             </p>
             
-            <div className={`${isDark ? 'bg-gray-700' : 'bg-gray-50'} p-3 sm:p-4 rounded-lg mb-4 sm:mb-6`}>
+            <div className={`${isDark ? 'bg-gray-700' : 'bg-gray-50'} p-3 sm:p-4 rounded-lg mb-4`}>
               <p className={`font-semibold ${isDark ? 'text-white' : 'text-gray-900'}`}>
                 {selectedBooking.course_name}
               </p>
@@ -549,6 +553,68 @@ export default function ManageBookingsPage() {
               <p className={`text-sm ${isDark ? 'text-gray-300' : 'text-gray-600'}`}>
                 🕐 {formatTime(selectedBooking.start_time)} - {formatTime(selectedBooking.end_time)}
               </p>
+            </div>
+
+            {/* Email Notification Toggle */}
+            <div className={`relative p-5 ${isDark ? 'bg-gradient-to-br from-gray-750 to-gray-700 border-2 border-gray-600' : 'bg-gradient-to-br from-red-50 via-white to-orange-50 border-2 border-red-100'} rounded-xl mb-4 shadow-lg overflow-hidden group`}>
+              {/* Decorative background */}
+              <div className={`absolute -top-8 -right-8 w-24 h-24 rounded-full ${sendCancelEmail ? 'bg-red-400/10' : 'bg-gray-400/5'} blur-xl transition-all duration-500`}></div>
+              
+              <div className="relative flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  {/* Icon container */}
+                  <div className={`relative p-2.5 rounded-xl ${sendCancelEmail ? 'bg-gradient-to-br from-red-500 to-red-600 shadow-lg shadow-red-500/30' : isDark ? 'bg-gray-700 shadow-md' : 'bg-gray-100 shadow-md'} transition-all duration-300`}>
+                    {sendCancelEmail && (
+                      <div className="absolute inset-0 rounded-xl bg-red-400 animate-ping opacity-20"></div>
+                    )}
+                    <svg className={`w-5 h-5 relative z-10 ${sendCancelEmail ? 'text-white' : isDark ? 'text-gray-400' : 'text-gray-500'} transition-all duration-300`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                      {sendCancelEmail && (
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+                      )}
+                    </svg>
+                  </div>
+                  
+                  {/* Text */}
+                  <div className="flex flex-col">
+                    <div className="flex items-center gap-2 mb-0.5">
+                      <p className={`text-sm font-bold ${isDark ? 'text-white' : 'text-gray-900'}`}>
+                        Cancellation Email
+                      </p>
+                      {sendCancelEmail && (
+                        <span className="px-1.5 py-0.5 text-[9px] font-semibold rounded-full bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400 animate-pulse">
+                          Active
+                        </span>
+                      )}
+                    </div>
+                    <p className={`text-xs ${isDark ? 'text-gray-400' : 'text-gray-600'} font-medium`}>
+                      {sendCancelEmail ? '✓ You will receive a cancellation email' : '✗ No cancellation email'}
+                    </p>
+                    <p className={`text-[9px] ${isDark ? 'text-gray-500' : 'text-gray-500'} mt-0.5 italic`}>
+                      Instructor always gets notified
+                    </p>
+                  </div>
+                </div>
+                
+                {/* Toggle switch */}
+                <button
+                  onClick={() => setSendCancelEmail(!sendCancelEmail)}
+                  className={`relative inline-flex h-7 w-12 flex-shrink-0 items-center rounded-full border-2 border-transparent transition-colors duration-300 focus:outline-none focus:ring-4 focus:ring-offset-2 shadow-lg ${sendCancelEmail ? 'bg-gradient-to-r from-red-500 via-red-600 to-red-700 focus:ring-red-400/50 shadow-red-500/40' : isDark ? 'bg-gradient-to-r from-gray-600 to-gray-700 focus:ring-gray-500/50 shadow-gray-800/40' : 'bg-gradient-to-r from-gray-300 to-gray-400 focus:ring-gray-400/50 shadow-gray-400/40'} transform hover:scale-105 active:scale-95`}
+                  aria-label="Toggle cancellation email"
+                >
+                  <span className={`pointer-events-none inline-flex items-center justify-center h-5 w-5 transform rounded-full bg-white shadow-xl transition-all duration-300 ease-out ${sendCancelEmail ? 'translate-x-[24px]' : 'translate-x-[2px]'}`}>
+                    {sendCancelEmail ? (
+                      <svg className="w-3 h-3 text-red-600" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                      </svg>
+                    ) : (
+                      <svg className="w-3 h-3 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
+                      </svg>
+                    )}
+                  </span>
+                </button>
+              </div>
             </div>
 
             <div className="flex gap-3">

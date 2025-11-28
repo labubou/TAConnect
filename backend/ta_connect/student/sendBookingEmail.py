@@ -97,7 +97,7 @@ def send_booking_confirmation_email(student, instructor, slot, booking_date, boo
     }
 
 
-def send_booking_cancelled_email(student, instructor, slot, booking_date, booking_time):
+def send_booking_cancelled_email(student, instructor, slot, booking_date, booking_time, send_to_student=True):
     """
     Send booking cancellation notification emails to both student and instructor.
     
@@ -107,6 +107,7 @@ def send_booking_cancelled_email(student, instructor, slot, booking_date, bookin
         slot: OfficeHourSlot object
         booking_date: Date object or string (YYYY-MM-DD)
         booking_time: Time object or string (HH:MM)
+        send_to_student: bool - Whether to send email to student (default: True)
     
     Returns:
         dict: {'success': bool, 'student_sent': bool, 'instructor_sent': bool, 'errors': []}
@@ -144,22 +145,26 @@ def send_booking_cancelled_email(student, instructor, slot, booking_date, bookin
         'frontend_url': frontend_url,
     }
 
-    # Send email to student
-    try:
-        mail_subject = 'Booking Cancellation - TA Connect'
-        message = render_to_string('booking_cancellation_email_Student.html', email_context)
-        send_mail(
-            mail_subject,
-            message,
-            'taconnect.team@gmail.com',
-            [student.email],
-            html_message=message
-        )
+    # Send email to student (only if send_to_student is True)
+    if send_to_student:
+        try:
+            mail_subject = 'Booking Cancellation - TA Connect'
+            message = render_to_string('booking_cancellation_email_Student.html', email_context)
+            send_mail(
+                mail_subject,
+                message,
+                'taconnect.team@gmail.com',
+                [student.email],
+                html_message=message
+            )
+            student_sent = True
+        except Exception as email_error:
+            error_msg = f"Failed to send booking cancellation email to student: {str(email_error)}"
+            print(error_msg)
+            errors.append(error_msg)
+    else:
+        # If we're not sending to student, mark as sent to avoid false error reporting
         student_sent = True
-    except Exception as email_error:
-        error_msg = f"Failed to send booking cancellation email to student: {str(email_error)}"
-        print(error_msg)
-        errors.append(error_msg)
 
     # Send email to instructor/TA
     try:

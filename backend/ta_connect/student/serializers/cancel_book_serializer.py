@@ -4,6 +4,7 @@ import datetime
 
 class CancelBookingSerializer(serializers.Serializer):
     confirm = serializers.BooleanField(default=True)
+    send_email = serializers.BooleanField(default=True, required=False)
 
     def validate(self, attrs):
         booking = self.instance

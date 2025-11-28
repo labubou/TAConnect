@@ -300,16 +300,18 @@ export const useCancelInstructorBooking = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (bookingId) => {
+    mutationFn: async ({ bookingId, sendEmail = true }) => {
       const response = await axios.delete(`/api/student/booking/${bookingId}/`, {
         data: {
           confirm: true,
+          send_email: sendEmail,
         },
       });
       return response.data;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['instructor', 'bookings'] });
+      queryClient.invalidateQueries({ queryKey: ['student', 'bookings'] });
     },
   });
 };
