@@ -51,6 +51,7 @@ class InstructorProfile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name="instructor_profile")
     email_notifications_on_booking = models.BooleanField(default=True, verbose_name="Email Notifications on Booking")
     email_notifications_on_cancellation = models.BooleanField(default=True, verbose_name="Email Notifications on Cancellation")
+    email_notifications_on_update = models.BooleanField(default=True, verbose_name="Email Notifications on Updates The Booking")
 
     def __str__(self):
         return f"Instructor Profile: {self.user.username}"
@@ -64,6 +65,6 @@ class StudentProfile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name="student_profile")
     email_notifications_on_booking = models.BooleanField(default=True, verbose_name="Email Notifications on Booking")
     email_notifications_on_cancellation = models.BooleanField(default=True, verbose_name="Email Notifications on Cancellation")
-    
+    email_notifications_on_update = models.BooleanField(default=True, verbose_name="Email Notifications on Updates The Booking")
     def __str__(self):
         return f"Student Profile: {self.user.username}"

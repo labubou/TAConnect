@@ -160,12 +160,22 @@ class BookingDetailView(GenericAPIView):
             return Response({'error': serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
 
         updated_booking = serializer.save()
+        #send email notifications
+        send_booking_update_email(
+            student=request.user,
+            instructor=booking.office_hour.instructor,
+            slot=booking.office_hour,
+            booking_date=updated_booking.date,
+            booking_time=updated_booking.start_time
+        )
+        
         
         return Response({
             'success': True, 
             'booking_id': updated_booking.id, 
             'message': 'Booking updated successfully.'
         }, status=status.HTTP_200_OK)
+       
 
     @swagger_auto_schema(**cancel_booking_swagger)
     def delete(self, request, pk):
