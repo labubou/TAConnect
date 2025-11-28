@@ -1,7 +1,7 @@
 const analyticsStrings = {
   dashboard: {
     title: "TA Analytics Dashboard",
-    description: "Comprehensive analytics of your bookings, feedback, and student engagement",
+    description: "Comprehensive analytics of your bookings and student engagement",
     errorLoading: "Failed to load analytics data. Please try again.",
     startDate: "Start Date",
     endDate: "End Date",
@@ -49,6 +49,28 @@ const analyticsStrings = {
     yAxisLabel: "Number of Students",
     legend: "Active Students",
     noDataAvailable: "No activity data available",
+  },
+  backendAnalytics: {
+    mostBookedSlot: "Most Booked Slot",
+    mostBookedTime: "Most Booked Time",
+    allSlots: "All Slots Analytics",
+    allTimes: "Bookings by Hour",
+    totalBookingsCard: "Total Bookings",
+    slotDetails: "Slot Details",
+    room: "Room",
+    startTime: "Start Time",
+    endTime: "End Time",
+    bookings: "Bookings",
+    noMostBookedSlot: "No slot data available",
+    noMostBookedTime: "No time data available",
+    noSlotsData: "No slots analytics available",
+    noTimesData: "No times analytics available",
+    averageBookingsPerSlot: "Avg Bookings/Slot",
+    totalUniqueSlots: "Total Unique Slots",
+    totalUniqueTimes: "Total Unique Times",
+    summary: "Summary Statistics",
+    hour: "Hour",
+    time: "Time",
   },
 };
 
