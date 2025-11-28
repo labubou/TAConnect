@@ -1,43 +1,47 @@
 from rest_framework import status
 from rest_framework.generics import GenericAPIView
-from rest_framework.permissions import IsAuthenticated, AllowAny
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
-from rest_framework.throttling import UserRateThrottle
 from drf_yasg.utils import swagger_auto_schema
-from accounts.schemas.profile_schemas import (
-    get_profile_response,
-    update_profile_request,
-    update_profile_response,
-    change_password_request,
-    change_password_response,
-    verify_email_change_request,
-    verify_email_change_response,
+from accounts.schemas.email_preference_schemas import (
+    get_email_preferences_swagger,
+    update_email_preferences_swagger,
 )
 from ..serializers.update_profile_notifications_serializer import UpdateProfileNotificationsSerializer
-from .utils.send_change_email import send_change_email
 
 class ProfileEmailPreferenceView(GenericAPIView):
-    """Get current user profile information"""
+    """
+    Manage email notification preferences for authenticated users.
+    
+    Supports both GET and PATCH methods:
+    - GET: Retrieve current email notification preferences
+    - PATCH: Update email notification preferences
+    
+    Works for both instructor and student user types.
+    """
     permission_classes = [IsAuthenticated]
     serializer_class = UpdateProfileNotificationsSerializer
 
-    @swagger_auto_schema(
-        operation_description='Get current user profile information.',
-        responses={
-            200: get_profile_response,
-            401: 'Authentication required',
-            429: 'Too many requests',
-            500: 'Internal server error'
-        }
-    )
+    @swagger_auto_schema(**get_email_preferences_swagger)
     def get(self, request):
-        """Get current user email preference information"""
+        """
+        Get current user email notification preferences.
+        
+        Returns the user's current settings for:
+        - Email notifications on booking
+        - Email notifications on cancellation
+        """
         try:
             user = request.user
+            
+            # Initialize default values
+            email_on_booking = True
+            email_on_cancellation = True
+            
+            # Get preferences based on user type
             if user.is_instructor():
                 email_on_booking = user.instructor_profile.email_notifications_on_booking
                 email_on_cancellation = user.instructor_profile.email_notifications_on_cancellation
-
             elif user.is_student():
                 email_on_booking = user.student_profile.email_notifications_on_booking
                 email_on_cancellation = user.student_profile.email_notifications_on_cancellation
@@ -50,26 +54,21 @@ class ProfileEmailPreferenceView(GenericAPIView):
                 'email_on_booking': email_on_booking,
                 'email_on_cancellation': email_on_cancellation,
             }, status=status.HTTP_200_OK)
+            
         except Exception as e:
-            print("Error retrieving profile information:", e)
+            print("Error retrieving email preferences:", e)
             return Response(
-                {'error': 'An error occurred while retrieving profile. Please try again.'},
+                {'error': 'An error occurred while retrieving email preferences. Please try again.'},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
 
-    @swagger_auto_schema(
-        operation_description='Update current user profile information and send email verification if email changed.',
-        request_body=update_profile_request,
-        responses={
-            200: update_profile_response,
-            400: 'Validation error',
-            401: 'Authentication required',
-            429: 'Too many requests',
-            500: 'Internal server error'
-        }
-    )
+    @swagger_auto_schema(**update_email_preferences_swagger)
     def patch(self, request):
-        """Update user email preferences"""
+        """
+        Update user email notification preferences.
+        
+        Accepts partial updates - only provided fields will be updated.
+        """
         try:
             user = request.user
             serializer = self.get_serializer(data=request.data, context={'user': user})
@@ -86,15 +85,17 @@ class ProfileEmailPreferenceView(GenericAPIView):
                     status=status.HTTP_400_BAD_REQUEST
                 )
 
-            user = serializer.update(user, serializer.validated_data)
+            # Update the user preferences
+            serializer.update(user, serializer.validated_data)
 
             return Response(
-                {'status': 'Profile updated successfully'
-            }, status=status.HTTP_200_OK)
+                {'status': 'Profile updated successfully'},
+                status=status.HTTP_200_OK
+            )
 
         except Exception as e:
-            print("Error updating profile information:", e)
+            print("Error updating email preferences:", e)
             return Response(
-                {'error': 'An error occurred during profile update. Please try again.'}, 
+                {'error': 'An error occurred while updating email preferences. Please try again.'}, 
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
