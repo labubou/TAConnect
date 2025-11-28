@@ -27,6 +27,7 @@ const InstructorManageBookings = lazy(() => import('./pages/ta/ManageBookings'))
 const StudentHomePage = lazy(() => import('./pages/student/studentHomePage'));
 const BookPage = lazy(() => import('./pages/student/BookPage'));
 const ManageBookingsPage = lazy(() => import('./pages/student/ManageBookingsPage'));
+const StudentEmailPreferencesPage = lazy(() => import('./pages/student/EmailPreferencesPage'));
 
 /**
  * Fallback component displayed while lazy-loaded pages are loading
@@ -215,6 +216,16 @@ function App() {
                   <ProtectedRoute>
                     <Suspense fallback={<PageLoader />}>
                       <ManageBookingsPage />
+                    </Suspense>
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/student/email-preferences" 
+                element={
+                  <ProtectedRoute>
+                    <Suspense fallback={<PageLoader />}>
+                      <StudentEmailPreferencesPage />
                     </Suspense>
                   </ProtectedRoute>
                 } 
