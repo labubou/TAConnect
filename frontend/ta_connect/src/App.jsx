@@ -16,6 +16,7 @@ import SelectUserType from './pages/main/SelectUserType';
 
 // Lazy-loaded pages for better code splitting
 const VerifyEmailPage = lazy(() => import('./pages/main/VerifyEmailPage'));
+const VerifyEmailChangePage = lazy(() => import('./pages/main/VerifyEmailChangePage'));
 const ForgotPasswordPage = lazy(() => import('./pages/main/ForgotPasswordPage'));
 const ResetPasswordPage = lazy(() => import('./pages/main/ResetPasswordPage'));
 const ProfilePage = lazy(() => import('./pages/main/ProfilePage'));
@@ -89,6 +90,14 @@ function App() {
                 element={
                   <Suspense fallback={<PageLoader />}>
                     <VerifyEmailPage />
+                  </Suspense>
+                }
+              />
+              <Route 
+                path="/verify-email-change/:uid/:token/:newEmail"
+                element={
+                  <Suspense fallback={<PageLoader />}>
+                    <VerifyEmailChangePage />
                   </Suspense>
                 }
               />
