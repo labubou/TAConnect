@@ -9,6 +9,7 @@ import ManageAllowedStudentsModal from "../../components/ta/mini-pages/ManageAll
 import { SkeletonLoader } from "../../components/SkeletonLoader";
 import strings from "../../strings/manageCoursesPageStrings";
 import { useInstructorSlots } from "../../hooks/useApi";
+import { exportTimeSlotsAsCSV } from "../../services/exportService";
 
 const Modal = ({ title, onClose, isDark, children }) => (
   <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
@@ -54,6 +55,8 @@ export default function ManageCourses() {
   const [isNavbarOpen, setIsNavbarOpen] = useState(true);
   const [modalState, setModalState] = useState({ type: null, slot: null });
   const [infoBanner, setInfoBanner] = useState("");
+  const [isExporting, setIsExporting] = useState(false);
+  const [exportError, setExportError] = useState("");
 
   // Use React Query for efficient data fetching with caching
   const { 
@@ -69,6 +72,28 @@ export default function ManageCourses() {
     const timer = setTimeout(() => setInfoBanner(""), 5000);
     return () => clearTimeout(timer);
   }, [infoBanner]);
+
+  useEffect(() => {
+    if (!exportError) return;
+    const timer = setTimeout(() => setExportError(""), 5000);
+    return () => clearTimeout(timer);
+  }, [exportError]);
+
+  const handleExportTimeSlots = async () => {
+    setIsExporting(true);
+    setExportError("");
+    
+    try {
+      // TODO: Get username from user context if available, otherwise use 'ta'
+      await exportTimeSlotsAsCSV();
+      setInfoBanner("Time slots exported successfully");
+    } catch (error) {
+      console.error('Export failed:', error);
+      setExportError(error.message || 'Failed to export time slots');
+    } finally {
+      setIsExporting(false);
+    }
+  };
 
   const handleSlotCreated = (newSlot) => {
     // Refetch to get updated list from server
@@ -152,6 +177,30 @@ export default function ManageCourses() {
             </div>
           )}
 
+          {exportError && (
+            <div
+              className={`rounded-2xl px-3 sm:px-4 py-2 sm:py-3 border flex items-center justify-between gap-2 sm:gap-4 text-sm ${
+                isDark
+                  ? "bg-red-900/20 border-red-700 text-red-200"
+                  : "bg-red-50 border-red-200 text-red-800"
+              }`}
+            >
+              <p className="text-xs sm:text-sm font-medium">{exportError}</p>
+              <button
+                onClick={() => setExportError("")}
+                className={`p-2 rounded-lg ${
+                  isDark
+                    ? "hover:bg-red-900/40 text-red-100"
+                    : "hover:bg-red-100 text-red-900"
+                }`}
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+          )}
+
           {/* Main content - only show when not loading */}
           {!isLoading && (
             <section>
@@ -164,6 +213,8 @@ export default function ManageCourses() {
                 onEditSlot={(slot) => openModal("edit", slot)}
                 onDeleteSlot={(slot) => openModal("delete", slot)}
                 onManageStudents={handleManageStudents}
+                onExportSlots={handleExportTimeSlots}
+                isExporting={isExporting}
               />
             </section>
           )}
