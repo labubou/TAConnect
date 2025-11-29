@@ -23,6 +23,7 @@ const ResetPasswordPage = lazy(() => import('./pages/main/ResetPasswordPage'));
 const ProfilePage = lazy(() => import('./pages/main/ProfilePage'));
 const TAPage = lazy(() => import('./pages/ta/TAPage'));
 const ManageCourses = lazy(() => import('./pages/ta/ManageCourses'));
+const Dashboard = lazy(() => import('./pages/ta/Dashboard'));
 const AnalyticsDashboard = lazy(() => import('./pages/ta/AnalyticsDashboard'));
 const EmailPreferencesPage = lazy(() => import('./pages/ta/EmailPreferencesPage'));
 const InstructorManageBookings = lazy(() => import('./pages/ta/ManageBookings'));
@@ -134,7 +135,7 @@ function App() {
                 element={
                   <ProtectedRoute>
                     <Suspense fallback={<PageLoader />}>
-                      <TAPage />
+                      <Dashboard />
                     </Suspense>
                   </ProtectedRoute>
                 } 
