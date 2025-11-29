@@ -7,6 +7,7 @@ import { SkeletonLoader } from '../../components/SkeletonLoader';
 import strings from '../../strings/manageBookingsStrings';
 import { useInstructorBookings } from '../../hooks/useApi';
 import CancelBookingModal from '../../components/ta/CancelBookingModal';
+import { exportBookingsAsCSV } from '../../services/exportService';
 import axios from 'axios';
 
 // Helper function to get current month's date range
@@ -46,6 +47,8 @@ export default function ManageBookings() {
   const [successMessage, setSuccessMessage] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
   const [backendError, setBackendError] = useState(null);
+  const [isExporting, setIsExporting] = useState(false);
+  const [showExportModal, setShowExportModal] = useState(false);
 
   // Fetch bookings data with current month date range
   const { data: bookings = [], isLoading, error, refetch } = useInstructorBookings(
@@ -168,6 +171,56 @@ export default function ManageBookings() {
     setSearchTerm('');
     setStatusFilter({ active: true, cancelled: false });
     setDateRange(getCurrentMonthDateRange());
+  };
+
+  const handleExportClick = () => {
+    setShowExportModal(true);
+  };
+
+  const handleExportWithFilters = async () => {
+    setIsExporting(true);
+    setErrorMessage('');
+    setShowExportModal(false);
+    
+    try {
+      if (!dateRange.start || !dateRange.end) {
+        throw new Error('Please select a date range before exporting');
+      }
+
+      await exportBookingsAsCSV(dateRange.start, dateRange.end);
+      setSuccessMessage('Bookings exported successfully with filters');
+      
+      // Clear success message after 3 seconds
+      setTimeout(() => setSuccessMessage(''), 3000);
+    } catch (error) {
+      console.error('Export failed:', error);
+      setErrorMessage(error.message || 'Failed to export bookings');
+    } finally {
+      setIsExporting(false);
+    }
+  };
+
+  const handleExportAllBookings = async () => {
+    setIsExporting(true);
+    setErrorMessage('');
+    setShowExportModal(false);
+    
+    try {
+      // Get all bookings by using a very wide date range
+      const startOfYear = new Date(new Date().getFullYear(), 0, 1).toISOString().split('T')[0];
+      const endOfYear = new Date(new Date().getFullYear() + 1, 11, 31).toISOString().split('T')[0];
+      
+      await exportBookingsAsCSV(startOfYear, endOfYear);
+      setSuccessMessage('All bookings exported successfully');
+      
+      // Clear success message after 3 seconds
+      setTimeout(() => setSuccessMessage(''), 3000);
+    } catch (error) {
+      console.error('Export failed:', error);
+      setErrorMessage(error.message || 'Failed to export bookings');
+    } finally {
+      setIsExporting(false);
+    }
   };
 
   const formatDate = (dateString) => {
@@ -332,6 +385,21 @@ export default function ManageBookings() {
                   }`}
                 >
                   {strings.filters.clear}
+                </button>
+                <button
+                  onClick={handleExportClick}
+                  disabled={isExporting}
+                  className={`px-4 py-2 rounded-lg font-medium transition-all flex items-center  justify-center gap-2 ${
+                    isDark
+                      ? 'bg-blue-600 text-white hover:bg-blue-500 disabled:opacity-50'
+                      : 'bg-blue-500 text-white hover:bg-blue-600 disabled:opacity-50'
+                  }`}
+                  title="Export bookings as CSV"
+                >
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                  </svg>
+                  {isExporting ? 'Exporting...' : 'Export CSV'}
                 </button>
               </div>
             </div>
@@ -577,6 +645,90 @@ export default function ManageBookings() {
       </div>
 
       <Footer />
+
+      {/* Export Bookings Modal */}
+      {showExportModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div
+            className="absolute inset-0 bg-black/40 backdrop-blur-sm"
+            onClick={() => setShowExportModal(false)}
+          ></div>
+          <div
+            className={`relative w-full max-w-md rounded-2xl shadow-2xl ${
+              isDark
+                ? 'bg-gray-900 border border-gray-800'
+                : 'bg-white border border-gray-100'
+            }`}
+          >
+            <div className="p-6">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className={`text-xl font-semibold ${isDark ? 'text-white' : 'text-gray-900'}`}>
+                  Export Bookings
+                </h3>
+                <button
+                  onClick={() => setShowExportModal(false)}
+                  className={`p-2 rounded-lg transition-all ${
+                    isDark
+                      ? 'bg-gray-800 hover:bg-gray-700 text-white'
+                      : 'bg-gray-100 hover:bg-gray-200 text-gray-700'
+                  }`}
+                >
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+
+              <p className={`mb-6 ${isDark ? 'text-gray-300' : 'text-gray-600'}`}>
+                How would you like to export your bookings?
+              </p>
+
+              <div className="space-y-3">
+                <button
+                  onClick={handleExportWithFilters}
+                  disabled={isExporting}
+                  className={`w-full px-4 py-2 rounded-lg font-medium transition-all flex items-center justify-center gap-2 ${
+                    isDark
+                      ? 'bg-blue-600 text-white hover:bg-blue-500 disabled:opacity-50'
+                      : 'bg-blue-500 text-white hover:bg-blue-600 disabled:opacity-50'
+                  }`}
+                >
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                  </svg>
+                  Export with Filters
+                </button>
+
+                <button
+                  onClick={handleExportAllBookings}
+                  disabled={isExporting}
+                  className={`w-full px-4 py-2 rounded-lg font-medium transition-all flex items-center justify-center gap-2 ${
+                    isDark
+                      ? 'bg-blue-600 text-white hover:bg-blue-500 disabled:opacity-50'
+                      : 'bg-blue-500 text-white hover:bg-blue-600 disabled:opacity-50'
+                  }`}
+                >
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                  </svg>
+                  Export All Bookings
+                </button>
+              </div>
+
+              <button
+                onClick={() => setShowExportModal(false)}
+                className={`w-full mt-4 px-4 py-2 rounded-lg border transition-all ${
+                  isDark
+                    ? 'border-gray-500 text-gray-300 hover:bg-gray-800'
+                    : 'border-gray-300 text-gray-700 hover:bg-gray-100'
+                }`}
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Cancel Booking Modal */}
       {showCancelModal && selectedBooking && (
