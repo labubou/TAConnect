@@ -16,6 +16,7 @@ export default function EmailPreferencesPage() {
   const [preferences, setPreferences] = useState({
     email_on_booking: true,
     email_on_cancellation: true,
+    email_on_update: true,
   });
 
   const [loading, setLoading] = useState(true);
@@ -36,7 +37,7 @@ export default function EmailPreferencesPage() {
   // ==================================================================================
   // BACKEND CONNECTION - FETCH PREFERENCES
   // Endpoint: GET /api/profile/email-preferences/
-  // Expected Response: { email_on_booking: boolean, email_on_cancellation: boolean }
+  // Expected Response: { email_on_booking: boolean, email_on_cancellation: boolean, email_on_update: boolean }
   // This fetches the user's current email notification preferences from the backend
   // ==================================================================================
   const fetchPreferences = async () => {
@@ -48,6 +49,7 @@ export default function EmailPreferencesPage() {
       setPreferences({
         email_on_booking: data.email_on_booking !== false,
         email_on_cancellation: data.email_on_cancellation !== false,
+        email_on_update: data.email_on_update !== false,
       });
     } catch (err) {
       console.error('Failed to fetch preferences:', err);
@@ -55,9 +57,11 @@ export default function EmailPreferencesPage() {
         type: 'error', 
         text: strings.emailPreferences?.fetchError || 'Failed to load preferences'
       });
+      // Set default preferences if fetch fails
       setPreferences({
         email_on_booking: true,
         email_on_cancellation: true,
+        email_on_update: true,
       });
     } finally {
       setLoading(false);
@@ -75,17 +79,18 @@ export default function EmailPreferencesPage() {
     setPreferences({
       email_on_booking: true,
       email_on_cancellation: true,
+      email_on_update: true,
     });
     setMessage({ 
       type: 'success', 
-      text: 'Preferences reset to default'
+      text: strings.emailPreferences?.resetSuccess || 'Preferences reset to default'
     });
   };
 
   // ==================================================================================
   // BACKEND CONNECTION - SAVE PREFERENCES
   // Endpoint: PATCH /api/profile/email-preferences/
-  // Request Payload: { email_on_booking: boolean, email_on_cancellation: boolean }
+  // Request Payload: { email_on_booking: boolean, email_on_cancellation: boolean, email_on_update: boolean }
   // Expected Response: { status: 200 } or { error: string }
   // This sends the updated preferences to the backend and saves them to the database
   // ==================================================================================
@@ -97,6 +102,7 @@ export default function EmailPreferencesPage() {
       const response = await axios.patch('/api/profile/email-preferences/', {
         email_on_booking: preferences.email_on_booking,
         email_on_cancellation: preferences.email_on_cancellation,
+        email_on_update: preferences.email_on_update,
       });
 
       if (response.status === 200) {
@@ -159,8 +165,20 @@ export default function EmailPreferencesPage() {
             </div>
           </div>
 
+          {/* Loading State */}
+          {loading && (
+            <div className={`rounded-2xl ${isDark ? 'bg-gray-900/60' : 'bg-white'} shadow-lg border ${isDark ? 'border-gray-800' : 'border-gray-100'} p-8 flex items-center justify-center`}>
+              <div className="text-center space-y-3">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-emerald-500 mx-auto"></div>
+                <p className={`text-sm ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
+                  {strings.emailPreferences?.loading || 'Loading preferences...'}
+                </p>
+              </div>
+            </div>
+          )}
+
           {/* Message Banner */}
-          {message.text && (
+          {!loading && message.text && (
             <div
               className={`rounded-2xl px-4 py-3 border flex items-center justify-between gap-4 ${
                 message.type === 'success'
@@ -190,6 +208,9 @@ export default function EmailPreferencesPage() {
             </div>
           )}
 
+          {/* Preferences Section - Hidden while loading */}
+          {!loading && (
+            <>
           {/* Email on Booking */}
           <div className={`rounded-2xl ${isDark ? 'bg-gray-900/60' : 'bg-white'} shadow-lg border ${isDark ? 'border-gray-800' : 'border-gray-100'} overflow-hidden`}>
             <div className="p-4 sm:p-6">
@@ -334,6 +355,78 @@ export default function EmailPreferencesPage() {
             </div>
           </div>
 
+          {/* Email on Update */}
+          <div className={`rounded-2xl ${isDark ? 'bg-gray-900/60' : 'bg-white'} shadow-lg border ${isDark ? 'border-gray-800' : 'border-gray-100'} overflow-hidden`}>
+            <div className="p-4 sm:p-6">
+              <div className="flex items-start gap-3 sm:gap-4 mb-4">
+                <div className={`p-2 rounded-lg ${isDark ? 'bg-amber-900/20' : 'bg-amber-100'}`}>
+                  <RefreshCw className={`w-5 h-5 ${isDark ? 'text-amber-400' : 'text-amber-600'}`} />
+                </div>
+                <div className="flex-1">
+                  <h2 className={`text-lg sm:text-xl font-semibold ${isDark ? 'text-white' : 'text-gray-900'}`}>
+                    {strings.emailPreferences?.updateLabel || 'Email on Booking Update'}
+                  </h2>
+                  <p className={`text-sm mt-1 ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
+                    {strings.emailPreferences?.updateDescription || 'Get notified when students update or reschedule their bookings'}
+                  </p>
+                </div>
+              </div>
+
+              <div
+                onClick={() => !saving && handleToggle('email_on_update')}
+                className={`rounded-xl p-4 border-2 transition-all cursor-pointer ${
+                  saving ? 'opacity-50 cursor-not-allowed' : ''
+                } ${
+                  preferences.email_on_update
+                    ? isDark
+                      ? 'border-emerald-600 bg-emerald-900/20'
+                      : 'border-emerald-500 bg-emerald-50'
+                    : isDark
+                    ? 'border-gray-700 hover:border-gray-600 bg-gray-800/50'
+                    : 'border-gray-200 hover:border-gray-300 bg-gray-50'
+                }`}
+              >
+                <div className="flex items-start gap-3">
+                  <div
+                    className={`mt-0.5 w-5 h-5 rounded-full border-2 flex items-center justify-center flex-shrink-0 transition-all ${
+                      preferences.email_on_update
+                        ? isDark
+                          ? 'border-emerald-500 bg-emerald-500'
+                          : 'border-emerald-500 bg-emerald-500'
+                        : isDark
+                        ? 'border-gray-600'
+                        : 'border-gray-300'
+                    }`}
+                  >
+                    {preferences.email_on_update && (
+                      <div className="w-2 h-2 bg-white rounded-full"></div>
+                    )}
+                  </div>
+                  <div className="flex-1">
+                    <div className="flex flex-col sm:flex-row sm:items-center gap-2">
+                      <p className={`font-semibold ${isDark ? 'text-white' : 'text-gray-900'}`}>
+                        {strings.emailPreferences?.updateLabel || 'Email on Booking Update'}
+                      </p>
+                      {preferences.email_on_update && (
+                        <span className={`text-xs px-2 py-0.5 rounded-full inline-block w-fit ${isDark ? 'bg-emerald-700 text-emerald-100' : 'bg-emerald-200 text-emerald-800'}`}>
+                          Enabled
+                        </span>
+                      )}
+                    </div>
+                    <p className={`text-sm mt-1 ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
+                      Receive email when a student updates or reschedules a booking
+                    </p>
+                  </div>
+                  <RefreshCw className={`w-5 h-5 flex-shrink-0 ${
+                    preferences.email_on_update
+                      ? isDark ? 'text-emerald-400' : 'text-emerald-600'
+                      : isDark ? 'text-gray-600' : 'text-gray-400'
+                  }`} />
+                </div>
+              </div>
+            </div>
+          </div>
+
           {/* Save Button */}
           <div className={`rounded-2xl ${isDark ? 'bg-gray-900/60' : 'bg-white'} shadow-lg border ${isDark ? 'border-gray-800' : 'border-gray-100'} p-4 sm:p-6`}>
             <button
@@ -362,6 +455,8 @@ export default function EmailPreferencesPage() {
               )}
             </button>
           </div>
+            </>
+          )}
         </div>
       </main>
 

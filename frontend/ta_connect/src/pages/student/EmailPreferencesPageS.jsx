@@ -89,7 +89,7 @@ export default function EmailPreferencesPage() {
   // ==================================================================================
   // BACKEND CONNECTION - SAVE PREFERENCES
   // Endpoint: PATCH /api/profile/email-preferences/
-  // Request Payload: { email_on_booking: boolean, email_on_cancellation: boolean }
+  // Request Payload: { email_on_booking: boolean, email_on_cancellation: boolean, email_on_update: boolean }
   // Expected Response: { status: 200 } or { error: string }
   // This sends the updated preferences to the backend and saves them to the database
   // ==================================================================================
@@ -164,8 +164,20 @@ export default function EmailPreferencesPage() {
             </div>
           </div>
 
+          {/* Loading State */}
+          {loading && (
+            <div className={`rounded-2xl ${isDark ? 'bg-gray-800' : 'bg-white'} shadow-lg border ${isDark ? 'border-gray-700' : 'border-gray-100'} p-8 flex items-center justify-center`}>
+              <div className="text-center space-y-3">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-teal-500 mx-auto"></div>
+                <p className={`text-sm ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
+                  {strings.messages.loading}
+                </p>
+              </div>
+            </div>
+          )}
+
           {/* Message Banner */}
-          {message.text && (
+          {!loading && message.text && (
             <div
               className={`rounded-2xl px-4 py-3 border flex items-center justify-between gap-4 ${
                 message.type === 'success'
@@ -195,6 +207,9 @@ export default function EmailPreferencesPage() {
             </div>
           )}
 
+          {/* Preferences Section - Hidden while loading */}
+          {!loading && (
+            <>
           {/* Email on Booking */}
           <div className={`rounded-2xl ${isDark ? 'bg-gray-800' : 'bg-white'} shadow-lg border ${isDark ? 'border-gray-700' : 'border-gray-100'} overflow-hidden`}>
             <div className="p-4 sm:p-6">
@@ -441,6 +456,8 @@ export default function EmailPreferencesPage() {
               )}
             </button>
           </div>
+            </>
+          )}
         </div>
       </main>
 
