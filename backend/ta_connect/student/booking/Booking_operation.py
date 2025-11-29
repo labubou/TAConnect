@@ -165,8 +165,10 @@ class BookingDetailView(GenericAPIView):
             student=request.user,
             instructor=booking.office_hour.instructor,
             slot=booking.office_hour,
-            booking_date=updated_booking.date,
-            booking_time=updated_booking.start_time
+            old_date=booking.date,
+            old_time=booking.start_time,
+            new_date=updated_booking.date,
+            new_time=updated_booking.start_time
         )
         
         
