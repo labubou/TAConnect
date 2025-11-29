@@ -3,7 +3,30 @@ import { useTheme } from '../../contexts/ThemeContext';
 import StudentNavbar from '../../components/student/studentNavbar';
 import Footer from '../../components/Footer';
 import axios from 'axios';
-import { useStudentBookings, useCancelInstructorBooking, useUpdateBooking } from '../../hooks/useApi';
+import { useQuery } from '@tanstack/react-query';
+import { useCancelInstructorBooking, useUpdateBooking } from '../../hooks/useApi';
+
+// Helper function to get current month's date range
+const getCurrentMonthDateRange = () => {
+  const today = new Date();
+  const currentYear = today.getFullYear();
+  const currentMonth = today.getMonth();
+  
+  const monthStart = new Date(currentYear, currentMonth, 1);
+  const monthEnd = new Date(currentYear, currentMonth + 1, 0);
+  
+  const formatDate = (d) => {
+    const yyyy = d.getFullYear();
+    const mm = String(d.getMonth() + 1).padStart(2, '0');
+    const dd = String(d.getDate()).padStart(2, '0');
+    return `${yyyy}-${mm}-${dd}`;
+  };
+  
+  return {
+    start: formatDate(monthStart),
+    end: formatDate(monthEnd)
+  };
+};
 
 export default function ManageBookingsPage() {
   const { theme } = useTheme();
@@ -23,15 +46,28 @@ export default function ManageBookingsPage() {
   const [newTime, setNewTime] = useState('');
   const [filterStatus, setFilterStatus] = useState('all'); 
   const [filterCourse, setFilterCourse] = useState('all');
-  const [sortBy, setSortBy] = useState('date'); // 'date', 'course'
+  const [sortBy, setSortBy] = useState('date');
+  const [dateRange, setDateRange] = useState(() => getCurrentMonthDateRange());
   const [clearedCancelledIds, setClearedCancelledIds] = useState(() => {
-    // Initialize from localStorage
     const saved = localStorage.getItem('clearedCancelledIds');
     return saved ? new Set(JSON.parse(saved)) : new Set();
   });
 
-  // Use React Query to fetch bookings with auto-refresh
-  const { data: allBookings = [], isLoading: loading, error: apiError, refetch } = useStudentBookings();
+  // Fetch bookings with date range
+  const { data: allBookings = [], isLoading: loading, error: apiError, refetch } = useQuery({
+    queryKey: ['student', 'bookings', 'manage', dateRange.start, dateRange.end],
+    queryFn: async () => {
+      const response = await axios.get('/api/student/booking/', {
+        params: {
+          date_from: dateRange.start,
+          date_to: dateRange.end
+        }
+      });
+      return response?.data?.bookings || [];
+    },
+    staleTime: 0,
+    refetchOnMount: true,
+  });
   
   // Use mutation for cancelling bookings
   const { mutate: cancelBookingMutation, isPending: isCancelling } = useCancelInstructorBooking();
@@ -242,6 +278,13 @@ export default function ManageBookingsPage() {
     setTimeout(() => setSuccess(''), 3000);
   };
 
+  const handleClearFilters = () => {
+    setFilterStatus('all');
+    setFilterCourse('all');
+    setSortBy('date');
+    setDateRange(getCurrentMonthDateRange());
+  };
+
   // Get unique courses for filter
   const uniqueCourses = [...new Set(bookings.map(b => b.course_name))].sort();
 
@@ -295,7 +338,6 @@ export default function ManageBookingsPage() {
       >
         <main className={`${isDark ? 'bg-gray-900' : 'bg-gray-50'} p-3 sm:p-6`}>
           <div className="max-w-7xl mx-auto">
-            {/* Header */}
             {/* Header */}
             <div className={`${isDark ? 'bg-gray-800' : 'bg-white'} p-4 sm:p-6 md:p-8 rounded-xl shadow-lg mb-4 sm:mb-6`}>
               <h1 className={`text-2xl sm:text-3xl font-bold ${isDark ? 'text-white' : 'text-gray-900'} mb-2`}>
@@ -373,12 +415,56 @@ export default function ManageBookingsPage() {
                   </div>
                 </div>
 
-                {/* Bottom Row: Clear Cancelled Button */}
-                {bookings.some(b => b.is_cancelled) && (
-                  <div className="flex justify-center sm:justify-end pt-2 sm:pt-3 border-t border-gray-600/30">
+                {/* Date Range */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+                  <div>
+                    <label className={`block text-xs sm:text-sm font-medium ${isDark ? 'text-gray-300' : 'text-gray-700'} mb-1.5 sm:mb-2`}>
+                      From Date
+                    </label>
+                    <input
+                      type="date"
+                      value={dateRange.start}
+                      onChange={(e) => setDateRange(prev => ({ ...prev, start: e.target.value }))}
+                      className={`w-full px-4 py-2 rounded-lg border-2 ${
+                        isDark
+                          ? 'bg-gray-700 border-gray-600 text-white focus:border-[#366c6b]'
+                          : 'bg-white border-gray-300 text-gray-900 focus:border-[#366c6b]'
+                      } focus:outline-none transition-colors`}
+                    />
+                  </div>
+                  <div>
+                    <label className={`block text-xs sm:text-sm font-medium ${isDark ? 'text-gray-300' : 'text-gray-700'} mb-1.5 sm:mb-2`}>
+                      To Date
+                    </label>
+                    <input
+                      type="date"
+                      value={dateRange.end}
+                      onChange={(e) => setDateRange(prev => ({ ...prev, end: e.target.value }))}
+                      className={`w-full px-4 py-2 rounded-lg border-2 ${
+                        isDark
+                          ? 'bg-gray-700 border-gray-600 text-white focus:border-[#366c6b]'
+                          : 'bg-white border-gray-300 text-gray-900 focus:border-[#366c6b]'
+                      } focus:outline-none transition-colors`}
+                    />
+                  </div>
+                </div>
+
+                {/* Bottom Row: Action Buttons */}
+                <div className="flex flex-col sm:flex-row gap-2 pt-2 sm:pt-3 border-t border-gray-600/30">
+                  <button
+                    onClick={handleClearFilters}
+                    className={`w-full sm:w-auto px-4 py-2 rounded-lg border transition-all ${
+                      isDark
+                        ? 'border-gray-500 text-gray-300 hover:bg-gray-600'
+                        : 'border-gray-300 text-gray-700 hover:bg-gray-100'
+                    }`}
+                  >
+                    Clear Filters
+                  </button>
+                  {bookings.some(b => b.is_cancelled) && (
                     <button
                       onClick={handleClearCancelled}
-                      className={`w-full sm:w-auto px-4 sm:px-6 py-2 sm:py-2.5 rounded-lg font-medium text-sm transition-all duration-300 flex items-center justify-center gap-2 ${
+                      className={`w-full sm:w-auto px-4 py-2 rounded-lg font-medium text-sm transition-all duration-300 flex items-center justify-center gap-2 ${
                         isDark 
                           ? 'bg-red-900/30 text-red-300 hover:bg-red-900/50 border-2 border-red-700 hover:scale-105' 
                           : 'bg-red-50 text-red-700 hover:bg-red-100 border-2 border-red-300 hover:scale-105'
@@ -389,8 +475,8 @@ export default function ManageBookingsPage() {
                       </svg>
                       Delete All Cancelled
                     </button>
-                  </div>
-                )}
+                  )}
+                </div>
               </div>
             </div>
 

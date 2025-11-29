@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useTheme } from '../../contexts/ThemeContext';
-import { useStudentBookings } from '../../hooks/useApi';
+import { useQuery } from '@tanstack/react-query';
+import axios from 'axios';
 
 export default function BookingsCalendar() {
   const { theme } = useTheme();
@@ -10,8 +11,47 @@ export default function BookingsCalendar() {
   const [hoveredDay, setHoveredDay] = useState(null);
   const [tooltipPosition, setTooltipPosition] = useState({ x: 0, y: 0 });
 
-  // Use React Query to fetch bookings
-  const { data: bookings = [], isLoading: loading } = useStudentBookings();
+  // Helper function to get month date range
+  const getMonthDateRange = (date) => {
+    const year = date.getFullYear();
+    const month = date.getMonth();
+    
+    // Create dates in local time
+    const monthStart = new Date(year, month, 1);
+    const monthEnd = new Date(year, month + 1, 0);
+    
+    // Format without timezone conversion
+    const formatDate = (d) => {
+      const yyyy = d.getFullYear();
+      const mm = String(d.getMonth() + 1).padStart(2, '0');
+      const dd = String(d.getDate()).padStart(2, '0');
+      return `${yyyy}-${mm}-${dd}`;
+    };
+    
+    return {
+      start: formatDate(monthStart),
+      end: formatDate(monthEnd)
+    };
+  };
+
+  // Get date range for current month
+  const dateRange = getMonthDateRange(currentDate);
+
+  // Fetch bookings for current month only
+  const { data: bookings = [], isLoading: loading } = useQuery({
+    queryKey: ['student', 'bookings', 'calendar', dateRange.start, dateRange.end],
+    queryFn: async () => {
+      const response = await axios.get('/api/student/booking/', {
+        params: {
+          date_from: dateRange.start,
+          date_to: dateRange.end
+        }
+      });
+      return response?.data?.bookings || [];
+    },
+    staleTime: 0,
+    refetchOnMount: true,
+  });
 
   const getDaysInMonth = (date) => {
     const year = date.getFullYear();
