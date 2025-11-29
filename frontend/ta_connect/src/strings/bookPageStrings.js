@@ -46,6 +46,11 @@ export const bookPageStrings = {
     successBooking: 'Booking created successfully! Check your email for confirmation.',
     loading: 'Loading...',
   },
+
+  errors: {
+    failedLoadTimes: 'Failed to load available times for this date',
+    selectAll: 'Please select a slot, date, and time',
+  },
   
   successModal: {
     title: 'Booking Confirmed!',
