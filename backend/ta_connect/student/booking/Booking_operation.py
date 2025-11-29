@@ -16,6 +16,7 @@ from student.serializers.update_book_serializer import UpdateBookingSerializer
 from student.serializers.cancel_book_serializer import CancelBookingSerializer
 from student.serializers.available_times_serializer import AvailableTimesSerializer
 from student.utils.calculate_available_times import get_available_times
+from utils.error_formatter import format_serializer_errors
 from student.schemas.booking_schemas import (
     create_booking_swagger,
     update_booking_swagger,
