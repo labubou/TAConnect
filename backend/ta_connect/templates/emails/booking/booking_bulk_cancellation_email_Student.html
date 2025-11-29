@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Office Hours Cancelled - TA Connect</title>
+</head>
+<body style="margin: 0; padding: 0; font-family: Arial, sans-serif; background-color: #f4f4f4;">
+    <table role="presentation" style="width: 100%; border-collapse: collapse;">
+        <tr>
+            <td align="center" style="padding: 40px 0;">
+                <table role="presentation" style="width: 600px; border-collapse: collapse; background-color: #ffffff; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); border-radius: 8px; overflow: hidden;">
+                    
+                    <!-- Header with gradient -->
+                    <tr>
+                        <td style="background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%); padding: 40px 30px; text-align: center;">
+                            <h1 style="margin: 0; color: #ffffff; font-size: 28px; font-weight: bold;">Office Hours Cancelled</h1>
+                            <p style="margin: 10px 0 0 0; color: #fee2e2; font-size: 16px;">TA Connect Notification</p>
+                        </td>
+                    </tr>
+
+                    <!-- Alert Banner -->
+                    <tr>
+                        <td style="background-color: #fef2f2; border-left: 4px solid #dc2626; padding: 20px 30px;">
+                            <table role="presentation" style="width: 100%;">
+                                <tr>
+                                    <td style="width: 40px; vertical-align: top;">
+                                        <div style="background-color: #dc2626; color: white; width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 20px; font-weight: bold;">!</div>
+                                    </td>
+                                    <td style="vertical-align: top; padding-left: 15px;">
+                                        <p style="margin: 0; color: #991b1b; font-size: 16px; font-weight: 600;">Important Notice</p>
+                                        <p style="margin: 5px 0 0 0; color: #7f1d1d; font-size: 14px;">Your scheduled office hours session has been cancelled.</p>
+                                    </td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+
+                    <!-- Main Content -->
+                    <tr>
+                        <td style="padding: 30px;">
+                            <p style="margin: 0 0 20px 0; color: #374151; font-size: 16px; line-height: 1.6;">
+                                Dear <strong>{{ student_name }}</strong>,
+                            </p>
+
+                            <p style="margin: 0 0 25px 0; color: #374151; font-size: 16px; line-height: 1.6;">
+                                We regret to inform you that your upcoming office hours session has been cancelled by your instructor.
+                            </p>
+
+                            <!-- Cancellation Details Card -->
+                            <div style="background: linear-gradient(135deg, #f9fafb 0%, #f3f4f6 100%); border: 2px solid #e5e7eb; border-radius: 8px; padding: 25px; margin-bottom: 25px;">
+                                <h2 style="margin: 0 0 20px 0; color: #1f2937; font-size: 18px; border-bottom: 2px solid #d1d5db; padding-bottom: 10px;">
+                                    📅 Cancelled Session Details
+                                </h2>
+                                
+                                <table role="presentation" style="width: 100%; border-collapse: collapse;">
+                                    <tr>
+                                        <td style="padding: 8px 0; color: #6b7280; font-size: 14px; width: 140px; vertical-align: top;">
+                                            <strong>Course:</strong>
+                                        </td>
+                                        <td style="padding: 8px 0; color: #1f2937; font-size: 14px; font-weight: 500;">
+                                            {{ course_name }}
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td style="padding: 8px 0; color: #6b7280; font-size: 14px; vertical-align: top;">
+                                            <strong>Instructor:</strong>
+                                        </td>
+                                        <td style="padding: 8px 0; color: #1f2937; font-size: 14px; font-weight: 500;">
+                                            {{ instructor_name }}
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td style="padding: 8px 0; color: #6b7280; font-size: 14px; vertical-align: top;">
+                                            <strong>Date:</strong>
+                                        </td>
+                                        <td style="padding: 8px 0; color: #1f2937; font-size: 14px; font-weight: 500;">
+                                            {{ booking_date }}
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td style="padding: 8px 0; color: #6b7280; font-size: 14px; vertical-align: top;">
+                                            <strong>Time:</strong>
+                                        </td>
+                                        <td style="padding: 8px 0; color: #1f2937; font-size: 14px; font-weight: 500;">
+                                            {{ booking_time }} ({{ duration }} minutes)
+                                        </td>
+                                    </tr>
+                                    {% if room %}
+                                    <tr>
+                                        <td style="padding: 8px 0; color: #6b7280; font-size: 14px; vertical-align: top;">
+                                            <strong>Location:</strong>
+                                        </td>
+                                        <td style="padding: 8px 0; color: #1f2937; font-size: 14px; font-weight: 500;">
+                                            {{ room }}
+                                        </td>
+                                    </tr>
+                                    {% endif %}
+                                </table>
+                            </div>
+
+                            <!-- Reason for Cancellation -->
+                            <div style="background-color: #fef3c7; border-left: 4px solid #f59e0b; padding: 20px; border-radius: 6px; margin-bottom: 25px;">
+                                <h3 style="margin: 0 0 12px 0; color: #92400e; font-size: 16px; display: flex; align-items: center;">
+                                    <span style="margin-right: 8px; font-size: 20px;">💡</span>
+                                    Reason for Cancellation
+                                </h3>
+                                <p style="margin: 0; color: #78350f; font-size: 15px; line-height: 1.6;">
+                                    {{ cancellation_reason }}
+                                </p>
+                            </div>
+
+                            <!-- Next Steps -->
+                            <div style="background-color: #eff6ff; border-left: 4px solid #3b82f6; padding: 20px; border-radius: 6px; margin-bottom: 25px;">
+                                <h3 style="margin: 0 0 12px 0; color: #1e40af; font-size: 16px; display: flex; align-items: center;">
+                                    <span style="margin-right: 8px; font-size: 20px;">📌</span>
+                                    What to Do Next
+                                </h3>
+                                <ul style="margin: 0; padding-left: 20px; color: #1e3a8a;">
+                                    <li style="margin-bottom: 8px; font-size: 14px; line-height: 1.6;">Check for alternative office hours sessions that may be available</li>
+                                    <li style="margin-bottom: 8px; font-size: 14px; line-height: 1.6;">Contact your instructor directly if you have urgent questions</li>
+                                    <li style="margin-bottom: 8px; font-size: 14px; line-height: 1.6;">Book a new session when the instructor's schedule is updated</li>
+                                    <li style="margin-bottom: 0; font-size: 14px; line-height: 1.6;">Check your course platform for announcements about rescheduled sessions</li>
+                                </ul>
+                            </div>
+
+                            <!-- Action Button -->
+                            <div style="text-align: center; margin: 30px 0;">
+                                <a href="{{ frontend_url }}/student/book" style="display: inline-block; background: linear-gradient(135deg, #366c6b 0%, #1a3535 100%); color: #ffffff; text-decoration: none; padding: 14px 32px; border-radius: 8px; font-weight: 600; font-size: 16px; box-shadow: 0 4px 6px rgba(54, 108, 107, 0.3); transition: all 0.3s;">
+                                    Book Another Session
+                                </a>
+                            </div>
+
+                            <!-- Support Information -->
+                            <div style="background-color: #f9fafb; border-radius: 6px; padding: 20px; margin-top: 25px;">
+                                <p style="margin: 0 0 10px 0; color: #6b7280; font-size: 14px; line-height: 1.6;">
+                                    <strong style="color: #374151;">Need Help?</strong><br>
+                                    If you have any questions or concerns, please don't hesitate to reach out to your instructor at 
+                                    <a href="mailto:{{ instructor_email }}" style="color: #366c6b; text-decoration: none; font-weight: 500;">{{ instructor_email }}</a>
+                                </p>
+                            </div>
+
+                            <p style="margin: 25px 0 0 0; color: #6b7280; font-size: 14px; line-height: 1.6;">
+                                We apologize for any inconvenience this may cause.
+                            </p>
+
+                            <p style="margin: 10px 0 0 0; color: #374151; font-size: 14px; line-height: 1.6;">
+                                Best regards,<br>
+                                <strong style="color: #1f2937;">The TA Connect Team</strong>
+                            </p>
+                        </td>
+                    </tr>
+
+                    <!-- Footer -->
+                    <tr>
+                        <td style="background-color: #f9fafb; padding: 25px 30px; border-top: 1px solid #e5e7eb;">
+                            <p style="margin: 0 0 10px 0; color: #6b7280; font-size: 12px; text-align: center; line-height: 1.5;">
+                                This is an automated message from TA Connect. Please do not reply to this email.
+                            </p>
+                            <p style="margin: 0; color: #9ca3af; font-size: 11px; text-align: center;">
+                                © 2025 TA Connect. All rights reserved.
+                            </p>
+                        </td>
+                    </tr>
+
+                </table>
+            </td>
+        </tr>
+    </table>
+</body>
+</html>

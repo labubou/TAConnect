@@ -133,7 +133,10 @@ ROOT_URLCONF = 'ta_connect.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [
+            BASE_DIR / 'templates',  # Main templates directory
+            BASE_DIR / 'utils' / 'email_sending' / 'templates',  # Email templates
+        ],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [

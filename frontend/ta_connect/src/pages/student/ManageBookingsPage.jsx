@@ -3,10 +3,9 @@ import { useTheme } from '../../contexts/ThemeContext';
 import StudentNavbar from '../../components/student/studentNavbar';
 import Footer from '../../components/Footer';
 import axios from 'axios';
-import { useStudentBookings, useCancelInstructorBooking, useUpdateBooking } from '../../hooks/useApi';
-import strings from '../../strings/manageBookingsStrings';
 import { useQuery } from '@tanstack/react-query';
 import { useCancelInstructorBooking, useUpdateBooking } from '../../hooks/useApi';
+import strings from '../../strings/manageBookingsStrings';
 
 // Helper function to get current month's date range
 const getCurrentMonthDateRange = () => {
