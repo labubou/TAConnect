@@ -6,6 +6,7 @@ import ViewCourses from "../../components/ta/mini-pages/ViewCourses";
 import EditCourses from "../../components/ta/mini-pages/EditCourses";
 import DeleteCourses from "../../components/ta/mini-pages/DeleteCourses";
 import ManageAllowedStudentsModal from "../../components/ta/mini-pages/ManageAllowedStudentsModal";
+import ShareSlotModal from "../../components/ta/mini-pages/ShareSlotModal";
 import { SkeletonLoader } from "../../components/SkeletonLoader";
 import strings from "../../strings/manageCoursesPageStrings";
 import { useInstructorSlots } from "../../hooks/useApi";
@@ -215,6 +216,7 @@ export default function ManageCourses() {
                 onManageStudents={handleManageStudents}
                 onExportSlots={handleExportTimeSlots}
                 isExporting={isExporting}
+                onShareSlot={(slot) => openModal("share", slot)}
               />
             </section>
           )}
@@ -273,6 +275,20 @@ export default function ManageCourses() {
           isDark={isDark}
         >
           <ManageAllowedStudentsModal
+            isDark={isDark}
+            slot={modalState.slot}
+            onClose={closeModal}
+          />
+        </Modal>
+      )}
+
+      {modalState.type === "share" && modalState.slot && (
+        <Modal
+          title={strings.modals.shareTitle}
+          onClose={closeModal}
+          isDark={isDark}
+        >
+          <ShareSlotModal
             isDark={isDark}
             slot={modalState.slot}
             onClose={closeModal}

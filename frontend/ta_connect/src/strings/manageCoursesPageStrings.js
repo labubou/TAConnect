@@ -115,6 +115,7 @@ const manageCoursesPageStrings = {
       manageStudents: "Manage Allowed Students",
       addCourse: "Add Course",
       saving: "Saving...",
+      share: "Share",
     },
   },
 
@@ -206,8 +207,24 @@ const manageCoursesPageStrings = {
     editTitle: "Edit Course",
     deleteTitle: "Delete Course",
     manageStudentsTitle: "Manage Allowed Students",
+    shareTitle: "Share Office Hour Slot",
     comingSoon: "This feature is coming soon.",
     close: "Close",
+  },
+
+  // Share Slot Strings
+  share: {
+    slotInfo: "Slot Information",
+    shareLink: "Share Link",
+    copyLink: "Copy Link",
+    copiedToClipboard: "Copied!",
+    linkCopiedMessage: "Link copied to clipboard!",
+    copyError: "Failed to copy link. Please try again.",
+    instructions: "How to share:",
+    instruction1: "Copy the link above",
+    instruction2: "Share it with students via email, messaging, or any platform",
+    instruction3: "Students can click the link to book this office hour slot",
+    errorNoTAId: "Error: Unable to determine TA ID",
   },
 
   // Warning Modal Strings
