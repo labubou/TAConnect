@@ -94,3 +94,4 @@ class ProfileEmailPreferenceView(GenericAPIView):
                 {'error': 'An error occurred while updating email preferences. Please try again.'}, 
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
+        
