@@ -62,7 +62,7 @@ export default function CancelBookingModal({ booking, isDark, onConfirm, onCance
         <h3 className={`text-xl font-bold text-center mb-2 ${
           isDark ? 'text-white' : 'text-gray-900'
         }`}>
-          {isLoading ? 'Cancelling Booking...' : strings.modals.cancelConfirmTitle}
+          {isLoading ? strings.modals.cancelConfirmTitle : strings.modals.cancelConfirmTitle}
         </h3>
 
         {/* Message */}
@@ -70,7 +70,7 @@ export default function CancelBookingModal({ booking, isDark, onConfirm, onCance
           isDark ? 'text-gray-400' : 'text-gray-600'
         }`}>
           {isLoading 
-            ? 'Processing cancellation and notifying the student...'
+            ? strings.modals.cancelConfirmMessage
             : strings.modals.cancelConfirmMessage}
         </p>
 
@@ -81,7 +81,7 @@ export default function CancelBookingModal({ booking, isDark, onConfirm, onCance
           <div className="space-y-2 text-sm">
             <div className="flex justify-between">
               <span className={isDark ? 'text-gray-400' : 'text-gray-600'}>
-                Student:
+                {strings.bookingCard.student}:
               </span>
               <span className={`font-medium ${isDark ? 'text-white' : 'text-gray-900'}`}>
                 {booking.student.first_name} {booking.student.last_name}
@@ -89,7 +89,7 @@ export default function CancelBookingModal({ booking, isDark, onConfirm, onCance
             </div>
             <div className="flex justify-between">
               <span className={isDark ? 'text-gray-400' : 'text-gray-600'}>
-                Course:
+                {strings.bookingCard.course}:
               </span>
               <span className={`font-medium ${isDark ? 'text-white' : 'text-gray-900'}`}>
                 {booking.office_hour.course_name}
@@ -97,7 +97,7 @@ export default function CancelBookingModal({ booking, isDark, onConfirm, onCance
             </div>
             <div className="flex justify-between">
               <span className={isDark ? 'text-gray-400' : 'text-gray-600'}>
-                Date:
+                {strings.bookingCard.date}:
               </span>
               <span className={`font-medium ${isDark ? 'text-white' : 'text-gray-900'}`}>
                 {new Date(booking.date).toLocaleDateString('en-US', {
@@ -109,7 +109,7 @@ export default function CancelBookingModal({ booking, isDark, onConfirm, onCance
             </div>
             <div className="flex justify-between">
               <span className={isDark ? 'text-gray-400' : 'text-gray-600'}>
-                Time:
+                {strings.bookingCard.time}:
               </span>
               <span className={`font-medium ${isDark ? 'text-white' : 'text-gray-900'}`}>
                 {booking.start_time}
@@ -162,7 +162,7 @@ export default function CancelBookingModal({ booking, isDark, onConfirm, onCance
                 <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
               </svg>
             )}
-            {isLoading ? 'Cancelling...' : strings.modals.yes}
+            {isLoading ? strings.modals.confirmCancel : strings.modals.yes}
           </button>
         </div>
       </div>

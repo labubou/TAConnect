@@ -1,0 +1,51 @@
+const MonthlyCalendarStrings = {
+  calendar: {
+    title: "Monthly Calendar",
+    prevMonth: "← Prev",
+    nextMonth: "Next →",
+    today: "Today",
+    ariaGoToToday: "Go to today",
+    ariaPrevMonth: "Previous month",
+    ariaNextMonth: "Next month",
+  },
+  dayNames: {
+    sun: "Sun",
+    mon: "Mon",
+    tue: "Tue",
+    wed: "Wed",
+    thu: "Thu",
+    fri: "Fri",
+    sat: "Sat",
+  },
+  dayStatus: {
+    active: "Active",
+    inactive: "Inactive",
+    mixed: "Mixed",
+    none: "No Slots",
+  },
+  legend: {
+    title: "Legend",
+    active: "All slots active",
+    inactive: "All slots inactive",
+    mixed: "Mix of active and inactive slots",
+    noSlots: "No slots",
+  },
+  details: {
+    slotDetails: "Slot Details",
+    course: "Slot",
+    section: "Section",
+    day: "Day",
+    time: "Time",
+    room: "Room",
+    duration: "Duration",
+    studentLimit: "Student Limit",
+    startDate: "Start Date",
+    endDate: "End Date",
+    status: "Status",
+    active: "Active",
+    inactive: "Inactive",
+    noSlotsSelected: "No slots found for this date",
+  },
+};
+
+export default MonthlyCalendarStrings;

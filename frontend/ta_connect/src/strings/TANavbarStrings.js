@@ -3,8 +3,8 @@ const TANavbarStrings = {
 
   navigation: {
     profile: "Profile",
-    createSlot: "Create Course / Slot",
-    manageCourses: "Manage Courses",
+    createSlot: "Create Slot",
+    manageCourses: "Manage Slots",
     manageBookings: "Manage Bookings",
     analytics: "Analytics",
     logout: "Logout",

@@ -1,4 +1,5 @@
 import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from 'recharts';
+import strings from '../../strings/analyticsStrings';
 
 const FeedbackChart = ({ data, isDark }) => {
   const COLORS = ['#10b981', '#3b82f6', '#f59e0b', '#ef4444', '#6b7280'];
@@ -6,7 +7,7 @@ const FeedbackChart = ({ data, isDark }) => {
   if (!data || !data.ratingDistribution || data.ratingDistribution.length === 0) {
     return (
       <div className={`w-full h-80 flex items-center justify-center rounded-xl border-2 border-dashed ${isDark ? 'border-gray-700 bg-gray-900' : 'border-gray-300 bg-gray-50'}`}>
-        <p className={`text-lg ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>No feedback data available</p>
+        <p className={`text-lg ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>{strings.backendAnalytics.noFeedbackData}</p>
       </div>
     );
   }

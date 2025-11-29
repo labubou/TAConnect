@@ -1,17 +1,17 @@
 const manageCoursesPageStrings = {
   pages: {
-    create: "Create Course",
-    view: "View Courses",
-    edit: "Edit Courses",
-    delete: "Delete Courses",
+    create: "Create Slot",
+    view: "View Slots",
+    edit: "Edit Slots",
+    delete: "Delete Slots",
   },
 
-  // Create Course Page Strings
+  // Create Slot Page Strings
   create: {
-    title: "Create New Course",
+    title: "Create New Slot",
     description: "Add a new office hour slot to your schedule.",
     fields: {
-      courseName: "Course Name",
+      courseName: "Slot Name",
       section: "Section (Optional)",
       dayOfWeek: "Day of Week",
       room: "Room/Location",
@@ -24,7 +24,7 @@ const manageCoursesPageStrings = {
       csvFile: "Import Students (CSV)",
     },
     placeholders: {
-      courseName: "e.g., Computer Science 101",
+      courseName: "e.g., CS 101 - Intro to Programming",
       section: "e.g., A1, B2",
       room: "e.g., Room 201",
       duration: "e.g., 60",
@@ -48,35 +48,35 @@ const manageCoursesPageStrings = {
     },
     dayOptions: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
     buttons: {
-      create: "Create Course",
+      create: "Create Slot",
       creating: "Creating...",
     },
-    success: "Course created successfully!",
+    success: "Slot created successfully!",
     errors: {
-      courseNameRequired: "Course name is required.",
+      courseNameRequired: "Slot name is required.",
       dayRequired: "Please select a day of week.",
       startTimeRequired: "Start time is required.",
       endTimeRequired: "End time is required.",
       startDateRequired: "Start date is required.",
       endDateRequired: "End date is required.",
       roomRequired: "Room/Location is required.",
-      failed: "Failed to create course. Please try again.",
+      failed: "Failed to create slot. Please try again.",
     },
     recentSlots: "Recent Slots",
   },
 
-  // View Courses Page Strings
+  // View Slots Page Strings
   view: {
-    title: "Your Courses",
+    title: "Your Slots",
     description: "View and manage all your office hour slots.",
-    loading: "Loading your courses...",
-    noSlots: "No Courses Yet",
+    loading: "Loading your slots...",
+    noSlots: "No Slots Yet",
     noSlotsDescription:
-      "Use the Add Course button to start building your schedule.",
+      "Use the Add Slot button to start building your schedule.",
     slotsFound: "slots found",
     sortBy: "Sort By",
     search: "Search",
-    searchPlaceholder: "Search by course, section, or room",
+    searchPlaceholder: "Search by slot name, section, or room",
     statusFilter: "Status",
     statusOptions: {
       all: "All",
@@ -84,7 +84,7 @@ const manageCoursesPageStrings = {
       inactive: "Inactive",
     },
     sortOptions: {
-      courseName: "Course Name",
+      courseName: "Slot Name",
       dayOfWeek: "Day of Week",
       startTime: "Start Time",
     },
@@ -98,7 +98,7 @@ const manageCoursesPageStrings = {
     duration: "Duration (minutes)",
     createdAt: "Created At",
     actions: "Actions",
-    listTitle: "Course List",
+    listTitle: "Slot List",
     manageStudentsComingSoon: "Student management is coming soon.",
   
     to: "to",
@@ -113,20 +113,20 @@ const manageCoursesPageStrings = {
       deactivate: "Deactivate",
       toggling: "Toggling...",
       manageStudents: "Manage Allowed Students",
-      addCourse: "Add Course",
+      addCourse: "Add Slot",
       saving: "Saving...",
       share: "Share",
     },
   },
 
-  // Edit Courses Page Strings
+  // Edit Slots Page Strings
   edit: {
-    title: "Edit Course",
+    title: "Edit Slot",
     description: "Modify the details of your office hour slot.",
-    selectASlot: "Select a Course to Edit",
+    selectASlot: "Select a Slot to Edit",
     selectDescription:
-      "Choose a course from the View Courses tab or select one below.",
-    availableSlots: "Available Courses:",
+      "Choose a slot from the View Slots tab or select one below.",
+    availableSlots: "Available Slots:",
     editing: "Currently Editing",
     deselectSlot: "Deselect",
     fields: {
@@ -150,37 +150,37 @@ const manageCoursesPageStrings = {
     },
     dayOptions: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
     buttons: {
-      update: "Update Course",
+      update: "Update Slot",
       updating: "Updating...",
     },
-    success: "Course updated successfully!",
+    success: "Slot updated successfully!",
     errors: {
-      noSlotSelected: "Please select a course to edit.",
-      courseNameRequired: "Course name is required.",
+      noSlotSelected: "Please select a slot to edit.",
+      courseNameRequired: "Slot name is required.",
       dayRequired: "Please select a day of week.",
       startTimeRequired: "Start time is required.",
       endTimeRequired: "End time is required.",
       startDateRequired: "Start date is required.",
       endDateRequired: "End date is required.",
       roomRequired: "Room/Location is required.",
-      failed: "Failed to update course. Please try again.",
+      failed: "Failed to update slot. Please try again.",
     },
   },
 
-  // Delete Courses Page Strings
+  // Delete Slots Page Strings
   delete: {
-    title: "Delete Course",
-    description: "Permanently remove a course from your schedule.",
-    selectASlot: "Select a Course to Delete",
+    title: "Delete Slot",
+    description: "Permanently remove a slot from your schedule.",
+    selectASlot: "Select a Slot to Delete",
     selectDescription:
-      "Choose a course from the View Courses tab or select one below.",
-    availableSlots: "Available Courses:",
+      "Choose a slot from the View Slots tab or select one below.",
+    availableSlots: "Available Slots:",
     deselectSlot: "Deselect",
     confirmMessage: "Are you sure? This action cannot be undone.",
     warning: {
       title: "⚠️ Warning",
       message:
-        "Deleting this course will remove all associated information. Students with bookings will be notified.",
+        "Deleting this slot will remove all associated information. Students with bookings will be notified.",
     },
     details: {
       section: "Section",
@@ -191,21 +191,21 @@ const manageCoursesPageStrings = {
       to: "to",
     },
     buttons: {
-      delete: "Delete Course",
+      delete: "Delete Slot",
       confirmDelete: "Confirm Delete",
       deleting: "Deleting...",
       cancel: "Cancel",
     },
-    success: "Course deleted successfully!",
+    success: "Slot deleted successfully!",
     errors: {
-      noSlotSelected: "Please select a course to delete.",
-      failed: "Failed to delete course. Please try again.",
+      noSlotSelected: "Please select a slot to delete.",
+      failed: "Failed to delete slot. Please try again.",
     },
   },
   modals: {
-    createTitle: "Create New Course",
-    editTitle: "Edit Course",
-    deleteTitle: "Delete Course",
+    createTitle: "Create New Slot",
+    editTitle: "Edit Slot",
+    deleteTitle: "Delete Slot",
     manageStudentsTitle: "Manage Allowed Students",
     shareTitle: "Share Office Hour Slot",
     comingSoon: "This feature is coming soon.",
@@ -229,21 +229,21 @@ const manageCoursesPageStrings = {
 
   // Warning Modal Strings
   warningModal: {
-    editTitle: "Confirm Course Edit",
-    editMessage: "Editing this course may affect existing student bookings. Changes to date, time, or duration may cancel related bookings.",
+    editTitle: "Confirm Slot Edit",
+    editMessage: "Editing this slot may affect existing student bookings. Changes to date, time, or duration may cancel related bookings.",
     editWarning: "This action might cancel some student bookings and could take a moment to process.",
     editConfirm: "Continue Editing",
     editCancel: "Cancel",
 
-    deactivateTitle: "Confirm Course Deactivation",
-    deactivateMessage: "Deactivating this course will cancel all active student bookings.",
+    deactivateTitle: "Confirm Slot Deactivation",
+    deactivateMessage: "Deactivating this slot will cancel all active student bookings.",
     deactivateWarning: "All students with bookings will be notified about the cancellation. This process might take a while.",
-    deactivateConfirm: "Deactivate Course",
+    deactivateConfirm: "Deactivate Slot",
     deactivateCancel: "Cancel",
 
-    activateMessage: "Activating this course will make it available for new bookings.",
-    activateWarning: "Make sure the course details are correct before activating.",
-    activateConfirm: "Activate Course",
+    activateMessage: "Activating this slot will make it available for new bookings.",
+    activateWarning: "Make sure the slot details are correct before activating.",
+    activateConfirm: "Activate Slot",
   },
 };
 

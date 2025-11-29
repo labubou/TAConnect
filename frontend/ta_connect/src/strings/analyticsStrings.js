@@ -71,6 +71,9 @@ const analyticsStrings = {
     summary: "Summary Statistics",
     hour: "Hour",
     time: "Time",
+    noBookingData: "No booking data available",
+    noFeedbackData: "No feedback data available",
+    noActivityData: "No activity data available",
   },
 };
 
