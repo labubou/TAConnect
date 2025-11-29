@@ -1,5 +1,8 @@
 from django.contrib.auth.models import AbstractUser
 from django.db import models
+from django.conf import settings
+from django.utils import timezone
+from datetime import timedelta
 
 # Create your models here.
 
@@ -68,3 +71,29 @@ class StudentProfile(models.Model):
     email_notifications_on_update = models.BooleanField(default=True, verbose_name="Email Notifications on Updates The Booking")
     def __str__(self):
         return f"Student Profile: {self.user.username}"
+
+class PendingEmailChange(models.Model):
+    """Track pending email change requests for single-use verification"""
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='pending_email_changes')
+    new_email = models.EmailField()
+    token = models.CharField(max_length=255)
+    created_at = models.DateTimeField(auto_now_add=True)
+    used = models.BooleanField(default=False)
+    
+    class Meta:
+        ordering = ['-created_at']
+    
+    def __str__(self):
+        return f"Email change for {self.user.username}: {self.new_email}"
+    
+    def is_expired(self):
+        """Check if the token has expired (24 hours by default)"""
+        
+        # Use EMAIL_CHANGE_TIMEOUT_HOURS setting or default to 24 hours
+        timeout_hours = getattr(settings, 'EMAIL_CHANGE_TIMEOUT_HOURS', 24)
+        expiry_time = self.created_at + timedelta(hours=timeout_hours)
+        return timezone.now() > expiry_time
+    
+    def is_valid(self):
+        """Check if token is valid (not used and not expired)"""
+        return not self.used and not self.is_expired()
