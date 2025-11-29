@@ -154,6 +154,7 @@ class TimeSlotDetailView(GenericAPIView):
         time_slot = get_object_or_404(OfficeHourSlot, id=slot_id, instructor=user)
 
         try:
+            cancel_student_bookings(time_slot)
             time_slot.delete()
         except Exception as e:
             print(f"Error deleting time slot {slot_id}: {e}")
