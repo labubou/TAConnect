@@ -81,7 +81,7 @@ const allowedStudentsPageStrings = {
     addSuccess: "Student added successfully",
     editSuccess: "Student updated successfully",
     deleteSuccess: "Student deleted successfully",
-    noSlotSelected: "Please select a course/slot first",
+    noSlotSelected: "Please select a slot first",
     selectSlot: "Select a slot to view or manage allowed students",
     error: "An error occurred. Please try again.",
     confirmDelete: "Are you sure you want to delete this student?",
@@ -89,9 +89,9 @@ const allowedStudentsPageStrings = {
   },
   slots: {
     title: "Select a Slot",
-    selectPlaceholder: "Choose a course slot",
+    selectPlaceholder: "Choose a slot",
     empty: "No slots available",
-    noSlots: "Create a course slot first to manage allowed students",
+    noSlots: "Create a slot first to manage allowed students",
   },
   aria: {
     toggleNav: "Toggle navigation",

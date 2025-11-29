@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useInstructorBookings } from '../../hooks/useApi';
+import strings from '../../strings/WeeklyScheduleStrings';
 
 export default function WeeklySchedule({ isDark = false }) {
   const [weekDates, setWeekDates] = useState([]);
@@ -143,7 +144,7 @@ export default function WeeklySchedule({ isDark = false }) {
       {/* Header with Navigation */}
       <div className="mb-6">
         <h2 className={`text-xl sm:text-2xl font-bold ${isDark ? 'text-white' : 'text-gray-900'}`}>
-          This Week's Bookings
+          {strings.weekSchedule.title}
         </h2>
         
         {/* Date Range and Navigation */}
@@ -162,7 +163,7 @@ export default function WeeklySchedule({ isDark = false }) {
                   : 'bg-gray-100 hover:bg-gray-200 text-gray-900'
               }`}
             >
-              ← Prev
+              {strings.weekSchedule.prevWeek}
             </button>
             
             <button
@@ -173,7 +174,7 @@ export default function WeeklySchedule({ isDark = false }) {
                   : 'bg-blue-500 hover:bg-blue-600 text-white'
               }`}
             >
-              Today
+              {strings.weekSchedule.today}
             </button>
             
             <button
@@ -184,7 +185,7 @@ export default function WeeklySchedule({ isDark = false }) {
                   : 'bg-gray-100 hover:bg-gray-200 text-gray-900'
               }`}
             >
-              Next →
+              {strings.weekSchedule.nextWeek}
             </button>
           </div>
         </div>
@@ -198,19 +199,19 @@ export default function WeeklySchedule({ isDark = false }) {
               <thead>
                 <tr className={isDark ? 'bg-gray-600' : 'bg-gray-100'}>
                   <th className={`px-4 sm:px-6 py-3 text-left text-sm font-semibold ${isDark ? 'text-gray-200' : 'text-gray-900'}`}>
-                    Date & Time
+                    {strings.table.headers.dateTime}
                   </th>
                   <th className={`px-4 sm:px-6 py-3 text-left text-sm font-semibold ${isDark ? 'text-gray-200' : 'text-gray-900'}`}>
-                    Student
+                    {strings.table.headers.student}
                   </th>
                   <th className={`px-4 sm:px-6 py-3 text-left text-sm font-semibold ${isDark ? 'text-gray-200' : 'text-gray-900'}`}>
-                    Course
+                    {strings.table.headers.course}
                   </th>
                   <th className={`px-4 sm:px-6 py-3 text-left text-sm font-semibold ${isDark ? 'text-gray-200' : 'text-gray-900'}`}>
-                    Room
+                    {strings.table.headers.room}
                   </th>
                   <th className={`px-4 sm:px-6 py-3 text-left text-sm font-semibold ${isDark ? 'text-gray-200' : 'text-gray-900'}`}>
-                    Status
+                    {strings.table.headers.status}
                   </th>
                 </tr>
               </thead>
@@ -250,7 +251,7 @@ export default function WeeklySchedule({ isDark = false }) {
                     </td>
                     <td className="px-4 sm:px-6 py-4">
                       <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${getStatusBadgeColor(booking)}`}>
-                        {booking.is_cancelled ? 'Cancelled' : 'Confirmed'}
+                        {booking.is_cancelled ? strings.status.cancelled : strings.status.confirmed}
                       </span>
                     </td>
                   </tr>
@@ -270,7 +271,7 @@ export default function WeeklySchedule({ isDark = false }) {
                 <div className="flex justify-between items-start mb-3">
                   <div>
                     <p className={`text-xs font-semibold ${isDark ? 'text-gray-400' : 'text-gray-600'} uppercase`}>
-                      Date & Time
+                      {strings.table.headers.dateTime}
                     </p>
                     <p className={`text-sm font-semibold ${isDark ? 'text-white' : 'text-gray-900'}`}>
                       {formatDate(booking.date)}
@@ -280,14 +281,14 @@ export default function WeeklySchedule({ isDark = false }) {
                     </p>
                   </div>
                   <span className={`px-3 py-1 rounded-full text-xs font-medium whitespace-nowrap ${getStatusBadgeColor(booking)}`}>
-                    {booking.is_cancelled ? 'Cancelled' : 'Confirmed'}
+                    {booking.is_cancelled ? strings.status.cancelled : strings.status.confirmed}
                   </span>
                 </div>
 
                 {/* Student Info */}
                 <div className="mb-3 pb-3 border-b" style={{ borderColor: isDark ? 'rgba(75, 85, 99, 0.3)' : '#e5e7eb' }}>
                   <p className={`text-xs font-semibold ${isDark ? 'text-gray-400' : 'text-gray-600'} uppercase`}>
-                    Student
+                    {strings.table.headers.student}
                   </p>
                   <p className={`text-sm font-semibold ${isDark ? 'text-white' : 'text-gray-900'}`}>
                     {booking.student.first_name} {booking.student.last_name}
@@ -301,7 +302,7 @@ export default function WeeklySchedule({ isDark = false }) {
                 <div className="grid grid-cols-1 gap-3">
                   <div>
                     <p className={`text-xs font-semibold ${isDark ? 'text-gray-400' : 'text-gray-600'} uppercase`}>
-                      Course
+                      {strings.table.headers.course}
                     </p>
                     <p className={`text-sm ${isDark ? 'text-white' : 'text-gray-900'}`}>
                       {booking.office_hour.course_name}
@@ -311,7 +312,7 @@ export default function WeeklySchedule({ isDark = false }) {
                   {booking.office_hour.room && (
                     <div>
                       <p className={`text-xs font-semibold ${isDark ? 'text-gray-400' : 'text-gray-600'} uppercase`}>
-                        Room
+                        {strings.table.headers.room}
                       </p>
                       <p className={`text-sm ${isDark ? 'text-white' : 'text-gray-900'}`}>
                         {booking.office_hour.room}
@@ -329,10 +330,10 @@ export default function WeeklySchedule({ isDark = false }) {
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
           </svg>
           <p className={`text-lg font-semibold ${isDark ? 'text-gray-300' : 'text-gray-600'}`}>
-            No bookings this week
+            {strings.weekSchedule.noBookings}
           </p>
           <p className={`text-sm mt-1 ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>
-            You have no confirmed bookings for the current week.
+            {strings.weekSchedule.noBookingsDescription}
           </p>
         </div>
       )}

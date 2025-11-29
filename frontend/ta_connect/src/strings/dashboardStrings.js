@@ -22,7 +22,7 @@ const dashboardStrings = {
     noBookingsDescription: "You have no confirmed bookings for the current week.",
     dateTime: "Date & Time",
     student: "Student",
-    course: "Course",
+    course: "Slot",
     room: "Room",
     status: "Status",
     confirmed: "Confirmed",

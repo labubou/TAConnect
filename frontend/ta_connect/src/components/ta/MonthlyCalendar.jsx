@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import strings from '../../strings/MonthlyCalendarStrings';
 
 export default function MonthlyCalendar({ slots = [], isDark = false, isLoading = false }) {
   const [currentDate, setCurrentDate] = useState(new Date());
@@ -230,25 +231,25 @@ export default function MonthlyCalendar({ slots = [], isDark = false, isLoading 
             className={`px-3 py-1.5 rounded transition-colors text-sm sm:text-base ${
               isDark ? 'bg-gray-600 hover:bg-gray-500 text-white' : 'bg-gray-200 hover:bg-gray-300 text-gray-900'
             }`}
-            aria-label="Previous month"
+            aria-label={strings.calendar.ariaPrevMonth}
           >
-            ← Prev
+            {strings.calendar.prevMonth}
           </button>
           <button
             onClick={handleToday}
             className="px-3 py-1.5 rounded transition-colors text-sm sm:text-base bg-gradient-to-r from-[#366c6b] to-[#1a3535] text-white hover:shadow-lg"
-            aria-label="Go to today"
+            aria-label={strings.calendar.ariaGoToToday}
           >
-            Today
+            {strings.calendar.today}
           </button>
           <button
             onClick={handleNextMonth}
             className={`px-3 py-1.5 rounded transition-colors text-sm sm:text-base ${
               isDark ? 'bg-gray-600 hover:bg-gray-500 text-white' : 'bg-gray-200 hover:bg-gray-300 text-gray-900'
             }`}
-            aria-label="Next month"
+            aria-label={strings.calendar.ariaNextMonth}
           >
-            Next →
+            {strings.calendar.nextMonth}
           </button>
         </div>
       </div>
@@ -341,10 +342,10 @@ export default function MonthlyCalendar({ slots = [], isDark = false, isLoading 
                       <p className="text-xs opacity-80">{slot.course_name}</p>
                     )}
                     {slot.room && (
-                      <p className="text-xs opacity-80">Room: {slot.room}</p>
+                      <p className="text-xs opacity-80">{strings.details.room}: {slot.room}</p>
                     )}
                     {slot.day_of_week && (
-                      <p className="text-xs opacity-80">Day: {slot.day_of_week}</p>
+                      <p className="text-xs opacity-80">{strings.details.day}: {slot.day_of_week}</p>
                     )}
                   </div>
                   <span className={`px-2 py-1 rounded-full text-xs font-semibold ${
