@@ -36,9 +36,10 @@ export const emailPreferencesStrings = {
   },
   
   messages: {
-    loadError: 'Failed to load preferences',
+    loadError: 'Failed to load preferences. Please try again.',
     saveSuccess: 'Preferences saved successfully',
-    saveError: 'Failed to save preferences',
+    saveError: 'Failed to save preferences. Please try again.',
     resetSuccess: 'Preferences reset to default',
+    loading: 'Loading preferences...',
   },
 };

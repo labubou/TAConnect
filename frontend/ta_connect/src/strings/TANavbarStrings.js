@@ -29,9 +29,15 @@ const TANavbarStrings = {
     bookingDescription: "Get notified when students book a session",
     cancellationLabel: "Email on Cancellation",
     cancellationDescription: "Get notified when sessions are cancelled",
+    updateLabel: "Email on Booking Update",
+    updateDescription: "Get notified when students update or reschedule their bookings",
     save: "Save Preferences",
     saving: "Saving...",
     saved: "Preferences saved successfully",
+    error: "Failed to save preferences",
+    fetchError: "Failed to load preferences",
+    resetSuccess: "Preferences reset to default",
+    loading: "Loading preferences...",
   }
 };
 
