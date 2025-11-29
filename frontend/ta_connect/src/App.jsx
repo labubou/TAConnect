@@ -1,5 +1,6 @@
 import { AuthProvider } from './contexts/AuthContext'
 import { ThemeProvider } from './contexts/ThemeContext'
+import { LanguageProvider } from './contexts/LanguageContext'
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
 import { lazy, Suspense } from 'react'
 import ProtectedRoute from './components/ProtectedRoute';
@@ -49,10 +50,11 @@ const PageLoader = () => {
 function App() {
   return (
     <ThemeProvider>
-      <AuthProvider>
-        <Router>
-          <div className="min-h-screen bg-[var(--bg)] text-[var(--text)] transition-colors">
-            <Routes>
+      <LanguageProvider>
+        <AuthProvider>
+          <Router>
+            <div className="min-h-screen bg-[var(--bg)] text-[var(--text)] transition-colors">
+              <Routes>
               <Route 
                 path="/" 
                 element={
@@ -243,6 +245,7 @@ function App() {
           </div>
         </Router>
       </AuthProvider>
+      </LanguageProvider>
     </ThemeProvider>
   )
 }

@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import { useTheme } from '../../contexts/ThemeContext';
+import { useLanguage } from '../../contexts/LanguageContext';
 import ThemeToggle from '../../components/ThemeToggle';
+import LanguageToggle from '../../components/LanguageToggle';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import axios from 'axios';
@@ -18,6 +20,9 @@ function LoginPage() {
     const [googleLoading, setGoogleLoading] = useState(false);
     const [showPassword, setShowPassword] = useState(false);
     const { theme } = useTheme();
+    const { language } = useLanguage();
+    const t = strings[language];
+    
     const handleChange = (e) => {
         setCredentials({
         ...credentials,
@@ -127,7 +132,7 @@ function LoginPage() {
       const authUrl = await getGoogleAuthUrl();
       window.location.href = authUrl;
     } catch (err) {
-      setError(strings.googleLoginError);
+      setError(t.googleLoginError);
       setGoogleLoading(false);
     }
   };
@@ -146,8 +151,9 @@ function LoginPage() {
             onClick={() => navigate('/register')}
             className="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600"
           >
-            {strings.registerButton}
+            {t.registerButton}
           </button>
+          <LanguageToggle />
           <ThemeToggle />
         </div>
       </nav>
@@ -155,10 +161,10 @@ function LoginPage() {
       <div className="flex items-center justify-center min-h-[calc(100vh-80px)] p-4">
         <div className={`${isDark ? 'bg-gray-800' : 'bg-white'} p-8 rounded-xl shadow-lg w-full max-w-md`}>
           <h1 className={`text-3xl font-bold text-center mb-2 ${isDark ? 'text-white' : 'text-gray-900'}`}>
-            {strings.welcomeBack}
+            {t.welcomeBack}
           </h1>
           <p className={`text-center ${isDark ? 'text-gray-400' : 'text-gray-600'} mb-6`}>
-            {strings.loginMessage}
+            {t.loginMessage}
           </p>
 
           {error && (
@@ -170,7 +176,7 @@ function LoginPage() {
           <div className="space-y-4">
             <div>
               <label className={`block text-sm font-medium ${isDark ? 'text-gray-300' : 'text-gray-700'} mb-1`}>
-                {strings.usernameLabel}
+                {t.usernameLabel}
               </label>
               <input
                 type="text"
@@ -178,13 +184,13 @@ function LoginPage() {
                 value={credentials.username}
                 onChange={handleChange}
                 className={`w-full px-3 py-2 border ${isDark ? 'border-gray-600 bg-gray-700 text-white' : 'border-gray-300 bg-white text-black'} rounded-lg focus:ring-2 focus:ring-blue-500`}
-                placeholder={strings.usernamePlaceholder}
+                placeholder={t.usernamePlaceholder}
               />
             </div>
 
             <div>
               <label className={`block text-sm font-medium ${isDark ? 'text-gray-300' : 'text-gray-700'} mb-1`}>
-                {strings.passwordLabel}
+                {t.passwordLabel}
               </label>
               <div className="relative">
                 <input
@@ -193,7 +199,7 @@ function LoginPage() {
                   value={credentials.password}
                   onChange={handleChange}
                   className={`w-full px-3 py-2 border ${isDark ? 'border-gray-600 bg-gray-700 text-white' : 'border-gray-300 bg-white text-black'} rounded-lg focus:ring-2 focus:ring-blue-500`}
-                  placeholder={strings.passwordPlaceholder}
+                  placeholder={t.passwordPlaceholder}
                 />
                 <button
                   type="button"
@@ -217,14 +223,14 @@ function LoginPage() {
                 disabled={loading}
                 className="flex-1 px-4 py-2 rounded-lg text-white transition shadow bg-blue-900 hover:bg-blue-950 dark:bg-blue-900/80 dark:hover:bg-blue-900"
               >
-                {loading ? strings.loggingInButton : strings.loginButton}
+                {loading ? t.loggingInButton : t.loginButton}
               </button>
 
               <button
                 onClick={() => navigate('/forgot-password')}
                 className="flex-1 px-4 py-2 rounded-lg text-white transition shadow bg-blue-900 hover:bg-blue-950 dark:bg-blue-900/80 dark:hover:bg-blue-900"
               >
-                {strings.forgotPassword}
+                {t.forgotPassword}
               </button>
             </div>
 
@@ -234,7 +240,7 @@ function LoginPage() {
               </div>
               <div className="relative flex justify-center text-sm">
                 <span className={`px-2 ${isDark ? 'bg-gray-800 text-gray-400' : 'bg-white text-gray-500'}`}>
-                  {strings.continueWith}
+                  {t.continueWith}
                 </span>
               </div>
             </div>
@@ -250,20 +256,20 @@ function LoginPage() {
                 <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
                 <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
               </svg>
-              {googleLoading ? 'Redirecting...' : strings.googleButton}
+              {googleLoading ? 'Redirecting...' : t.googleButton}
             </button>
           </div>
 
           <div className="mt-6 text-center">
             <p className={`text-sm ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
-              {strings.noAccount}{' '}
+              {t.noAccount}{' '}
               <button
                 onClick={() => navigate('/register')}
                 className="px-4 py-2 rounded-lg text-white transition shadow bg-blue-900 hover:bg-blue-950 dark:bg-blue-900/80 dark:hover:bg-blue-900"
 
 
               >
-                {strings.registerHere}
+                {t.registerHere}
               </button>
             </p>
           </div>
