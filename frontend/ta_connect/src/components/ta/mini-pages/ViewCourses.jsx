@@ -14,6 +14,7 @@ export default function ViewCourses({
   onManageStudents,
   onExportSlots,
   isExporting,
+  onShareSlot,
 }) {
   const [toggleLoading, setToggleLoading] = useState({});
   const [sortBy, setSortBy] = useState("course_name");
@@ -363,60 +364,117 @@ export default function ViewCourses({
                       </div>
                     </div>
 
-                    <div className="flex flex-wrap gap-2 pt-2">
-                      <button
-                        onClick={() => onEditSlot && onEditSlot(slot)}
-                        className={`flex-1 min-w-[120px] py-2 px-3 rounded-lg font-semibold text-sm flex items-center justify-center gap-2 ${
-                          isDark
-                            ? "bg-blue-600 hover:bg-blue-500 text-white"
-                            : "bg-blue-500 hover:bg-blue-600 text-white"
-                        }`}
-                      >
-                        {strings.view.buttons.edit}
-                      </button>
-                      <button
-                        onClick={() => onDeleteSlot && onDeleteSlot(slot)}
-                        className={`flex-1 min-w-[120px] py-2 px-3 rounded-lg font-semibold text-sm flex items-center justify-center gap-2 ${
-                          isDark
-                            ? "bg-red-600 hover:bg-red-500 text-white"
-                            : "bg-red-500 hover:bg-red-600 text-white"
-                        }`}
-                      >
-                        {strings.view.buttons.delete}
-                      </button>
-                      <button
-                        onClick={() => onManageStudents && onManageStudents(slot)}
-                        disabled={!onManageStudents}
-                        className={`flex-1 py-2 px-3 rounded-lg font-semibold text-xs sm:text-sm flex items-center justify-center gap-2 border whitespace-nowrap ${
-                          isDark
-                            ? "border-gray-700 text-gray-200 hover:bg-gray-800"
-                            : "border-gray-200 text-gray-700 hover:bg-gray-100"
-                        } ${!onManageStudents ? "opacity-50 cursor-not-allowed" : ""}`}
-                        title={strings.view.manageStudentsComingSoon}
-                      >
-                        {strings.view.buttons.manageStudents}
-                      </button>
-                      <button
-                        onClick={() => handleToggleStatus(slot.id, slot.status)}
-                        disabled={toggleLoading[slot.id]}
-                        className={`flex-1 py-2 px-3 rounded-lg font-semibold text-xs sm:text-sm flex items-center justify-center gap-2 whitespace-nowrap ${
-                          toggleLoading[slot.id] ? "opacity-50 cursor-not-allowed" : ""
-                        } ${
-                          slot.status
-                            ? isDark
-                              ? "bg-yellow-600 hover:bg-yellow-500 text-white"
-                              : "bg-yellow-500 hover:bg-yellow-600 text-white"
-                            : isDark
-                            ? "bg-green-600 hover:bg-green-500 text-white"
-                            : "bg-green-500 hover:bg-green-600 text-white"
-                        }`}
-                      >
-                        {toggleLoading[slot.id]
-                          ? strings.view.buttons.toggling
-                          : slot.status
-                          ? strings.view.buttons.deactivate
-                          : strings.view.buttons.activate}
-                      </button>
+                    <div className="space-y-2 pt-2">
+                      {/* First row: Edit, Delete, Share */}
+                      <div className="flex gap-2">
+                        <button
+                          onClick={() => onEditSlot && onEditSlot(slot)}
+                          className={`flex-1 py-2 px-3 rounded-lg font-semibold text-xs sm:text-sm flex items-center justify-center gap-1 ${
+                            isDark
+                              ? "bg-blue-600 hover:bg-blue-500 text-white"
+                              : "bg-blue-500 hover:bg-blue-600 text-white"
+                          }`}
+                        >
+                          <svg
+                            className="w-4 h-4 flex-shrink-0"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
+                            />
+                          </svg>
+                          <span className="hidden sm:inline">{strings.view.buttons.edit}</span>
+                        </button>
+                        <button
+                          onClick={() => onDeleteSlot && onDeleteSlot(slot)}
+                          className={`flex-1 py-2 px-3 rounded-lg font-semibold text-xs sm:text-sm flex items-center justify-center gap-1 ${
+                            isDark
+                              ? "bg-red-600 hover:bg-red-500 text-white"
+                              : "bg-red-500 hover:bg-red-600 text-white"
+                          }`}
+                        >
+                          <svg
+                            className="w-4 h-4 flex-shrink-0"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                            />
+                          </svg>
+                          <span className="hidden sm:inline">{strings.view.buttons.delete}</span>
+                        </button>
+                        <button
+                          onClick={() => onShareSlot && onShareSlot(slot)}
+                          disabled={!onShareSlot}
+                          className={`flex-1 py-2 px-3 rounded-lg font-semibold text-xs sm:text-sm flex items-center justify-center gap-1 ${
+                            isDark
+                              ? "bg-purple-600 hover:bg-purple-500 text-white"
+                              : "bg-purple-500 hover:bg-purple-600 text-white"
+                          } ${!onShareSlot ? "opacity-50 cursor-not-allowed" : ""}`}
+                        >
+                          <svg
+                            className="w-4 h-4 flex-shrink-0"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-5.368m0 5.368l6.632 3.316m-6.632-8.684a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"
+                            />
+                          </svg>
+                          <span className="hidden sm:inline">{strings.view.buttons.share || "Share"}</span>
+                        </button>
+                      </div>
+                      {/* Second row: Manage Students, Activate/Deactivate */}
+                      <div className="flex gap-2">
+                        <button
+                          onClick={() => onManageStudents && onManageStudents(slot)}
+                          disabled={!onManageStudents}
+                          className={`flex-1 py-2 px-3 rounded-lg font-semibold text-xs sm:text-sm flex items-center justify-center gap-1 border whitespace-nowrap ${
+                            isDark
+                              ? "border-gray-700 text-gray-200 hover:bg-gray-800"
+                              : "border-gray-200 text-gray-700 hover:bg-gray-100"
+                          } ${!onManageStudents ? "opacity-50 cursor-not-allowed" : ""}`}
+                          title={strings.view.manageStudentsComingSoon}
+                        >
+                          <span className="hidden md:inline">{strings.view.buttons.manageStudents}</span>
+                          <span className="md:hidden text-xs">Students</span>
+                        </button>
+                        <button
+                          onClick={() => handleToggleStatus(slot.id, slot.status)}
+                          disabled={toggleLoading[slot.id]}
+                          className={`flex-1 py-2 px-3 rounded-lg font-semibold text-xs sm:text-sm flex items-center justify-center gap-1 whitespace-nowrap ${
+                            toggleLoading[slot.id] ? "opacity-50 cursor-not-allowed" : ""
+                          } ${
+                            slot.status
+                              ? isDark
+                                ? "bg-yellow-600 hover:bg-yellow-500 text-white"
+                                : "bg-yellow-500 hover:bg-yellow-600 text-white"
+                              : isDark
+                              ? "bg-green-600 hover:bg-green-500 text-white"
+                              : "bg-green-500 hover:bg-green-600 text-white"
+                          }`}
+                        >
+                          {toggleLoading[slot.id]
+                            ? strings.view.buttons.toggling
+                            : slot.status
+                            ? strings.view.buttons.deactivate
+                            : strings.view.buttons.activate}
+                        </button>
+                      </div>
                     </div>
                   </div>
                 </div>
