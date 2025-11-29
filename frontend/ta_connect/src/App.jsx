@@ -1,5 +1,6 @@
 import { AuthProvider } from './contexts/AuthContext'
 import { ThemeProvider } from './contexts/ThemeContext'
+import { LanguageProvider } from './contexts/LanguageContext'
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
 import { lazy, Suspense } from 'react'
 import ProtectedRoute from './components/ProtectedRoute';
@@ -22,6 +23,7 @@ const ResetPasswordPage = lazy(() => import('./pages/main/ResetPasswordPage'));
 const ProfilePage = lazy(() => import('./pages/main/ProfilePage'));
 const TAPage = lazy(() => import('./pages/ta/TAPage'));
 const ManageCourses = lazy(() => import('./pages/ta/ManageCourses'));
+const Dashboard = lazy(() => import('./pages/ta/Dashboard'));
 const AnalyticsDashboard = lazy(() => import('./pages/ta/AnalyticsDashboard'));
 const EmailPreferencesPage = lazy(() => import('./pages/ta/EmailPreferencesPage'));
 const InstructorManageBookings = lazy(() => import('./pages/ta/ManageBookings'));
@@ -49,10 +51,11 @@ const PageLoader = () => {
 function App() {
   return (
     <ThemeProvider>
-      <AuthProvider>
-        <Router>
-          <div className="min-h-screen bg-[var(--bg)] text-[var(--text)] transition-colors">
-            <Routes>
+      <LanguageProvider>
+        <AuthProvider>
+          <Router>
+            <div className="min-h-screen bg-[var(--bg)] text-[var(--text)] transition-colors">
+              <Routes>
               <Route 
                 path="/" 
                 element={
@@ -132,7 +135,7 @@ function App() {
                 element={
                   <ProtectedRoute>
                     <Suspense fallback={<PageLoader />}>
-                      <TAPage />
+                      <Dashboard />
                     </Suspense>
                   </ProtectedRoute>
                 } 
@@ -243,6 +246,7 @@ function App() {
           </div>
         </Router>
       </AuthProvider>
+      </LanguageProvider>
     </ThemeProvider>
   )
 }

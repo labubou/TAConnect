@@ -22,7 +22,7 @@ from accounts.schemas.auth_schemas import (
     set_user_type_request,
     set_user_type_response,
 )
-from .utils.send_welcome_email import send_welcome_email
+from utils.email_sending.auth.send_welcome_email import send_welcome_email
 
 class GoogleAuthRateThrottle(AnonRateThrottle):
     rate = '10/hour'  # Limit Google OAuth attempts

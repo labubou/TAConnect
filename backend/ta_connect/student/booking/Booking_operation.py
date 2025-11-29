@@ -16,6 +16,7 @@ from student.serializers.update_book_serializer import UpdateBookingSerializer
 from student.serializers.cancel_book_serializer import CancelBookingSerializer
 from student.serializers.available_times_serializer import AvailableTimesSerializer
 from student.utils.calculate_available_times import get_available_times
+from utils.error_formatter import format_serializer_errors
 from student.schemas.booking_schemas import (
     create_booking_swagger,
     update_booking_swagger,
@@ -165,8 +166,10 @@ class BookingDetailView(GenericAPIView):
             student=request.user,
             instructor=booking.office_hour.instructor,
             slot=booking.office_hour,
-            booking_date=updated_booking.date,
-            booking_time=updated_booking.start_time
+            old_date=booking.date,
+            old_time=booking.start_time,
+            new_date=updated_booking.date,
+            new_time=updated_booking.start_time
         )
         
         

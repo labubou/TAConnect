@@ -2,7 +2,7 @@ from ta_connect.settings import SITE_DOMAIN, frontend_url
 from django.utils.http import urlsafe_base64_encode
 from django.utils.encoding import force_bytes
 from django.contrib.auth.tokens import default_token_generator
-from .send_email import send_email
+from ..send_email import send_email
 from accounts.models import PendingEmailChange
 
 def send_change_email(user, email):

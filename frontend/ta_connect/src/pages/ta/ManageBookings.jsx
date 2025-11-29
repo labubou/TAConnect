@@ -9,32 +9,64 @@ import { useInstructorBookings } from '../../hooks/useApi';
 import CancelBookingModal from '../../components/ta/CancelBookingModal';
 import axios from 'axios';
 
+// Helper function to get current month's date range
+const getCurrentMonthDateRange = () => {
+  const today = new Date();
+  const currentYear = today.getFullYear();
+  const currentMonth = today.getMonth();
+  
+  const monthStart = new Date(currentYear, currentMonth, 1);
+  const monthEnd = new Date(currentYear, currentMonth + 1, 0);
+  
+  const formatDate = (date) => {
+    // Use local date to avoid timezone issues
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  };
+  
+  return {
+    start: formatDate(monthStart),
+    end: formatDate(monthEnd)
+  };
+};
+
 export default function ManageBookings() {
   const { theme } = useTheme();
   const isDark = theme === 'dark';
   const [isNavbarOpen, setIsNavbarOpen] = useState(true);
   const [filteredBookings, setFilteredBookings] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
-  const [statusFilter, setStatusFilter] = useState('all');
-  const [dateRange, setDateRange] = useState({ start: '', end: '' });
+  const [statusFilter, setStatusFilter] = useState({ active: true, cancelled: false });
+  const [dateRange, setDateRange] = useState(() => getCurrentMonthDateRange());
   const [selectedBooking, setSelectedBooking] = useState(null);
   const [showCancelModal, setShowCancelModal] = useState(false);
   const [isCancelling, setIsCancelling] = useState(false);
   const [successMessage, setSuccessMessage] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
+  const [backendError, setBackendError] = useState(null);
 
-  // Fetch bookings data
-  const { data: bookings = [], isLoading, error, refetch } = useInstructorBookings();
+  // Fetch bookings data with current month date range
+  const { data: bookings = [], isLoading, error, refetch } = useInstructorBookings(
+    dateRange.start,
+    dateRange.end
+  );
 
   // Filter and search bookings
   useEffect(() => {
     let filtered = bookings;
 
-    // Filter by status
-    if (statusFilter === 'active') {
+    // Filter by status - show both active and cancelled if both are selected, or just one if only one is selected
+    if (statusFilter.active && statusFilter.cancelled) {
+      // Show all bookings
+    } else if (statusFilter.active) {
       filtered = filtered.filter(b => !b.is_cancelled);
-    } else if (statusFilter === 'cancelled') {
+    } else if (statusFilter.cancelled) {
       filtered = filtered.filter(b => b.is_cancelled);
+    } else {
+      // If neither is selected, show nothing
+      filtered = [];
     }
 
     // Filter by date range
@@ -59,7 +91,19 @@ export default function ManageBookings() {
     setFilteredBookings(filtered);
   }, [bookings, statusFilter, dateRange, searchTerm]);
 
-  // Auto-clear messages after 5 seconds
+  // Surface backend errors to user-facing error message (only once when error changes)
+  useEffect(() => {
+    if (error) {
+      const errMsg = error?.response?.data?.error || error?.message || strings.messages.error;
+      setBackendError(errMsg);
+      
+      // Auto-clear backend error after 5 seconds
+      const timer = setTimeout(() => setBackendError(null), 5000);
+      return () => clearTimeout(timer);
+    }
+  }, [error]);
+
+  // Auto-clear success messages after 5 seconds
   useEffect(() => {
     if (successMessage) {
       const timer = setTimeout(() => setSuccessMessage(''), 5000);
@@ -67,6 +111,7 @@ export default function ManageBookings() {
     }
   }, [successMessage]);
 
+  // Auto-clear error messages after 5 seconds
   useEffect(() => {
     if (errorMessage) {
       const timer = setTimeout(() => setErrorMessage(''), 5000);
@@ -96,10 +141,21 @@ export default function ManageBookings() {
         setSelectedBooking(null);
         // Refresh the bookings list
         await refetch();
+      } else {
+        throw new Error(response.data.error || strings.messages.error);
       }
     } catch (err) {
       console.error('Failed to cancel booking:', err);
-      const errorMsg = err.response?.data?.error || strings.messages.error;
+      
+      let errorMsg = strings.messages.error;
+      if (err.response?.data?.error) {
+        errorMsg = err.response.data.error;
+      } else if (err.response?.data?.message) {
+        errorMsg = err.response.data.message;
+      } else if (err.message) {
+        errorMsg = err.message;
+      }
+      
       setErrorMessage(errorMsg);
       setShowCancelModal(false);
       setSelectedBooking(null);
@@ -110,8 +166,8 @@ export default function ManageBookings() {
 
   const handleClearFilters = () => {
     setSearchTerm('');
-    setStatusFilter('all');
-    setDateRange({ start: '', end: '' });
+    setStatusFilter({ active: true, cancelled: false });
+    setDateRange(getCurrentMonthDateRange());
   };
 
   const formatDate = (dateString) => {
@@ -126,6 +182,19 @@ export default function ManageBookings() {
     if (!timeString) return 'N/A';
     const [hours, minutes] = timeString.split(':');
     return `${hours}:${minutes}`;
+  };
+
+  const formatBookingDateTime = (dateTimeString) => {
+    if (!dateTimeString) return 'N/A';
+    try {
+      // Handle ISO format datetime (YYYY-MM-DD HH:MM:SS or with Z)
+      const date = new Date(dateTimeString);
+      const hours = String(date.getHours()).padStart(2, '0');
+      const minutes = String(date.getMinutes()).padStart(2, '0');
+      return `${hours}:${minutes}`;
+    } catch (e) {
+      return 'N/A';
+    }
   };
 
   const getStatusColor = (booking) => {
@@ -177,9 +246,9 @@ export default function ManageBookings() {
                 {strings.filters.filterByStatus}
               </h2>
               
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
+              <div className="mb-4">
                 {/* Search */}
-                <div className="sm:col-span-2 lg:col-span-2">
+                <div className="mb-4">
                   <input
                     type="text"
                     placeholder={strings.filters.search}
@@ -193,20 +262,37 @@ export default function ManageBookings() {
                   />
                 </div>
 
-                {/* Status Filter */}
-                <select
-                  value={statusFilter}
-                  onChange={(e) => setStatusFilter(e.target.value)}
-                  className={`px-4 py-2 rounded-lg border transition-colors ${
-                    isDark
-                      ? 'bg-gray-600 border-gray-500 text-white'
-                      : 'bg-white border-gray-300 text-gray-900'
-                  } focus:outline-none focus:ring-2 focus:ring-[#366c6b]`}
-                >
-                  <option value="all">{strings.filters.all}</option>
-                  <option value="active">{strings.filters.active}</option>
-                  <option value="cancelled">{strings.filters.cancelled}</option>
-                </select>
+                {/* Status Toggle Buttons */}
+                <div className="flex gap-4 flex-wrap">
+                  <button
+                    onClick={() => setStatusFilter(prev => ({ ...prev, active: !prev.active }))}
+                    className={`px-12 py-5 rounded-xl border-3 transition-all font-bold text-xl min-w-[180px] ${
+                      statusFilter.active
+                        ? isDark
+                          ? 'border-emerald-600 bg-emerald-900/20 text-emerald-200'
+                          : 'border-emerald-500 bg-emerald-50 text-emerald-700'
+                        : isDark
+                        ? 'border-gray-700 hover:border-gray-600 bg-gray-800/50 text-gray-300'
+                        : 'border-gray-200 hover:border-gray-300 bg-gray-50 text-gray-600'
+                    }`}
+                  >
+                    Active
+                  </button>
+                  <button
+                    onClick={() => setStatusFilter(prev => ({ ...prev, cancelled: !prev.cancelled }))}
+                    className={`px-12 py-5 rounded-xl border-3 transition-all font-bold text-xl min-w-[180px] ${
+                      statusFilter.cancelled
+                        ? isDark
+                          ? 'border-red-600 bg-red-900/20 text-red-200'
+                          : 'border-red-500 bg-red-50 text-red-700'
+                        : isDark
+                        ? 'border-gray-700 hover:border-gray-600 bg-gray-800/50 text-gray-300'
+                        : 'border-gray-200 hover:border-gray-300 bg-gray-50 text-gray-600'
+                    }`}
+                  >
+                    Cancelled
+                  </button>
+                </div>
               </div>
 
               {/* Date Range */}
@@ -264,7 +350,7 @@ export default function ManageBookings() {
               </div>
             )}
 
-            {/* Error Message */}
+            {/* Error Message from User Actions */}
             {errorMessage && (
               <div className={`mb-6 p-4 rounded-lg ${
                 isDark ? 'bg-red-900/30 border-red-600' : 'bg-red-50 border-red-300'
@@ -274,6 +360,20 @@ export default function ManageBookings() {
                     <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
                   </svg>
                   <span className={`${isDark ? 'text-red-200' : 'text-red-700'} font-medium`}>{errorMessage}</span>
+                </div>
+              </div>
+            )}
+
+            {/* Backend Error Message */}
+            {backendError && (
+              <div className={`mb-6 p-4 rounded-lg ${
+                isDark ? 'bg-yellow-900/30 border-yellow-600' : 'bg-yellow-50 border-yellow-300'
+              } border-2`}>
+                <div className="flex items-start">
+                  <svg className={`w-5 h-5 mr-3 mt-0.5 ${isDark ? 'text-yellow-400' : 'text-yellow-600'}`} fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                  </svg>
+                  <span className={`${isDark ? 'text-yellow-200' : 'text-yellow-700'} font-medium`}>{backendError}</span>
                 </div>
               </div>
             )}
@@ -356,7 +456,7 @@ export default function ManageBookings() {
                                 <div>
                                   <p className="font-medium">{formatDate(booking.date)}</p>
                                   <p className={`text-xs ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
-                                    {formatTime(booking.office_hour.start_time)} - {formatTime(booking.office_hour.end_time)}
+                                    {formatBookingDateTime(booking.start_time)}
                                   </p>
                                 </div>
                               </td>
@@ -449,7 +549,7 @@ export default function ManageBookings() {
                                 {strings.bookingCard.time}
                               </p>
                               <p className={`text-sm ${isDark ? 'text-white' : 'text-gray-900'}`}>
-                                {formatTime(booking.office_hour.start_time)} - {formatTime(booking.office_hour.end_time)}
+                                {formatBookingDateTime(booking.start_time)}
                               </p>
                             </div>
                           </div>

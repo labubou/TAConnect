@@ -127,7 +127,7 @@ class TimeSlotDetailView(GenericAPIView):
             try:
                 affected_bookings = self._cancel_affected_bookings(updated_slot, critical_fields_changed)
                 if affected_bookings.exists():
-                    cancel_student_bookings(updated_slot, bookings=affected_bookings)
+                    cancel_student_bookings(updated_slot, bookings=affected_bookings, cancellation_reason="schedule_conflict")
             except Exception as e:
                 print(f"Error cancelling affected bookings for slot {slot_id}: {e}")
         
@@ -154,6 +154,10 @@ class TimeSlotDetailView(GenericAPIView):
         time_slot = get_object_or_404(OfficeHourSlot, id=slot_id, instructor=user)
 
         try:
+            message, error = cancel_student_bookings(time_slot, cancellation_reason="slot_deleted")
+            if error:
+                print(f"Error cancelling bookings for time slot {time_slot.id}: {error}")
+                return Response({'error': "something went wrong"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
             time_slot.delete()
         except Exception as e:
             print(f"Error deleting time slot {slot_id}: {e}")

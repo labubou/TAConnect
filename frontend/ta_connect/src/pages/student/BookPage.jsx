@@ -176,7 +176,7 @@ export default function BookPage() {
       }
     } catch (err) {
       console.error('Error fetching available times:', err);
-      setError('Failed to load available times for this date');
+      setError(strings.errors.failedLoadTimes);
       setTimeSlots([]);
     }
   };
@@ -212,7 +212,7 @@ export default function BookPage() {
 
   const handleBookSlot = async () => {
     if (!selectedSlot || !selectedDate || !selectedTime) {
-      setError('Please select a slot, date, and time');
+      setError(strings.errors.selectAll);
       return;
     }
 

@@ -16,7 +16,7 @@ from accounts.schemas.profile_schemas import (
 from ..serializers.change_password_serializer import ChangePasswordSerializer
 from ..serializers.update_profile_serializer import UpdateProfileSerializer
 from ..serializers.verify_email_change_serializer import VerifyEmailChangeSerializer
-from .utils.send_change_email import send_change_email
+from utils.email_sending.profile.send_change_email import send_change_email
 
 class ProfileRateThrottle(UserRateThrottle):
     rate = '20/hour'  # Limit profile operations

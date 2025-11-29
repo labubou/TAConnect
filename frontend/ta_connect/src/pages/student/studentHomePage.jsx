@@ -59,7 +59,7 @@ export default function StudentHomePage() {
                         {strings.studentHomePage.bookSlot}
                       </h3>
                       <p className={`text-sm ${isDark ? 'text-gray-300' : 'text-gray-600'}`}>
-                        Browse available office hours and schedule time with your TAs
+                        {strings.studentHomePage.bookSlotDescription}
                       </p>
                     </div>
                   </div>
@@ -81,7 +81,7 @@ export default function StudentHomePage() {
                         {strings.studentHomePage.viewBookings}
                       </h3>
                       <p className={`text-sm ${isDark ? 'text-gray-300' : 'text-gray-600'}`}>
-                        View, update, or cancel your scheduled appointments
+                        {strings.studentHomePage.viewBookingsDescription}
                       </p>
                     </div>
                   </div>
@@ -104,12 +104,12 @@ export default function StudentHomePage() {
                 </div>
                 <div className="flex-1">
                   <h3 className={`text-lg font-semibold mb-2 ${isDark ? 'text-white' : 'text-gray-900'}`}>
-                    Quick Tips
+                    {strings.studentHomePage.quickTips.title}
                   </h3>
                   <ul className={`text-sm space-y-1 ${isDark ? 'text-gray-300' : 'text-gray-600'}`}>
-                    <li>• Book office hours at least 24 hours in advance when possible</li>
-                    <li>• Check your email for booking confirmations</li>
-                    <li>• Cancel appointments you can't make to free up slots for others</li>
+                    <li>{strings.studentHomePage.quickTips.tip1}</li>
+                    <li>{strings.studentHomePage.quickTips.tip2}</li>
+                    <li>{strings.studentHomePage.quickTips.tip3}</li>
                   </ul>
                 </div>
               </div>

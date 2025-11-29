@@ -8,6 +8,9 @@ DATABASES = {
     }
 }
 
+# Note: Throttling is disabled in the BaseTestCase.setUp() method
+# by patching the throttle_classes on individual views
+
 # Silence only noisy HTTP request error logs during tests
 LOGGING = {
     "version": 1,

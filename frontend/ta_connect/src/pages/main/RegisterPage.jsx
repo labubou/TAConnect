@@ -1,7 +1,9 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTheme } from '../../contexts/ThemeContext';
+import { useLanguage } from '../../contexts/LanguageContext';
 import ThemeToggle from '../../components/ThemeToggle';
+import LanguageToggle from '../../components/LanguageToggle';
 import Footer from '../../components/Footer';
 import Logo2 from '../../assets/Logo2.png';
 import strings from '../../strings/registerPageStrings';
@@ -10,6 +12,8 @@ import axios from 'axios';
 function RegisterPage() {
   const navigate = useNavigate();
   const { theme } = useTheme();
+  const { language } = useLanguage();
+  const t = strings[language];
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
@@ -50,42 +54,42 @@ function RegisterPage() {
     // Validation ya karim ya bassem ya joseph x2 
 
     if (!formData.first_name.trim()) {
-      newErrors.first_name = strings.validation.firstNameRequired;
+      newErrors.first_name = t.validation.firstNameRequired;
     }
 
 
     if (!formData.last_name.trim()) {
-      newErrors.last_name = strings.validation.lastNameRequired;
+      newErrors.last_name = t.validation.lastNameRequired;
     }
 
 
     if (!formData.username.trim()) {
-      newErrors.username = strings.validation.usernameRequired;
+      newErrors.username = t.validation.usernameRequired;
     }
 
 
     if (!formData.email.trim()) {
-      newErrors.email = strings.validation.emailRequired;
+      newErrors.email = t.validation.emailRequired;
     } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
-      newErrors.email = strings.validation.invalidEmail;
+      newErrors.email = t.validation.invalidEmail;
     }
 
 
     if (!formData.password) {
-      newErrors.password = strings.validation.passwordRequired;
+      newErrors.password = t.validation.passwordRequired;
     } else if (formData.password.length < 8) {
-      newErrors.password = strings.validation.passwordMinLength;
+      newErrors.password = t.validation.passwordMinLength;
     }
 
 
     if (!formData.password2) {
-      newErrors.password2 = strings.validation.confirmPasswordRequired;
+      newErrors.password2 = t.validation.confirmPasswordRequired;
     } else if (formData.password !== formData.password2) {
-      newErrors.password2 = strings.validation.passwordsDoNotMatch;
+      newErrors.password2 = t.validation.passwordsDoNotMatch;
     }
 
     if (!formData.user_type) {
-      newErrors.user_type = strings.validation.userTypeRequired;
+      newErrors.user_type = t.validation.userTypeRequired;
     }
 
     setErrors(newErrors);
@@ -109,7 +113,7 @@ function RegisterPage() {
       console.log('Registration response:', response.data);
       
       if (response.data) {
-        setSuccess(response.data.message || strings.messages.success);
+        setSuccess(response.data.message || t.messages.success);
         // Clear the form
         setFormData({
           username: '',
@@ -150,10 +154,10 @@ function RegisterPage() {
           setError('Please check the form for errors.');
         } else {
           // Handle general error message
-          setError(errorData.error || errorData.message || errorData.detail || strings.messages.error);
+          setError(errorData.error || errorData.message || errorData.detail || t.messages.error);
         }
       } else {
-        setError(strings.messages.error);
+        setError(t.messages.error);
       }
     } finally {
       setLoading(false);
@@ -177,8 +181,9 @@ function RegisterPage() {
             onClick={() => navigate('/login')}
             className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
           >
-            {strings.navbar.login}
+            {t.navbar.login}
           </button>
+          <LanguageToggle />
           <ThemeToggle />
         </div>
       </nav>
@@ -187,10 +192,10 @@ function RegisterPage() {
       <div className="flex items-center justify-center min-h-[calc(100vh-200px)] p-4 py-8">
         <div className={`${isDark ? 'bg-gray-800' : 'bg-white'} p-8 rounded-xl shadow-lg w-full max-w-2xl`}>
           <h1 className={`text-3xl font-bold text-center mb-2 ${isDark ? 'text-white' : 'text-gray-900'}`}>
-            {strings.heading.title}
+            {t.heading.title}
           </h1>
           <p className={`text-center ${isDark ? 'text-gray-400' : 'text-gray-600'} mb-6`}>
-            {strings.heading.subtitle}
+            {t.heading.subtitle}
           </p>
 
           {/* Error Message */}
@@ -212,7 +217,7 @@ function RegisterPage() {
                 </svg>
                 <div className="flex-1">
                   <p className="font-semibold text-lg mb-1">✉️ {success}</p>
-                  <p className="text-sm">{strings.messages.successSubtext}</p>
+                  <p className="text-sm">{t.messages.successSubtext}</p>
                   <p className="text-sm mt-2">Check your spam folder if you don't see the email.</p>
                   <button
                     onClick={() => navigate('/login')}
@@ -231,7 +236,7 @@ function RegisterPage() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label className={`block text-sm font-medium ${isDark ? 'text-gray-300' : 'text-gray-700'} mb-1`}>
-                  {strings.form.firstName} *
+                  {t.form.firstName} *
                 </label>
                 <input
                   type="text"
@@ -243,7 +248,7 @@ function RegisterPage() {
                       ? 'border-red-500' 
                       : isDark ? 'border-gray-600' : 'border-gray-300'
                   } ${isDark ? 'bg-gray-700 text-white' : 'bg-white text-black'} rounded-lg focus:ring-2 focus:ring-blue-500 transition-transform focus:scale-105`}
-                  placeholder={strings.form.firstNamePlaceholder}
+                  placeholder={t.form.firstNamePlaceholder}
                 />
                 {errors.first_name && (
                   <p className="text-red-500 text-xs mt-1">{errors.first_name}</p>
@@ -252,7 +257,7 @@ function RegisterPage() {
 
               <div>
                 <label className={`block text-sm font-medium ${isDark ? 'text-gray-300' : 'text-gray-700'} mb-1`}>
-                  {strings.form.lastName} *
+                  {t.form.lastName} *
                 </label>
                 <input
                   type="text"
@@ -264,7 +269,7 @@ function RegisterPage() {
                       ? 'border-red-500' 
                       : isDark ? 'border-gray-600' : 'border-gray-300'
                   } ${isDark ? 'bg-gray-700 text-white' : 'bg-white text-black'} rounded-lg focus:ring-2 focus:ring-blue-500 transition-transform focus:scale-105`}
-                  placeholder={strings.form.lastNamePlaceholder}
+                  placeholder={t.form.lastNamePlaceholder}
                 />
                 {errors.last_name && (
                   <p className="text-red-500 text-xs mt-1">{errors.last_name}</p>
@@ -275,7 +280,7 @@ function RegisterPage() {
             {/* Username */}
             <div>
               <label className={`block text-sm font-medium ${isDark ? 'text-gray-300' : 'text-gray-700'} mb-1`}>
-                {strings.form.username} *
+                {t.form.username} *
               </label>
               <input
                 type="text"
@@ -287,7 +292,7 @@ function RegisterPage() {
                     ? 'border-red-500' 
                     : isDark ? 'border-gray-600' : 'border-gray-300'
                 } ${isDark ? 'bg-gray-700 text-white' : 'bg-white text-black'} rounded-lg focus:ring-2 focus:ring-blue-500 transition-transform focus:scale-105`}
-                placeholder={strings.form.usernamePlaceholder}
+                placeholder={t.form.usernamePlaceholder}
               />
               {errors.username && (
                 <p className="text-red-500 text-xs mt-1">{errors.username}</p>
@@ -297,7 +302,7 @@ function RegisterPage() {
             {/* Email */}
             <div>
               <label className={`block text-sm font-medium ${isDark ? 'text-gray-300' : 'text-gray-700'} mb-1`}>
-                {strings.form.email} *
+                {t.form.email} *
               </label>
               <input
                 type="email"
@@ -309,7 +314,7 @@ function RegisterPage() {
                     ? 'border-red-500' 
                     : isDark ? 'border-gray-600' : 'border-gray-300'
                 } ${isDark ? 'bg-gray-700 text-white' : 'bg-white text-black'} rounded-lg focus:ring-2 focus:ring-blue-500 transition-transform focus:scale-105`}
-                placeholder={strings.form.emailPlaceholder}
+                placeholder={t.form.emailPlaceholder}
               />
               {errors.email && (
                 <p className="text-red-500 text-xs mt-1">{errors.email}</p>
@@ -320,7 +325,7 @@ function RegisterPage() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label className={`block text-sm font-medium ${isDark ? 'text-gray-300' : 'text-gray-700'} mb-1`}>
-                  {strings.form.password} *
+                  {t.form.password} *
                 </label>
                 <div className="relative">
                   <input
@@ -333,7 +338,7 @@ function RegisterPage() {
                         ? 'border-red-500' 
                         : isDark ? 'border-gray-600' : 'border-gray-300'
                     } ${isDark ? 'bg-gray-700 text-white' : 'bg-white text-black'} rounded-lg focus:ring-2 focus:ring-blue-500 transition-transform focus:scale-105`}
-                    placeholder={strings.form.passwordPlaceholder}
+                    placeholder={t.form.passwordPlaceholder}
                   />
                   <button
                     type="button"
@@ -356,7 +361,7 @@ function RegisterPage() {
 
               <div>
                 <label className={`block text-sm font-medium ${isDark ? 'text-gray-300' : 'text-gray-700'} mb-1`}>
-                  {strings.form.confirmPassword} *
+                  {t.form.confirmPassword} *
                 </label>
                 <div className="relative">
                   <input
@@ -369,7 +374,7 @@ function RegisterPage() {
                         ? 'border-red-500' 
                         : isDark ? 'border-gray-600' : 'border-gray-300'
                     } ${isDark ? 'bg-gray-700 text-white' : 'bg-white text-black'} rounded-lg focus:ring-2 focus:ring-blue-500 transition-transform focus:scale-105`}
-                    placeholder={strings.form.confirmPasswordPlaceholder}
+                    placeholder={t.form.confirmPasswordPlaceholder}
                   />
                   <button
                     type="button"
@@ -394,7 +399,7 @@ function RegisterPage() {
             {/* User Type */}
             <div>
               <label className={`block text-sm font-medium ${isDark ? 'text-gray-300' : 'text-gray-700'} mb-2`}>
-                {strings.form.userType} *
+                {t.form.userType} *
               </label>
               <div className="grid grid-cols-2 gap-4">
                 <button
@@ -409,7 +414,7 @@ function RegisterPage() {
                   <div className="flex flex-col items-center">
                     <span className="text-2xl mb-2">🎓</span>
                     <span className={`font-medium ${isDark ? 'text-white' : 'text-gray-900'}`}>
-                      {strings.form.userTypeStudent}
+                      {t.form.userTypeStudent}
                     </span>
                   </div>
                 </button>
@@ -426,7 +431,7 @@ function RegisterPage() {
                   <div className="flex flex-col items-center">
                     <span className="text-2xl mb-2">👨‍🏫</span>
                     <span className={`font-medium ${isDark ? 'text-white' : 'text-gray-900'}`}>
-                      {strings.form.userTypeInstructor}
+                      {t.form.userTypeInstructor}
                     </span>
                   </div>
                 </button>
@@ -442,20 +447,20 @@ function RegisterPage() {
               disabled={loading}
               className="w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 disabled:bg-blue-400 disabled:cursor-not-allowed transition font-medium"
             >
-              {loading ? strings.form.registeringButton : strings.form.registerButton}
+              {loading ? t.form.registeringButton : t.form.registerButton}
             </button>
           </form>
 
           {/* Login Link */}
           <div className="mt-6 text-center">
             <p className={`text-sm ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
-              {strings.footer.haveAccount}{' '}
+              {t.footer.haveAccount}{' '}
               <button
                 onClick={() => navigate('/login')}
                 className="px-4 py-2 rounded-lg text-white transition shadow bg-blue-900 hover:bg-blue-950 dark:bg-blue-900/80 dark:hover:bg-blue-900"
 
               >
-                {strings.footer.loginLink}
+                {t.footer.loginLink}
               </button>
             </p>
           </div>
