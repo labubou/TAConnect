@@ -45,11 +45,15 @@ def update_time_slot_status(request, slot_id):
         time_slot.save()
     except Exception as e:
         return Response({'error': f'Failed to update time slot'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-    
-    message, error = cancel_student_bookings(time_slot)
 
-    if error:
-        print(f"Error cancelling bookings for time slot {time_slot.id}: {error}")
-        return Response({'error': "something went wrong"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+    # Only cancel bookings if slot is being disabled
+    if not time_slot.status:
+        message, error = cancel_student_bookings(time_slot, cancellation_reason='slot_disabled')
+
+        if error:
+            print(f"Error cancelling bookings for time slot {time_slot.id}: {error}")
+            return Response({'error': "something went wrong"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+    else:
+        message = "Time slot enabled successfully."
 
     return Response({'success': True, 'time_slot_id': time_slot.id, 'message': message}, status=status.HTTP_200_OK)

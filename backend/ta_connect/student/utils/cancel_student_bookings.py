@@ -1,13 +1,20 @@
 from student.models import Booking
 from utils.email_sending.booking.send_cancel_booking_email_mass import send_cancel_booking_email_mass
 
-def cancel_student_bookings(time_slot, bookings=None):
+def cancel_student_bookings(time_slot, bookings=None, cancellation_reason=None):
     """
     Cancel all student bookings associated with the given time slot.
 
     Args:
         time_slot (OfficeHourSlot): The time slot for which to cancel bookings.
         bookings (QuerySet, optional): Specific bookings to cancel. If None, cancels all non-cancelled, non-completed bookings.
+        cancellation_reason (str, optional): Reason for cancellation. Can be:
+            - 'slot_disabled': Time slot temporarily disabled
+            - 'slot_deleted': Time slot permanently deleted
+            - 'manual': Manual cancellation by instructor
+            - 'schedule_conflict': Scheduling conflict
+            - Custom message string
+            If None, defaults to 'manual'
 
     Returns:
         tuple: A message and an error (if any).
@@ -31,7 +38,7 @@ def cancel_student_bookings(time_slot, bookings=None):
 
         #send bulk cancellation emails
         try:
-            email_result = send_cancel_booking_email_mass(bookings_list)
+            email_result = send_cancel_booking_email_mass(bookings_list, cancellation_reason)
             
             if email_result['failed']:
                 print(f"Warning: {len(email_result['failed'])} cancellation emails failed to send")
