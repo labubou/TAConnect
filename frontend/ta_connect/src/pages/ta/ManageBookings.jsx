@@ -19,7 +19,11 @@ const getCurrentMonthDateRange = () => {
   const monthEnd = new Date(currentYear, currentMonth + 1, 0);
   
   const formatDate = (date) => {
-    return date.toISOString().split('T')[0];
+    // Use local date to avoid timezone issues
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
   };
   
   return {
@@ -34,7 +38,7 @@ export default function ManageBookings() {
   const [isNavbarOpen, setIsNavbarOpen] = useState(true);
   const [filteredBookings, setFilteredBookings] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
-  const [statusFilter, setStatusFilter] = useState('active');
+  const [statusFilter, setStatusFilter] = useState({ active: true, cancelled: false });
   const [dateRange, setDateRange] = useState(() => getCurrentMonthDateRange());
   const [selectedBooking, setSelectedBooking] = useState(null);
   const [showCancelModal, setShowCancelModal] = useState(false);
@@ -53,11 +57,16 @@ export default function ManageBookings() {
   useEffect(() => {
     let filtered = bookings;
 
-    // Filter by status
-    if (statusFilter === 'active') {
+    // Filter by status - show both active and cancelled if both are selected, or just one if only one is selected
+    if (statusFilter.active && statusFilter.cancelled) {
+      // Show all bookings
+    } else if (statusFilter.active) {
       filtered = filtered.filter(b => !b.is_cancelled);
-    } else if (statusFilter === 'cancelled') {
+    } else if (statusFilter.cancelled) {
       filtered = filtered.filter(b => b.is_cancelled);
+    } else {
+      // If neither is selected, show nothing
+      filtered = [];
     }
 
     // Filter by date range
@@ -157,7 +166,7 @@ export default function ManageBookings() {
 
   const handleClearFilters = () => {
     setSearchTerm('');
-    setStatusFilter('active');
+    setStatusFilter({ active: true, cancelled: false });
     setDateRange(getCurrentMonthDateRange());
   };
 
@@ -173,6 +182,19 @@ export default function ManageBookings() {
     if (!timeString) return 'N/A';
     const [hours, minutes] = timeString.split(':');
     return `${hours}:${minutes}`;
+  };
+
+  const formatBookingDateTime = (dateTimeString) => {
+    if (!dateTimeString) return 'N/A';
+    try {
+      // Handle ISO format datetime (YYYY-MM-DD HH:MM:SS or with Z)
+      const date = new Date(dateTimeString);
+      const hours = String(date.getHours()).padStart(2, '0');
+      const minutes = String(date.getMinutes()).padStart(2, '0');
+      return `${hours}:${minutes}`;
+    } catch (e) {
+      return 'N/A';
+    }
   };
 
   const getStatusColor = (booking) => {
@@ -224,9 +246,9 @@ export default function ManageBookings() {
                 {strings.filters.filterByStatus}
               </h2>
               
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
+              <div className="mb-4">
                 {/* Search */}
-                <div className="sm:col-span-2 lg:col-span-2">
+                <div className="mb-4">
                   <input
                     type="text"
                     placeholder={strings.filters.search}
@@ -240,20 +262,37 @@ export default function ManageBookings() {
                   />
                 </div>
 
-                {/* Status Filter */}
-                <select
-                  value={statusFilter}
-                  onChange={(e) => setStatusFilter(e.target.value)}
-                  className={`px-4 py-2 rounded-lg border transition-colors ${
-                    isDark
-                      ? 'bg-gray-600 border-gray-500 text-white'
-                      : 'bg-white border-gray-300 text-gray-900'
-                  } focus:outline-none focus:ring-2 focus:ring-[#366c6b]`}
-                >
-                  <option value="all">{strings.filters.all}</option>
-                  <option value="active">{strings.filters.active}</option>
-                  <option value="cancelled">{strings.filters.cancelled}</option>
-                </select>
+                {/* Status Toggle Buttons */}
+                <div className="flex gap-4 flex-wrap">
+                  <button
+                    onClick={() => setStatusFilter(prev => ({ ...prev, active: !prev.active }))}
+                    className={`px-12 py-5 rounded-xl border-3 transition-all font-bold text-xl min-w-[180px] ${
+                      statusFilter.active
+                        ? isDark
+                          ? 'border-emerald-600 bg-emerald-900/20 text-emerald-200'
+                          : 'border-emerald-500 bg-emerald-50 text-emerald-700'
+                        : isDark
+                        ? 'border-gray-700 hover:border-gray-600 bg-gray-800/50 text-gray-300'
+                        : 'border-gray-200 hover:border-gray-300 bg-gray-50 text-gray-600'
+                    }`}
+                  >
+                    Active
+                  </button>
+                  <button
+                    onClick={() => setStatusFilter(prev => ({ ...prev, cancelled: !prev.cancelled }))}
+                    className={`px-12 py-5 rounded-xl border-3 transition-all font-bold text-xl min-w-[180px] ${
+                      statusFilter.cancelled
+                        ? isDark
+                          ? 'border-red-600 bg-red-900/20 text-red-200'
+                          : 'border-red-500 bg-red-50 text-red-700'
+                        : isDark
+                        ? 'border-gray-700 hover:border-gray-600 bg-gray-800/50 text-gray-300'
+                        : 'border-gray-200 hover:border-gray-300 bg-gray-50 text-gray-600'
+                    }`}
+                  >
+                    Cancelled
+                  </button>
+                </div>
               </div>
 
               {/* Date Range */}
@@ -417,7 +456,7 @@ export default function ManageBookings() {
                                 <div>
                                   <p className="font-medium">{formatDate(booking.date)}</p>
                                   <p className={`text-xs ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
-                                    {formatTime(booking.office_hour.start_time)} - {formatTime(booking.office_hour.end_time)}
+                                    {formatBookingDateTime(booking.start_time)}
                                   </p>
                                 </div>
                               </td>
@@ -510,7 +549,7 @@ export default function ManageBookings() {
                                 {strings.bookingCard.time}
                               </p>
                               <p className={`text-sm ${isDark ? 'text-white' : 'text-gray-900'}`}>
-                                {formatTime(booking.office_hour.start_time)} - {formatTime(booking.office_hour.end_time)}
+                                {formatBookingDateTime(booking.start_time)}
                               </p>
                             </div>
                           </div>
