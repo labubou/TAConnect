@@ -20,7 +20,7 @@ from accounts.schemas.auth_schemas import (
     password_reset_validate_request,
     password_reset_generic_response,
 )
-from .utils.send_password_reset_email import send_password_reset_email
+from utils.email_sending.auth.send_password_reset_email import send_password_reset_email
 
 class CustomPasswordResetView(PasswordResetView):
     template_name = 'password_reset.html'
