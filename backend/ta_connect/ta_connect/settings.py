@@ -379,3 +379,10 @@ if DEBUG:
     CONTENT_SECURITY_POLICY_REPORT_ONLY = CONTENT_SECURITY_POLICY
 else:
     CONTENT_SECURITY_POLICY_REPORT_ONLY = None
+
+# Email Change Verification Settings
+EMAIL_CHANGE_TIMEOUT_HOURS = 24  # Email change links expire after 24 hours
+
+# Django's built-in password reset timeout (also affects token validity)
+# This is in seconds - 24 hours = 86400 seconds
+PASSWORD_RESET_TIMEOUT = 86400

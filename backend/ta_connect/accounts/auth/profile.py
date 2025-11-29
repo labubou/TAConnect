@@ -253,6 +253,11 @@ class VerifyEmailChangeView(GenericAPIView):
             validated_data = serializer.validated_data
             user = validated_data.get('user')
             new_email = validated_data.get('new_email_decoded')
+            pending_change = validated_data.get('pending_change')
+            
+            # Mark the pending change as used (single-use token)
+            pending_change.used = True
+            pending_change.save()
             
             # Update the user's email
             user.email = new_email

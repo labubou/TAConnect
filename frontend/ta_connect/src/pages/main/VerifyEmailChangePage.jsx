@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useTheme } from '../../contexts/ThemeContext';
 import { useAuth } from '../../contexts/AuthContext';
@@ -14,9 +14,17 @@ function VerifyEmailChangePage() {
   const { uid, token, newEmail } = useParams();
   const [status, setStatus] = useState('verifying'); // verifying, success, error
   const [message, setMessage] = useState('Verifying your new email...');
+  
+  // Prevent duplicate API calls
+  const hasVerified = useRef(false);
 
   useEffect(() => {
     const verifyEmailChange = async () => {
+      // Prevent duplicate calls
+      if (hasVerified.current) {
+        return;
+      }
+      
       // Validate URL parameters
       if (!uid || !token || !newEmail) {
         setStatus('error');
@@ -24,11 +32,15 @@ function VerifyEmailChangePage() {
         return;
       }
 
+      // Mark as verified to prevent duplicate calls
+      hasVerified.current = true;
+
       try {
+        // newEmail is already base64-encoded from the URL, pass it directly
         const response = await axios.post('/api/profile/verify-email-change/', {
           uid,
           token,
-          new_email: decodeURIComponent(newEmail),
+          new_email: newEmail,
         });
 
         if (response.data) {
@@ -55,8 +67,6 @@ function VerifyEmailChangePage() {
         }
       } catch (err) {
         console.error('Email change verification error:', err);
-        console.error('Response data:', err.response?.data);
-        console.error('Request data sent:', { uid, token, new_email: decodeURIComponent(newEmail) });
         setStatus('error');
         
         // Handle rate limiting specifically

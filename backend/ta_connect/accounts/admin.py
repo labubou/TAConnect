@@ -1,7 +1,7 @@
 from django.contrib import admin
 from django.contrib.auth import get_user_model
 from django.contrib.auth.admin import UserAdmin as DjangoUserAdmin
-from .models import InstructorProfile, StudentProfile
+from .models import InstructorProfile, StudentProfile, PendingEmailChange
 
 User = get_user_model()
 
@@ -33,3 +33,18 @@ class StudentProfileAdmin(admin.ModelAdmin):
     search_fields = ("user__username", "user__email", "user__first_name", "user__last_name")
     list_filter = ("email_notifications_on_booking", "email_notifications_on_cancellation")
     raw_id_fields = ("user",)
+
+@admin.register(PendingEmailChange)
+class PendingEmailChangeAdmin(admin.ModelAdmin):
+    list_display = ("id", "user", "new_email", "created_at", "used", "is_expired_display")
+    search_fields = ("user__username", "user__email", "new_email")
+    list_filter = ("used", "created_at")
+    readonly_fields = ("token", "created_at", "is_expired_display")
+    raw_id_fields = ("user",)
+    ordering = ("-created_at",)
+    date_hierarchy = "created_at"
+    
+    def is_expired_display(self, obj):
+        return obj.is_expired()
+    is_expired_display.short_description = "Expired"
+    is_expired_display.boolean = True
