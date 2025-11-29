@@ -19,6 +19,7 @@ from .schemas.slot_schemas import (
 )
 from django.db.models import Q, Count
 from student.utils.complete_book import complete_booking
+from utils.error_formatter import format_serializer_errors
 
 # Create your views here.
 class GetUserSlotsView(GenericAPIView):

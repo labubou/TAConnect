@@ -17,6 +17,7 @@ from accounts.schemas.auth_schemas import (
 from ..serializers.register_serializer import RegisterSerializer
 from utils.email_sending.auth.send_verification_email import send_verification_email
 from utils.email_sending.auth.send_welcome_email import send_welcome_email
+from utils.error_formatter import format_serializer_errors
 
 class RegisterRateThrottle(AnonRateThrottle):
     rate = '5/hour'  # Limit registration to prevent abuse

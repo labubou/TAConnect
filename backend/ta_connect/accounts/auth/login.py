@@ -9,6 +9,7 @@ from drf_yasg.utils import swagger_auto_schema
 from accounts.schemas.auth_schemas import login_request, login_response
 from ..serializers.login_serializer import LoginSerializer
 from utils.email_sending.auth.send_verification_email import send_verification_email
+from utils.error_formatter import format_serializer_errors
 from ..models import User
 
 class LoginRateThrottle(AnonRateThrottle):
