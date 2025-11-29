@@ -24,6 +24,13 @@ export const emailPreferencesStrings = {
     optionDescription: 'Receive email confirmation when you cancel a booking',
   },
   
+  updateSection: {
+    title: 'Email on Booking Update',
+    subtitle: 'Get notified when you update a booking',
+    optionTitle: 'Email on Booking Update',
+    optionDescription: 'Receive email confirmation when you update or reschedule a booking',
+  },
+  
   status: {
     enabled: 'Enabled',
   },
