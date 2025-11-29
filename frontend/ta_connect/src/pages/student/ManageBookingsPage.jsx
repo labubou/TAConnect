@@ -16,6 +16,7 @@ export default function ManageBookingsPage() {
   const [showUpdateModal, setShowUpdateModal] = useState(false);
   const [cancelLoading, setCancelLoading] = useState(false);
   const [sendCancelEmail, setSendCancelEmail] = useState(true);
+  const [sendUpdateEmail, setSendUpdateEmail] = useState(true);
   const [availableDates, setAvailableDates] = useState([]);
   const [availableTimes, setAvailableTimes] = useState([]);
   const [newDate, setNewDate] = useState('');
@@ -54,6 +55,23 @@ export default function ManageBookingsPage() {
       setError('Failed to load bookings');
     }
   }, [apiError]);
+
+  // Fetch user email preferences on mount
+  useEffect(() => {
+    const fetchEmailPreferences = async () => {
+      try {
+        const response = await axios.get('/api/profile/email-preferences/');
+        if (response.data) {
+          setSendCancelEmail(response.data.email_on_cancellation !== false);
+          setSendUpdateEmail(response.data.email_on_update !== false);
+        }
+      } catch (err) {
+        console.error('Failed to fetch email preferences:', err);
+        // Keep default values if fetch fails
+      }
+    };
+    fetchEmailPreferences();
+  }, []);
 
   const handleCancelClick = (booking) => {
     setSelectedBooking(booking);
@@ -155,7 +173,8 @@ export default function ManageBookingsPage() {
       bookingId: selectedBooking.id,
       data: {
         new_date: newDate,
-        new_time: newTime
+        new_time: newTime,
+        send_email: sendUpdateEmail
       }
     }, {
       onSuccess: () => {
