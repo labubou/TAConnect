@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useTheme } from '../../contexts/ThemeContext';
 import { useGlobalLoading } from '../../contexts/GlobalLoadingContext';
+import { useLocation } from 'react-router-dom';
 import StudentNavbar from '../../components/student/studentNavbar';
 import Footer from '../../components/General/Footer';
 import axios from 'axios';
@@ -30,9 +31,19 @@ const getCurrentMonthDateRange = () => {
   };
 };
 
+// Helper function to get date range for a specific date
+const getDateRangeForDate = (dateStr) => {
+  const date = new Date(dateStr + 'T00:00:00');
+  return {
+    start: dateStr,
+    end: dateStr
+  };
+};
+
 export default function ManageBookingsPage() {
   const { theme } = useTheme();
   const { startLoading, stopLoading, isLoading } = useGlobalLoading();
+  const location = useLocation();
   const isDark = theme === 'dark';
   const [isNavbarOpen, setIsNavbarOpen] = useState(window.innerWidth >= 1024);
   const [error, setError] = useState('');
@@ -50,7 +61,13 @@ export default function ManageBookingsPage() {
   const [filterStatus, setFilterStatus] = useState('all'); 
   const [filterCourse, setFilterCourse] = useState('all');
   const [sortBy, setSortBy] = useState('date');
-  const [dateRange, setDateRange] = useState(() => getCurrentMonthDateRange());
+  const [dateRange, setDateRange] = useState(() => {
+    // Check if there's a filterDate in location state
+    if (location.state?.filterDate) {
+      return getDateRangeForDate(location.state.filterDate);
+    }
+    return getCurrentMonthDateRange();
+  });
   const [clearedCancelledIds, setClearedCancelledIds] = useState(() => {
     const saved = localStorage.getItem('clearedCancelledIds');
     return saved ? new Set(JSON.parse(saved)) : new Set();

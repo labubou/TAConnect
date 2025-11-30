@@ -1,11 +1,13 @@
 import { useState, useEffect } from 'react';
 import { useTheme } from '../../contexts/ThemeContext';
 import { useQuery } from '@tanstack/react-query';
+import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 
 export default function BookingsCalendar() {
   const { theme } = useTheme();
   const isDark = theme === 'dark';
+  const navigate = useNavigate();
   const [currentDate, setCurrentDate] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState(null);
   const [hoveredDay, setHoveredDay] = useState(null);
@@ -348,8 +350,12 @@ export default function BookingsCalendar() {
               {getBookingsForDate(selectedDate).map((booking, idx) => (
                 <div
                   key={idx}
-                  className={`p-5 rounded-xl transition-all duration-300 hover:shadow-2xl hover:scale-[1.02] ${
-                    isDark ? 'bg-gradient-to-br from-gray-700 to-gray-800 border-2 border-gray-600' : 'bg-gradient-to-br from-white to-gray-50 border-2 border-gray-300 shadow-lg'
+                  onClick={() => {
+                    const dateStr = `${selectedDate.getFullYear()}-${String(selectedDate.getMonth() + 1).padStart(2, '0')}-${String(selectedDate.getDate()).padStart(2, '0')}`;
+                    navigate('/student/manage-booked', { state: { filterDate: dateStr } });
+                  }}
+                  className={`p-5 rounded-xl transition-all duration-300 hover:shadow-2xl hover:scale-[1.02] cursor-pointer ${
+                    isDark ? 'bg-gradient-to-br from-gray-700 to-gray-800 border-2 border-gray-600 hover:border-[#366c6b]' : 'bg-gradient-to-br from-white to-gray-50 border-2 border-gray-300 shadow-lg hover:border-[#366c6b]'
                   }`}
                 >
                   <div className="flex items-start justify-between">
@@ -379,6 +385,11 @@ export default function BookingsCalendar() {
                           </p>
                         )}
                       </div>
+                    </div>
+                    <div className={`ml-3 ${isDark ? 'text-[#4a9d9c]' : 'text-[#366c6b]'}`}>
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                      </svg>
                     </div>
                   </div>
                 </div>
