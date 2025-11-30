@@ -83,6 +83,12 @@ function RegisterPage() {
       newErrors.password = t.validation.passwordRequired;
     } else if (formData.password.length < 8) {
       newErrors.password = t.validation.passwordMinLength;
+    } else if (!/[A-Z]/.test(formData.password)) {
+      newErrors.password = t.validation.passwordUppercase;
+    } else if (!/[a-z]/.test(formData.password)) {
+      newErrors.password = t.validation.passwordLowercase;
+    } else if (!/[0-9]/.test(formData.password)) {
+      newErrors.password = t.validation.passwordNumber;
     }
 
 
