@@ -1,17 +1,18 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useTheme } from '../../contexts/ThemeContext';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { useGlobalLoading } from '../../contexts/GlobalLoadingContext';
-import ThemeToggle from '../../components/ThemeToggle';
-import LanguageToggle from '../../components/LanguageToggle';
-import Footer from '../../components/Footer';
+import ThemeToggle from '../../components/General/ThemeToggle';
+import LanguageToggle from '../../components/General/LanguageToggle';
+import Footer from '../../components/General/Footer';
 import Logo2 from '../../assets/Logo2.png';
 import strings from '../../strings/registerPageStrings';
 import axios from 'axios';
 
 function RegisterPage() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const { theme } = useTheme();
   const { language } = useLanguage();
   const { startLoading, stopLoading, isLoading: globalIsLoading } = useGlobalLoading();
@@ -19,6 +20,7 @@ function RegisterPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+  const returnUrl = searchParams.get('returnUrl');
   
   const [formData, setFormData] = useState({
     username: '',
@@ -118,16 +120,25 @@ function RegisterPage() {
       if (response.data) {
         stopLoading('register');
         setSuccess(response.data.message || t.messages.success);
-        // Clear the form
-        setFormData({
-          username: '',
-          email: '',
-          password: '',
-          password2: '',
-          first_name: '',
-          last_name: '',
-          user_type: '',
-        });
+        
+        // If there's a returnUrl (e.g., from booking link), redirect to login with returnUrl
+        if (returnUrl) {
+          // Show success message briefly, then redirect
+          setTimeout(() => {
+            navigate(`/login?returnUrl=${encodeURIComponent(returnUrl)}&registered=true`);
+          }, 1500);
+        } else {
+          // Clear the form for regular registration
+          setFormData({
+            username: '',
+            email: '',
+            password: '',
+            password2: '',
+            first_name: '',
+            last_name: '',
+            user_type: '',
+          });
+        }
       }
     } catch (err) {
       console.error('Registration error:', err);
@@ -183,8 +194,8 @@ function RegisterPage() {
         </div>
         <div className="flex items-center space-x-4">
           <button
-            onClick={() => navigate('/login')}
-            className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+            onClick={() => navigate(returnUrl ? `/login?returnUrl=${encodeURIComponent(returnUrl)}` : '/login')}
+            className="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600"
           >
             {t.navbar.login}
           </button>
@@ -225,7 +236,7 @@ function RegisterPage() {
                   <p className="text-sm">{t.messages.successSubtext}</p>
                   <p className="text-sm mt-2">Check your spam folder if you don't see the email.</p>
                   <button
-                    onClick={() => navigate('/login')}
+                    onClick={() => navigate(returnUrl ? `/login?returnUrl=${encodeURIComponent(returnUrl)}` : '/login')}
                     className={`mt-3 px-4 py-2 ${isDark ? 'bg-green-700 hover:bg-green-600' : 'bg-green-600 hover:bg-green-700'} text-white rounded transition`}
                   >
                     Go to Login

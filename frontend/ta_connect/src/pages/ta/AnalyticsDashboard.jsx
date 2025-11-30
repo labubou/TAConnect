@@ -8,9 +8,9 @@ import MostBookedTimeCard from '../../components/ta/MostBookedTimeCard';
 import AllSlotsAnalytics from '../../components/ta/AllSlotsAnalytics';
 import AllTimesAnalytics from '../../components/ta/AllTimesAnalytics';
 import SummaryStatistics from '../../components/ta/SummaryStatistics';
-import ErrorBoundary from '../../components/ErrorBoundary';
-import Footer from '../../components/Footer';
-import { SkeletonLoader } from '../../components/SkeletonLoader';
+import ErrorBoundary from '../../components/General/ErrorBoundary';
+import Footer from '../../components/General/Footer';
+import { SkeletonLoader } from '../../components/General/SkeletonLoader';
 import {
   processBookingsForChart,
   processStudentActivityForChart,

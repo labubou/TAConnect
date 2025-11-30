@@ -5,7 +5,7 @@ import { useTheme } from '../../contexts/ThemeContext';
 import { useAuth } from '../../contexts/AuthContext';
 import { useGlobalLoading } from '../../contexts/GlobalLoadingContext';
 import StudentNavbar from '../../components/student/studentNavbar';
-import Footer from '../../components/Footer';
+import Footer from '../../components/General/Footer';
 import { emailPreferencesStrings as strings } from '../../strings/emailPreferencesSTUStrings';
 
 export default function EmailPreferencesPage() {

@@ -5,7 +5,7 @@ import { useTheme } from '../../contexts/ThemeContext';
 import { useAuth } from '../../contexts/AuthContext';
 import { useGlobalLoading } from '../../contexts/GlobalLoadingContext';
 import TAnavbar from '../../components/ta/TAnavbar';
-import Footer from '../../components/Footer';
+import Footer from '../../components/General/Footer';
 import strings from '../../strings/TANavbarStrings';
 
 export default function EmailPreferencesPage() {

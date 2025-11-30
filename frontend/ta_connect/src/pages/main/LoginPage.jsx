@@ -1,19 +1,20 @@
 import { useState } from 'react';
 import { useTheme } from '../../contexts/ThemeContext';
 import { useLanguage } from '../../contexts/LanguageContext';
-import ThemeToggle from '../../components/ThemeToggle';
-import LanguageToggle from '../../components/LanguageToggle';
-import { useNavigate } from 'react-router-dom';
+import ThemeToggle from '../../components/General/ThemeToggle';
+import LanguageToggle from '../../components/General/LanguageToggle';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { useGlobalLoading } from '../../contexts/GlobalLoadingContext';
 import axios from 'axios';
 import Logo2 from '../../assets/Logo2.png';
 import strings from '../../strings/loginPageStrings';
-import Footer from '../../components/Footer';
+import Footer from '../../components/General/Footer';
 
 
 function LoginPage() {
     const navigate = useNavigate();
+    const [searchParams] = useSearchParams();
     const { login } = useAuth();
     const { startLoading, stopLoading, isLoading } = useGlobalLoading();
     const [credentials, setCredentials] = useState({ username: '', password: '' });
@@ -24,6 +25,11 @@ function LoginPage() {
     const { theme } = useTheme();
     const { language } = useLanguage();
     const t = strings[language];
+    const returnUrl = searchParams.get('returnUrl');
+    const registered = searchParams.get('registered');
+    const [infoMessage, setInfoMessage] = useState(
+        registered === 'true' ? 'Registration successful! Please login to continue.' : ''
+    );
     
     const handleChange = (e) => {
         setCredentials({
@@ -64,8 +70,12 @@ function LoginPage() {
           
           stopLoading('login');
           
-          // Navigate based on user type
-          if (userType === 'instructor') {
+          // If there's a returnUrl, redirect to it
+          if (returnUrl) {
+            navigate(returnUrl);
+          }
+          // Otherwise navigate based on user type
+          else if (userType === 'instructor') {
             navigate('/ta');
           } else if (userType === 'student') {
             navigate('/student');
@@ -74,8 +84,8 @@ function LoginPage() {
           stopLoading('login');
           console.error('Failed to fetch user data:', fetchErr);
           // If fetching user data fails, try to navigate anyway
-          // AuthContext will handle it
-          navigate('/ta');
+          // If there's a returnUrl, use it; otherwise default to /ta
+          navigate(returnUrl || '/ta');
         }
       }
     } catch (err) {
@@ -155,7 +165,7 @@ function LoginPage() {
         </div>
         <div className="flex items-center space-x-4">
           <button
-            onClick={() => navigate('/register')}
+            onClick={() => navigate(returnUrl ? `/register?returnUrl=${encodeURIComponent(returnUrl)}` : '/register')}
             className="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600"
           >
             {t.registerButton}
@@ -173,6 +183,12 @@ function LoginPage() {
           <p className={`text-center ${isDark ? 'text-gray-400' : 'text-gray-600'} mb-6`}>
             {t.loginMessage}
           </p>
+
+          {infoMessage && (
+            <div className={`mb-4 p-3 ${isDark ? 'bg-green-900 border-green-600 text-green-200' : 'bg-green-100 border-green-400 text-green-700'} border rounded`}>
+              {infoMessage}
+            </div>
+          )}
 
           {error && (
             <div className={`mb-4 p-3 ${isDark ? 'bg-red-900 border-red-600 text-red-200' : 'bg-red-100 border-red-400 text-red-700'} border rounded`}>
@@ -271,7 +287,7 @@ function LoginPage() {
             <p className={`text-sm ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
               {t.noAccount}{' '}
               <button
-                onClick={() => navigate('/register')}
+                onClick={() => navigate(returnUrl ? `/register?returnUrl=${encodeURIComponent(returnUrl)}` : '/register')}
                 className="px-4 py-2 rounded-lg text-white transition shadow bg-blue-900 hover:bg-blue-950 dark:bg-blue-900/80 dark:hover:bg-blue-900"
 
 

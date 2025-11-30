@@ -1,20 +1,21 @@
-import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useState, useEffect, useRef } from 'react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useTheme } from '../../contexts/ThemeContext';
 import { useAuth } from '../../contexts/AuthContext';
 import { useGlobalLoading } from '../../contexts/GlobalLoadingContext';
 import StudentNavbar from '../../components/student/studentNavbar';
-import Footer from '../../components/Footer';
+import Footer from '../../components/General/Footer';
 import { bookPageStrings as strings } from '../../strings/bookPageStrings';
 import axios from 'axios';
 import { useCreateBooking } from '../../hooks/useApi';
 
 export default function BookPage() {
   const { theme } = useTheme();
-  const { user } = useAuth();
+  const { user, accessToken } = useAuth();
   const { startLoading, stopLoading, isLoading } = useGlobalLoading();
   const isDark = theme === 'dark';
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const [isNavbarOpen, setIsNavbarOpen] = useState(true);
 
   const [instructors, setInstructors] = useState([]);
@@ -36,6 +37,148 @@ export default function BookPage() {
 
   // Use mutation for creating booking
   const { mutate: createBooking, isPending: isCreatingBooking } = useCreateBooking();
+
+  // Track which URL params have been loaded to prevent duplicate loading
+  const loadedParamsRef = useRef(null);
+
+  // Ebst ya Nadeem
+  
+  // Redirect to public booking page if user is not authenticated but URL parameters are present
+  useEffect(() => {
+    const instructorId = searchParams.get('ta_id') || searchParams.get('instructor');
+    const slotId = searchParams.get('slot_id') || searchParams.get('slot');
+
+    // If URL parameters exist but user is not authenticated, redirect to public booking page
+    if (instructorId && slotId && !user) {
+      navigate(`/book?ta_id=${instructorId}&slot_id=${slotId}`, { replace: true });
+    }
+  }, [searchParams, user, navigate]);
+  
+  // Handle URL parameters for pre-selection
+  useEffect(() => {
+    // Support both parameter naming conventions: ta_id/slot_id and instructor/slot
+    const instructorId = searchParams.get('ta_id') || searchParams.get('instructor');
+    const slotId = searchParams.get('slot_id') || searchParams.get('slot');
+
+    // Get token from accessToken state or localStorage
+    const token = accessToken || localStorage.getItem('access_token');
+
+    console.log('[BookPage] URL params:', { instructorId, slotId, user: !!user, accessToken: !!token });
+
+    // Only proceed if we have parameters and user is authenticated
+    if (instructorId && slotId && user && token) {
+      // Create a key to track if we've already loaded these params
+      const paramsKey = `${instructorId}-${slotId}`;
+      
+      console.log('[BookPage] Checking params key:', paramsKey, 'vs loaded:', loadedParamsRef.current);
+      
+      // Skip if we've already loaded these exact parameters
+      if (loadedParamsRef.current === paramsKey) {
+        console.log('[BookPage] Already loaded these params, skipping');
+        return;
+      }
+
+      console.log('[BookPage] Loading from params:', { instructorId, slotId });
+
+      // Auto-load instructor and slot from URL parameters
+      const loadFromParams = async () => {
+        startLoading('load-params', 'Loading booking details...');
+        try {
+          // Fetch instructor's full data including slots directly
+          const response = await axios.get(`/api/instructor/get-instructor-data/${instructorId}/`, {
+            headers: { Authorization: `Bearer ${token}` }
+          });
+          
+          const instructorData = response.data;
+          console.log('[BookPage] Instructor data:', instructorData);
+          
+          // Transform instructor data
+          const nameParts = (instructorData.full_name || '').split(' ');
+          const instructor = {
+            id: instructorData.id,
+            full_name: instructorData.full_name,
+            first_name: nameParts[0] || instructorData.first_name || '',
+            last_name: nameParts.slice(1).join(' ') || instructorData.last_name || '',
+            email: instructorData.email,
+          };
+
+          console.log('[BookPage] Found instructor:', instructor);
+
+          // Set both selected instructor and add to instructors list for display
+          setSelectedInstructor(instructor);
+          setInstructors([instructor]);
+          
+          // Get slots from the instructor data
+          const slots = instructorData.slots || instructorData.time_slots || [];
+          setInstructorSlots(slots);
+          
+          console.log('[BookPage] Fetched slots:', slots.length, 'Looking for slot ID:', slotId);
+          
+          // Find and select the specific slot
+          const targetSlot = slots.find(slot => slot.id === parseInt(slotId));
+          if (targetSlot) {
+            console.log('[BookPage] Found target slot:', targetSlot);
+            setSelectedSlot(targetSlot);
+            
+            // Generate available dates for the selected slot
+            const dates = [];
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            
+            const [startYear, startMonth, startDay] = targetSlot.start_date.split('-').map(Number);
+            const startDate = new Date(startYear, startMonth - 1, startDay);
+            
+            const [endYear, endMonth, endDay] = targetSlot.end_date.split('-').map(Number);
+            const endDate = new Date(endYear, endMonth - 1, endDay);
+            
+            const daysOfWeek = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+            const targetDay = daysOfWeek.indexOf(targetSlot.day_of_week);
+
+            let currentDate = new Date(Math.max(today.getTime(), startDate.getTime()));
+            
+            while (currentDate <= endDate) {
+              if (currentDate.getDay() === targetDay && currentDate >= today) {
+                dates.push(new Date(currentDate));
+              }
+              currentDate.setDate(currentDate.getDate() + 1);
+            }
+
+            setAvailableDates(dates);
+            console.log('[BookPage] Generated available dates:', dates.length);
+          } else {
+            console.log('[BookPage] Slot not found in slots:', slots.map(s => s.id));
+            setError('The requested time slot was not found. Please select a slot manually.');
+          }
+          
+          // Mark these params as loaded
+          loadedParamsRef.current = paramsKey;
+          
+        } catch (err) {
+          console.error('Error loading from URL parameters:', err);
+          console.error('Error details:', err.response?.data);
+          setError('Failed to load booking details from link. Please search manually.');
+        } finally {
+          stopLoading('load-params');
+        }
+      };
+
+      loadFromParams();
+    } else {
+      console.log('[BookPage] Not loading params - missing requirements:', { 
+        hasInstructorId: !!instructorId, 
+        hasSlotId: !!slotId, 
+        hasUser: !!user, 
+        hasToken: !!token 
+      });
+      
+      if (!instructorId || !slotId) {
+        // Reset the ref if there are no URL params
+        loadedParamsRef.current = null;
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchParams, user, accessToken]);
+
 
   // Fetch user email preferences on mount
   useEffect(() => {
@@ -201,14 +344,21 @@ export default function BookPage() {
 
   const generateAvailableDates = (slot) => {
     const dates = [];
+    // Use local date without timezone conversion
     const today = new Date();
-    const startDate = new Date(slot.start_date);
-    const endDate = new Date(slot.end_date);
+    today.setHours(0, 0, 0, 0);
+    
+    // Parse dates as local dates to avoid timezone shifts
+    const [startYear, startMonth, startDay] = slot.start_date.split('-').map(Number);
+    const startDate = new Date(startYear, startMonth - 1, startDay);
+    
+    const [endYear, endMonth, endDay] = slot.end_date.split('-').map(Number);
+    const endDate = new Date(endYear, endMonth - 1, endDay);
     
     const daysOfWeek = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
     const targetDay = daysOfWeek.indexOf(slot.day_of_week);
 
-    let currentDate = new Date(Math.max(today, startDate));
+    let currentDate = new Date(Math.max(today.getTime(), startDate.getTime()));
     
     while (currentDate <= endDate) {
       if (currentDate.getDay() === targetDay && currentDate >= today) {
@@ -336,6 +486,25 @@ export default function BookPage() {
                 {strings.header.subtitle}
               </p>
             </div>
+
+            {/* URL Parameters Info Banner */}
+            {(searchParams.get('ta_id') || searchParams.get('instructor')) && (searchParams.get('slot_id') || searchParams.get('slot')) && selectedInstructor && selectedSlot && (
+              <div className={`mb-6 p-4 ${isDark ? 'bg-blue-900/30 border-blue-600' : 'bg-blue-50 border-blue-300'} border-2 rounded-xl ${isDark ? '' : 'shadow-sm'}`}>
+                <div className="flex items-start">
+                  <svg className={`w-5 h-5 mr-3 mt-0.5 ${isDark ? 'text-blue-400' : 'text-blue-500'}`} fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+                  </svg>
+                  <div>
+                    <span className={`${isDark ? 'text-blue-200' : 'text-blue-700'} font-semibold`}>
+                      Instructor and slot pre-selected from link
+                    </span>
+                    <p className={`text-sm ${isDark ? 'text-blue-300' : 'text-blue-600'} mt-1`}>
+                      Booking with {selectedInstructor.full_name} for {selectedSlot.course?.course_name || 'office hours'} on {selectedSlot.day_of_week}. Just select your preferred date and time below.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
 
             {/* Error/Success Messages */}
             {error && (
@@ -559,7 +728,11 @@ export default function BookPage() {
                         </p>
                       ) : (
                         availableDates.map((date, index) => {
-                          const dateStr = date.toISOString().split('T')[0];
+                          // Format date as YYYY-MM-DD using local timezone to avoid UTC conversion issues
+                          const year = date.getFullYear();
+                          const month = String(date.getMonth() + 1).padStart(2, '0');
+                          const day = String(date.getDate()).padStart(2, '0');
+                          const dateStr = `${year}-${month}-${day}`;
                           return (
                             <button
                               key={index}

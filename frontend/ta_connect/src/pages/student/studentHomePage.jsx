@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { useGlobalLoading } from '../../contexts/GlobalLoadingContext';
 import StudentNavbar from '../../components/student/studentNavbar';
-import Footer from '../../components/Footer';
+import Footer from '../../components/General/Footer';
 import BookingsCalendar from '../../components/student/BookingsCalendar';
 import strings from '../../strings/studentPageStrings'; 
 
@@ -15,7 +15,14 @@ export default function StudentHomePage() {
   const isDark = theme === 'dark';
   const navigate = useNavigate();
   const [isNavbarOpen, setIsNavbarOpen] = useState(true);
-  const { refreshUser } = useAuth();
+  const { refreshUser, user } = useAuth();
+
+  // Redirect TAs/Instructors to their home page
+  useEffect(() => {
+    if (user?.role === 'TA' || user?.role === 'Instructor') {
+      navigate('/ta/home');
+    }
+  }, [user, navigate]);
 
   // Refresh user data on mount to get latest email verification status
   useEffect(() => {

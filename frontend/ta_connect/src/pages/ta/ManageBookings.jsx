@@ -2,9 +2,9 @@ import { useState, useEffect } from 'react';
 import { useTheme } from '../../contexts/ThemeContext';
 import { useGlobalLoading } from '../../contexts/GlobalLoadingContext';
 import TAnavbar from '../../components/ta/TAnavbar';
-import ErrorBoundary from '../../components/ErrorBoundary';
-import Footer from '../../components/Footer';
-import { SkeletonLoader } from '../../components/SkeletonLoader';
+import ErrorBoundary from '../../components/General/ErrorBoundary';
+import Footer from '../../components/General/Footer';
+import { SkeletonLoader } from '../../components/General/SkeletonLoader';
 import strings from '../../strings/manageBookingsStrings';
 import { useInstructorBookings } from '../../hooks/useApi';
 import CancelBookingModal from '../../components/ta/CancelBookingModal';
@@ -53,9 +53,14 @@ export default function ManageBookings() {
   const [showExportModal, setShowExportModal] = useState(false);
 
   // Fetch bookings data with current month date range
+  // Auto-refetch every 30 seconds to update completed status
   const { data: bookings = [], isLoading, error, refetch } = useInstructorBookings(
     dateRange.start,
-    dateRange.end
+    dateRange.end,
+    {
+      refetchInterval: 30000, // Refetch every 30 seconds to check for completed bookings
+      refetchIntervalInBackground: false, // Don't refetch when tab is not active
+    }
   );
 
   // Filter and search bookings

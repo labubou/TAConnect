@@ -3,7 +3,7 @@ import { useAuth } from '../../contexts/AuthContext';
 import { Link, useLocation } from 'react-router-dom';
 import Logo from '../../assets/Logo2.png';
 import { useTheme } from '../../contexts/ThemeContext';
-import ThemeToggle from '../ThemeToggle';
+import ThemeToggle from '../General/ThemeToggle';
 import strings from '../../strings/TANavbarStrings';
 
 const TAnavbar = ({ onToggle }) => {

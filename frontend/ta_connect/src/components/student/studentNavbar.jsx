@@ -3,7 +3,7 @@ import { useAuth } from '../../contexts/AuthContext';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import Logo from '../../assets/Logo2.png';
 import { useTheme } from '../../contexts/ThemeContext';
-import ThemeToggle from '../ThemeToggle';
+import ThemeToggle from '../General/ThemeToggle';
 import strings from '../../strings/studentNavbarStrings';
 
 const StudentNavbar = ({ onToggle }) => {
@@ -173,27 +173,6 @@ const StudentNavbar = ({ onToggle }) => {
                 </Link>
 
                 <Link 
-                  to="/student/profile"
-                  className={`navbar-link group flex items-center p-4 rounded-2xl transition-all duration-300 ${
-                    isActive('/student/profile') 
-                      ? 'bg-gradient-to-r from-[#366c6b] to-[#1a3535] text-white shadow-lg transform scale-105' 
-                      : 'text-gray-700 dark:text-gray-200 hover:bg-white/70 dark:hover:bg-gray-800/60 hover:shadow-md hover:scale-105'
-                  }`}
-                  onClick={closeNavbar}
-                >
-                  <div className={`w-10 h-10 rounded-xl flex items-center justify-center mr-3 transition-colors duration-300 ${
-                    isActive('/student/profile')
-                      ? 'bg-white/20' 
-                      : 'bg-gray-100 dark:bg-gray-800 group-hover:bg-[#eaf6f6] group-hover:dark:bg-gray-700'
-                  }`}>
-                    <svg className={`w-5 h-5 ${isActive('/student/profile') ? 'text-white' : 'text-[#366c6b]'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                    </svg>
-                  </div>
-                  <span className="font-semibold">{strings.navigation.profile}</span>
-                </Link>
-
-                <Link 
                   to="/student/book"
                   className={`navbar-link group flex items-center p-4 rounded-2xl transition-all duration-300 ${
                     isActive('/student/book') 
@@ -255,6 +234,27 @@ const StudentNavbar = ({ onToggle }) => {
                     </svg>
                   </div>
                   <span className="font-semibold">Email Preferences</span>
+                </Link>
+
+                <Link 
+                  to="/student/profile"
+                  className={`navbar-link group flex items-center p-4 rounded-2xl transition-all duration-300 ${
+                    isActive('/student/profile') 
+                      ? 'bg-gradient-to-r from-[#366c6b] to-[#1a3535] text-white shadow-lg transform scale-105' 
+                      : 'text-gray-700 dark:text-gray-200 hover:bg-white/70 dark:hover:bg-gray-800/60 hover:shadow-md hover:scale-105'
+                  }`}
+                  onClick={closeNavbar}
+                >
+                  <div className={`w-10 h-10 rounded-xl flex items-center justify-center mr-3 transition-colors duration-300 ${
+                    isActive('/student/profile')
+                      ? 'bg-white/20' 
+                      : 'bg-gray-100 dark:bg-gray-800 group-hover:bg-[#eaf6f6] group-hover:dark:bg-gray-700'
+                  }`}>
+                    <svg className={`w-5 h-5 ${isActive('/student/profile') ? 'text-white' : 'text-[#366c6b]'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                    </svg>
+                  </div>
+                  <span className="font-semibold">{strings.navigation.profile}</span>
                 </Link>
               </div>
             </div>

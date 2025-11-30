@@ -4,10 +4,11 @@ import { LanguageProvider } from './contexts/LanguageContext'
 import { GlobalLoadingProvider } from './contexts/GlobalLoadingContext'
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
 import { lazy, Suspense } from 'react'
-import ProtectedRoute from './components/ProtectedRoute';
-import PublicRoute from './components/PublicRoute';
-import { SkeletonLoader } from './components/SkeletonLoader';
-import GlobalLoadingOverlay from './components/GlobalLoadingOverlay';
+import ProtectedRoute from './components/General/ProtectedRoute';
+import PublicRoute from './components/General/PublicRoute';
+import PublicBookingRedirect from './components/General/PublicBookingRedirect';
+import { SkeletonLoader } from './components/General/SkeletonLoader';
+import GlobalLoadingOverlay from './components/General/GlobalLoadingOverlay';
 import { useTheme } from './contexts/ThemeContext';
 
 // Eager-loaded critical pages
@@ -16,6 +17,7 @@ import LoginPage from './pages/main/LoginPage';
 import RegisterPage from './pages/main/RegisterPage';
 import GoogleCallback from './pages/main/GoogleCallback';
 import SelectUserType from './pages/main/SelectUserType';
+import PublicBookingPage from './pages/public/PublicBookingPage';
 
 // Lazy-loaded pages for better code splitting
 const VerifyEmailPage = lazy(() => import('./pages/main/VerifyEmailPage'));
@@ -134,6 +136,10 @@ function App() {
                 path="/select-user-type"
                 element={<SelectUserType />}
               />
+              <Route
+                path="/book"
+                element={<PublicBookingPage />}
+              />
               <Route 
                 path="/ta" 
                 element={
@@ -219,11 +225,13 @@ function App() {
               <Route 
                 path="/student/book" 
                 element={
-                  <ProtectedRoute>
-                    <Suspense fallback={<PageLoader />}>
-                      <BookPage />
-                    </Suspense>
-                  </ProtectedRoute>
+                  <PublicBookingRedirect>
+                    <ProtectedRoute>
+                      <Suspense fallback={<PageLoader />}>
+                        <BookPage />
+                      </Suspense>
+                    </ProtectedRoute>
+                  </PublicBookingRedirect>
                 } 
               />
               <Route 

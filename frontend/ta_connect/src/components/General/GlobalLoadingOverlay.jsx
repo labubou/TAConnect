@@ -1,5 +1,5 @@
-import { useGlobalLoading } from '../contexts/GlobalLoadingContext';
-import { useTheme } from '../contexts/ThemeContext';
+import { useGlobalLoading } from '../../contexts/GlobalLoadingContext';
+import { useTheme } from '../../contexts/ThemeContext';
 
 export default function GlobalLoadingOverlay() {
   const { isLoading, loadingMessage } = useGlobalLoading();

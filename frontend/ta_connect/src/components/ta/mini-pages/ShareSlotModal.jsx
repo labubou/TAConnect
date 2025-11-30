@@ -27,7 +27,7 @@ export default function ShareSlotModal({ isDark, slot, onClose }) {
     );
   }
 
-  const shareUrl = `${getBaseUrl()}/student/book/?ta_id=${taId}&slot_id=${slot.id}`;
+  const shareUrl = `${getBaseUrl()}/book/?ta_id=${taId}&slot_id=${slot.id}`;
 
   const handleCopyLink = async () => {
     setCopyError("");

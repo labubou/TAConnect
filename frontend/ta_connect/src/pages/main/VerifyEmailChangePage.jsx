@@ -3,8 +3,8 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { useTheme } from '../../contexts/ThemeContext';
 import { useAuth } from '../../contexts/AuthContext';
 import { useGlobalLoading } from '../../contexts/GlobalLoadingContext';
-import ThemeToggle from '../../components/ThemeToggle';
-import Footer from '../../components/Footer';
+import ThemeToggle from '../../components/General/ThemeToggle';
+import Footer from '../../components/General/Footer';
 import Logo2 from '../../assets/Logo2.png';
 import axios from 'axios';
 

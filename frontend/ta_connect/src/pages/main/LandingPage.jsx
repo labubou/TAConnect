@@ -1,9 +1,9 @@
 import { useNavigate } from 'react-router-dom';
 import { useTheme } from '../../contexts/ThemeContext';
 import { useLanguage } from '../../contexts/LanguageContext';
-import ThemeToggle from '../../components/ThemeToggle';
-import LanguageToggle from '../../components/LanguageToggle';
-import Footer from '../../components/Footer';
+import ThemeToggle from '../../components/General/ThemeToggle';
+import LanguageToggle from '../../components/General/LanguageToggle';
+import Footer from '../../components/General/Footer';
 import Logo2 from '../../assets/Logo2.png';
 import strings from '../../strings/landingPageStrings';
 

@@ -2,7 +2,7 @@ from django.shortcuts import render
 from rest_framework.generics import GenericAPIView
 from rest_framework.response import Response
 from rest_framework import status
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, AllowAny
 from accounts.permissions import IsInstructor, IsStudent
 from instructor.models import OfficeHourSlot
 from accounts.models import User
@@ -178,7 +178,7 @@ class SearchInstructorsView(GenericAPIView):
             return Response({'error': f'An error occurred: {str(e)}'}, status=500)
 
 class InstructorDataView(GenericAPIView):
-    permission_classes = [IsStudent]
+    permission_classes = [AllowAny]
 
     @swagger_auto_schema(**get_instructor_data_swagger)
     def get(self, request, user_id):
@@ -204,6 +204,8 @@ class InstructorDataView(GenericAPIView):
                         'start_date': slot.start_date,
                         'end_date': slot.end_date,
                         'room': slot.room,
+                        'location': slot.room,  # Add location as alias for room
+                        'capacity': slot.policy.set_student_limit if hasattr(slot, 'policy') and slot.policy else 1,  # Add capacity
                         'status': slot.status,
                     } for slot in OfficeHourSlot.objects.filter(instructor=instructor)
                 ]
