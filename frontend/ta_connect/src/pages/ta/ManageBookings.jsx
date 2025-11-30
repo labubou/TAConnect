@@ -53,9 +53,14 @@ export default function ManageBookings() {
   const [showExportModal, setShowExportModal] = useState(false);
 
   // Fetch bookings data with current month date range
+  // Auto-refetch every 30 seconds to update completed status
   const { data: bookings = [], isLoading, error, refetch } = useInstructorBookings(
     dateRange.start,
-    dateRange.end
+    dateRange.end,
+    {
+      refetchInterval: 30000, // Refetch every 30 seconds to check for completed bookings
+      refetchIntervalInBackground: false, // Don't refetch when tab is not active
+    }
   );
 
   // Filter and search bookings

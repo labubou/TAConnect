@@ -15,7 +15,14 @@ export default function StudentHomePage() {
   const isDark = theme === 'dark';
   const navigate = useNavigate();
   const [isNavbarOpen, setIsNavbarOpen] = useState(true);
-  const { refreshUser } = useAuth();
+  const { refreshUser, user } = useAuth();
+
+  // Redirect TAs/Instructors to their home page
+  useEffect(() => {
+    if (user?.role === 'TA' || user?.role === 'Instructor') {
+      navigate('/ta/home');
+    }
+  }, [user, navigate]);
 
   // Refresh user data on mount to get latest email verification status
   useEffect(() => {

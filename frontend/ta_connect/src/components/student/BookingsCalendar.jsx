@@ -38,7 +38,7 @@ export default function BookingsCalendar() {
   const dateRange = getMonthDateRange(currentDate);
 
   // Fetch bookings for current month only
-  const { data: bookings = [], isLoading: loading } = useQuery({
+  const { data: bookings = [], isLoading: loading, error } = useQuery({
     queryKey: ['student', 'bookings', 'calendar', dateRange.start, dateRange.end],
     queryFn: async () => {
       const response = await axios.get('/api/student/booking/', {
@@ -51,6 +51,12 @@ export default function BookingsCalendar() {
     },
     staleTime: 0,
     refetchOnMount: true,
+    retry: false, // Don't retry if forbidden (403)
+    onError: (err) => {
+      if (err?.response?.status === 403) {
+        console.warn('User does not have permission to view student bookings');
+      }
+    }
   });
 
   const getDaysInMonth = (date) => {
