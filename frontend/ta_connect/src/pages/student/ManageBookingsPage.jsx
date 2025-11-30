@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useTheme } from '../../contexts/ThemeContext';
+import { useGlobalLoading } from '../../contexts/GlobalLoadingContext';
 import StudentNavbar from '../../components/student/studentNavbar';
 import Footer from '../../components/Footer';
 import axios from 'axios';
@@ -31,6 +32,7 @@ const getCurrentMonthDateRange = () => {
 
 export default function ManageBookingsPage() {
   const { theme } = useTheme();
+  const { startLoading, stopLoading, isLoading } = useGlobalLoading();
   const isDark = theme === 'dark';
   const [isNavbarOpen, setIsNavbarOpen] = useState(window.innerWidth >= 1024);
   const [error, setError] = useState('');
@@ -179,10 +181,12 @@ export default function ManageBookingsPage() {
     if (!selectedBooking) return;
 
     setCancelLoading(true);
+    startLoading('cancel-booking', strings.messages.canceling);
     cancelBookingMutation(
       { bookingId: selectedBooking.id, sendEmail: sendCancelEmail },
       {
         onSuccess: () => {
+          stopLoading('cancel-booking');
           setSuccess(strings.messages.cancelSuccess);
           setShowCancelModal(false);
           setSelectedBooking(null);
@@ -190,6 +194,7 @@ export default function ManageBookingsPage() {
           setTimeout(() => setSuccess(''), 3000);
         },
         onError: (err) => {
+          stopLoading('cancel-booking');
           console.error('Error cancelling booking:', err);
           setError(err.response?.data?.error || strings.messages.cancelError);
         },
@@ -206,6 +211,7 @@ export default function ManageBookingsPage() {
       return;
     }
 
+    startLoading('update-booking', strings.messages.updating);
     updateBookingMutation({
       bookingId: selectedBooking.id,
       data: {
@@ -215,12 +221,14 @@ export default function ManageBookingsPage() {
       }
     }, {
       onSuccess: () => {
+        stopLoading('update-booking');
         setSuccess(strings.messages.updateSuccess);
         setShowUpdateModal(false);
         refetch();
         setTimeout(() => setSuccess(''), 3000);
       },
       onError: (err) => {
+        stopLoading('update-booking');
         console.error('Error updating booking:', err);
         setError(err.response?.data?.error || strings.messages.updateError);
       }

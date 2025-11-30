@@ -3,6 +3,7 @@ import axios from 'axios';
 import { Bell, Mail, X, Save, RefreshCw } from 'lucide-react';
 import { useTheme } from '../../contexts/ThemeContext';
 import { useAuth } from '../../contexts/AuthContext';
+import { useGlobalLoading } from '../../contexts/GlobalLoadingContext';
 import StudentNavbar from '../../components/student/studentNavbar';
 import Footer from '../../components/Footer';
 import { emailPreferencesStrings as strings } from '../../strings/emailPreferencesSTUStrings';
@@ -10,6 +11,7 @@ import { emailPreferencesStrings as strings } from '../../strings/emailPreferenc
 export default function EmailPreferencesPage() {
   const { theme } = useTheme();
   const { user } = useAuth();
+  const { startLoading, stopLoading, isLoading } = useGlobalLoading();
   const isDark = theme === 'dark';
   const [isNavbarOpen, setIsNavbarOpen] = useState(true);
 
@@ -43,6 +45,7 @@ export default function EmailPreferencesPage() {
   const fetchPreferences = async () => {
     try {
       setLoading(true);
+      startLoading('fetch-email-prefs', 'Loading preferences...');
       const response = await axios.get('/api/profile/email-preferences/');
       const data = response.data;
       
@@ -63,6 +66,7 @@ export default function EmailPreferencesPage() {
         email_on_update: true,
       });
     } finally {
+      stopLoading('fetch-email-prefs');
       setLoading(false);
     }
   };
@@ -96,6 +100,7 @@ export default function EmailPreferencesPage() {
   const handleSave = async () => {
     try {
       setSaving(true);
+      startLoading('save-email-prefs', 'Saving preferences...');
       setMessage({ type: '', text: '' });
 
       const response = await axios.patch('/api/profile/email-preferences/', {
@@ -105,12 +110,14 @@ export default function EmailPreferencesPage() {
       });
 
       if (response.status === 200) {
+        stopLoading('save-email-prefs');
         setMessage({ 
           type: 'success', 
           text: strings.messages.saveSuccess
         });
       }
     } catch (err) {
+      stopLoading('save-email-prefs');
       const errorMsg = err.response?.data?.error || strings.messages.saveError;
       setMessage({ 
         type: 'error', 
@@ -150,15 +157,15 @@ export default function EmailPreferencesPage() {
               </div>
               <button
                 onClick={handleReset}
-                disabled={saving}
+                disabled={saving || isLoading}
                 className={`p-2 rounded-lg transition-all flex items-center gap-2 ${
                   isDark
                     ? 'bg-gray-700 hover:bg-gray-600 text-white'
                     : 'bg-gray-100 hover:bg-gray-200 text-gray-700'
-                } ${saving ? 'opacity-50 cursor-not-allowed' : ''}`}
+                } ${(saving || isLoading) ? 'opacity-50 cursor-not-allowed' : ''}`}
                 title="Reset to default"
               >
-                <RefreshCw className={`w-5 h-5 ${saving ? 'animate-spin' : ''}`} />
+                <RefreshCw className={`w-5 h-5 ${(saving || isLoading) ? 'animate-spin' : ''}`} />
                 <span className="text-sm font-medium hidden sm:inline">{strings.buttons.reset}</span>
               </button>
             </div>
@@ -432,9 +439,9 @@ export default function EmailPreferencesPage() {
           <div className={`rounded-2xl ${isDark ? 'bg-gray-800' : 'bg-white'} shadow-lg border ${isDark ? 'border-gray-700' : 'border-gray-100'} p-4 sm:p-6`}>
             <button
               onClick={handleSave}
-              disabled={saving || loading}
+              disabled={saving || loading || isLoading}
               className={`w-full py-3 px-6 rounded-xl font-semibold transition-all flex items-center justify-center gap-2 ${
-                saving || loading
+                (saving || loading || isLoading)
                   ? 'opacity-50 cursor-not-allowed'
                   : 'hover:shadow-lg hover:scale-105'
               } ${
@@ -443,7 +450,7 @@ export default function EmailPreferencesPage() {
                   : 'bg-gradient-to-r from-[#4a9d9c] to-[#366c6b] hover:from-[#3d8584] hover:to-[#2d5857] text-white'
               }`}
             >
-              {saving ? (
+              {saving || isLoading ? (
                 <>
                   <RefreshCw className="w-5 h-5 animate-spin" />
                   {strings.buttons.saving}

@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTheme } from '../../contexts/ThemeContext';
 import { useAuth } from '../../contexts/AuthContext';
+import { useGlobalLoading } from '../../contexts/GlobalLoadingContext';
 import StudentNavbar from '../../components/student/studentNavbar';
 import Footer from '../../components/Footer';
 import { bookPageStrings as strings } from '../../strings/bookPageStrings';
@@ -11,6 +12,7 @@ import { useCreateBooking } from '../../hooks/useApi';
 export default function BookPage() {
   const { theme } = useTheme();
   const { user } = useAuth();
+  const { startLoading, stopLoading, isLoading } = useGlobalLoading();
   const isDark = theme === 'dark';
   const navigate = useNavigate();
   const [isNavbarOpen, setIsNavbarOpen] = useState(true);
@@ -73,6 +75,7 @@ export default function BookPage() {
     setIsSearching(true);
     setLoading(true);
     setError('');
+    startLoading('fetch-instructors', strings.messages.searchingInstructors);
     try {
       console.log('Fetching instructors with query:', searchQuery);
       const response = await axios.get('/api/instructor/search-instructors/', {
@@ -98,6 +101,7 @@ export default function BookPage() {
 
       setInstructors([]);
     } finally {
+      stopLoading('fetch-instructors');
       setLoading(false);
       setIsSearching(false);
     }
@@ -136,6 +140,7 @@ export default function BookPage() {
     setError('');
     setSuccess('');
 
+    startLoading('fetch-slots', strings.messages.loadingSlots);
     try {
       console.log('Fetching slots for instructor ID:', instructor.id);
       const response = await axios.get(`/api/instructor/get-instructor-data/${instructor.id}/`);
@@ -146,6 +151,8 @@ export default function BookPage() {
       setError(strings.messages.errorFetchSlots);
       console.error('Error fetching slots:', err);
       console.error('Error response:', err.response?.data);
+    } finally {
+      stopLoading('fetch-slots');
     }
   };
 
@@ -160,6 +167,7 @@ export default function BookPage() {
   };
 
   const fetchAvailableTimes = async (slotId, date) => {
+    startLoading('fetch-times', strings.messages.loadingTimes);
     try {
       const response = await axios.get(`/api/student/booking/${slotId}/`, {
         params: { date }
@@ -178,6 +186,8 @@ export default function BookPage() {
       console.error('Error fetching available times:', err);
       setError(strings.errors.failedLoadTimes);
       setTimeSlots([]);
+    } finally {
+      stopLoading('fetch-times');
     }
   };
 
@@ -218,6 +228,7 @@ export default function BookPage() {
 
     setError('');
     setSuccess('');
+    startLoading('create-booking', strings.messages.creatingBooking);
 
     createBooking(
       {
@@ -228,10 +239,12 @@ export default function BookPage() {
       },
       {
         onSuccess: (response) => {
+          stopLoading('create-booking');
           setSuccess(strings.messages.successBooking);
           setShowSuccessModal(true);
         },
         onError: (err) => {
+          stopLoading('create-booking');
           console.error('Error creating booking:', err);
           let errorMsg = strings.messages.errorBooking;
 
@@ -392,7 +405,7 @@ export default function BookPage() {
                     </div>
                     <button
                       onClick={handleSearchInstructors}
-                      disabled={!searchQuery.trim() || isSearching}
+                      disabled={!searchQuery.trim() || isSearching || isLoading}
                       className={`px-4 py-2 ${isDark ? 'bg-gradient-to-r from-[#366c6b] to-[#1a3535] hover:from-[#2d5857] hover:to-[#152a2a]' : 'bg-gradient-to-r from-[#4a9d9c] to-[#366c6b] hover:from-[#3d8584] hover:to-[#2d5857]'} text-white rounded-lg hover:shadow-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed font-medium`}
                     >
                       {strings.steps.step1.searchButton}
@@ -614,10 +627,10 @@ export default function BookPage() {
 
                     <button
                       onClick={handleBookSlot}
-                      disabled={!selectedDate || !selectedTime || isCreatingBooking}
+                      disabled={!selectedDate || !selectedTime || isCreatingBooking || isLoading}
                       className={`w-full ${isDark ? 'bg-gradient-to-r from-[#366c6b] to-[#1a3535]' : 'bg-gradient-to-r from-[#4a9d9c] to-[#366c6b]'} text-white py-3 px-6 rounded-lg ${isDark ? 'hover:from-[#2d5857] hover:to-[#152a2a]' : 'hover:from-[#3d8584] hover:to-[#2d5857]'} hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 font-semibold flex items-center justify-center transform hover:scale-[1.02]`}
                     >
-                      {isCreatingBooking ? (
+                      {isCreatingBooking || isLoading ? (
                         <>
                           <svg className="animate-spin -ml-1 mr-2 h-5 w-5 text-white" fill="none" viewBox="0 0 24 24">
                             <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
