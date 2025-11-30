@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useTheme } from '../../contexts/ThemeContext';
 import { useAuth } from '../../contexts/AuthContext';
@@ -11,7 +11,7 @@ import { useCreateBooking } from '../../hooks/useApi';
 
 export default function BookPage() {
   const { theme } = useTheme();
-  const { user } = useAuth();
+  const { user, accessToken } = useAuth();
   const { startLoading, stopLoading, isLoading } = useGlobalLoading();
   const isDark = theme === 'dark';
   const navigate = useNavigate();
@@ -38,46 +38,124 @@ export default function BookPage() {
   // Use mutation for creating booking
   const { mutate: createBooking, isPending: isCreatingBooking } = useCreateBooking();
 
+  // Track which URL params have been loaded to prevent duplicate loading
+  const loadedParamsRef = useRef(null);
 
   // Ebst ya Nadeem
   
+  // Redirect to public booking page if user is not authenticated but URL parameters are present
+  useEffect(() => {
+    const instructorId = searchParams.get('ta_id') || searchParams.get('instructor');
+    const slotId = searchParams.get('slot_id') || searchParams.get('slot');
+
+    // If URL parameters exist but user is not authenticated, redirect to public booking page
+    if (instructorId && slotId && !user) {
+      navigate(`/book?ta_id=${instructorId}&slot_id=${slotId}`, { replace: true });
+    }
+  }, [searchParams, user, navigate]);
+  
   // Handle URL parameters for pre-selection
   useEffect(() => {
-    const instructorId = searchParams.get('instructor');
-    const slotId = searchParams.get('slot');
+    // Support both parameter naming conventions: ta_id/slot_id and instructor/slot
+    const instructorId = searchParams.get('ta_id') || searchParams.get('instructor');
+    const slotId = searchParams.get('slot_id') || searchParams.get('slot');
 
-    if (instructorId && slotId && user) {
+    // Get token from accessToken state or localStorage
+    const token = accessToken || localStorage.getItem('access_token');
+
+    console.log('[BookPage] URL params:', { instructorId, slotId, user: !!user, accessToken: !!token });
+
+    // Only proceed if we have parameters and user is authenticated
+    if (instructorId && slotId && user && token) {
+      // Create a key to track if we've already loaded these params
+      const paramsKey = `${instructorId}-${slotId}`;
+      
+      console.log('[BookPage] Checking params key:', paramsKey, 'vs loaded:', loadedParamsRef.current);
+      
+      // Skip if we've already loaded these exact parameters
+      if (loadedParamsRef.current === paramsKey) {
+        console.log('[BookPage] Already loaded these params, skipping');
+        return;
+      }
+
+      console.log('[BookPage] Loading from params:', { instructorId, slotId });
+
       // Auto-load instructor and slot from URL parameters
       const loadFromParams = async () => {
         startLoading('load-params', 'Loading booking details...');
         try {
-          // Fetch instructor data
-          const instructorResponse = await axios.get(`/api/instructor/get-instructor-data/${instructorId}/`);
-          const instructorData = instructorResponse.data;
+          // Fetch instructor's full data including slots directly
+          const response = await axios.get(`/api/instructor/get-instructor-data/${instructorId}/`, {
+            headers: { Authorization: `Bearer ${token}` }
+          });
           
-          // Create instructor object
+          const instructorData = response.data;
+          console.log('[BookPage] Instructor data:', instructorData);
+          
+          // Transform instructor data
           const nameParts = (instructorData.full_name || '').split(' ');
           const instructor = {
-            id: parseInt(instructorId),
+            id: instructorData.id,
             full_name: instructorData.full_name,
-            first_name: nameParts[0] || '',
-            last_name: nameParts.slice(1).join(' ') || '',
-            email: instructorData.email
+            first_name: nameParts[0] || instructorData.first_name || '',
+            last_name: nameParts.slice(1).join(' ') || instructorData.last_name || '',
+            email: instructorData.email,
           };
 
+          console.log('[BookPage] Found instructor:', instructor);
+
+          // Set both selected instructor and add to instructors list for display
           setSelectedInstructor(instructor);
+          setInstructors([instructor]);
           
-          // Get slots and find the specific slot
+          // Get slots from the instructor data
           const slots = instructorData.slots || instructorData.time_slots || [];
           setInstructorSlots(slots);
           
+          console.log('[BookPage] Fetched slots:', slots.length, 'Looking for slot ID:', slotId);
+          
+          // Find and select the specific slot
           const targetSlot = slots.find(slot => slot.id === parseInt(slotId));
           if (targetSlot) {
+            console.log('[BookPage] Found target slot:', targetSlot);
             setSelectedSlot(targetSlot);
-            generateAvailableDates(targetSlot);
+            
+            // Generate available dates for the selected slot
+            const dates = [];
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            
+            const [startYear, startMonth, startDay] = targetSlot.start_date.split('-').map(Number);
+            const startDate = new Date(startYear, startMonth - 1, startDay);
+            
+            const [endYear, endMonth, endDay] = targetSlot.end_date.split('-').map(Number);
+            const endDate = new Date(endYear, endMonth - 1, endDay);
+            
+            const daysOfWeek = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+            const targetDay = daysOfWeek.indexOf(targetSlot.day_of_week);
+
+            let currentDate = new Date(Math.max(today.getTime(), startDate.getTime()));
+            
+            while (currentDate <= endDate) {
+              if (currentDate.getDay() === targetDay && currentDate >= today) {
+                dates.push(new Date(currentDate));
+              }
+              currentDate.setDate(currentDate.getDate() + 1);
+            }
+
+            setAvailableDates(dates);
+            console.log('[BookPage] Generated available dates:', dates.length);
+          } else {
+            console.log('[BookPage] Slot not found in slots:', slots.map(s => s.id));
+            setError('The requested time slot was not found. Please select a slot manually.');
           }
+          
+          // Mark these params as loaded
+          loadedParamsRef.current = paramsKey;
+          
         } catch (err) {
           console.error('Error loading from URL parameters:', err);
+          console.error('Error details:', err.response?.data);
           setError('Failed to load booking details from link. Please search manually.');
         } finally {
           stopLoading('load-params');
@@ -85,8 +163,21 @@ export default function BookPage() {
       };
 
       loadFromParams();
+    } else {
+      console.log('[BookPage] Not loading params - missing requirements:', { 
+        hasInstructorId: !!instructorId, 
+        hasSlotId: !!slotId, 
+        hasUser: !!user, 
+        hasToken: !!token 
+      });
+      
+      if (!instructorId || !slotId) {
+        // Reset the ref if there are no URL params
+        loadedParamsRef.current = null;
+      }
     }
-  }, [searchParams, user]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchParams, user, accessToken]);
 
 
   // Fetch user email preferences on mount
@@ -397,7 +488,7 @@ export default function BookPage() {
             </div>
 
             {/* URL Parameters Info Banner */}
-            {searchParams.get('instructor') && searchParams.get('slot') && selectedInstructor && selectedSlot && (
+            {(searchParams.get('ta_id') || searchParams.get('instructor')) && (searchParams.get('slot_id') || searchParams.get('slot')) && selectedInstructor && selectedSlot && (
               <div className={`mb-6 p-4 ${isDark ? 'bg-blue-900/30 border-blue-600' : 'bg-blue-50 border-blue-300'} border-2 rounded-xl ${isDark ? '' : 'shadow-sm'}`}>
                 <div className="flex items-start">
                   <svg className={`w-5 h-5 mr-3 mt-0.5 ${isDark ? 'text-blue-400' : 'text-blue-500'}`} fill="currentColor" viewBox="0 0 20 20">
