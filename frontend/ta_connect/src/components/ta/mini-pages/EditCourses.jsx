@@ -208,42 +208,6 @@ export default function EditCourses({ isDark, slot, onSlotUpdated, onClose }) {
         />
       )}
 
-      <div className="flex items-center justify-between mb-6">
-        <div>
-          <h2 className={`text-2xl font-bold ${isDark ? "text-white" : "text-gray-900"}`}>
-            {strings.edit.title}
-          </h2>
-          <p className={`${isDark ? "text-gray-400" : "text-gray-600"}`}>
-            {strings.edit.description}
-          </p>
-        </div>
-        {onClose && (
-          <button
-            onClick={onClose}
-            className={`p-2 rounded-lg transition-all ${
-              isDark
-                ? "bg-gray-700 hover:bg-gray-600 text-white"
-                : "bg-gray-100 hover:bg-gray-200 text-gray-700"
-            }`}
-            title={strings.modals.close}
-          >
-            <svg
-              className="w-5 h-5"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M6 18L18 6M6 6l12 12"
-              />
-            </svg>
-          </button>
-        )}
-      </div>
-
       {error && (
         <div className={`mb-4 p-4 rounded-lg ${isDark ? "bg-red-900/30 border border-red-700 text-red-300" : "bg-red-100 border border-red-400 text-red-700"}`}>
           <div className="flex items-start">

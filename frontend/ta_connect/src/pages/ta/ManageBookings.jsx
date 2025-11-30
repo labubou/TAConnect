@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useTheme } from '../../contexts/ThemeContext';
+import { useGlobalLoading } from '../../contexts/GlobalLoadingContext';
 import TAnavbar from '../../components/ta/TAnavbar';
 import ErrorBoundary from '../../components/ErrorBoundary';
 import Footer from '../../components/Footer';
@@ -35,6 +36,7 @@ const getCurrentMonthDateRange = () => {
 
 export default function ManageBookings() {
   const { theme } = useTheme();
+  const { startLoading, stopLoading, isLoading: globalIsLoading } = useGlobalLoading();
   const isDark = theme === 'dark';
   const [isNavbarOpen, setIsNavbarOpen] = useState(true);
   const [filteredBookings, setFilteredBookings] = useState([]);
@@ -134,20 +136,24 @@ export default function ManageBookings() {
 
     setIsCancelling(true);
     setErrorMessage('');
+    startLoading('cancel-booking', 'Cancelling booking...');
 
     try {
       const response = await axios.delete(`/api/instructor/cancel-booking/${selectedBooking.id}/`);
       
       if (response.data.success) {
+        stopLoading('cancel-booking');
         setSuccessMessage(strings.messages.success);
         setShowCancelModal(false);
         setSelectedBooking(null);
         // Refresh the bookings list
         await refetch();
       } else {
+        stopLoading('cancel-booking');
         throw new Error(response.data.error || strings.messages.error);
       }
     } catch (err) {
+      stopLoading('cancel-booking');
       console.error('Failed to cancel booking:', err);
       
       let errorMsg = strings.messages.error;

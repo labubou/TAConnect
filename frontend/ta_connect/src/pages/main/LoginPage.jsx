@@ -5,6 +5,7 @@ import ThemeToggle from '../../components/ThemeToggle';
 import LanguageToggle from '../../components/LanguageToggle';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
+import { useGlobalLoading } from '../../contexts/GlobalLoadingContext';
 import axios from 'axios';
 import Logo2 from '../../assets/Logo2.png';
 import strings from '../../strings/loginPageStrings';
@@ -14,6 +15,7 @@ import Footer from '../../components/Footer';
 function LoginPage() {
     const navigate = useNavigate();
     const { login } = useAuth();
+    const { startLoading, stopLoading, isLoading } = useGlobalLoading();
     const [credentials, setCredentials] = useState({ username: '', password: '' });
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
@@ -33,6 +35,7 @@ function LoginPage() {
 
   const handleSubmit = async () => {
     setLoading(true);
+    startLoading('login', 'Logging in...');
     setError('');
 
     try {
@@ -59,6 +62,8 @@ function LoginPage() {
           const userResponse = await axios.get('/api/user-data/');
           const userType = userResponse.data?.user_type;
           
+          stopLoading('login');
+          
           // Navigate based on user type
           if (userType === 'instructor') {
             navigate('/ta');
@@ -66,6 +71,7 @@ function LoginPage() {
             navigate('/student');
           }
         } catch (fetchErr) {
+          stopLoading('login');
           console.error('Failed to fetch user data:', fetchErr);
           // If fetching user data fails, try to navigate anyway
           // AuthContext will handle it
@@ -109,6 +115,7 @@ function LoginPage() {
       }
       
       setError(errorMessage);
+      stopLoading('login');
     } finally {
       setLoading(false);
     }

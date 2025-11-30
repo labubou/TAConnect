@@ -3,6 +3,7 @@ import axios from 'axios';
 import { Bell, Mail, X, Save, RefreshCw } from 'lucide-react';
 import { useTheme } from '../../contexts/ThemeContext';
 import { useAuth } from '../../contexts/AuthContext';
+import { useGlobalLoading } from '../../contexts/GlobalLoadingContext';
 import TAnavbar from '../../components/ta/TAnavbar';
 import Footer from '../../components/Footer';
 import strings from '../../strings/TANavbarStrings';
@@ -10,6 +11,7 @@ import strings from '../../strings/TANavbarStrings';
 export default function EmailPreferencesPage() {
   const { theme } = useTheme();
   const { user } = useAuth();
+  const { startLoading, stopLoading, isLoading } = useGlobalLoading();
   const isDark = theme === 'dark';
   const [isNavbarOpen, setIsNavbarOpen] = useState(true);
 
@@ -43,6 +45,7 @@ export default function EmailPreferencesPage() {
   const fetchPreferences = async () => {
     try {
       setLoading(true);
+      startLoading('fetch-ta-email-prefs', 'Loading preferences...');
       const response = await axios.get('/api/profile/email-preferences/');
       const data = response.data;
       
@@ -64,6 +67,7 @@ export default function EmailPreferencesPage() {
         email_on_update: true,
       });
     } finally {
+      stopLoading('fetch-ta-email-prefs');
       setLoading(false);
     }
   };
@@ -97,6 +101,7 @@ export default function EmailPreferencesPage() {
   const handleSave = async () => {
     try {
       setSaving(true);
+      startLoading('save-ta-email-prefs', 'Saving preferences...');
       setMessage({ type: '', text: '' });
 
       const response = await axios.patch('/api/profile/email-preferences/', {
@@ -106,12 +111,14 @@ export default function EmailPreferencesPage() {
       });
 
       if (response.status === 200) {
+        stopLoading('save-ta-email-prefs');
         setMessage({ 
           type: 'success', 
           text: strings.emailPreferences?.saved || 'Preferences saved successfully'
         });
       }
     } catch (err) {
+      stopLoading('save-ta-email-prefs');
       const errorMsg = err.response?.data?.error || strings.emailPreferences?.error || 'Failed to save preferences';
       setMessage({ 
         type: 'error', 

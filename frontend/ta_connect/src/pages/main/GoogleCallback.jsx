@@ -2,6 +2,7 @@ import { useEffect, useState, useRef } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { useTheme } from '../../contexts/ThemeContext';
+import { useGlobalLoading } from '../../contexts/GlobalLoadingContext';
 import axios from 'axios';
 
 const GoogleCallback = () => {
@@ -9,6 +10,7 @@ const GoogleCallback = () => {
   const navigate = useNavigate();
   const { login } = useAuth();
   const { theme } = useTheme();
+  const { startLoading, stopLoading, isLoading: globalIsLoading } = useGlobalLoading();
   const [status, setStatus] = useState('processing');
   const [message, setMessage] = useState('Processing Google authentication...');
   const [isNewUser, setIsNewUser] = useState(false);
@@ -18,11 +20,13 @@ const GoogleCallback = () => {
 
   const googleAuth = async (code) => {
     try {
+      startLoading('google-auth', 'Authenticating with Google...');
       const response = await axios.post('/api/auth/google/authenticate/', {
         code,
       });
       
       const { access, refresh, user: userData, is_new_user, needs_user_type } = response.data;
+      stopLoading('google-auth');
       
       return { 
         success: true, 
@@ -31,6 +35,7 @@ const GoogleCallback = () => {
         data: { access, refresh, user: userData }
       };
     } catch (error) {
+      stopLoading('google-auth');
       console.error('Google authentication failed:', error);
       
       let errorMessage = 'Google authentication failed';

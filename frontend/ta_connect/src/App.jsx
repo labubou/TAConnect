@@ -1,11 +1,13 @@
 import { AuthProvider } from './contexts/AuthContext'
 import { ThemeProvider } from './contexts/ThemeContext'
 import { LanguageProvider } from './contexts/LanguageContext'
+import { GlobalLoadingProvider } from './contexts/GlobalLoadingContext'
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
 import { lazy, Suspense } from 'react'
 import ProtectedRoute from './components/ProtectedRoute';
 import PublicRoute from './components/PublicRoute';
 import { SkeletonLoader } from './components/SkeletonLoader';
+import GlobalLoadingOverlay from './components/GlobalLoadingOverlay';
 import { useTheme } from './contexts/ThemeContext';
 
 // Eager-loaded critical pages
@@ -53,9 +55,11 @@ function App() {
     <ThemeProvider>
       <LanguageProvider>
         <AuthProvider>
-          <Router>
-            <div className="min-h-screen bg-[var(--bg)] text-[var(--text)] transition-colors">
-              <Routes>
+          <GlobalLoadingProvider>
+            <Router>
+              <GlobalLoadingOverlay />
+              <div className="min-h-screen bg-[var(--bg)] text-[var(--text)] transition-colors">
+                <Routes>
               <Route 
                 path="/" 
                 element={
@@ -243,9 +247,10 @@ function App() {
                 } 
               />
             </Routes>
-          </div>
-        </Router>
-      </AuthProvider>
+              </div>
+            </Router>
+          </GlobalLoadingProvider>
+        </AuthProvider>
       </LanguageProvider>
     </ThemeProvider>
   )

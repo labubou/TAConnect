@@ -88,6 +88,8 @@ const manageBookingsStrings = {
     noCompletedBookings: "No completed bookings",
     loading: "Loading bookings...",
     noData: "No data available",
+    canceling: "Cancelling booking...",
+    updating: "Updating booking...",
   },
   table: {
     headers: {

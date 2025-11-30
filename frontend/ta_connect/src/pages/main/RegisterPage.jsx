@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTheme } from '../../contexts/ThemeContext';
 import { useLanguage } from '../../contexts/LanguageContext';
+import { useGlobalLoading } from '../../contexts/GlobalLoadingContext';
 import ThemeToggle from '../../components/ThemeToggle';
 import LanguageToggle from '../../components/LanguageToggle';
 import Footer from '../../components/Footer';
@@ -13,6 +14,7 @@ function RegisterPage() {
   const navigate = useNavigate();
   const { theme } = useTheme();
   const { language } = useLanguage();
+  const { startLoading, stopLoading, isLoading: globalIsLoading } = useGlobalLoading();
   const t = strings[language];
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -104,6 +106,7 @@ function RegisterPage() {
     }
 
     setLoading(true);
+    startLoading('register', 'Creating account...');
     setError('');
     setSuccess('');
 
@@ -113,6 +116,7 @@ function RegisterPage() {
       console.log('Registration response:', response.data);
       
       if (response.data) {
+        stopLoading('register');
         setSuccess(response.data.message || t.messages.success);
         // Clear the form
         setFormData({
@@ -159,6 +163,7 @@ function RegisterPage() {
       } else {
         setError(t.messages.error);
       }
+      stopLoading('register');
     } finally {
       setLoading(false);
     }
