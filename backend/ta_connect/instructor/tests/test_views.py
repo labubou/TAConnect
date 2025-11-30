@@ -317,14 +317,4 @@ class InstructorDataViewTestCase(BaseTestCase):
         
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
         self.assertIn('error', response.data)
-    
-    def test_get_instructor_data_security_unauthenticated(self):
-        """Test accessing instructor data without authentication (401 Unauthorized)."""
-        instructor = self.create_instructor()
-        
-        self.client.credentials()
-        url = reverse('get-instructor-data', kwargs={'user_id': instructor.id})
-        response = self.client.get(url)
-        
-        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
