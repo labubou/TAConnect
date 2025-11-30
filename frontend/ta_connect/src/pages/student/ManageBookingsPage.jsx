@@ -72,6 +72,10 @@ export default function ManageBookingsPage() {
     const saved = localStorage.getItem('clearedCancelledIds');
     return saved ? new Set(JSON.parse(saved)) : new Set();
   });
+  const [clearedCompletedIds, setClearedCompletedIds] = useState(() => {
+    const saved = localStorage.getItem('clearedCompletedIds');
+    return saved ? new Set(JSON.parse(saved)) : new Set();
+  });
 
   // Fetch bookings with date range
   const { data: allBookings = [], isLoading: loading, error: apiError, refetch } = useQuery({
@@ -100,9 +104,14 @@ export default function ManageBookingsPage() {
     localStorage.setItem('clearedCancelledIds', JSON.stringify([...clearedCancelledIds]));
   }, [clearedCancelledIds]);
 
-  // Filter out cancelled bookings that were cleared by user
+  useEffect(() => {
+    localStorage.setItem('clearedCompletedIds', JSON.stringify([...clearedCompletedIds]));
+  }, [clearedCompletedIds]);
+
+  // Filter out cancelled and completed bookings that were cleared by user
   const bookings = allBookings.filter(
-    booking => !(booking.is_cancelled && clearedCancelledIds.has(booking.id))
+    booking => !(booking.is_cancelled && clearedCancelledIds.has(booking.id)) &&
+                !(booking.is_completed && clearedCompletedIds.has(booking.id))
   );
 
   // Show error if API call fails
@@ -304,6 +313,14 @@ export default function ManageBookingsPage() {
     setTimeout(() => setSuccess(''), 3000);
   };
 
+  const handleClearCompleted = () => {
+    const completedIds = bookings.filter(b => b.is_completed).map(b => b.id);
+    const newClearedIds = new Set([...clearedCompletedIds, ...completedIds]);
+    setClearedCompletedIds(newClearedIds);
+    setSuccess(strings.messages.clearedCompleted || 'Completed bookings cleared from view');
+    setTimeout(() => setSuccess(''), 3000);
+  };
+
   const handleClearFilters = () => {
     setFilterStatus('all');
     setFilterCourse('all');
@@ -500,6 +517,21 @@ export default function ManageBookingsPage() {
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                       </svg>
                       {strings.buttons.deleteAllCancelled}
+                    </button>
+                  )}
+                  {bookings.some(b => b.is_completed) && (
+                    <button
+                      onClick={handleClearCompleted}
+                      className={`w-full sm:w-auto px-4 py-2 rounded-lg font-medium text-sm transition-all duration-300 flex items-center justify-center gap-2 ${
+                        isDark 
+                          ? 'bg-green-900/30 text-green-300 hover:bg-green-900/50 border-2 border-green-700 hover:scale-105' 
+                          : 'bg-green-50 text-green-700 hover:bg-green-100 border-2 border-green-300 hover:scale-105'
+                      } shadow-md hover:shadow-lg`}
+                    >
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                      </svg>
+                      {strings.buttons.deleteAllCompleted || 'Clear Completed'}
                     </button>
                   )}
                 </div>
