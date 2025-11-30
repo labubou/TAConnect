@@ -1,7 +1,10 @@
 import { useState, useEffect } from 'react';
-import strings from '../../strings/MonthlyCalendarStrings';
+import { useLanguage } from '../../contexts/LanguageContext';
+import allStrings from '../../strings/MonthlyCalendarStrings';
 
 export default function MonthlyCalendar({ slots = [], isDark = false, isLoading = false }) {
+  const { language } = useLanguage();
+  const strings = allStrings[language];
   const [currentDate, setCurrentDate] = useState(new Date());
   const [slotsByDate, setSlotsByDate] = useState({});
   const [selectedDate, setSelectedDate] = useState(null);
