@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useTheme } from '../../contexts/ThemeContext';
 import { useAuth } from '../../contexts/AuthContext';
 import { useGlobalLoading } from '../../contexts/GlobalLoadingContext';
@@ -15,6 +15,7 @@ export default function BookPage() {
   const { startLoading, stopLoading, isLoading } = useGlobalLoading();
   const isDark = theme === 'dark';
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const [isNavbarOpen, setIsNavbarOpen] = useState(true);
 
   const [instructors, setInstructors] = useState([]);
@@ -36,6 +37,57 @@ export default function BookPage() {
 
   // Use mutation for creating booking
   const { mutate: createBooking, isPending: isCreatingBooking } = useCreateBooking();
+
+
+  // Ebst ya Nadeem
+  
+  // Handle URL parameters for pre-selection
+  useEffect(() => {
+    const instructorId = searchParams.get('instructor');
+    const slotId = searchParams.get('slot');
+
+    if (instructorId && slotId && user) {
+      // Auto-load instructor and slot from URL parameters
+      const loadFromParams = async () => {
+        startLoading('load-params', 'Loading booking details...');
+        try {
+          // Fetch instructor data
+          const instructorResponse = await axios.get(`/api/instructor/get-instructor-data/${instructorId}/`);
+          const instructorData = instructorResponse.data;
+          
+          // Create instructor object
+          const nameParts = (instructorData.full_name || '').split(' ');
+          const instructor = {
+            id: parseInt(instructorId),
+            full_name: instructorData.full_name,
+            first_name: nameParts[0] || '',
+            last_name: nameParts.slice(1).join(' ') || '',
+            email: instructorData.email
+          };
+
+          setSelectedInstructor(instructor);
+          
+          // Get slots and find the specific slot
+          const slots = instructorData.slots || instructorData.time_slots || [];
+          setInstructorSlots(slots);
+          
+          const targetSlot = slots.find(slot => slot.id === parseInt(slotId));
+          if (targetSlot) {
+            setSelectedSlot(targetSlot);
+            generateAvailableDates(targetSlot);
+          }
+        } catch (err) {
+          console.error('Error loading from URL parameters:', err);
+          setError('Failed to load booking details from link. Please search manually.');
+        } finally {
+          stopLoading('load-params');
+        }
+      };
+
+      loadFromParams();
+    }
+  }, [searchParams, user]);
+
 
   // Fetch user email preferences on mount
   useEffect(() => {
@@ -343,6 +395,25 @@ export default function BookPage() {
                 {strings.header.subtitle}
               </p>
             </div>
+
+            {/* URL Parameters Info Banner */}
+            {searchParams.get('instructor') && searchParams.get('slot') && selectedInstructor && selectedSlot && (
+              <div className={`mb-6 p-4 ${isDark ? 'bg-blue-900/30 border-blue-600' : 'bg-blue-50 border-blue-300'} border-2 rounded-xl ${isDark ? '' : 'shadow-sm'}`}>
+                <div className="flex items-start">
+                  <svg className={`w-5 h-5 mr-3 mt-0.5 ${isDark ? 'text-blue-400' : 'text-blue-500'}`} fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+                  </svg>
+                  <div>
+                    <span className={`${isDark ? 'text-blue-200' : 'text-blue-700'} font-semibold`}>
+                      Instructor and slot pre-selected from link
+                    </span>
+                    <p className={`text-sm ${isDark ? 'text-blue-300' : 'text-blue-600'} mt-1`}>
+                      Booking with {selectedInstructor.full_name} for {selectedSlot.course?.course_name || 'office hours'} on {selectedSlot.day_of_week}. Just select your preferred date and time below.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
 
             {/* Error/Success Messages */}
             {error && (
