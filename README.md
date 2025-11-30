@@ -12,10 +12,10 @@
 
 **Simplify academic scheduling. Connect TAs with students. Maximize learning.**
 
-[Quick Start](#-quick-start) •
 [Features](#-features) •
-[Documentation](#-documentation) •
-[Contributing](#-contributing)
+[Quick Start](#-quick-start) •
+[Tech Stack](#-tech-stack) •
+[Team](#-team)
 
 </div>
 
@@ -48,7 +48,7 @@
 - Dedicated TA dashboards
 - Student booking interface
 - Email verification system
-- JWT secure authentication
+- Secure authentication
 
 </td>
 </tr>
@@ -98,12 +98,6 @@
 
 ## 🚀 Quick Start
 
-### Prerequisites
-- [Docker & Docker Compose](https://docs.docker.com/get-docker/)
-- [Git](https://git-scm.com/downloads)
-
-### Installation
-
 ```bash
 # Clone the repository
 git clone https://github.com/Kbassem10/TAConnect.git
@@ -112,18 +106,17 @@ cd TAConnect
 # Copy environment file
 cp backend/ta_connect/.env.example backend/ta_connect/.env
 
-# Start with Docker (recommended)
+# Start with Docker
 docker compose up --build
 ```
-
-### Access Points
 
 | Service | URL |
 |---------|-----|
 | 🖥️ Frontend | http://localhost:3000 |
 | ⚙️ Backend API | http://localhost:8000 |
-| 📚 API Docs (Swagger) | http://localhost:8000/swagger/ |
-| 🔧 Django Admin | http://localhost:8000/admin/ |
+| 📚 API Docs | http://localhost:8000/swagger/ |
+
+> 📘 For detailed setup instructions, see **[PROJECT_GUIDE.md](PROJECT_GUIDE.md)**
 
 ---
 
@@ -134,46 +127,11 @@ docker compose up --build
 | Frontend | Backend | Database | DevOps |
 |:--------:|:-------:|:--------:|:------:|
 | React 19 | Django 5 | PostgreSQL | Docker |
-| Vite | Django REST | SQLite (tests) | Docker Compose |
-| Tailwind CSS | JWT Auth | | GitHub Actions |
+| Vite | Django REST | | Docker Compose |
+| Tailwind CSS | JWT Auth | | |
 | React Query | drf-spectacular | | |
-| Recharts | Celery (planned) | | |
 
 </div>
-
----
-
-## 📚 Documentation
-
-For comprehensive documentation, see **[PROJECT_GUIDE.md](PROJECT_GUIDE.md)**
-
-| Document | Description |
-|----------|-------------|
-| [Setup Guide](docs/SETUP.md) | Installation & configuration |
-| [API Documentation](docs/API_DOCUMENTATION.md) | Swagger/OpenAPI & JWT guide |
-| [Environment Variables](docs/ENVIRONMENT_VARIABLES.md) | Configuration reference |
-| [Testing Guide](docs/TESTING.md) | Running & writing tests |
-| [Contributing](docs/CONTRIBUTING.md) | How to contribute |
-| [Folder Structure](docs/FOLDER_STRUCTURE.md) | Project organization |
-
----
-
-## 🧪 Testing
-
-TAConnect includes a comprehensive test suite with **~128 tests** covering models, views, and serializers.
-
-```bash
-# Run all tests
-docker exec taconnect-backend-1 python manage.py test
-
-# Run specific app tests
-docker exec taconnect-backend-1 python manage.py test accounts
-docker exec taconnect-backend-1 python manage.py test instructor
-docker exec taconnect-backend-1 python manage.py test student
-
-# Run with verbosity
-docker exec taconnect-backend-1 python manage.py test --verbosity=2
-```
 
 ---
 
@@ -198,30 +156,10 @@ docker exec taconnect-backend-1 python manage.py test --verbosity=2
 - [x] JWT authentication
 - [x] Email notifications
 - [x] Analytics dashboard
-- [x] CSV export
 - [x] Dark/Light theme
-- [ ] 🔤 Multi-language support (Arabic, French)
-- [ ] 📅 Google Calendar integration
-- [ ] 📅 Outlook Calendar sync
-- [ ] 🧠 AI scheduling assistant
-- [ ] 🔗 LMS integrations
-
----
-
-## 🤝 Contributing
-
-We welcome contributions! See our [Contributing Guide](docs/CONTRIBUTING.md) for details.
-
-```bash
-# Create a feature branch
-git checkout -b feature/your-feature
-
-# Make changes and commit
-git commit -m "Add: your feature description"
-
-# Push and create PR
-git push origin feature/your-feature
-```
+- [ ] Multi-language support
+- [ ] Calendar integrations (Google, Outlook)
+- [ ] AI scheduling assistant
 
 ---
 
@@ -232,9 +170,7 @@ This project uses a **dual-license model**:
 - **AGPL-3.0** for academic and non-commercial use
 - **Commercial License** for enterprise/proprietary usage
 
-For commercial inquiries: [taconnect.team@outlook.com](mailto:taconnect.team@outlook.com)
-
-See [LICENSE.md](LICENSE.md) for details.
+For commercial inquiries: [taconnect.team@gmail.com](mailto:taconnect.team@gmail.com)
 
 ---
 

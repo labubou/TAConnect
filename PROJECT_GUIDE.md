@@ -1,48 +1,80 @@
 # 🛠️ TAConnect Project Guide
 
-Welcome to the TAConnect Project Guide! This document provides an overview and links to detailed documentation for setting up, developing, and contributing to TAConnect.
-
-## 📚 Documentation Index
-
-### Getting Started
-- **[Setup Guide](docs/SETUP.md)** – Prerequisites, Docker setup, and manual installation instructions
-
-### Development
-- **[API Documentation](docs/API_DOCUMENTATION.md)** – Swagger/OpenAPI documentation and JWT authorization guide
-- **[Development Workflow](docs/DEVELOPMENT_WORKFLOW.md)** – Development practices and CI/CD information
-- **[Environment Variables](docs/ENVIRONMENT_VARIABLES.md)** – Configuration guide for backend and frontend
-- **[Folder Structure](docs/FOLDER_STRUCTURE.md)** – Project organization and directory layout
-
-### Testing
-- **[Testing Guide](docs/TESTING.md)** – Comprehensive testing documentation including:
-  - Test structure and organization
-  - Running tests (all apps, specific tests, with options)
-  - Writing new tests
-  - Test best practices and patterns
-  - Troubleshooting guide
-
-### Contributing
-- **[Contributing Guide](docs/CONTRIBUTING.md)** – How to contribute to the project, branch naming conventions
+Welcome to the **TAConnect Technical Documentation**. This guide covers everything you need to set up, develop, test, and contribute to the project.
 
 ---
 
-## 📝 Code of Conduct
+## 📚 Documentation
 
-Please read our Code of Conduct to understand community expectations and maintain a respectful, collaborative environment.
+| Document | Description |
+|----------|-------------|
+| [Setup Guide](docs/SETUP.md) | Prerequisites, Docker & manual installation |
+| [API Documentation](docs/API_DOCUMENTATION.md) | Swagger/OpenAPI & JWT authorization |
+| [Environment Variables](docs/ENVIRONMENT_VARIABLES.md) | Backend & frontend configuration |
+| [Folder Structure](docs/FOLDER_STRUCTURE.md) | Project organization |
+| [Testing Guide](docs/TESTING.md) | Running & writing tests |
+| [Contributing](docs/CONTRIBUTING.md) | How to contribute |
 
 ---
 
-## 🚀 Quick Links
+## 🚀 Quick Start
 
-- **Frontend**: http://localhost:3000
-- **Backend API**: http://localhost:8000
-- **Swagger Docs**: http://localhost:8000/swagger/
-- **Django Admin**: http://localhost:8000/admin/
+### Prerequisites
+- [Docker & Docker Compose](https://docs.docker.com/get-docker/)
+- [Git](https://git-scm.com/downloads)
+
+### Setup
+
+```bash
+git clone https://github.com/Kbassem10/TAConnect.git
+cd TAConnect
+cp backend/ta_connect/.env.example backend/ta_connect/.env
+docker compose up --build
+```
+
+### Access Points
+
+| Service | URL |
+|---------|-----|
+| Frontend | http://localhost:3000 |
+| Backend API | http://localhost:8000 |
+| Swagger Docs | http://localhost:8000/swagger/ |
+| Django Admin | http://localhost:8000/admin/ |
+
+---
+
+## 🧪 Testing
+
+TAConnect includes **~128 tests** covering models, views, and serializers.
+
+```bash
+# Run all tests
+docker exec taconnect-backend-1 python manage.py test
+
+# Run specific app
+docker exec taconnect-backend-1 python manage.py test accounts
+
+# Verbose output
+docker exec taconnect-backend-1 python manage.py test --verbosity=2
+```
+
+See [Testing Guide](docs/TESTING.md) for comprehensive documentation.
+
+---
+
+## 🤝 Contributing
+
+```bash
+git checkout -b feature/your-feature
+git commit -m "Add: your feature"
+git push origin feature/your-feature
+```
+
+See [Contributing Guide](docs/CONTRIBUTING.md) for details.
 
 ---
 
 ## 📖 Additional Resources
 
-For more information, see:
-- [README.md](README.md) – Project overview and features
+- [README.md](README.md) – Project overview
 - [LICENSE.md](LICENSE.md) – License information
