@@ -153,24 +153,24 @@ export default function BookingsCalendar() {
             }
           }}
           onMouseLeave={() => setHoveredDay(null)}
-          className={`aspect-square p-1 sm:p-2 border rounded-lg relative cursor-pointer transition-all duration-300 ${
+          className={`aspect-square p-1 sm:p-2 border-2 rounded-xl relative cursor-pointer transition-all duration-300 transform ${
             isTodayDate 
               ? isDark 
-                ? 'bg-gradient-to-br from-[#366c6b]/30 to-[#1a3535]/30 border-[#366c6b] hover:shadow-lg' 
-                : 'bg-gradient-to-br from-[#366c6b]/10 to-[#1a3535]/10 border-[#366c6b] hover:shadow-lg' 
+                ? 'bg-gradient-to-br from-[#366c6b]/40 to-[#1a3535]/40 border-[#366c6b] shadow-lg hover:shadow-xl hover:scale-105' 
+                : 'bg-gradient-to-br from-[#366c6b]/15 to-[#1a3535]/15 border-[#366c6b] shadow-md hover:shadow-lg hover:scale-105' 
               : hasBookings 
                 ? isDark 
-                  ? 'bg-[#366c6b]/20 hover:bg-[#366c6b]/30 border-[#366c6b]/50 hover:border-[#366c6b] hover:shadow-md' 
-                  : 'bg-[#366c6b]/10 hover:bg-[#366c6b]/20 border-[#366c6b]/30 hover:border-[#366c6b] hover:shadow-md'
+                  ? 'bg-[#366c6b]/25 hover:bg-[#366c6b]/35 border-[#366c6b]/60 hover:border-[#366c6b] shadow-md hover:shadow-lg hover:scale-105' 
+                  : 'bg-[#366c6b]/12 hover:bg-[#366c6b]/20 border-[#366c6b]/40 hover:border-[#366c6b] shadow-sm hover:shadow-md hover:scale-105'
                 : isDark 
-                  ? 'border-gray-600 hover:bg-gray-600 hover:border-gray-500' 
-                  : 'border-gray-200 hover:bg-gray-50 hover:border-gray-300'
+                  ? 'border-gray-700 hover:bg-gray-700/50 hover:border-gray-600 hover:scale-105' 
+                  : 'border-gray-300 hover:bg-gray-100 hover:border-gray-400 hover:scale-105'
           }`}
         >
-          <div className={`text-xs sm:text-sm font-medium ${
+          <div className={`text-xs sm:text-sm font-bold ${
             isTodayDate 
-              ? isDark ? 'text-[#366c6b]' : 'text-[#366c6b]' 
-              : isDark ? 'text-gray-300' : 'text-gray-700'
+              ? isDark ? 'text-[#4a9d9c]' : 'text-[#366c6b]' 
+              : isDark ? 'text-gray-200' : 'text-gray-800'
           }`}>
             {day}
           </div>
@@ -179,18 +179,18 @@ export default function BookingsCalendar() {
               {dayBookings.slice(0, 2).map((booking, idx) => (
                 <div
                   key={idx}
-                  className={`text-xs px-1 py-0.5 rounded truncate ${
+                  className={`text-xs px-1.5 py-0.5 rounded-md truncate font-medium shadow-sm ${
                     isDark 
                       ? 'bg-gradient-to-r from-[#366c6b] to-[#1a3535] text-white' 
-                      : 'bg-gradient-to-r from-[#366c6b] to-[#1a3535] text-white'
+                      : 'bg-gradient-to-r from-[#4a9d9c] to-[#366c6b] text-white'
                   }`}
                 >
                   {formatTime(booking.start_time)}
                 </div>
               ))}
               {dayBookings.length > 2 && (
-                <div className={`text-xs px-1 font-semibold ${isDark ? 'text-[#366c6b]' : 'text-[#366c6b]'}`}>
-                  +{dayBookings.length - 2}
+                <div className={`text-xs px-1.5 font-bold ${isDark ? 'text-[#4a9d9c]' : 'text-[#366c6b]'}`}>
+                  +{dayBookings.length - 2} more
                 </div>
               )}
             </div>
@@ -203,163 +203,194 @@ export default function BookingsCalendar() {
   };
 
   return (
-    <div className={`${isDark ? 'bg-gray-700' : 'bg-white'} rounded-xl shadow-md p-4 sm:p-6 border border-opacity-10 relative`}>
-      {/* Tooltip */}
-      {hoveredDay !== null && (
-        <div 
-          className={`fixed z-50 pointer-events-none transform -translate-x-1/2 -translate-y-full mb-2 ${
-            isDark ? 'bg-gray-800 border-gray-600' : 'bg-white border-gray-200'
-          } border rounded-lg shadow-2xl p-3 min-w-[250px] max-w-[350px]`}
-          style={{ 
-            left: `${tooltipPosition.x}px`, 
-            top: `${tooltipPosition.y - 10}px` 
-          }}
-        >
-          <div className="space-y-2">
-            {getBookingsForDate(new Date(year, month, hoveredDay)).map((booking, idx) => (
-              <div 
-                key={idx} 
-                className={`pb-2 ${idx !== getBookingsForDate(new Date(year, month, hoveredDay)).length - 1 ? `border-b ${isDark ? 'border-gray-700' : 'border-gray-200'}` : ''}`}
-              >
-                <p className={`font-semibold text-sm ${isDark ? 'text-white' : 'text-gray-900'}`}>
-                  {booking.course_name || 'Office Hours'}
-                </p>
-                <p className={`text-xs ${isDark ? 'text-gray-300' : 'text-gray-600'} mt-1`}>
-                  🕐 {formatTime(booking.start_time)} - {formatTime(booking.end_time)}
-                </p>
-                <p className={`text-xs ${isDark ? 'text-gray-300' : 'text-gray-600'}`}>
-                  👨‍🏫 {booking.instructor?.full_name || 'Instructor'}
-                </p>
-                {booking.room && (
-                  <p className={`text-xs ${isDark ? 'text-gray-300' : 'text-gray-600'}`}>
-                    📍 {booking.room}
-                  </p>
-                )}
-                {booking.section && (
-                  <p className={`text-xs ${isDark ? 'text-gray-300' : 'text-gray-600'}`}>
-                    📚 Section {booking.section}
-                  </p>
-                )}
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
+    <div className={`${isDark ? 'bg-gradient-to-br from-gray-800 via-gray-800 to-gray-900' : 'bg-gradient-to-br from-white via-white to-gray-50'} rounded-2xl shadow-2xl p-4 sm:p-6 lg:p-8 border ${isDark ? 'border-gray-700' : 'border-gray-200'} relative overflow-hidden`}>
+      {/* Decorative background elements */}
+      <div className="absolute top-0 right-0 w-96 h-96 bg-gradient-to-br from-[#366c6b]/5 to-transparent rounded-full blur-3xl pointer-events-none"></div>
+      <div className="absolute bottom-0 left-0 w-96 h-96 bg-gradient-to-tr from-[#1a3535]/5 to-transparent rounded-full blur-3xl pointer-events-none"></div>
       
-      {/* Header */}
-      <div className="flex items-center justify-between mb-4 sm:mb-6">
-        <h3 className={`text-lg sm:text-xl lg:text-2xl font-semibold ${isDark ? 'text-white' : 'text-gray-900'}`}>
-          My Bookings Calendar
-        </h3>
-        <button
-          onClick={goToToday}
-          className="px-4 py-2 bg-gradient-to-r from-[#366c6b] to-[#1a3535] text-white rounded-lg hover:shadow-lg transition-all duration-300 hover:scale-105 text-sm font-medium"
-        >
-          Today
-        </button>
-      </div>
-
-      {/* Month Navigation */}
-      <div className="flex items-center justify-between mb-4 sm:mb-6">
-        <button
-          onClick={previousMonth}
-          className={`p-2 sm:p-3 rounded-lg transition-all duration-300 hover:scale-105 ${
-            isDark ? 'hover:bg-gray-600 text-gray-300' : 'hover:bg-gray-100 text-gray-700'
-          }`}
-        >
-          <svg className="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-          </svg>
-        </button>
-        
-        <h4 className={`text-base sm:text-lg lg:text-xl font-semibold ${isDark ? 'text-white' : 'text-gray-900'}`}>
-          {monthNames[month]} {year}
-        </h4>
-
-        <button
-          onClick={nextMonth}
-          className={`p-2 sm:p-3 rounded-lg transition-all duration-300 hover:scale-105 ${
-            isDark ? 'hover:bg-gray-600 text-gray-300' : 'hover:bg-gray-100 text-gray-700'
-          }`}
-        >
-          <svg className="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-          </svg>
-        </button>
-      </div>
-
-      {/* Day Names */}
-      <div className="grid grid-cols-7 gap-1 sm:gap-2 mb-2">
-        {dayNames.map(day => (
-          <div key={day} className={`text-center text-xs sm:text-sm font-semibold py-2 ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
-            {day}
+      <div className="relative z-10">
+        {/* Enhanced Tooltip */}
+        {hoveredDay !== null && (
+          <div 
+            className={`fixed z-[100] pointer-events-none transform -translate-x-1/2 -translate-y-full mb-2 ${
+              isDark ? 'bg-gray-900 border-gray-600' : 'bg-white border-gray-300'
+            } border-2 rounded-xl shadow-2xl p-4 min-w-[280px] max-w-[380px] backdrop-blur-md`}
+            style={{ 
+              left: `${tooltipPosition.x}px`, 
+              top: `${tooltipPosition.y - 10}px` 
+            }}
+          >
+            <div className="space-y-2.5">
+              {getBookingsForDate(new Date(year, month, hoveredDay)).map((booking, idx) => (
+                <div 
+                  key={idx} 
+                  className={`pb-2.5 ${idx !== getBookingsForDate(new Date(year, month, hoveredDay)).length - 1 ? `border-b ${isDark ? 'border-gray-700' : 'border-gray-200'}` : ''}`}
+                >
+                  <p className={`font-bold text-sm ${isDark ? 'text-white' : 'text-gray-900'} mb-1.5`}>
+                    {booking.course_name || 'Office Hours'}
+                  </p>
+                  <p className={`text-xs ${isDark ? 'text-gray-300' : 'text-gray-600'} flex items-center gap-1.5`}>
+                    <span className="text-sm">🕐</span>
+                    <span>{formatTime(booking.start_time)} - {formatTime(booking.end_time)}</span>
+                  </p>
+                  <p className={`text-xs ${isDark ? 'text-gray-300' : 'text-gray-600'} flex items-center gap-1.5`}>
+                    <span className="text-sm">👨‍🏫</span>
+                    <span>{booking.instructor?.full_name || 'Instructor'}</span>
+                  </p>
+                  {booking.room && (
+                    <p className={`text-xs ${isDark ? 'text-gray-300' : 'text-gray-600'} flex items-center gap-1.5`}>
+                      <span className="text-sm">📍</span>
+                      <span>{booking.room}</span>
+                    </p>
+                  )}
+                  {booking.section && (
+                    <p className={`text-xs ${isDark ? 'text-gray-300' : 'text-gray-600'} flex items-center gap-1.5`}>
+                      <span className="text-sm">📚</span>
+                      <span>Section {booking.section}</span>
+                    </p>
+                  )}
+                </div>
+              ))}
+            </div>
           </div>
-        ))}
-      </div>
+        )}
+        
+        {/* Modern Header */}
+        <div className="flex items-center justify-between mb-6 sm:mb-8">
+          <div className="flex items-center gap-3">
+            <div className={`p-3 rounded-xl ${isDark ? 'bg-gradient-to-br from-[#366c6b] to-[#1a3535]' : 'bg-gradient-to-br from-[#4a9d9c] to-[#366c6b]'} shadow-lg`}>
+              <svg className="w-6 h-6 sm:w-7 sm:h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+              </svg>
+            </div>
+            <h3 className={`text-xl sm:text-2xl lg:text-3xl font-bold ${isDark ? 'text-white' : 'text-gray-900'}`}>
+              My Bookings
+            </h3>
+          </div>
+          <button
+            onClick={goToToday}
+            className="px-5 py-2.5 bg-gradient-to-r from-[#366c6b] to-[#1a3535] hover:from-[#2d5857] hover:to-[#152a2a] text-white rounded-xl hover:shadow-xl transition-all duration-300 hover:scale-105 text-sm font-bold flex items-center gap-2"
+          >
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <span className="hidden sm:inline">Today</span>
+          </button>
+        </div>
 
-      {/* Calendar Grid */}
-      {loading ? (
-        <div className="grid grid-cols-7 gap-1 sm:gap-2">
-          {[...Array(35)].map((_, i) => (
-            <div key={i} className={`aspect-square ${isDark ? 'bg-gray-600' : 'bg-gray-100'} rounded-lg animate-pulse`} />
+        {/* Sleek Month Navigation */}
+        <div className="flex items-center justify-between mb-6">
+          <button
+            onClick={previousMonth}
+            className={`p-3 rounded-xl transition-all duration-300 hover:scale-110 ${
+              isDark ? 'hover:bg-gray-700 bg-gray-800/60 text-gray-300' : 'hover:bg-gray-100 bg-gray-50 text-gray-700'
+            } shadow-md hover:shadow-xl`}
+          >
+            <svg className="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M15 19l-7-7 7-7" />
+            </svg>
+          </button>
+          
+          <h4 className={`text-lg sm:text-xl lg:text-2xl font-bold ${isDark ? 'text-white' : 'text-gray-900'}`}>
+            {monthNames[month]} {year}
+          </h4>
+
+          <button
+            onClick={nextMonth}
+            className={`p-3 rounded-xl transition-all duration-300 hover:scale-110 ${
+              isDark ? 'hover:bg-gray-700 bg-gray-800/60 text-gray-300' : 'hover:bg-gray-100 bg-gray-50 text-gray-700'
+            } shadow-md hover:shadow-xl`}
+          >
+            <svg className="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 5l7 7-7 7" />
+            </svg>
+          </button>
+        </div>
+
+        {/* Day Names with Modern Styling */}
+        <div className="grid grid-cols-7 gap-1 sm:gap-2 mb-3">
+          {dayNames.map(day => (
+            <div key={day} className={`text-center text-xs sm:text-sm font-bold py-3 rounded-lg ${isDark ? 'text-gray-400 bg-gray-800/40' : 'text-gray-600 bg-gray-100/50'}`}>
+              {day}
+            </div>
           ))}
         </div>
-      ) : (
-        <div className="grid grid-cols-7 gap-1 sm:gap-2">
-          {renderCalendarDays()}
-        </div>
-      )}
 
-      {/* Selected Date Details */}
-      {selectedDate && (
-        <div className={`mt-4 sm:mt-6 p-4 sm:p-6 rounded-xl ${isDark ? 'bg-gray-600' : 'bg-gray-50'} shadow-md`}>
-          <h4 className={`font-semibold mb-3 sm:mb-4 text-base sm:text-lg ${isDark ? 'text-white' : 'text-gray-900'}`}>
-            {selectedDate.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
-          </h4>
-          <div className="space-y-3">
-            {getBookingsForDate(selectedDate).map((booking, idx) => (
-              <div
-                key={idx}
-                className={`p-4 rounded-lg transition-all duration-300 hover:shadow-lg ${
-                  isDark ? 'bg-gray-700 border border-gray-600' : 'bg-white border border-gray-200'
-                }`}
-              >
-                <div className="flex items-start justify-between">
-                  <div className="flex-1">
-                    <p className={`font-semibold text-base sm:text-lg ${isDark ? 'text-white' : 'text-gray-900'}`}>
-                      {booking.course_name || 'Office Hours'}
-                    </p>
-                    <p className={`text-sm ${isDark ? 'text-gray-300' : 'text-gray-600'} mt-2 flex items-center gap-2`}>
-                      <span>🕐</span>
-                      <span>{formatTime(booking.start_time)} - {formatTime(booking.end_time)}</span>
-                    </p>
-                    <p className={`text-sm ${isDark ? 'text-gray-300' : 'text-gray-600'} flex items-center gap-2`}>
-                      <span>👨‍🏫</span>
-                      <span>{booking.instructor?.full_name || 'Instructor'}</span>
-                    </p>
-                    {booking.room && (
-                      <p className={`text-sm ${isDark ? 'text-gray-300' : 'text-gray-600'} flex items-center gap-2`}>
-                        <span>📍</span>
-                        <span>{booking.room}</span>
-                      </p>
-                    )}
-                  </div>
-                </div>
-              </div>
+        {/* Calendar Grid with Enhanced Loading */}
+        {loading ? (
+          <div className="grid grid-cols-7 gap-1 sm:gap-2">
+            {[...Array(35)].map((_, i) => (
+              <div key={i} className={`aspect-square ${isDark ? 'bg-gray-700' : 'bg-gray-100'} rounded-xl animate-pulse shadow-sm`} />
             ))}
           </div>
-        </div>
-      )}
+        ) : (
+          <div className="grid grid-cols-7 gap-1 sm:gap-2">
+            {renderCalendarDays()}
+          </div>
+        )}
 
-      {/* Legend */}
-      <div className={`mt-4 sm:mt-6 pt-4 border-t ${isDark ? 'border-gray-600' : 'border-gray-200'} flex flex-wrap items-center gap-4 text-xs sm:text-sm`}>
-        <div className="flex items-center gap-2">
-          <div className={`w-4 h-4 rounded ${isDark ? 'bg-gradient-to-br from-[#366c6b]/30 to-[#1a3535]/30 border border-[#366c6b]' : 'bg-gradient-to-br from-[#366c6b]/10 to-[#1a3535]/10 border border-[#366c6b]'}`}></div>
-          <span className={isDark ? 'text-gray-300' : 'text-gray-700'}>Today</span>
-        </div>
-        <div className="flex items-center gap-2">
-          <div className={`w-4 h-4 rounded ${isDark ? 'bg-[#366c6b]/20 border border-[#366c6b]/50' : 'bg-[#366c6b]/10 border border-[#366c6b]/30'}`}></div>
-          <span className={isDark ? 'text-gray-300' : 'text-gray-700'}>Has Bookings</span>
+        {/* Enhanced Selected Date Details */}
+        {selectedDate && (
+          <div className={`mt-6 sm:mt-8 p-5 sm:p-7 rounded-2xl ${isDark ? 'bg-gradient-to-br from-gray-800 to-gray-900 border border-gray-700' : 'bg-gradient-to-br from-white to-gray-50 border border-gray-200'} shadow-xl backdrop-blur-sm`}>
+            <h4 className={`font-bold mb-4 text-lg sm:text-xl ${isDark ? 'text-white' : 'text-gray-900'} flex items-center gap-2.5`}>
+              <svg className="w-6 h-6 text-[#366c6b]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+              </svg>
+              {selectedDate.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
+            </h4>
+            <div className="space-y-3.5">
+              {getBookingsForDate(selectedDate).map((booking, idx) => (
+                <div
+                  key={idx}
+                  className={`p-5 rounded-xl transition-all duration-300 hover:shadow-2xl hover:scale-[1.02] ${
+                    isDark ? 'bg-gradient-to-br from-gray-700 to-gray-800 border-2 border-gray-600' : 'bg-gradient-to-br from-white to-gray-50 border-2 border-gray-300 shadow-lg'
+                  }`}
+                >
+                  <div className="flex items-start justify-between">
+                    <div className="flex-1">
+                      <p className={`font-bold text-lg sm:text-xl ${isDark ? 'text-white' : 'text-gray-900'} mb-3`}>
+                        {booking.course_name || 'Office Hours'}
+                      </p>
+                      <div className="space-y-2">
+                        <p className={`text-sm ${isDark ? 'text-gray-300' : 'text-gray-600'} flex items-center gap-2.5 font-medium`}>
+                          <span className="text-lg">🕐</span>
+                          <span>{formatTime(booking.start_time)} - {formatTime(booking.end_time)}</span>
+                        </p>
+                        <p className={`text-sm ${isDark ? 'text-gray-300' : 'text-gray-600'} flex items-center gap-2.5 font-medium`}>
+                          <span className="text-lg">👨‍🏫</span>
+                          <span>{booking.instructor?.full_name || 'Instructor'}</span>
+                        </p>
+                        {booking.room && (
+                          <p className={`text-sm ${isDark ? 'text-gray-300' : 'text-gray-600'} flex items-center gap-2.5 font-medium`}>
+                            <span className="text-lg">📍</span>
+                            <span>{booking.room}</span>
+                          </p>
+                        )}
+                        {booking.section && (
+                          <p className={`text-sm ${isDark ? 'text-gray-300' : 'text-gray-600'} flex items-center gap-2.5 font-medium`}>
+                            <span className="text-lg">📚</span>
+                            <span>Section {booking.section}</span>
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Modern Legend */}
+        <div className={`mt-6 sm:mt-8 pt-5 border-t-2 ${isDark ? 'border-gray-700' : 'border-gray-200'} flex flex-wrap items-center gap-5 text-sm`}>
+          <div className="flex items-center gap-2.5">
+            <div className={`w-5 h-5 rounded-lg ${isDark ? 'bg-gradient-to-br from-[#366c6b]/30 to-[#1a3535]/30 border-2 border-[#366c6b]' : 'bg-gradient-to-br from-[#366c6b]/10 to-[#1a3535]/10 border-2 border-[#366c6b]'} shadow-md`}></div>
+            <span className={`font-semibold ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>Today</span>
+          </div>
+          <div className="flex items-center gap-2.5">
+            <div className={`w-5 h-5 rounded-lg ${isDark ? 'bg-[#366c6b]/20 border-2 border-[#366c6b]/50' : 'bg-[#366c6b]/10 border-2 border-[#366c6b]/30'} shadow-md`}></div>
+            <span className={`font-semibold ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>Has Bookings</span>
+          </div>
         </div>
       </div>
     </div>
