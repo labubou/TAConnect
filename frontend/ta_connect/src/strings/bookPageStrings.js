@@ -45,6 +45,10 @@ export const bookPageStrings = {
     errorBooking: 'Failed to create booking',
     successBooking: 'Booking created successfully! Check your email for confirmation.',
     loading: 'Loading...',
+    searchingInstructors: 'Searching for instructors...',
+    loadingSlots: 'Loading time slots...',
+    loadingTimes: 'Loading available times...',
+    creatingBooking: 'Creating your booking...',
   },
 
   errors: {

@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { useTheme } from "../../contexts/ThemeContext";
+import { useGlobalLoading } from "../../contexts/GlobalLoadingContext";
 import TAnavbar from "../../components/ta/TAnavbar";
 import AllowedStudentsTable from "../../components/ta/mini-pages/AllowedStudentsTable";
 import AddAllowedStudent from "../../components/ta/mini-pages/AddAllowedStudent";
@@ -49,6 +50,7 @@ const Modal = ({ title, onClose, isDark, children }) => (
 
 export default function AllowedStudents() {
   const { theme } = useTheme();
+  const { startLoading, stopLoading, isLoading } = useGlobalLoading();
   const isDark = theme === "dark";
   const [isNavbarOpen, setIsNavbarOpen] = useState(true);
   const [slots, setSlots] = useState([]);
@@ -72,6 +74,7 @@ export default function AllowedStudents() {
   const fetchSlots = async () => {
     try {
       setLoading(true);
+      startLoading('fetch-slots-allowed', 'Loading slots...');
       const res = await axios.get("/api/instructor/get-user-slots");
       setSlots(res?.data?.slots || []);
       if (res?.data?.slots?.length > 0) {
@@ -79,9 +82,10 @@ export default function AllowedStudents() {
         await fetchAllowedStudents(res.data.slots[0].id);
       }
     } catch (err) {
-      console.error("Failed to fetch slots:", err);
+      console.error("Error:", err);
       setInfoBanner(strings.messages.error);
     } finally {
+      stopLoading('fetch-slots-allowed');
       setLoading(false);
     }
   };
