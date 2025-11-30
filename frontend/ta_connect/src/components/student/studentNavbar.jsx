@@ -3,7 +3,9 @@ import { useAuth } from '../../contexts/AuthContext';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import Logo from '../../assets/Logo2.png';
 import { useTheme } from '../../contexts/ThemeContext';
+import { useLanguage } from '../../contexts/LanguageContext';
 import ThemeToggle from '../General/ThemeToggle';
+import LanguageToggle from '../General/LanguageToggle';
 import strings from '../../strings/studentNavbarStrings';
 
 const StudentNavbar = ({ onToggle }) => {
@@ -13,6 +15,8 @@ const StudentNavbar = ({ onToggle }) => {
   const [isOpen, setIsOpen] = useState(true);
   const [isMobile, setIsMobile] = useState(false);
   const { theme } = useTheme();
+  const { language } = useLanguage();
+  const t = strings[language];
 
   useEffect(() => {
     const checkScreenSize = () => {
@@ -68,8 +72,8 @@ const StudentNavbar = ({ onToggle }) => {
       <button 
         className="fixed top-4 left-4 z-50 w-12 h-12 bg-white/80 dark:bg-gray-800/80 backdrop-blur-xl border border-white/30 dark:border-gray-700 rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-300 hover:scale-110 flex items-center justify-center group"
         onClick={toggleNavbar}
-        aria-label={strings.aria.toggleNav}
-        title={isOpen ? strings.aria.collapseSidebar : strings.aria.expandSidebar}
+        aria-label={t.aria.toggleNav}
+        title={isOpen ? t.aria.collapseSidebar : t.aria.expandSidebar}
       >
         <svg 
           className={`w-6 h-6 text-gray-700 dark:text-gray-200 transition-transform duration-300 ${isOpen ? 'rotate-180' : ''} group-hover:text-[#366c6b]`}
@@ -85,8 +89,9 @@ const StudentNavbar = ({ onToggle }) => {
         </svg>
       </button>
 
-      {/* Theme toggle - top right */}
-      <div className="fixed top-4 right-4 z-50">
+      {/* Theme and Language toggles - top right */}
+      <div className="fixed top-4 right-4 z-50 flex gap-2">
+        <LanguageToggle />
         <ThemeToggle />
       </div>
 
@@ -114,7 +119,7 @@ const StudentNavbar = ({ onToggle }) => {
                 </div>
               <div className="text-center">
                 <p className="text-gray-500 dark:text-gray-400 text-xs font-medium">
-                  {strings.appName}
+                  {t.appName}
                 </p>
               </div>
               </div>
@@ -130,7 +135,7 @@ const StudentNavbar = ({ onToggle }) => {
                       <p className="text-gray-800 dark:text-gray-100 font-semibold text-sm truncate">
                         {user?.first_name && user?.last_name 
                           ? `${user.first_name} ${user.last_name}`
-                          : user?.username || strings.user.defaultName
+                          : user?.username || t.user.defaultName
                         }
                       </p>
                       <p className="text-gray-600 dark:text-gray-300 text-xs truncate">{user?.email}</p>
@@ -142,7 +147,7 @@ const StudentNavbar = ({ onToggle }) => {
                         <svg className="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
                           <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
                         </svg>
-                        {strings.user.emailNotVerified}
+                        {t.user.emailNotVerified}
                       </span>
                     </div>
                   )}
@@ -169,7 +174,7 @@ const StudentNavbar = ({ onToggle }) => {
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
                     </svg>
                   </div>
-                  <span className="font-semibold">{strings.navigation.dashboard}</span>
+                  <span className="font-semibold">{t.navigation.dashboard}</span>
                 </Link>
 
                 <Link 
@@ -190,7 +195,7 @@ const StudentNavbar = ({ onToggle }) => {
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                     </svg>
                   </div>
-                  <span className="font-semibold">{strings.navigation.book}</span>
+                  <span className="font-semibold">{t.navigation.book}</span>
                 </Link>
 
 
@@ -212,7 +217,7 @@ const StudentNavbar = ({ onToggle }) => {
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
                     </svg>
                   </div>
-                  <span className="font-semibold">{strings.navigation.manageBooked}</span>
+                  <span className="font-semibold">{t.navigation.manageBooked}</span>
                 </Link>
 
                 <Link 
@@ -233,7 +238,7 @@ const StudentNavbar = ({ onToggle }) => {
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
                     </svg>
                   </div>
-                  <span className="font-semibold">Email Preferences</span>
+                  <span className="font-semibold">{t.navigation.emailPreferences}</span>
                 </Link>
 
                 <Link 
@@ -254,7 +259,7 @@ const StudentNavbar = ({ onToggle }) => {
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                     </svg>
                   </div>
-                  <span className="font-semibold">{strings.navigation.profile}</span>
+                  <span className="font-semibold">{t.navigation.profile}</span>
                 </Link>
               </div>
             </div>
@@ -270,11 +275,11 @@ const StudentNavbar = ({ onToggle }) => {
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
                   </svg>
                 </div>
-                <span className="font-semibold">{strings.navigation.logout}</span>
+                <span className="font-semibold">{t.navigation.logout}</span>
               </button>
               <div className="text-center">
                 <p className="text-gray-500 dark:text-gray-400 text-xs font-large">
-                  {strings.appName}
+                  {t.appName}
                 </p>
               </div>
             </div>

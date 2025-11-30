@@ -45,6 +45,8 @@ const REGISTER_PAGE = {
     messages: {
       success: "Account created successfully! Please check your email to verify your account.",
       successSubtext: "We've sent a verification link to your email address. Click the link to activate your account.",
+      checkSpam: "Check your spam folder if you don't see the email.",
+      goToLogin: "Go to Login",
       error: "Failed to create account. Please try again.",
     },
     footer: {
@@ -98,6 +100,8 @@ const REGISTER_PAGE = {
     messages: {
       success: "تم إنشاء الحساب بنجاح! يرجى التحقق من بريدك الإلكتروني للتحقق من حسابك.",
       successSubtext: "لقد أرسلنا رابط التحقق إلى بريدك الإلكتروني. انقر على الرابط لتفعيل حسابك.",
+      checkSpam: "تحقق من مجلد الرسائل غير المرغوب فيها إذا لم تجد البريد الإلكتروني.",
+      goToLogin: "انتقل إلى تسجيل الدخول",
       error: "فشل إنشاء الحساب. الرجاء المحاولة مرة أخرى.",
     },
     footer: {
