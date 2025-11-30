@@ -1,95 +1,249 @@
-# 🎓 TAConnect – Smart Office Hours & Scheduling Platform (Demo - Under Development)
+<div align="center">
 
-[![Project Status: Active](https://img.shields.io/badge/Project%20Status-Active-green.svg)](https://github.com/Kbassem10/TAConnect)
-[![License](https://img.shields.io/badge/License-Dual-blue.svg)](LICENSE)
+# 🎓 TAConnect
 
-Simplify academic life with **TAConnect** — an open-source web platform that helps **Teaching Assistants (TAs)** and **students** manage **office hours**, **bookings**, and **feedback** with ease.
+### Smart Office Hours & Scheduling Platform
 
-Built with **Django** and **React**, TAConnect offers a smooth, conflict-free scheduling experience, powerful analytics, and a beautiful, modern UI — all while remaining secure and scalable through Docker and JWT authentication.
+[![Project Status](https://img.shields.io/badge/Status-Active%20Development-brightgreen?style=for-the-badge)](https://github.com/Kbassem10/TAConnect)
+[![License](https://img.shields.io/badge/License-AGPL--3.0%20%2F%20Commercial-blue?style=for-the-badge)](LICENSE.md)
+[![Django](https://img.shields.io/badge/Django-5.x-092E20?style=for-the-badge&logo=django)](https://www.djangoproject.com/)
+[![React](https://img.shields.io/badge/React-19.x-61DAFB?style=for-the-badge&logo=react)](https://reactjs.org/)
+[![Docker](https://img.shields.io/badge/Docker-Ready-2496ED?style=for-the-badge&logo=docker)](https://www.docker.com/)
+
+**Simplify academic scheduling. Connect TAs with students. Maximize learning.**
+
+[Quick Start](#-quick-start) •
+[Features](#-features) •
+[Documentation](#-documentation) •
+[Contributing](#-contributing)
+
+</div>
+
+---
+
+## 📖 About
+
+**TAConnect** is an open-source platform that streamlines office hours management for Teaching Assistants and students. Built with modern technologies, it offers conflict-free booking, real-time analytics, and a beautiful user experience.
+
+> *"Maximize Your Learning. Minimize the Wait."*
+
+---
+
+## ✨ Features
+
+<table>
+<tr>
+<td width="50%">
+
+### 📅 Smart Scheduling
+- Create & manage office hour slots
+- Conflict-free booking system
+- Buffer time between sessions
+- Recurring slot patterns
+
+</td>
+<td width="50%">
+
+### 👥 Role-Based Access
+- Dedicated TA dashboards
+- Student booking interface
+- Email verification system
+- JWT secure authentication
+
+</td>
+</tr>
+<tr>
+<td width="50%">
+
+### 📊 Analytics & Insights
+- Booking trends visualization
+- Session completion tracking
+- Export bookings as CSV
+- Date range filtering
+
+</td>
+<td width="50%">
+
+### 🔔 Notifications
+- Email on new bookings
+- Cancellation alerts
+- Booking update notifications
+- Customizable preferences
+
+</td>
+</tr>
+<tr>
+<td width="50%">
+
+### 🎨 Modern UI/UX
+- Dark/Light theme toggle
+- Fully responsive design
+- Interactive calendars
+- Accessible components
+
+</td>
+<td width="50%">
+
+### 🛠️ Developer Friendly
+- Swagger API documentation
+- Docker one-command setup
+- Comprehensive test suite
+- Modular architecture
+
+</td>
+</tr>
+</table>
+
+---
+
+## 🚀 Quick Start
+
+### Prerequisites
+- [Docker & Docker Compose](https://docs.docker.com/get-docker/)
+- [Git](https://git-scm.com/downloads)
+
+### Installation
+
+```bash
+# Clone the repository
+git clone https://github.com/Kbassem10/TAConnect.git
+cd TAConnect
+
+# Copy environment file
+cp backend/ta_connect/.env.example backend/ta_connect/.env
+
+# Start with Docker (recommended)
+docker compose up --build
+```
+
+### Access Points
+
+| Service | URL |
+|---------|-----|
+| 🖥️ Frontend | http://localhost:3000 |
+| ⚙️ Backend API | http://localhost:8000 |
+| 📚 API Docs (Swagger) | http://localhost:8000/swagger/ |
+| 🔧 Django Admin | http://localhost:8000/admin/ |
+
+---
+
+## 🏗️ Tech Stack
+
+<div align="center">
+
+| Frontend | Backend | Database | DevOps |
+|:--------:|:-------:|:--------:|:------:|
+| React 19 | Django 5 | PostgreSQL | Docker |
+| Vite | Django REST | SQLite (tests) | Docker Compose |
+| Tailwind CSS | JWT Auth | | GitHub Actions |
+| React Query | drf-spectacular | | |
+| Recharts | Celery (planned) | | |
+
+</div>
 
 ---
 
 ## 📚 Documentation
 
-For setup, API, contributing, and more, see [PROJECT_GUIDE.md](PROJECT_GUIDE.md).
+For comprehensive documentation, see **[PROJECT_GUIDE.md](PROJECT_GUIDE.md)**
+
+| Document | Description |
+|----------|-------------|
+| [Setup Guide](docs/SETUP.md) | Installation & configuration |
+| [API Documentation](docs/API_DOCUMENTATION.md) | Swagger/OpenAPI & JWT guide |
+| [Environment Variables](docs/ENVIRONMENT_VARIABLES.md) | Configuration reference |
+| [Testing Guide](docs/TESTING.md) | Running & writing tests |
+| [Contributing](docs/CONTRIBUTING.md) | How to contribute |
+| [Folder Structure](docs/FOLDER_STRUCTURE.md) | Project organization |
 
 ---
 
-## 🗓️ Features
+## 🧪 Testing
 
-### 🎓 Core Scheduling System
-- **TA Office Hours Management** – TAs can create, edit, and organize office hour slots with buffer times.
-- **Conflict-Free Booking** – Prevents overlapping or double-booked sessions using intelligent backend logic.
-- **Role-Based Dashboards** – TAs and students see customized dashboards and functionalities.
-- **Booking System** – Students can easily book, modify, and cancel office hour appointments.
+TAConnect includes a comprehensive test suite with **~128 tests** covering models, views, and serializers.
 
-### 📈 Analytics & Insights
-- **Booking Analytics** – Visual reports showing most booked times, attendance patterns, and student engagement.
-- **Feedback Analysis** – Aggregated student feedback insights to enhance teaching quality.
+```bash
+# Run all tests
+docker exec taconnect-backend-1 python manage.py test
 
-### ⚙️ Efficiency & Usability
-- **Smart Conflict Detection** – Automatically prevents time overlap for both TAs and courses.
-- **Interactive Calendar View** – Calendar interface (FullCalendar) for intuitive booking and management.
-- **Swagger API Documentation** – Every backend endpoint automatically published and versioned for frontend use.
+# Run specific app tests
+docker exec taconnect-backend-1 python manage.py test accounts
+docker exec taconnect-backend-1 python manage.py test instructor
+docker exec taconnect-backend-1 python manage.py test student
 
-### 🔐 Security & Reliability
-- **JWT Authentication** – Secure and stateless authentication for all users.
-- **Dockerized Setup** – One-command deployment and development setup with Docker Compose.
-- **PostgreSQL Database** – Stable and production-ready relational database for all app data.
+# Run with verbosity
+docker exec taconnect-backend-1 python manage.py test --verbosity=2
+```
 
-<!-- ---
+---
 
-## 🖼️ Screenshots
+## 👥 Team
 
 <div align="center">
-  <img width="1730" height="889" src="https://github.com/user-attachments/assets/example1.png" />
-  <p><em>Dashboard with TA and Student roles</em></p>
 
-  <img width="1727" height="969" src="https://github.com/user-attachments/assets/example2.png" />
-  <p><em>Office hour scheduling and management</em></p>
+| Role | Name |
+|:----:|:----:|
+| 🔧 Backend Developer | **Karim Bassem** |
+| 🔧 Backend Developer | **Ahmed Fahmy** |
+| 🎨 Frontend Developer | **Nadeem Diaa** |
+| 🎨 Frontend Developer | **Omar Salama** |
 
-  <img width="1727" height="969" src="https://github.com/user-attachments/assets/example3.png" />
-  <p><em>Student booking and feedback flow</em></p>
-
-  <img width="1727" height="969" src="https://github.com/user-attachments/assets/example4.png" />
-  <p><em>Analytics dashboard with TA insights</em></p>
 </div>
 
---- -->
+---
 
-## 🔧 Technology Stack
+## 🛣️ Roadmap
 
-- **Frontend**: React, Vite, Tailwind CSS
-- **Backend**: Django REST Framework, JWT Authentication, drf-spectacular (Swagger Docs)
-- **Database**: PostgreSQL
-- **Deployment**: Docker, Docker Compose
+- [x] Core booking system
+- [x] JWT authentication
+- [x] Email notifications
+- [x] Analytics dashboard
+- [x] CSV export
+- [x] Dark/Light theme
+- [ ] 🔤 Multi-language support (Arabic, French)
+- [ ] 📅 Google Calendar integration
+- [ ] 📅 Outlook Calendar sync
+- [ ] 🧠 AI scheduling assistant
+- [ ] 🔗 LMS integrations
 
 ---
 
-## 👥 Project Team
+## 🤝 Contributing
 
-Role | Member Name
---- | ---
-Backend Developer | Karim Bassem
-Backend Developer | Ahmed Fahmy
-Frontend Developer | Nadeem Diaa
-Frontend Developer | Omar Salama
+We welcome contributions! See our [Contributing Guide](docs/CONTRIBUTING.md) for details.
 
----
+```bash
+# Create a feature branch
+git checkout -b feature/your-feature
 
-## 🛣️ Future Roadmap
+# Make changes and commit
+git commit -m "Add: your feature description"
 
-- 🔤 Add multi-language support - Add multiple language (Arabic, French, etc..)
-- 📅 Calendar Integrations – Google Calendar & Outlook sync
-- 🧠 AI Scheduling Assistant – Suggest optimal time slots based on the existing data
-- 🧩 University Integrations – LMS and academic APIs
+# Push and create PR
+git push origin feature/your-feature
+```
 
 ---
 
-## 🌟 Acknowledgments
+## 📄 License
 
-- Built with ❤️ by the TAConnect Development Team
-- Inspired by the need for simpler academic scheduling
-- Thanks to our mentors and peers for feedback and testing
+This project uses a **dual-license model**:
 
-> “Connect better. Schedule smarter. Teach easier.” — TAConnect Team
+- **AGPL-3.0** for academic and non-commercial use
+- **Commercial License** for enterprise/proprietary usage
+
+For commercial inquiries: [taconnect.team@outlook.com](mailto:taconnect.team@outlook.com)
+
+See [LICENSE.md](LICENSE.md) for details.
+
+---
+
+<div align="center">
+
+### ⭐ Star this repo if you find it helpful!
+
+**Built with ❤️ by the TAConnect Team**
+
+*"Connect better. Schedule smarter. Teach easier."*
+
+</div>
