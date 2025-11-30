@@ -204,13 +204,6 @@ export default function CreateCourse({ isDark, onSlotCreated, slots, onClose }) 
 
   return (
     <div className={containerClasses}>
-      <h2
-        className={`text-xl sm:text-2xl font-bold mb-2 ${
-          isDark ? "text-white" : "text-gray-900"
-        }`}
-      >
-        {strings.create.title}
-      </h2>
       <p
         className={`mb-6 text-sm sm:text-base ${isDark ? "text-gray-300" : "text-gray-600"}`}
       >
