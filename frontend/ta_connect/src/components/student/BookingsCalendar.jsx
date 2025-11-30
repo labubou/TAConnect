@@ -77,7 +77,7 @@ export default function BookingsCalendar() {
     return bookings.filter(booking => {
       // Handle both formats: YYYY-MM-DD from backend or Date object
       const bookingDate = typeof booking.date === 'string' ? booking.date : booking.date.toISOString().split('T')[0];
-      return bookingDate === dateStr && !booking.is_cancelled;
+      return bookingDate === dateStr;
     });
   };
 
@@ -187,13 +187,23 @@ export default function BookingsCalendar() {
               {dayBookings.slice(0, 2).map((booking, idx) => (
                 <div
                   key={idx}
-                  className={`text-xs px-1.5 py-0.5 rounded-md truncate font-medium shadow-sm ${
-                    isDark 
-                      ? 'bg-gradient-to-r from-[#366c6b] to-[#1a3535] text-white' 
-                      : 'bg-gradient-to-r from-[#4a9d9c] to-[#366c6b] text-white'
+                  className={`text-xs px-1.5 py-0.5 rounded-md truncate font-medium shadow-sm flex items-center gap-1 ${
+                    booking.is_completed
+                      ? isDark
+                        ? 'bg-gradient-to-r from-green-700 to-green-800 text-white'
+                        : 'bg-gradient-to-r from-green-500 to-green-600 text-white'
+                      : booking.is_cancelled
+                      ? isDark
+                        ? 'bg-gradient-to-r from-gray-600 to-gray-700 text-gray-300 line-through opacity-60'
+                        : 'bg-gradient-to-r from-gray-400 to-gray-500 text-gray-100 line-through opacity-70'
+                      : isDark 
+                        ? 'bg-gradient-to-r from-[#366c6b] to-[#1a3535] text-white' 
+                        : 'bg-gradient-to-r from-[#4a9d9c] to-[#366c6b] text-white'
                   }`}
                 >
-                  {formatTime(booking.start_time)}
+                  {booking.is_completed && <span className="text-[10px]">✓</span>}
+                  {booking.is_cancelled && <span className="text-[10px]">✕</span>}
+                  <span className={booking.is_cancelled ? 'line-through' : ''}>{formatTime(booking.start_time)}</span>
                 </div>
               ))}
               {dayBookings.length > 2 && (
@@ -234,25 +244,37 @@ export default function BookingsCalendar() {
                   key={idx} 
                   className={`pb-2.5 ${idx !== getBookingsForDate(new Date(year, month, hoveredDay)).length - 1 ? `border-b ${isDark ? 'border-gray-700' : 'border-gray-200'}` : ''}`}
                 >
-                  <p className={`font-bold text-sm ${isDark ? 'text-white' : 'text-gray-900'} mb-1.5`}>
-                    {booking.course_name || 'Office Hours'}
-                  </p>
-                  <p className={`text-xs ${isDark ? 'text-gray-300' : 'text-gray-600'} flex items-center gap-1.5`}>
+                  <div className="flex items-start justify-between gap-2 mb-1.5">
+                    <p className={`font-bold text-sm ${isDark ? 'text-white' : 'text-gray-900'} ${booking.is_cancelled ? 'line-through opacity-60' : ''}`}>
+                      {booking.course_name || 'Office Hours'}
+                    </p>
+                    {booking.is_completed && (
+                      <span className="px-2 py-0.5 bg-green-500 text-white text-xs rounded-full font-semibold flex items-center gap-1">
+                        <span>✓</span> Completed
+                      </span>
+                    )}
+                    {booking.is_cancelled && (
+                      <span className="px-2 py-0.5 bg-red-500 text-white text-xs rounded-full font-semibold flex items-center gap-1">
+                        <span>✕</span> Cancelled
+                      </span>
+                    )}
+                  </div>
+                  <p className={`text-xs ${isDark ? 'text-gray-300' : 'text-gray-600'} flex items-center gap-1.5 ${booking.is_cancelled ? 'line-through opacity-60' : ''}`}>
                     <span className="text-sm">🕐</span>
                     <span>{formatTime(booking.start_time)} - {formatTime(booking.end_time)}</span>
                   </p>
-                  <p className={`text-xs ${isDark ? 'text-gray-300' : 'text-gray-600'} flex items-center gap-1.5`}>
+                  <p className={`text-xs ${isDark ? 'text-gray-300' : 'text-gray-600'} flex items-center gap-1.5 ${booking.is_cancelled ? 'opacity-60' : ''}`}>
                     <span className="text-sm">👨‍🏫</span>
                     <span>{booking.instructor?.full_name || 'Instructor'}</span>
                   </p>
                   {booking.room && (
-                    <p className={`text-xs ${isDark ? 'text-gray-300' : 'text-gray-600'} flex items-center gap-1.5`}>
+                    <p className={`text-xs ${isDark ? 'text-gray-300' : 'text-gray-600'} flex items-center gap-1.5 ${booking.is_cancelled ? 'opacity-60' : ''}`}>
                       <span className="text-sm">📍</span>
                       <span>{booking.room}</span>
                     </p>
                   )}
                   {booking.section && (
-                    <p className={`text-xs ${isDark ? 'text-gray-300' : 'text-gray-600'} flex items-center gap-1.5`}>
+                    <p className={`text-xs ${isDark ? 'text-gray-300' : 'text-gray-600'} flex items-center gap-1.5 ${booking.is_cancelled ? 'opacity-60' : ''}`}>
                       <span className="text-sm">📚</span>
                       <span>Section {booking.section}</span>
                     </p>
@@ -354,32 +376,52 @@ export default function BookingsCalendar() {
                     const dateStr = `${selectedDate.getFullYear()}-${String(selectedDate.getMonth() + 1).padStart(2, '0')}-${String(selectedDate.getDate()).padStart(2, '0')}`;
                     navigate('/student/manage-booked', { state: { filterDate: dateStr } });
                   }}
-                  className={`p-5 rounded-xl transition-all duration-300 hover:shadow-2xl hover:scale-[1.02] cursor-pointer ${
-                    isDark ? 'bg-gradient-to-br from-gray-700 to-gray-800 border-2 border-gray-600 hover:border-[#366c6b]' : 'bg-gradient-to-br from-white to-gray-50 border-2 border-gray-300 shadow-lg hover:border-[#366c6b]'
+                  className={`p-5 rounded-xl transition-all duration-300 hover:shadow-2xl hover:scale-[1.02] cursor-pointer relative ${
+                    booking.is_completed
+                      ? isDark
+                        ? 'bg-gradient-to-br from-green-900/40 to-green-800/40 border-2 border-green-600 hover:border-green-500'
+                        : 'bg-gradient-to-br from-green-50 to-green-100 border-2 border-green-400 shadow-lg hover:border-green-500'
+                      : booking.is_cancelled
+                      ? isDark
+                        ? 'bg-gradient-to-br from-gray-800/60 to-gray-900/60 border-2 border-gray-600 opacity-70'
+                        : 'bg-gradient-to-br from-gray-100 to-gray-200 border-2 border-gray-400 shadow-lg opacity-75'
+                      : isDark 
+                        ? 'bg-gradient-to-br from-gray-700 to-gray-800 border-2 border-gray-600 hover:border-[#366c6b]' 
+                        : 'bg-gradient-to-br from-white to-gray-50 border-2 border-gray-300 shadow-lg hover:border-[#366c6b]'
                   }`}
                 >
+                  {booking.is_completed && (
+                    <div className="absolute top-3 right-3 px-3 py-1 bg-green-500 text-white text-xs rounded-full font-bold flex items-center gap-1.5 shadow-lg">
+                      <span className="text-sm">✓</span> Completed
+                    </div>
+                  )}
+                  {booking.is_cancelled && (
+                    <div className="absolute top-3 right-3 px-3 py-1 bg-red-500 text-white text-xs rounded-full font-bold flex items-center gap-1.5 shadow-lg">
+                      <span className="text-sm">✕</span> Cancelled
+                    </div>
+                  )}
                   <div className="flex items-start justify-between">
-                    <div className="flex-1">
-                      <p className={`font-bold text-lg sm:text-xl ${isDark ? 'text-white' : 'text-gray-900'} mb-3`}>
+                    <div className="flex-1 pr-24">
+                      <p className={`font-bold text-lg sm:text-xl ${isDark ? 'text-white' : 'text-gray-900'} mb-3 ${booking.is_cancelled ? 'line-through opacity-60' : ''}`}>
                         {booking.course_name || 'Office Hours'}
                       </p>
                       <div className="space-y-2">
-                        <p className={`text-sm ${isDark ? 'text-gray-300' : 'text-gray-600'} flex items-center gap-2.5 font-medium`}>
+                        <p className={`text-sm ${isDark ? 'text-gray-300' : 'text-gray-600'} flex items-center gap-2.5 font-medium ${booking.is_cancelled ? 'line-through opacity-60' : ''}`}>
                           <span className="text-lg">🕐</span>
                           <span>{formatTime(booking.start_time)} - {formatTime(booking.end_time)}</span>
                         </p>
-                        <p className={`text-sm ${isDark ? 'text-gray-300' : 'text-gray-600'} flex items-center gap-2.5 font-medium`}>
+                        <p className={`text-sm ${isDark ? 'text-gray-300' : 'text-gray-600'} flex items-center gap-2.5 font-medium ${booking.is_cancelled ? 'opacity-60' : ''}`}>
                           <span className="text-lg">👨‍🏫</span>
                           <span>{booking.instructor?.full_name || 'Instructor'}</span>
                         </p>
                         {booking.room && (
-                          <p className={`text-sm ${isDark ? 'text-gray-300' : 'text-gray-600'} flex items-center gap-2.5 font-medium`}>
+                          <p className={`text-sm ${isDark ? 'text-gray-300' : 'text-gray-600'} flex items-center gap-2.5 font-medium ${booking.is_cancelled ? 'opacity-60' : ''}`}>
                             <span className="text-lg">📍</span>
                             <span>{booking.room}</span>
                           </p>
                         )}
                         {booking.section && (
-                          <p className={`text-sm ${isDark ? 'text-gray-300' : 'text-gray-600'} flex items-center gap-2.5 font-medium`}>
+                          <p className={`text-sm ${isDark ? 'text-gray-300' : 'text-gray-600'} flex items-center gap-2.5 font-medium ${booking.is_cancelled ? 'opacity-60' : ''}`}>
                             <span className="text-lg">📚</span>
                             <span>Section {booking.section}</span>
                           </p>
@@ -406,7 +448,15 @@ export default function BookingsCalendar() {
           </div>
           <div className="flex items-center gap-2.5">
             <div className={`w-5 h-5 rounded-lg ${isDark ? 'bg-[#366c6b]/20 border-2 border-[#366c6b]/50' : 'bg-[#366c6b]/10 border-2 border-[#366c6b]/30'} shadow-md`}></div>
-            <span className={`font-semibold ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>Has Bookings</span>
+            <span className={`font-semibold ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>Active</span>
+          </div>
+          <div className="flex items-center gap-2.5">
+            <div className={`w-5 h-5 rounded-lg ${isDark ? 'bg-gradient-to-r from-green-700 to-green-800' : 'bg-gradient-to-r from-green-500 to-green-600'} shadow-md flex items-center justify-center text-white text-xs font-bold`}>✓</div>
+            <span className={`font-semibold ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>Completed</span>
+          </div>
+          <div className="flex items-center gap-2.5">
+            <div className={`w-5 h-5 rounded-lg ${isDark ? 'bg-gradient-to-r from-gray-600 to-gray-700' : 'bg-gradient-to-r from-gray-400 to-gray-500'} shadow-md opacity-60 flex items-center justify-center text-white text-xs font-bold`}>✕</div>
+            <span className={`font-semibold ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>Cancelled</span>
           </div>
         </div>
       </div>
