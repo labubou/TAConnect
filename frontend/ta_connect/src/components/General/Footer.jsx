@@ -1,5 +1,5 @@
-import { useLanguage } from '../contexts/LanguageContext';
-import strings from '../strings/landingPageStrings';
+import { useLanguage } from '../../contexts/LanguageContext';
+import strings from '../../strings/landingPageStrings';
 
 function Footer() {
   const { language } = useLanguage();

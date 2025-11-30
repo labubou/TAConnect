@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useTheme } from '../../contexts/ThemeContext';
 import { useGlobalLoading } from '../../contexts/GlobalLoadingContext';
 import StudentNavbar from '../../components/student/studentNavbar';
-import Footer from '../../components/Footer';
+import Footer from '../../components/General/Footer';
 import axios from 'axios';
 import { useQuery } from '@tanstack/react-query';
 import { useCancelInstructorBooking, useUpdateBooking } from '../../hooks/useApi';

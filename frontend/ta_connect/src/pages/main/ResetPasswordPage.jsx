@@ -3,7 +3,7 @@ import axios from 'axios';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useTheme } from '../../contexts/ThemeContext';
 import { useGlobalLoading } from '../../contexts/GlobalLoadingContext';
-import ThemeToggle from '../../components/ThemeToggle';
+import ThemeToggle from '../../components/General/ThemeToggle';
 
 function ResetPasswordPage() {
   const [searchParams] = useSearchParams();

@@ -4,9 +4,9 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import TAnavbar from '../../components/ta/TAnavbar';
 import DashboardSlots from '../../components/ta/DashboardSlots';
-import ErrorBoundary from '../../components/ErrorBoundary';
-import Footer from '../../components/Footer';
-import { SkeletonLoader } from '../../components/SkeletonLoader';
+import ErrorBoundary from '../../components/General/ErrorBoundary';
+import Footer from '../../components/General/Footer';
+import { SkeletonLoader } from '../../components/General/SkeletonLoader';
 import strings from '../../strings/TAPageStrings';
 import { useInstructorSlots, useInstructorBookings } from '../../hooks/useApi';
 

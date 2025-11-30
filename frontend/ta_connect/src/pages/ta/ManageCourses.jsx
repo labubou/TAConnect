@@ -7,7 +7,7 @@ import EditCourses from "../../components/ta/mini-pages/EditCourses";
 import DeleteCourses from "../../components/ta/mini-pages/DeleteCourses";
 import ManageAllowedStudentsModal from "../../components/ta/mini-pages/ManageAllowedStudentsModal";
 import ShareSlotModal from "../../components/ta/mini-pages/ShareSlotModal";
-import { SkeletonLoader } from "../../components/SkeletonLoader";
+import { SkeletonLoader } from "../../components/General/SkeletonLoader";
 import strings from "../../strings/manageCoursesPageStrings";
 import { useInstructorSlots } from "../../hooks/useApi";
 import { exportTimeSlotsAsCSV } from "../../services/exportService";

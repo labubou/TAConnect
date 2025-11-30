@@ -1,7 +1,7 @@
 import { useState, useMemo } from "react";
 import axios from "axios";
 import strings from "../../../strings/manageCoursesPageStrings";
-import WarningModal from "../../WarningModal";
+import WarningModal from "../../General/WarningModal";
 
 export default function ViewCourses({
   isDark,

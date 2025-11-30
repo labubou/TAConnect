@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
 import strings from "../../../strings/manageCoursesPageStrings";
-import WarningModal from "../../WarningModal";
+import WarningModal from "../../General/WarningModal";
 
 export default function EditCourses({ isDark, slot, onSlotUpdated, onClose }) {
   const [form, setForm] = useState({

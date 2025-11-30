@@ -3,8 +3,8 @@ import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import { useTheme } from '../../contexts/ThemeContext';
 import { useGlobalLoading } from '../../contexts/GlobalLoadingContext';
-import ThemeToggle from '../../components/ThemeToggle';
-import Footer from '../../components/Footer';
+import ThemeToggle from '../../components/General/ThemeToggle';
+import Footer from '../../components/General/Footer';
 import strings from '../../strings/forgotPasswordPageStrings';
 
 

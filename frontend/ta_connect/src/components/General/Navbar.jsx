@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
-import { useAuth } from '../contexts/AuthContext';
+import { useAuth } from '../../contexts/AuthContext';
 import { Link, useLocation } from 'react-router-dom';
-import Logo from '../assets/Logo.png';
-import { useTheme } from '../contexts/ThemeContext'; // use ThemeContext instead
+import Logo from '../../assets/Logo.png';
+import { useTheme } from '../../contexts/ThemeContext'; // use ThemeContext instead
 import ThemeToggle from './ThemeToggle';
 
 const Navbar = ({ onToggle }) => {

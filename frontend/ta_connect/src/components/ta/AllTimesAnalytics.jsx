@@ -1,6 +1,6 @@
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import strings from '../../strings/analyticsStrings';
-import { SkeletonLoader } from '../SkeletonLoader';
+import { SkeletonLoader } from '../General/SkeletonLoader';
 
 const AllTimesAnalytics = ({ timesData, isDark, isLoading }) => {
   if (isLoading) {

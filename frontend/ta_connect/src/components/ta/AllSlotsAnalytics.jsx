@@ -1,5 +1,5 @@
 import strings from '../../strings/analyticsStrings';
-import { SkeletonLoader } from '../SkeletonLoader';
+import { SkeletonLoader } from '../General/SkeletonLoader';
 
 const AllSlotsAnalytics = ({ slotsData, isDark, isLoading }) => {
   if (isLoading) {

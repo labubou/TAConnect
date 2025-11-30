@@ -4,10 +4,10 @@ import { LanguageProvider } from './contexts/LanguageContext'
 import { GlobalLoadingProvider } from './contexts/GlobalLoadingContext'
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
 import { lazy, Suspense } from 'react'
-import ProtectedRoute from './components/ProtectedRoute';
-import PublicRoute from './components/PublicRoute';
-import { SkeletonLoader } from './components/SkeletonLoader';
-import GlobalLoadingOverlay from './components/GlobalLoadingOverlay';
+import ProtectedRoute from './components/General/ProtectedRoute';
+import PublicRoute from './components/General/PublicRoute';
+import { SkeletonLoader } from './components/General/SkeletonLoader';
+import GlobalLoadingOverlay from './components/General/GlobalLoadingOverlay';
 import { useTheme } from './contexts/ThemeContext';
 
 // Eager-loaded critical pages

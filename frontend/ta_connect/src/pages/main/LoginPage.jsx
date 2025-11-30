@@ -1,15 +1,15 @@
 import { useState } from 'react';
 import { useTheme } from '../../contexts/ThemeContext';
 import { useLanguage } from '../../contexts/LanguageContext';
-import ThemeToggle from '../../components/ThemeToggle';
-import LanguageToggle from '../../components/LanguageToggle';
+import ThemeToggle from '../../components/General/ThemeToggle';
+import LanguageToggle from '../../components/General/LanguageToggle';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { useGlobalLoading } from '../../contexts/GlobalLoadingContext';
 import axios from 'axios';
 import Logo2 from '../../assets/Logo2.png';
 import strings from '../../strings/loginPageStrings';
-import Footer from '../../components/Footer';
+import Footer from '../../components/General/Footer';
 
 
 function LoginPage() {

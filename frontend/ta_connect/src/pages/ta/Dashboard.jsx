@@ -3,9 +3,9 @@ import { useTheme } from '../../contexts/ThemeContext';
 import TAnavbar from '../../components/ta/TAnavbar';
 import MonthlyCalendar from '../../components/ta/MonthlyCalendar';
 import WeeklySchedule from '../../components/ta/WeeklySchedule';
-import ErrorBoundary from '../../components/ErrorBoundary';
-import Footer from '../../components/Footer';
-import { SkeletonLoader } from '../../components/SkeletonLoader';
+import ErrorBoundary from '../../components/General/ErrorBoundary';
+import Footer from '../../components/General/Footer';
+import { SkeletonLoader } from '../../components/General/SkeletonLoader';
 import { useInstructorSlots } from '../../hooks/useApi';
 
 export default function Dashboard() {

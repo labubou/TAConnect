@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { useGlobalLoading } from '../../contexts/GlobalLoadingContext';
 import StudentNavbar from '../../components/student/studentNavbar';
-import Footer from '../../components/Footer';
+import Footer from '../../components/General/Footer';
 import BookingsCalendar from '../../components/student/BookingsCalendar';
 import strings from '../../strings/studentPageStrings'; 
 
