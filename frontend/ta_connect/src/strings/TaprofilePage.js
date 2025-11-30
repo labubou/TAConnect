@@ -3,6 +3,7 @@ const profilePageStrings = {
     profilePage: {
       title: "Profile",
       description: "Update your profile information below.",
+      personalInformation: "Personal Information",
       username: "Username",
       firstName: "First name",
       lastName: "Last name",
@@ -65,6 +66,7 @@ const profilePageStrings = {
     profilePage: {
       title: "الملف الشخصي",
       description: "حدّث معلومات ملفك الشخصي أدناه.",
+      personalInformation: "المعلومات الشخصية",
       username: "اسم المستخدم",
       firstName: "الاسم الأول",
       lastName: "الاسم الأخير",

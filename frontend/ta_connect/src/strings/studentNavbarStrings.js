@@ -26,22 +26,22 @@ const strings = {
     appName: 'TA Connect',
     
     aria: {
-      toggleNav: 'تبديل التنقل',
-      collapseSidebar: 'طي الشريط الجانبي',
-      expandSidebar: 'توسيع الشريط الجانبي'
+      toggleNav: 'تبديل القائمة',
+      collapseSidebar: 'إخفاء القائمة الجانبية',
+      expandSidebar: 'إظهار القائمة الجانبية'
     },
     
     user: {
       defaultName: 'مستخدم',
-      emailNotVerified: 'البريد الإلكتروني غير مؤكد'
+      emailNotVerified: 'البريد الإلكتروني غير مُفعّل'
     },
     
     navigation: {
-      dashboard: 'لوحة التحكم',
+      dashboard: 'الصفحة الرئيسية',
       profile: 'الملف الشخصي',
-      book: 'حجز',
-      manageBooked: 'إدارة الحجوزات',
-      emailPreferences: 'تفضيلات البريد الإلكتروني',
+      book: 'حجز موعد',
+      manageBooked: 'حجوزاتي',
+      emailPreferences: 'إعدادات البريد الإلكتروني',
       logout: 'تسجيل الخروج'
     }
   }

@@ -273,7 +273,7 @@ export default function ManageBookingsPage() {
         const timePart = time.split('T')[1].split('.')[0].split('Z')[0];
         const [hours, minutes] = timePart.split(':');
         const hour = parseInt(hours);
-        const ampm = hour >= 12 ? 'PM' : 'AM';
+        const ampm = hour >= 12 ? (language === 'ar' ? 'م' : 'PM') : (language === 'ar' ? 'ص' : 'AM');
         const displayHour = hour % 12 || 12;
         return `${displayHour}:${minutes} ${ampm}`;
       }
@@ -282,7 +282,7 @@ export default function ManageBookingsPage() {
       if (timeParts.length >= 2) {
         const hours = parseInt(timeParts[0]);
         const minutes = timeParts[1];
-        const ampm = hours >= 12 ? 'PM' : 'AM';
+        const ampm = hours >= 12 ? (language === 'ar' ? 'م' : 'PM') : (language === 'ar' ? 'ص' : 'AM');
         const displayHour = hours % 12 || 12;
         return `${displayHour}:${minutes} ${ampm}`;
       }
@@ -297,7 +297,7 @@ export default function ManageBookingsPage() {
     if (!date) return '';
     try {
       const d = new Date(date);
-      return d.toLocaleDateString('en-US', {
+      return d.toLocaleDateString(language === 'ar' ? 'ar-EG' : 'en-US', {
         weekday: 'short',
         year: 'numeric',
         month: 'short',
@@ -398,9 +398,9 @@ export default function ManageBookingsPage() {
             <div className={`${isDark ? 'bg-gray-800' : 'bg-white'} p-4 sm:p-6 rounded-xl shadow-lg mb-4 sm:mb-6`}>
               <div className="flex flex-col gap-3 sm:gap-4">
                 {/* Top Row: Filters */}
-                <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
+                <div className="flex flex-row gap-3 sm:gap-4">
                   {/* Status Filter */}
-                  <div className="flex-1 min-w-full sm:min-w-[150px]">
+                  <div className="flex-1 min-w-[150px]">
                     <label className={`block text-xs sm:text-sm font-medium ${isDark ? 'text-gray-300' : 'text-gray-700'} mb-1.5 sm:mb-2`}>
                       {t.filters.status}
                     </label>
@@ -421,7 +421,7 @@ export default function ManageBookingsPage() {
                   </div>
 
                   {/* Course Filter */}
-                  <div className="flex-1 min-w-full sm:min-w-[150px]">
+                  <div className="flex-1 min-w-[150px]">
                     <label className={`block text-xs sm:text-sm font-medium ${isDark ? 'text-gray-300' : 'text-gray-700'} mb-1.5 sm:mb-2`}>
                       {t.filters.course}
                     </label>
@@ -442,7 +442,7 @@ export default function ManageBookingsPage() {
                   </div>
 
                   {/* Sort By */}
-                  <div className="flex-1 min-w-full sm:min-w-[150px]">
+                  <div className="flex-1 min-w-[150px]">
                     <label className={`block text-xs sm:text-sm font-medium ${isDark ? 'text-gray-300' : 'text-gray-700'} mb-1.5 sm:mb-2`}>
                       {t.filters.sortBy}
                     </label>
@@ -465,7 +465,7 @@ export default function ManageBookingsPage() {
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                   <div>
                     <label className={`block text-xs sm:text-sm font-medium ${isDark ? 'text-gray-300' : 'text-gray-700'} mb-1.5 sm:mb-2`}>
-                      From Date
+                      {t.filters.from}
                     </label>
                     <input
                       type="date"
@@ -480,7 +480,7 @@ export default function ManageBookingsPage() {
                   </div>
                   <div>
                     <label className={`block text-xs sm:text-sm font-medium ${isDark ? 'text-gray-300' : 'text-gray-700'} mb-1.5 sm:mb-2`}>
-                      To Date
+                      {t.filters.to}
                     </label>
                     <input
                       type="date"
@@ -496,21 +496,21 @@ export default function ManageBookingsPage() {
                 </div>
 
                 {/* Bottom Row: Action Buttons */}
-                <div className="flex flex-col sm:flex-row gap-2 pt-2 sm:pt-3 border-t border-gray-600/30">
+                <div className="flex flex-row gap-2 pt-2 sm:pt-3 border-t border-gray-600/30">
                   <button
                     onClick={handleClearFilters}
-                    className={`w-full sm:w-auto px-4 py-2 rounded-lg border transition-all ${
+                    className={`w-auto px-4 py-2 rounded-lg border transition-all ${
                       isDark
                         ? 'border-gray-500 text-gray-300 hover:bg-gray-600'
                         : 'border-gray-300 text-gray-700 hover:bg-gray-100'
                     }`}
                   >
-                    Clear Filters
+                    {t.filters.clear}
                   </button>
                   {bookings.some(b => b.is_cancelled) && (
                     <button
                       onClick={handleClearCancelled}
-                      className={`w-full sm:w-auto px-4 py-2 rounded-lg font-medium text-sm transition-all duration-300 flex items-center justify-center gap-2 ${
+                      className={`w-auto px-4 py-2 rounded-lg font-medium text-sm transition-all duration-300 flex items-center justify-center gap-2 ${
                         isDark 
                           ? 'bg-red-900/30 text-red-300 hover:bg-red-900/50 border-2 border-red-700 hover:scale-105' 
                           : 'bg-red-50 text-red-700 hover:bg-red-100 border-2 border-red-300 hover:scale-105'
@@ -525,7 +525,7 @@ export default function ManageBookingsPage() {
                   {bookings.some(b => b.is_completed) && (
                     <button
                       onClick={handleClearCompleted}
-                      className={`w-full sm:w-auto px-4 py-2 rounded-lg font-medium text-sm transition-all duration-300 flex items-center justify-center gap-2 ${
+                      className={`w-auto px-4 py-2 rounded-lg font-medium text-sm transition-all duration-300 flex items-center justify-center gap-2 ${
                         isDark 
                           ? 'bg-green-900/30 text-green-300 hover:bg-green-900/50 border-2 border-green-700 hover:scale-105' 
                           : 'bg-green-50 text-green-700 hover:bg-green-100 border-2 border-green-300 hover:scale-105'
@@ -610,20 +610,20 @@ export default function ManageBookingsPage() {
                           <div className={`space-y-1.5 sm:space-y-2 mb-3 sm:mb-4 text-sm sm:text-base ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
                             <p className="flex items-center gap-2">
                               <span>👨‍🏫</span>
-                              <span>{booking.instructor?.full_name || 'Instructor'}</span>
+                              <span dir="ltr">{booking.instructor?.full_name || 'Instructor'}</span>
                             </p>
                             <p className="flex items-center gap-2">
                               <span>📅</span>
-                              <span>{formatDate(booking.date)}</span>
+                              <span dir="ltr">{formatDate(booking.date)}</span>
                             </p>
                             <p className="flex items-center gap-2">
                               <span>🕐</span>
-                              <span>{formatTime(booking.start_time)} - {formatTime(booking.end_time)}</span>
+                              <span dir="ltr">{formatTime(booking.start_time)} - {formatTime(booking.end_time)}</span>
                             </p>
                             {booking.room && (
                               <p className="flex items-center gap-2">
                                 <span>📍</span>
-                                <span>{booking.room}</span>
+                                <span dir="ltr">{booking.room}</span>
                               </p>
                             )}
                           </div>
@@ -686,15 +686,15 @@ export default function ManageBookingsPage() {
                           <div className={`space-y-1.5 sm:space-y-2 text-sm sm:text-base ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
                             <p className="flex items-center gap-2">
                               <span>👨‍🏫</span>
-                              <span>{booking.instructor?.full_name || 'Instructor'}</span>
+                              <span dir="ltr">{booking.instructor?.full_name || 'Instructor'}</span>
                             </p>
                             <p className="flex items-center gap-2">
                               <span>📅</span>
-                              <span>{formatDate(booking.date)}</span>
+                              <span dir="ltr">{formatDate(booking.date)}</span>
                             </p>
                             <p className="flex items-center gap-2">
                               <span>🕐</span>
-                              <span>{formatTime(booking.start_time)} - {formatTime(booking.end_time)}</span>
+                              <span dir="ltr">{formatTime(booking.start_time)} - {formatTime(booking.end_time)}</span>
                             </p>
                           </div>
                         </div>
@@ -741,20 +741,20 @@ export default function ManageBookingsPage() {
                           <div className={`space-y-1.5 text-sm ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
                             <p className="flex items-center gap-2">
                               <span>👨‍🏫</span>
-                              <span className="truncate">{booking.instructor?.full_name || 'Instructor'}</span>
+                              <span className="truncate" dir="ltr">{booking.instructor?.full_name || 'Instructor'}</span>
                             </p>
                             <p className="flex items-center gap-2">
                               <span>📅</span>
-                              <span>{formatDate(booking.date)}</span>
+                              <span dir="ltr">{formatDate(booking.date)}</span>
                             </p>
                             <p className="flex items-center gap-2">
                               <span>🕐</span>
-                              <span>{formatTime(booking.start_time)} - {formatTime(booking.end_time)}</span>
+                              <span dir="ltr">{formatTime(booking.start_time)} - {formatTime(booking.end_time)}</span>
                             </p>
                             {booking.room && (
                               <p className="flex items-center gap-2">
                                 <span>📍</span>
-                                <span className="truncate">{booking.room}</span>
+                                <span className="truncate" dir="ltr">{booking.room}</span>
                               </p>
                             )}
                           </div>
@@ -787,10 +787,10 @@ export default function ManageBookingsPage() {
               <p className={`font-semibold ${isDark ? 'text-white' : 'text-gray-900'}`}>
                 {selectedBooking.course_name}
               </p>
-              <p className={`text-sm ${isDark ? 'text-gray-300' : 'text-gray-600'} mt-2`}>
+              <p className={`text-sm ${isDark ? 'text-gray-300' : 'text-gray-600'} mt-2`} dir="ltr">
                 📅 {formatDate(selectedBooking.date)}
               </p>
-              <p className={`text-sm ${isDark ? 'text-gray-300' : 'text-gray-600'}`}>
+              <p className={`text-sm ${isDark ? 'text-gray-300' : 'text-gray-600'}`} dir="ltr">
                 🕐 {formatTime(selectedBooking.start_time)} - {formatTime(selectedBooking.end_time)}
               </p>
             </div>
@@ -834,10 +834,10 @@ export default function ManageBookingsPage() {
               <p className={`font-semibold ${isDark ? 'text-white' : 'text-gray-900'}`}>
                 {t.modals.currentBooking}
               </p>
-              <p className={`text-sm ${isDark ? 'text-gray-300' : 'text-gray-600'} mt-2`}>
+              <p className={`text-sm ${isDark ? 'text-gray-300' : 'text-gray-600'} mt-2`} dir="ltr">
                 📅 {formatDate(selectedBooking.date)}
               </p>
-              <p className={`text-sm ${isDark ? 'text-gray-300' : 'text-gray-600'}`}>
+              <p className={`text-sm ${isDark ? 'text-gray-300' : 'text-gray-600'}`} dir="ltr">
                 🕐 {formatTime(selectedBooking.start_time)} - {formatTime(selectedBooking.end_time)}
               </p>
             </div>
@@ -848,7 +848,11 @@ export default function ManageBookingsPage() {
               </h4>
               <div className="max-h-48 overflow-y-auto space-y-2">
                 {availableDates.map((date, index) => {
-                  const dateStr = date.toISOString().split('T')[0];
+                  // Use local timezone date formatting to avoid UTC conversion issues
+                  const yyyy = date.getFullYear();
+                  const mm = String(date.getMonth() + 1).padStart(2, '0');
+                  const dd = String(date.getDate()).padStart(2, '0');
+                  const dateStr = `${yyyy}-${mm}-${dd}`;
                   return (
                     <button
                       key={index}

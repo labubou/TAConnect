@@ -331,7 +331,7 @@ export default function ProfilePage() {
                 </svg>
               </div>
               <h2 className={`text-2xl font-bold ${isDark ? 'text-white' : 'text-gray-900'}`}>
-                Personal Information
+                {t.profilePage.personalInformation}
               </h2>
             </div>
 
@@ -434,7 +434,7 @@ export default function ProfilePage() {
               </div>
 
               {/* Action Buttons */}
-              <div className="flex flex-col sm:flex-row gap-4 pt-6 border-t-2 border-gray-700 dark:border-gray-600">
+              <div className="flex flex-row gap-4 pt-6 border-t-2 border-gray-700 dark:border-gray-600">
                 <button
                   type="submit"
                   disabled={loading}

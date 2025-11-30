@@ -127,18 +127,18 @@ const StudentNavbar = ({ onToggle }) => {
               
               <div className="mb-8">
                 <div className="chef-card rounded-2xl p-4 shadow-lg">
-                  <div className="flex items-center space-x-3 mb-3">
+                  <div className="flex items-center gap-3 mb-3">
                     <div className="w-12 h-12 bg-gradient-to-br from-[#366c6b] to-[#1a3535] rounded-xl shadow-md flex items-center justify-center text-white font-bold text-lg">
                       {user?.first_name ? user.first_name.charAt(0).toUpperCase() : user?.username?.charAt(0).toUpperCase() || 'U'}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-gray-800 dark:text-gray-100 font-semibold text-sm truncate">
+                      <p className="text-gray-800 dark:text-gray-100 font-semibold text-sm truncate" dir="ltr">
                         {user?.first_name && user?.last_name 
                           ? `${user.first_name} ${user.last_name}`
                           : user?.username || t.user.defaultName
                         }
                       </p>
-                      <p className="text-gray-600 dark:text-gray-300 text-xs truncate">{user?.email}</p>
+                      <p className="text-gray-600 dark:text-gray-300 text-xs truncate" dir="ltr">{user?.email}</p>
                     </div>
                   </div>
                   {!user?.email_verify && (
@@ -158,14 +158,14 @@ const StudentNavbar = ({ onToggle }) => {
               <div className="space-y-2 mb-8">
                 <Link 
                   to="/student"
-                  className={`navbar-link group flex items-center p-4 rounded-2xl transition-all duration-300 ${
+                  className={`navbar-link group flex items-center gap-3 p-4 rounded-2xl transition-all duration-300 ${
                     isActive('/student') 
                       ? 'bg-gradient-to-r from-[#366c6b] to-[#1a3535] text-white shadow-lg transform scale-105' 
                       : 'text-gray-700 dark:text-gray-200 hover:bg-white/70 dark:hover:bg-gray-800/60 hover:shadow-md hover:scale-105'
                   }`}
                   onClick={closeNavbar}
                 >
-                  <div className={`w-10 h-10 rounded-xl flex items-center justify-center mr-3 transition-colors duration-300 ${
+                  <div className={`w-10 h-10 rounded-xl flex items-center justify-center transition-colors duration-300 ${
                     isActive('/student') 
                       ? 'bg-white/20' 
                       : 'bg-gray-100 dark:bg-gray-800 group-hover:bg-[#eaf6f6] group-hover:dark:bg-gray-700'
@@ -179,14 +179,14 @@ const StudentNavbar = ({ onToggle }) => {
 
                 <Link 
                   to="/student/book"
-                  className={`navbar-link group flex items-center p-4 rounded-2xl transition-all duration-300 ${
+                  className={`navbar-link group flex items-center gap-3 p-4 rounded-2xl transition-all duration-300 ${
                     isActive('/student/book') 
                       ? 'bg-gradient-to-r from-[#366c6b] to-[#1a3535] text-white shadow-lg transform scale-105' 
                       : 'text-gray-700 dark:text-gray-200 hover:bg-white/70 dark:hover:bg-gray-800/60 hover:shadow-md hover:scale-105'
                   }`}
                   onClick={closeNavbar}
                 >
-                  <div className={`w-10 h-10 rounded-xl flex items-center justify-center mr-3 transition-colors duration-300 ${
+                  <div className={`w-10 h-10 rounded-xl flex items-center justify-center transition-colors duration-300 ${
                     isActive('/student/book') 
                       ? 'bg-white/20' 
                       : 'bg-gray-100 dark:bg-gray-800 group-hover:bg-[#eaf6f6] group-hover:dark:bg-gray-700'
@@ -201,14 +201,14 @@ const StudentNavbar = ({ onToggle }) => {
 
                 <Link 
                   to="/student/manage-booked"
-                  className={`navbar-link group flex items-center p-4 rounded-2xl transition-all duration-300 ${
+                  className={`navbar-link group flex items-center gap-3 p-4 rounded-2xl transition-all duration-300 ${
                     isActive('/student/manage-bookings') 
                       ? 'bg-gradient-to-r from-[#366c6b] to-[#1a3535] text-white shadow-lg transform scale-105' 
                       : 'text-gray-700 dark:text-gray-200 hover:bg-white/70 dark:hover:bg-gray-800/60 hover:shadow-md hover:scale-105'
                   }`}
                   onClick={closeNavbar}
                 >
-                  <div className={`w-10 h-10 rounded-xl flex items-center justify-center mr-3 transition-colors duration-300 ${
+                  <div className={`w-10 h-10 rounded-xl flex items-center justify-center transition-colors duration-300 ${
                     isActive('/student/manage-booked') 
                       ? 'bg-white/20' 
                       : 'bg-gray-100 dark:bg-gray-800 group-hover:bg-[#eaf6f6] group-hover:dark:bg-gray-700'
@@ -222,14 +222,14 @@ const StudentNavbar = ({ onToggle }) => {
 
                 <Link 
                   to="/student/email-preferences"
-                  className={`navbar-link group flex items-center p-4 rounded-2xl transition-all duration-300 ${
+                  className={`navbar-link group flex items-center gap-3 p-4 rounded-2xl transition-all duration-300 ${
                     isActive('/student/email-preferences') 
                       ? 'bg-gradient-to-r from-[#366c6b] to-[#1a3535] text-white shadow-lg transform scale-105' 
                       : 'text-gray-700 dark:text-gray-200 hover:bg-white/70 dark:hover:bg-gray-800/60 hover:shadow-md hover:scale-105'
                   }`}
                   onClick={closeNavbar}
                 >
-                  <div className={`w-10 h-10 rounded-xl flex items-center justify-center mr-3 transition-colors duration-300 ${
+                  <div className={`w-10 h-10 rounded-xl flex items-center justify-center transition-colors duration-300 ${
                     isActive('/student/email-preferences') 
                       ? 'bg-white/20' 
                       : 'bg-gray-100 dark:bg-gray-800 group-hover:bg-[#eaf6f6] group-hover:dark:bg-gray-700'
@@ -243,14 +243,14 @@ const StudentNavbar = ({ onToggle }) => {
 
                 <Link 
                   to="/student/profile"
-                  className={`navbar-link group flex items-center p-4 rounded-2xl transition-all duration-300 ${
+                  className={`navbar-link group flex items-center gap-3 p-4 rounded-2xl transition-all duration-300 ${
                     isActive('/student/profile') 
                       ? 'bg-gradient-to-r from-[#366c6b] to-[#1a3535] text-white shadow-lg transform scale-105' 
                       : 'text-gray-700 dark:text-gray-200 hover:bg-white/70 dark:hover:bg-gray-800/60 hover:shadow-md hover:scale-105'
                   }`}
                   onClick={closeNavbar}
                 >
-                  <div className={`w-10 h-10 rounded-xl flex items-center justify-center mr-3 transition-colors duration-300 ${
+                  <div className={`w-10 h-10 rounded-xl flex items-center justify-center transition-colors duration-300 ${
                     isActive('/student/profile')
                       ? 'bg-white/20' 
                       : 'bg-gray-100 dark:bg-gray-800 group-hover:bg-[#eaf6f6] group-hover:dark:bg-gray-700'
@@ -268,9 +268,9 @@ const StudentNavbar = ({ onToggle }) => {
             <div className="flex-shrink-0 border-t border-gray-200/50 dark:border-gray-800 p-6 bg-gradient-to-t from-white/95 to-transparent dark:from-gray-950/90 dark:to-transparent">
               <button
                 onClick={handleLogout}
-                className="w-full group flex items-center p-4 rounded-2xl bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-200 hover:bg-red-50 dark:hover:bg-red-900/30 hover:text-red-600 hover:shadow-md transition-all duration-300 hover:scale-105 mb-4"
+                className="w-full group flex items-center gap-3 p-4 rounded-2xl bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-200 hover:bg-red-50 dark:hover:bg-red-900/30 hover:text-red-600 hover:shadow-md transition-all duration-300 hover:scale-105 mb-4"
               >
-                <div className="w-10 h-10 rounded-xl bg-white dark:bg-gray-800 group-hover:bg-red-100 dark:group-hover:bg-red-900/30 flex items-center justify-center mr-3 transition-colors duration-300">
+                <div className="w-10 h-10 rounded-xl bg-white dark:bg-gray-800 group-hover:bg-red-100 dark:group-hover:bg-red-900/30 flex items-center justify-center transition-colors duration-300">
                   <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
                   </svg>

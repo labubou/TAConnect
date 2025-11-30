@@ -1,12 +1,16 @@
 import { useState, useEffect } from 'react';
 import { useTheme } from '../../contexts/ThemeContext';
+import { useLanguage } from '../../contexts/LanguageContext';
 import { useQuery } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import strings from '../../strings/MonthlyCalendarStrings';
 
 export default function BookingsCalendar() {
   const { theme } = useTheme();
+  const { language } = useLanguage();
   const isDark = theme === 'dark';
+  const t = strings[language];
   const navigate = useNavigate();
   const [currentDate, setCurrentDate] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState(null);
@@ -90,7 +94,7 @@ export default function BookingsCalendar() {
         const timePart = time.split('T')[1].split('.')[0].split('Z')[0];
         const [hours, minutes] = timePart.split(':');
         const hour = parseInt(hours);
-        const ampm = hour >= 12 ? 'PM' : 'AM';
+        const ampm = hour >= 12 ? (language === 'ar' ? 'م' : 'PM') : (language === 'ar' ? 'ص' : 'AM');
         const displayHour = hour % 12 || 12;
         return `${displayHour}:${minutes} ${ampm}`;
       }
@@ -99,7 +103,7 @@ export default function BookingsCalendar() {
       if (timeParts.length >= 2) {
         const hours = parseInt(timeParts[0]);
         const minutes = timeParts[1];
-        const ampm = hours >= 12 ? 'PM' : 'AM';
+        const ampm = hours >= 12 ? (language === 'ar' ? 'م' : 'PM') : (language === 'ar' ? 'ص' : 'AM');
         const displayHour = hours % 12 || 12;
         return `${displayHour}:${minutes} ${ampm}`;
       }
@@ -123,8 +127,8 @@ export default function BookingsCalendar() {
   };
 
   const { daysInMonth, startingDayOfWeek, year, month } = getDaysInMonth(currentDate);
-  const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
-  const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+  const monthNames = t.monthNames;
+  const dayNames = t.dayNames;
 
   const today = new Date();
   const isToday = (day) => {
@@ -246,16 +250,16 @@ export default function BookingsCalendar() {
                 >
                   <div className="flex items-start justify-between gap-2 mb-1.5">
                     <p className={`font-bold text-sm ${isDark ? 'text-white' : 'text-gray-900'} ${booking.is_cancelled ? 'line-through opacity-60' : ''}`}>
-                      {booking.course_name || 'Office Hours'}
+                      {booking.course_name || t.officeHours}
                     </p>
                     {booking.is_completed && (
                       <span className="px-2 py-0.5 bg-green-500 text-white text-xs rounded-full font-semibold flex items-center gap-1">
-                        <span>✓</span> Completed
+                        <span>✓</span> {t.bookingStatus.completed}
                       </span>
                     )}
                     {booking.is_cancelled && (
                       <span className="px-2 py-0.5 bg-red-500 text-white text-xs rounded-full font-semibold flex items-center gap-1">
-                        <span>✕</span> Cancelled
+                        <span>✕</span> {t.bookingStatus.cancelled}
                       </span>
                     )}
                   </div>
@@ -265,7 +269,7 @@ export default function BookingsCalendar() {
                   </p>
                   <p className={`text-xs ${isDark ? 'text-gray-300' : 'text-gray-600'} flex items-center gap-1.5 ${booking.is_cancelled ? 'opacity-60' : ''}`}>
                     <span className="text-sm">👨‍🏫</span>
-                    <span>{booking.instructor?.full_name || 'Instructor'}</span>
+                    <span>{booking.instructor?.full_name || t.details.instructor}</span>
                   </p>
                   {booking.room && (
                     <p className={`text-xs ${isDark ? 'text-gray-300' : 'text-gray-600'} flex items-center gap-1.5 ${booking.is_cancelled ? 'opacity-60' : ''}`}>
@@ -276,7 +280,7 @@ export default function BookingsCalendar() {
                   {booking.section && (
                     <p className={`text-xs ${isDark ? 'text-gray-300' : 'text-gray-600'} flex items-center gap-1.5 ${booking.is_cancelled ? 'opacity-60' : ''}`}>
                       <span className="text-sm">📚</span>
-                      <span>Section {booking.section}</span>
+                      <span>{t.details.section} {booking.section}</span>
                     </p>
                   )}
                 </div>
@@ -294,7 +298,7 @@ export default function BookingsCalendar() {
               </svg>
             </div>
             <h3 className={`text-xl sm:text-2xl lg:text-3xl font-bold ${isDark ? 'text-white' : 'text-gray-900'}`}>
-              My Bookings
+              {t.calendar.myBookings}
             </h3>
           </div>
           <button
@@ -304,7 +308,7 @@ export default function BookingsCalendar() {
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
-            <span className="hidden sm:inline">Today</span>
+            <span className="hidden sm:inline">{t.calendar.today}</span>
           </button>
         </div>
 
@@ -366,7 +370,7 @@ export default function BookingsCalendar() {
               <svg className="w-6 h-6 text-[#366c6b]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
               </svg>
-              {selectedDate.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
+              {selectedDate.toLocaleDateString(language === 'ar' ? 'ar-EG' : 'en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
             </h4>
             <div className="space-y-3.5">
               {getBookingsForDate(selectedDate).map((booking, idx) => (
@@ -392,18 +396,18 @@ export default function BookingsCalendar() {
                 >
                   {booking.is_completed && (
                     <div className="absolute top-3 right-3 px-3 py-1 bg-green-500 text-white text-xs rounded-full font-bold flex items-center gap-1.5 shadow-lg">
-                      <span className="text-sm">✓</span> Completed
+                      <span className="text-sm">✓</span> {t.bookingStatus.completed}
                     </div>
                   )}
                   {booking.is_cancelled && (
                     <div className="absolute top-3 right-3 px-3 py-1 bg-red-500 text-white text-xs rounded-full font-bold flex items-center gap-1.5 shadow-lg">
-                      <span className="text-sm">✕</span> Cancelled
+                      <span className="text-sm">✕</span> {t.bookingStatus.cancelled}
                     </div>
                   )}
                   <div className="flex items-start justify-between">
                     <div className="flex-1 pr-24">
                       <p className={`font-bold text-lg sm:text-xl ${isDark ? 'text-white' : 'text-gray-900'} mb-3 ${booking.is_cancelled ? 'line-through opacity-60' : ''}`}>
-                        {booking.course_name || 'Office Hours'}
+                        {booking.course_name || t.officeHours}
                       </p>
                       <div className="space-y-2">
                         <p className={`text-sm ${isDark ? 'text-gray-300' : 'text-gray-600'} flex items-center gap-2.5 font-medium ${booking.is_cancelled ? 'line-through opacity-60' : ''}`}>
@@ -412,7 +416,7 @@ export default function BookingsCalendar() {
                         </p>
                         <p className={`text-sm ${isDark ? 'text-gray-300' : 'text-gray-600'} flex items-center gap-2.5 font-medium ${booking.is_cancelled ? 'opacity-60' : ''}`}>
                           <span className="text-lg">👨‍🏫</span>
-                          <span>{booking.instructor?.full_name || 'Instructor'}</span>
+                          <span>{booking.instructor?.full_name || t.details.instructor}</span>
                         </p>
                         {booking.room && (
                           <p className={`text-sm ${isDark ? 'text-gray-300' : 'text-gray-600'} flex items-center gap-2.5 font-medium ${booking.is_cancelled ? 'opacity-60' : ''}`}>
@@ -423,7 +427,7 @@ export default function BookingsCalendar() {
                         {booking.section && (
                           <p className={`text-sm ${isDark ? 'text-gray-300' : 'text-gray-600'} flex items-center gap-2.5 font-medium ${booking.is_cancelled ? 'opacity-60' : ''}`}>
                             <span className="text-lg">📚</span>
-                            <span>Section {booking.section}</span>
+                            <span>{t.details.section} {booking.section}</span>
                           </p>
                         )}
                       </div>
@@ -444,19 +448,19 @@ export default function BookingsCalendar() {
         <div className={`mt-6 sm:mt-8 pt-5 border-t-2 ${isDark ? 'border-gray-700' : 'border-gray-200'} flex flex-wrap items-center gap-5 text-sm`}>
           <div className="flex items-center gap-2.5">
             <div className={`w-5 h-5 rounded-lg ${isDark ? 'bg-gradient-to-br from-[#366c6b]/30 to-[#1a3535]/30 border-2 border-[#366c6b]' : 'bg-gradient-to-br from-[#366c6b]/10 to-[#1a3535]/10 border-2 border-[#366c6b]'} shadow-md`}></div>
-            <span className={`font-semibold ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>Today</span>
+            <span className={`font-semibold ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>{t.legend.today}</span>
           </div>
           <div className="flex items-center gap-2.5">
             <div className={`w-5 h-5 rounded-lg ${isDark ? 'bg-[#366c6b]/20 border-2 border-[#366c6b]/50' : 'bg-[#366c6b]/10 border-2 border-[#366c6b]/30'} shadow-md`}></div>
-            <span className={`font-semibold ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>Active</span>
+            <span className={`font-semibold ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>{t.legend.active}</span>
           </div>
           <div className="flex items-center gap-2.5">
             <div className={`w-5 h-5 rounded-lg ${isDark ? 'bg-gradient-to-r from-green-700 to-green-800' : 'bg-gradient-to-r from-green-500 to-green-600'} shadow-md flex items-center justify-center text-white text-xs font-bold`}>✓</div>
-            <span className={`font-semibold ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>Completed</span>
+            <span className={`font-semibold ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>{t.legend.completed}</span>
           </div>
           <div className="flex items-center gap-2.5">
             <div className={`w-5 h-5 rounded-lg ${isDark ? 'bg-gradient-to-r from-gray-600 to-gray-700' : 'bg-gradient-to-r from-gray-400 to-gray-500'} shadow-md opacity-60 flex items-center justify-center text-white text-xs font-bold`}>✕</div>
-            <span className={`font-semibold ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>Cancelled</span>
+            <span className={`font-semibold ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>{t.legend.cancelled}</span>
           </div>
         </div>
       </div>
