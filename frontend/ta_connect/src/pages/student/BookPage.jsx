@@ -201,14 +201,21 @@ export default function BookPage() {
 
   const generateAvailableDates = (slot) => {
     const dates = [];
+    // Use local date without timezone conversion
     const today = new Date();
-    const startDate = new Date(slot.start_date);
-    const endDate = new Date(slot.end_date);
+    today.setHours(0, 0, 0, 0);
+    
+    // Parse dates as local dates to avoid timezone shifts
+    const [startYear, startMonth, startDay] = slot.start_date.split('-').map(Number);
+    const startDate = new Date(startYear, startMonth - 1, startDay);
+    
+    const [endYear, endMonth, endDay] = slot.end_date.split('-').map(Number);
+    const endDate = new Date(endYear, endMonth - 1, endDay);
     
     const daysOfWeek = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
     const targetDay = daysOfWeek.indexOf(slot.day_of_week);
 
-    let currentDate = new Date(Math.max(today, startDate));
+    let currentDate = new Date(Math.max(today.getTime(), startDate.getTime()));
     
     while (currentDate <= endDate) {
       if (currentDate.getDay() === targetDay && currentDate >= today) {
@@ -559,7 +566,11 @@ export default function BookPage() {
                         </p>
                       ) : (
                         availableDates.map((date, index) => {
-                          const dateStr = date.toISOString().split('T')[0];
+                          // Format date as YYYY-MM-DD using local timezone to avoid UTC conversion issues
+                          const year = date.getFullYear();
+                          const month = String(date.getMonth() + 1).padStart(2, '0');
+                          const day = String(date.getDate()).padStart(2, '0');
+                          const dateStr = `${year}-${month}-${day}`;
                           return (
                             <button
                               key={index}
