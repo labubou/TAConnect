@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useTheme } from '../../contexts/ThemeContext';
+import { useGlobalLoading } from '../../contexts/GlobalLoadingContext';
 import ThemeToggle from '../../components/ThemeToggle';
 
 function ResetPasswordPage() {
@@ -16,6 +17,7 @@ function ResetPasswordPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const { theme } = useTheme();
+  const { startLoading, stopLoading, isLoading: globalIsLoading } = useGlobalLoading();
 
   const navigate = useNavigate();
   const uid = searchParams.get('uid');
@@ -33,13 +35,17 @@ function ResetPasswordPage() {
     }
 
     try {
+      startLoading('validate-token', 'Validating reset link...');
       const res = await axios.post('/api/auth/password-reset/validate/', { uid, token });
       if (res.data.valid) {
+        stopLoading('validate-token');
         setTokenValid(true);
       } else {
+        stopLoading('validate-token');
         setError(res.data.error || 'Invalid or expired password reset link');
       }
     } catch (err) {
+      stopLoading('validate-token');
       const resp = err.response;
       if (resp && resp.data) {
         setError(resp.data.error || 'Invalid or expired password reset link');
@@ -87,6 +93,7 @@ function ResetPasswordPage() {
     }
 
     setLoading(true);
+    startLoading('reset-password', 'Resetting password...');
     setError('');
     setMessage('');
 
@@ -98,6 +105,7 @@ function ResetPasswordPage() {
         confirm_password: confirmPassword
       });
       
+      stopLoading('reset-password');
       setMessage(res.data.message || 'Password has been reset successfully!');
       setNewPassword('');
       setConfirmPassword('');
@@ -107,6 +115,7 @@ function ResetPasswordPage() {
         navigate('/login');
       }, 3000);
     } catch (err) {
+      stopLoading('reset-password');
       const resp = err.response;
       if (resp && resp.data) {
         if (Array.isArray(resp.data.error)) {

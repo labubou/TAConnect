@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate, useSearchParams, useParams } from 'react-router-dom';
 import { useTheme } from '../../contexts/ThemeContext';
 import { useAuth } from '../../contexts/AuthContext';
+import { useGlobalLoading } from '../../contexts/GlobalLoadingContext';
 import ThemeToggle from '../../components/ThemeToggle';
 import Footer from '../../components/Footer';
 import Logo2 from '../../assets/Logo2.png';
@@ -11,6 +12,7 @@ function VerifyEmailPage() {
   const navigate = useNavigate();
   const { theme } = useTheme();
   const { refreshUser, isAuthenticated } = useAuth();
+  const { startLoading, stopLoading, isLoading: globalIsLoading } = useGlobalLoading();
   const [searchParams] = useSearchParams();
   const params = useParams();
   const [status, setStatus] = useState('verifying'); // verifying, success, error
@@ -31,12 +33,14 @@ function VerifyEmailPage() {
       }
 
       try {
+        startLoading('verify-email', 'Verifying email...');
         const response = await axios.post('/api/auth/verify-email/', {
           uid,
           token,
         });
 
         if (response.data) {
+          stopLoading('verify-email');
           setStatus('success');
           setMessage(response.data.message || 'Your email has been verified successfully!');
           
@@ -55,6 +59,7 @@ function VerifyEmailPage() {
           }, 3000);
         }
       } catch (err) {
+        stopLoading('verify-email');
         setStatus('error');
         setMessage(
           err.response?.data?.error || 

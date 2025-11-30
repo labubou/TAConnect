@@ -2,6 +2,7 @@ import { useState } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import { useTheme } from '../../contexts/ThemeContext';
+import { useGlobalLoading } from '../../contexts/GlobalLoadingContext';
 import ThemeToggle from '../../components/ThemeToggle';
 import Footer from '../../components/Footer';
 import strings from '../../strings/forgotPasswordPageStrings';
@@ -13,6 +14,7 @@ function ForgotPasswordPage() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const { theme } = useTheme();
+  const { startLoading, stopLoading, isLoading: globalIsLoading } = useGlobalLoading();
 
   const navigate = useNavigate();
 
@@ -40,15 +42,18 @@ function ForgotPasswordPage() {
     }
 
     setLoading(true);
+    startLoading('forgot-password', 'Sending reset email...');
     setError('');
     setMessage('');
 
     try {
       const res = await axios.post('/api/auth/password-reset/', { email: email.trim() });
       const data = res.data;
+      stopLoading('forgot-password');
       setMessage(data.message || strings.messages.success);
       setEmail('');
     } catch (err) {
+      stopLoading('forgot-password');
       const resp = err.response;
       if (resp && resp.data) {
         setError(resp.data.error || JSON.stringify(resp.data));

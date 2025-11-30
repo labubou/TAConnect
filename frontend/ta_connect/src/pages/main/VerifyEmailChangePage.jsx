@@ -2,6 +2,7 @@ import { useEffect, useState, useRef } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useTheme } from '../../contexts/ThemeContext';
 import { useAuth } from '../../contexts/AuthContext';
+import { useGlobalLoading } from '../../contexts/GlobalLoadingContext';
 import ThemeToggle from '../../components/ThemeToggle';
 import Footer from '../../components/Footer';
 import Logo2 from '../../assets/Logo2.png';
@@ -11,6 +12,7 @@ function VerifyEmailChangePage() {
   const navigate = useNavigate();
   const { theme } = useTheme();
   const { refreshUser, isAuthenticated } = useAuth();
+  const { startLoading, stopLoading, isLoading: globalIsLoading } = useGlobalLoading();
   const { uid, token, newEmail } = useParams();
   const [status, setStatus] = useState('verifying'); // verifying, success, error
   const [message, setMessage] = useState('Verifying your new email...');
@@ -37,6 +39,7 @@ function VerifyEmailChangePage() {
 
       try {
         // newEmail is already base64-encoded from the URL, pass it directly
+        startLoading('verify-email-change', 'Verifying email change...');
         const response = await axios.post('/api/profile/verify-email-change/', {
           uid,
           token,
@@ -44,6 +47,7 @@ function VerifyEmailChangePage() {
         });
 
         if (response.data) {
+          stopLoading('verify-email-change');
           setStatus('success');
           setMessage(response.data.message || 'Your email has been updated successfully!');
 
@@ -66,6 +70,7 @@ function VerifyEmailChangePage() {
           }, 3000);
         }
       } catch (err) {
+        stopLoading('verify-email-change');
         console.error('Email change verification error:', err);
         setStatus('error');
         

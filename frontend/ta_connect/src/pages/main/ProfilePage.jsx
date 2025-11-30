@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { useAuth } from '../../contexts/AuthContext';
 import { useTheme } from '../../contexts/ThemeContext';
+import { useGlobalLoading } from '../../contexts/GlobalLoadingContext';
 import TAnavbar from '../../components/ta/TAnavbar';
 import StudentNavbar from '../../components/student/studentNavbar';
 import strings from '../../strings/TaprofilePage';
@@ -10,6 +11,7 @@ import strings from '../../strings/TaprofilePage';
 export default function ProfilePage() {
   const { user, updateUser } = useAuth();
   const { theme } = useTheme();
+  const { startLoading, stopLoading, isLoading: globalIsLoading } = useGlobalLoading();
   const isDark = theme === 'dark';
   const navigate = useNavigate();
 
@@ -75,6 +77,7 @@ export default function ProfilePage() {
     setError('');
     setMessage('');
     setLoading(true);
+    startLoading('update-profile', 'Updating profile...');
 
     try {
       const res = await axios.put('/api/profile/update/', form);
@@ -87,11 +90,14 @@ export default function ProfilePage() {
           user_type: user.user_type, 
         };
         updateUser(mergedUser);
+        stopLoading('update-profile');
         setMessage(strings.profilePage.success);
       } else {
+        stopLoading('update-profile');
         setError(strings.profilePage.unexpectedError);
       }
     } catch (err) {
+      stopLoading('update-profile');
       setError(err.response?.data?.error || err.message || strings.profilePage.failed);
     } finally {
       setLoading(false);
@@ -106,6 +112,7 @@ export default function ProfilePage() {
     }
 
     setEmailLoading(true);
+    startLoading('change-email', 'Changing email...');
     setEmailMessage('');
 
     try {
@@ -113,6 +120,7 @@ export default function ProfilePage() {
         email: emailForm.newEmail,
       });
 
+      stopLoading('change-email');
       setEmailMessage({
         type: 'success',
         text: res.data.message || 'Verification email sent! Please check your new email to complete the change.'
@@ -125,6 +133,7 @@ export default function ProfilePage() {
         setEmailMessage('');
       }, 3000);
     } catch (err) {
+      stopLoading('change-email');
       setEmailMessage({
         type: 'error',
         text: err.response?.data?.error || 'Failed to request email change. Please try again.'
