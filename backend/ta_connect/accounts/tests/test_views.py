@@ -12,6 +12,7 @@ from django.utils.encoding import force_bytes
 from django.utils.http import urlsafe_base64_encode
 from accounts.models import User
 from accounts.tests.base import BaseTestCase
+from unittest.mock import patch
 
 
 class RegisterViewTestCase(BaseTestCase):
@@ -395,4 +396,160 @@ class VerifyEmailViewTestCase(BaseTestCase):
         
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertIn('already verified', response.data['message'].lower())
+
+
+class DeleteAccountViewTestCase(BaseTestCase):
+    """
+    Test cases for the delete account endpoint.
+    """
+    
+    def setUp(self):
+        super().setUp()
+        self.delete_account_url = reverse('delete_account')
+    
+    @patch('accounts.auth.delete_account.send_delete_account_email')
+    def test_delete_account_happy_path_student(self, mock_send_email):
+        """Test successful student account deletion (200 OK)."""
+        mock_send_email.return_value = None
+        
+        user, token = self.create_and_authenticate_user(
+            username='deletestudent',
+            email='deletestudent@example.com',
+            password='testpass123',
+            user_type='student'
+        )
+        user_id = user.id
+        
+        data = {
+            'password': 'testpass123'
+        }
+        
+        response = self.client.post(self.delete_account_url, data, format='json')
+        
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertIn('message', response.data)
+        
+        # Verify user was deleted
+        self.assertFalse(User.objects.filter(id=user_id).exists())
+    
+    @patch('accounts.auth.delete_account.send_delete_account_email')
+    def test_delete_account_happy_path_instructor(self, mock_send_email):
+        """Test successful instructor account deletion (200 OK)."""
+        mock_send_email.return_value = None
+        
+        user, token = self.create_and_authenticate_user(
+            username='deleteinstructor',
+            email='deleteinstructor@example.com',
+            password='testpass123',
+            user_type='instructor'
+        )
+        user_id = user.id
+        
+        data = {
+            'password': 'testpass123'
+        }
+        
+        response = self.client.post(self.delete_account_url, data, format='json')
+        
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertIn('message', response.data)
+        
+        # Verify user was deleted
+        self.assertFalse(User.objects.filter(id=user_id).exists())
+    
+    def test_delete_account_validation_incorrect_password(self):
+        """Test account deletion with incorrect password (400 Bad Request)."""
+        user, token = self.create_and_authenticate_user(
+            username='testuser',
+            email='test@example.com',
+            password='correctpass123',
+            user_type='student'
+        )
+        
+        data = {
+            'password': 'wrongpassword123'
+        }
+        
+        response = self.client.post(self.delete_account_url, data, format='json')
+        
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        
+        # Verify user was NOT deleted
+        self.assertTrue(User.objects.filter(id=user.id).exists())
+    
+    def test_delete_account_validation_missing_password(self):
+        """Test account deletion with missing password (400 Bad Request)."""
+        user, token = self.create_and_authenticate_user(
+            username='testuser',
+            email='test@example.com',
+            password='testpass123',
+            user_type='student'
+        )
+        
+        data = {}
+        
+        response = self.client.post(self.delete_account_url, data, format='json')
+        
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        
+        # Verify user was NOT deleted
+        self.assertTrue(User.objects.filter(id=user.id).exists())
+    
+    def test_delete_account_security_unauthenticated(self):
+        """Test account deletion without authentication (401 Unauthorized)."""
+        # Don't authenticate
+        self.client.credentials()  # Clear any credentials
+        
+        data = {
+            'password': 'testpass123'
+        }
+        
+        response = self.client.post(self.delete_account_url, data, format='json')
+        
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+    
+    @patch('accounts.auth.delete_account.send_delete_account_email')
+    def test_delete_account_email_failure_still_succeeds(self, mock_send_email):
+        """Test that account is deleted even if email notification fails."""
+        mock_send_email.side_effect = Exception('Email service unavailable')
+        
+        user, token = self.create_and_authenticate_user(
+            username='testuser',
+            email='test@example.com',
+            password='testpass123',
+            user_type='student'
+        )
+        user_id = user.id
+        
+        data = {
+            'password': 'testpass123'
+        }
+        
+        response = self.client.post(self.delete_account_url, data, format='json')
+        
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertIn('message', response.data)
+        
+        # Verify user was still deleted despite email failure
+        self.assertFalse(User.objects.filter(id=user_id).exists())
+    
+    def test_delete_account_validation_short_password(self):
+        """Test account deletion with password shorter than 8 characters (400 Bad Request)."""
+        user, token = self.create_and_authenticate_user(
+            username='testuser',
+            email='test@example.com',
+            password='testpass123',
+            user_type='student'
+        )
+        
+        data = {
+            'password': 'short'
+        }
+        
+        response = self.client.post(self.delete_account_url, data, format='json')
+        
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        
+        # Verify user was NOT deleted
+        self.assertTrue(User.objects.filter(id=user.id).exists())
 

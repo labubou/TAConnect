@@ -160,4 +160,12 @@ set_user_type_response = openapi.Schema(
     },
 )
 
+# Import delete account schemas
+from .delete_account_schema import (
+    delete_account_request_schema,
+    delete_account_success_response,
+    delete_account_error_response,
+    delete_account_responses,
+)
+
 

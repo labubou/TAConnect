@@ -74,7 +74,7 @@ def send_cancel_booking_email_mass(bookings, cancellation_reason=None):
         if student_wants_email:
             email_data_list.append({
                 'subject': 'Office Hours Session Cancelled - TA Connect',
-                'template_name': 'emails/booking/booking_bulk_cancellation_email_Student.html',
+                'template_name': 'booking_bulk_cancellation_email_Student.html',
                 'context': email_context,
                 'recipient_email': student.email
             })
