@@ -8,6 +8,7 @@ from rest_framework_simplejwt.views import (
 )
 from . import views
 from .auth.email_sending_preference import ProfileEmailPreferenceView
+from .auth.delete_account import DeleteAccountView
 
 urlpatterns = [
 
@@ -39,6 +40,6 @@ urlpatterns = [
     path('profile/verify-email-change/', profile.VerifyEmailChangeView.as_view(), name='verify_email_change'),
     
     path('profile/email-preferences/', ProfileEmailPreferenceView.as_view(), name='email_preferences'),
-
+    path('auth/delete-account/', DeleteAccountView.as_view(), name='delete_account'),
 
 ]
