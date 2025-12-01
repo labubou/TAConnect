@@ -2,14 +2,17 @@ import { useState, useEffect } from 'react';
 import axios from 'axios';
 import { Bell, Mail, X, Save, RefreshCw } from 'lucide-react';
 import { useTheme } from '../../contexts/ThemeContext';
+import { useLanguage } from '../../contexts/LanguageContext';
 import { useAuth } from '../../contexts/AuthContext';
 import { useGlobalLoading } from '../../contexts/GlobalLoadingContext';
 import StudentNavbar from '../../components/student/studentNavbar';
 import Footer from '../../components/General/Footer';
-import { emailPreferencesStrings as strings } from '../../strings/emailPreferencesSTUStrings';
+import { emailPreferencesStrings as allStrings } from '../../strings/emailPreferencesSTUStrings';
 
 export default function EmailPreferencesPage() {
   const { theme } = useTheme();
+  const { language } = useLanguage();
+  const t = allStrings[language];
   const { user } = useAuth();
   const { startLoading, stopLoading, isLoading } = useGlobalLoading();
   const isDark = theme === 'dark';
@@ -58,7 +61,7 @@ export default function EmailPreferencesPage() {
       console.error('Failed to fetch preferences:', err);
       setMessage({ 
         type: 'error', 
-        text: strings.messages.loadError
+        text: t.messages.loadError
       });
       setPreferences({
         email_on_booking: true,
@@ -86,7 +89,7 @@ export default function EmailPreferencesPage() {
     });
     setMessage({ 
       type: 'success', 
-      text: strings.messages.resetSuccess
+      text: t.messages.resetSuccess
     });
   };
 
@@ -113,12 +116,12 @@ export default function EmailPreferencesPage() {
         stopLoading('save-email-prefs');
         setMessage({ 
           type: 'success', 
-          text: strings.messages.saveSuccess
+          text: t.messages.saveSuccess
         });
       }
     } catch (err) {
       stopLoading('save-email-prefs');
-      const errorMsg = err.response?.data?.error || strings.messages.saveError;
+      const errorMsg = err.response?.data?.error || t.messages.saveError;
       setMessage({ 
         type: 'error', 
         text: errorMsg
@@ -148,10 +151,10 @@ export default function EmailPreferencesPage() {
                 </div>
                 <div>
                   <h1 className={`text-xl sm:text-2xl font-bold ${isDark ? 'text-white' : 'text-gray-900'}`}>
-                    {strings.header.title}
+                    {t.header.title}
                   </h1>
                   <p className={`text-sm sm:text-base mt-1 ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
-                    {strings.header.subtitle}
+                    {t.header.subtitle}
                   </p>
                 </div>
               </div>
@@ -166,7 +169,7 @@ export default function EmailPreferencesPage() {
                 title="Reset to default"
               >
                 <RefreshCw className={`w-5 h-5 ${(saving || isLoading) ? 'animate-spin' : ''}`} />
-                <span className="text-sm font-medium hidden sm:inline">{strings.buttons.reset}</span>
+                <span className="text-sm font-medium hidden sm:inline">{t.buttons.reset}</span>
               </button>
             </div>
           </div>
@@ -177,7 +180,7 @@ export default function EmailPreferencesPage() {
               <div className="text-center space-y-3">
                 <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-teal-500 mx-auto"></div>
                 <p className={`text-sm ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
-                  {strings.messages.loading}
+                  {t.messages.loading}
                 </p>
               </div>
             </div>
@@ -226,10 +229,10 @@ export default function EmailPreferencesPage() {
                 </div>
                 <div className="flex-1">
                   <h2 className={`text-lg sm:text-xl font-semibold ${isDark ? 'text-white' : 'text-gray-900'}`}>
-                    {strings.bookingSection.title}
+                    {t.bookingSection.title}
                   </h2>
                   <p className={`text-sm mt-1 ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
-                    {strings.bookingSection.subtitle}
+                    {t.bookingSection.subtitle}
                   </p>
                 </div>
               </div>
@@ -267,16 +270,16 @@ export default function EmailPreferencesPage() {
                   <div className="flex-1">
                     <div className="flex flex-col sm:flex-row sm:items-center gap-2">
                       <p className={`font-semibold ${isDark ? 'text-white' : 'text-gray-900'}`}>
-                        {strings.bookingSection.optionTitle}
+                        {t.bookingSection.optionTitle}
                       </p>
                       {preferences.email_on_booking && (
                         <span className={`text-xs px-2 py-0.5 rounded-full inline-block w-fit ${isDark ? 'bg-blue-700 text-blue-100' : 'bg-blue-200 text-blue-800'}`}>
-                          {strings.status.enabled}
+                          {t.status.enabled}
                         </span>
                       )}
                     </div>
                     <p className={`text-sm mt-1 ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
-                      {strings.bookingSection.optionDescription}
+                      {t.bookingSection.optionDescription}
                     </p>
                   </div>
                   <Mail className={`w-5 h-5 flex-shrink-0 ${
@@ -298,10 +301,10 @@ export default function EmailPreferencesPage() {
                 </div>
                 <div className="flex-1">
                   <h2 className={`text-lg sm:text-xl font-semibold ${isDark ? 'text-white' : 'text-gray-900'}`}>
-                    {strings.cancellationSection.title}
+                    {t.cancellationSection.title}
                   </h2>
                   <p className={`text-sm mt-1 ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
-                    {strings.cancellationSection.subtitle}
+                    {t.cancellationSection.subtitle}
                   </p>
                 </div>
               </div>
@@ -339,16 +342,16 @@ export default function EmailPreferencesPage() {
                   <div className="flex-1">
                     <div className="flex flex-col sm:flex-row sm:items-center gap-2">
                       <p className={`font-semibold ${isDark ? 'text-white' : 'text-gray-900'}`}>
-                        {strings.cancellationSection.optionTitle}
+                        {t.cancellationSection.optionTitle}
                       </p>
                       {preferences.email_on_cancellation && (
                         <span className={`text-xs px-2 py-0.5 rounded-full inline-block w-fit ${isDark ? 'bg-blue-700 text-blue-100' : 'bg-blue-200 text-blue-800'}`}>
-                          {strings.status.enabled}
+                          {t.status.enabled}
                         </span>
                       )}
                     </div>
                     <p className={`text-sm mt-1 ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
-                      {strings.cancellationSection.optionDescription}
+                      {t.cancellationSection.optionDescription}
                     </p>
                   </div>
                   <Mail className={`w-5 h-5 flex-shrink-0 ${
@@ -370,10 +373,10 @@ export default function EmailPreferencesPage() {
                 </div>
                 <div className="flex-1">
                   <h2 className={`text-lg sm:text-xl font-semibold ${isDark ? 'text-white' : 'text-gray-900'}`}>
-                    {strings.updateSection.title}
+                    {t.updateSection.title}
                   </h2>
                   <p className={`text-sm mt-1 ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
-                    {strings.updateSection.subtitle}
+                    {t.updateSection.subtitle}
                   </p>
                 </div>
               </div>
@@ -411,16 +414,16 @@ export default function EmailPreferencesPage() {
                   <div className="flex-1">
                     <div className="flex flex-col sm:flex-row sm:items-center gap-2">
                       <p className={`font-semibold ${isDark ? 'text-white' : 'text-gray-900'}`}>
-                        {strings.updateSection.optionTitle}
+                        {t.updateSection.optionTitle}
                       </p>
                       {preferences.email_on_update && (
                         <span className={`text-xs px-2 py-0.5 rounded-full inline-block w-fit ${isDark ? 'bg-blue-700 text-blue-100' : 'bg-blue-200 text-blue-800'}`}>
-                          {strings.status.enabled}
+                          {t.status.enabled}
                         </span>
                       )}
                     </div>
                     <p className={`text-sm mt-1 ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
-                      {strings.updateSection.optionDescription}
+                      {t.updateSection.optionDescription}
                     </p>
                   </div>
                   <Mail className={`w-5 h-5 flex-shrink-0 ${
@@ -453,12 +456,12 @@ export default function EmailPreferencesPage() {
               {saving || isLoading ? (
                 <>
                   <RefreshCw className="w-5 h-5 animate-spin" />
-                  {strings.buttons.saving}
+                  {t.buttons.saving}
                 </>
               ) : (
                 <>
                   <Save className="w-5 h-5" />
-                  {strings.buttons.save}
+                  {t.buttons.save}
                 </>
               )}
             </button>

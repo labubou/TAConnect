@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useTheme } from '../../contexts/ThemeContext';
+import { useLanguage } from '../../contexts/LanguageContext';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { useGlobalLoading } from '../../contexts/GlobalLoadingContext';
@@ -11,11 +12,13 @@ import strings from '../../strings/studentPageStrings';
 
 export default function StudentHomePage() {
   const { theme } = useTheme();
+  const { language } = useLanguage();
   const { startLoading, stopLoading, isLoading } = useGlobalLoading();
   const isDark = theme === 'dark';
   const navigate = useNavigate();
   const [isNavbarOpen, setIsNavbarOpen] = useState(true);
   const { refreshUser, user } = useAuth();
+  const t = strings[language];
 
   // Redirect TAs/Instructors to their home page
   useEffect(() => {
@@ -46,11 +49,11 @@ export default function StudentHomePage() {
 
             <div className={`${isDark ? 'bg-gray-800' : 'bg-white'} p-8 rounded-xl shadow-lg mb-6`}> 
               <h2 className={`text-3xl font-bold mb-4 ${isDark ? 'text-white' : 'text-gray-900'}`}>
-                {strings.studentHomePage.title}
+                {t.studentHomePage.title}
               </h2>
 
               <p className={`${isDark ? 'text-gray-300' : 'text-gray-600'} text-lg mb-6`}>
-                {strings.studentHomePage.description}
+                {t.studentHomePage.description}
               </p>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -68,10 +71,10 @@ export default function StudentHomePage() {
                     </div>
                     <div className="flex-1">
                       <h3 className={`text-xl font-bold mb-2 ${isDark ? 'text-white' : 'text-gray-900'}`}>
-                        {strings.studentHomePage.bookSlot}
+                        {t.studentHomePage.bookSlot}
                       </h3>
                       <p className={`text-sm ${isDark ? 'text-gray-300' : 'text-gray-600'}`}>
-                        {strings.studentHomePage.bookSlotDescription}
+                        {t.studentHomePage.bookSlotDescription}
                       </p>
                     </div>
                   </div>
@@ -90,10 +93,10 @@ export default function StudentHomePage() {
                     </div>
                     <div className="flex-1">
                       <h3 className={`text-xl font-bold mb-2 ${isDark ? 'text-white' : 'text-gray-900'}`}>
-                        {strings.studentHomePage.viewBookings}
+                        {t.studentHomePage.viewBookings}
                       </h3>
                       <p className={`text-sm ${isDark ? 'text-gray-300' : 'text-gray-600'}`}>
-                        {strings.studentHomePage.viewBookingsDescription}
+                        {t.studentHomePage.viewBookingsDescription}
                       </p>
                     </div>
                   </div>
@@ -116,12 +119,12 @@ export default function StudentHomePage() {
                 </div>
                 <div className="flex-1">
                   <h3 className={`text-lg font-semibold mb-2 ${isDark ? 'text-white' : 'text-gray-900'}`}>
-                    {strings.studentHomePage.quickTips.title}
+                    {t.studentHomePage.quickTips.title}
                   </h3>
                   <ul className={`text-sm space-y-1 ${isDark ? 'text-gray-300' : 'text-gray-600'}`}>
-                    <li>{strings.studentHomePage.quickTips.tip1}</li>
-                    <li>{strings.studentHomePage.quickTips.tip2}</li>
-                    <li>{strings.studentHomePage.quickTips.tip3}</li>
+                    <li>{t.studentHomePage.quickTips.tip1}</li>
+                    <li>{t.studentHomePage.quickTips.tip2}</li>
+                    <li>{t.studentHomePage.quickTips.tip3}</li>
                   </ul>
                 </div>
               </div>

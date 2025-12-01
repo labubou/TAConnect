@@ -83,6 +83,12 @@ function RegisterPage() {
       newErrors.password = t.validation.passwordRequired;
     } else if (formData.password.length < 8) {
       newErrors.password = t.validation.passwordMinLength;
+    } else if (!/[A-Z]/.test(formData.password)) {
+      newErrors.password = t.validation.passwordUppercase;
+    } else if (!/[a-z]/.test(formData.password)) {
+      newErrors.password = t.validation.passwordLowercase;
+    } else if (!/[0-9]/.test(formData.password)) {
+      newErrors.password = t.validation.passwordNumber;
     }
 
 
@@ -234,12 +240,12 @@ function RegisterPage() {
                 <div className="flex-1">
                   <p className="font-semibold text-lg mb-1">✉️ {success}</p>
                   <p className="text-sm">{t.messages.successSubtext}</p>
-                  <p className="text-sm mt-2">Check your spam folder if you don't see the email.</p>
+                  <p className="text-sm mt-2">{t.messages.checkSpam}</p>
                   <button
                     onClick={() => navigate(returnUrl ? `/login?returnUrl=${encodeURIComponent(returnUrl)}` : '/login')}
                     className={`mt-3 px-4 py-2 ${isDark ? 'bg-green-700 hover:bg-green-600' : 'bg-green-600 hover:bg-green-700'} text-white rounded transition`}
                   >
-                    Go to Login
+                    {t.messages.goToLogin}
                   </button>
                 </div>
               </div>

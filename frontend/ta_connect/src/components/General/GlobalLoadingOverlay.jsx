@@ -1,9 +1,13 @@
 import { useGlobalLoading } from '../../contexts/GlobalLoadingContext';
 import { useTheme } from '../../contexts/ThemeContext';
+import { useLanguage } from '../../contexts/LanguageContext';
+import loadingStrings from '../../strings/loadingStrings';
 
 export default function GlobalLoadingOverlay() {
   const { isLoading, loadingMessage } = useGlobalLoading();
   const { theme } = useTheme();
+  const { language } = useLanguage();
+  const t = loadingStrings[language];
   const isDark = theme === 'dark';
 
   if (!isLoading) return null;
@@ -59,7 +63,7 @@ export default function GlobalLoadingOverlay() {
               isDark ? 'text-white' : 'text-gray-800'
             }`}
           >
-            {loadingMessage || 'Loading...'}
+            {loadingMessage || t.loading}
           </p>
 
           {/* Subtitle */}
@@ -68,7 +72,7 @@ export default function GlobalLoadingOverlay() {
               isDark ? 'text-gray-400' : 'text-gray-600'
             }`}
           >
-            Please wait while we process your request
+            {t.pleaseWait}
           </p>
         </div>
       </div>

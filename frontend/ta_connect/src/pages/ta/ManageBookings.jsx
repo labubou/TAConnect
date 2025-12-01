@@ -1,11 +1,12 @@
 import { useState, useEffect } from 'react';
 import { useTheme } from '../../contexts/ThemeContext';
+import { useLanguage } from '../../contexts/LanguageContext';
 import { useGlobalLoading } from '../../contexts/GlobalLoadingContext';
 import TAnavbar from '../../components/ta/TAnavbar';
 import ErrorBoundary from '../../components/General/ErrorBoundary';
 import Footer from '../../components/General/Footer';
 import { SkeletonLoader } from '../../components/General/SkeletonLoader';
-import strings from '../../strings/manageBookingsStrings';
+import allStrings from '../../strings/manageBookingsStrings';
 import { useInstructorBookings } from '../../hooks/useApi';
 import CancelBookingModal from '../../components/ta/CancelBookingModal';
 import { exportBookingsAsCSV } from '../../services/exportService';
@@ -36,6 +37,8 @@ const getCurrentMonthDateRange = () => {
 
 export default function ManageBookings() {
   const { theme } = useTheme();
+  const { language } = useLanguage();
+  const strings = allStrings[language];
   const { startLoading, stopLoading, isLoading: globalIsLoading } = useGlobalLoading();
   const isDark = theme === 'dark';
   const [isNavbarOpen, setIsNavbarOpen] = useState(true);

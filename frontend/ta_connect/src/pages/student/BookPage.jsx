@@ -1,16 +1,19 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useTheme } from '../../contexts/ThemeContext';
+import { useLanguage } from '../../contexts/LanguageContext';
 import { useAuth } from '../../contexts/AuthContext';
 import { useGlobalLoading } from '../../contexts/GlobalLoadingContext';
 import StudentNavbar from '../../components/student/studentNavbar';
 import Footer from '../../components/General/Footer';
-import { bookPageStrings as strings } from '../../strings/bookPageStrings';
+import { bookPageStrings } from '../../strings/bookPageStrings';
 import axios from 'axios';
 import { useCreateBooking } from '../../hooks/useApi';
 
 export default function BookPage() {
   const { theme } = useTheme();
+  const { language } = useLanguage();
+  const strings = bookPageStrings[language];
   const { user, accessToken } = useAuth();
   const { startLoading, stopLoading, isLoading } = useGlobalLoading();
   const isDark = theme === 'dark';
@@ -317,10 +320,32 @@ export default function BookPage() {
       });
       
       if (response.data && response.data.available_times) {
-        const times = response.data.available_times.map(time => ({
+        let times = response.data.available_times.map(time => ({
           start: time,
           value: time
         }));
+        
+        // Filter out times that have already passed if the date is today
+        const selectedDateObj = new Date(date);
+        const now = new Date();
+        const isToday = selectedDateObj.getDate() === now.getDate() && 
+                        selectedDateObj.getMonth() === now.getMonth() && 
+                        selectedDateObj.getFullYear() === now.getFullYear();
+        
+        if (isToday) {
+          times = times.filter(timeSlot => {
+            try {
+              const [hours, minutes] = timeSlot.start.split(':').map(Number);
+              const slotDateTime = new Date();
+              slotDateTime.setHours(hours, minutes, 0, 0);
+              return slotDateTime > now;
+            } catch (e) {
+              console.error('Error parsing time:', e);
+              return true; // Keep the slot if there's an error parsing
+            }
+          });
+        }
+        
         setTimeSlots(times);
       } else {
         setTimeSlots([]);
@@ -345,6 +370,7 @@ export default function BookPage() {
   const generateAvailableDates = (slot) => {
     const dates = [];
     // Use local date without timezone conversion
+    const now = new Date();
     const today = new Date();
     today.setHours(0, 0, 0, 0);
     
@@ -357,12 +383,31 @@ export default function BookPage() {
     
     const daysOfWeek = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
     const targetDay = daysOfWeek.indexOf(slot.day_of_week);
+    
+    // Parse slot end time
+    const [endHours, endMinutes] = slot.end_time.split(':').map(Number);
 
     let currentDate = new Date(Math.max(today.getTime(), startDate.getTime()));
     
     while (currentDate <= endDate) {
       if (currentDate.getDay() === targetDay && currentDate >= today) {
-        dates.push(new Date(currentDate));
+        // Check if this is today and if the time slot has already passed
+        const isToday = currentDate.getDate() === now.getDate() && 
+                        currentDate.getMonth() === now.getMonth() && 
+                        currentDate.getFullYear() === now.getFullYear();
+        
+        if (isToday) {
+          // For today, only add if the slot end time hasn't passed yet
+          const slotEndDateTime = new Date(currentDate);
+          slotEndDateTime.setHours(endHours, endMinutes, 0, 0);
+          
+          if (now < slotEndDateTime) {
+            dates.push(new Date(currentDate));
+          }
+        } else {
+          // For future dates, always add
+          dates.push(new Date(currentDate));
+        }
       }
       currentDate.setDate(currentDate.getDate() + 1);
     }
@@ -429,7 +474,7 @@ export default function BookPage() {
       const [hours, minutes] = time.split(':');
       const hour = parseInt(hours);
       if (isNaN(hour)) return time;
-      const ampm = hour >= 12 ? 'PM' : 'AM';
+      const ampm = hour >= 12 ? (language === 'ar' ? 'م' : 'PM') : (language === 'ar' ? 'ص' : 'AM');
       const displayHour = hour % 12 || 12;
       return `${displayHour}:${minutes} ${ampm}`;
     } catch (e) {
@@ -455,7 +500,7 @@ export default function BookPage() {
     try {
       const d = new Date(date);
       if (isNaN(d.getTime())) return String(date);
-      return d.toLocaleDateString('en-US', {
+      return d.toLocaleDateString(language === 'ar' ? 'ar-EG' : 'en-US', {
         weekday: 'short',
         year: 'numeric',
         month: 'short',
@@ -464,6 +509,27 @@ export default function BookPage() {
     } catch (e) {
       console.error('Error formatting date:', e);
       return String(date);
+    }
+  };
+
+  // Helper function to check if a slot has completely passed
+  const isSlotPassed = (slot) => {
+    try {
+      const now = new Date();
+      
+      // Parse the end date
+      const [endYear, endMonth, endDay] = slot.end_date.split('-').map(Number);
+      const slotEndDate = new Date(endYear, endMonth - 1, endDay);
+      
+      // Parse the end time
+      const [endHours, endMinutes] = slot.end_time.split(':').map(Number);
+      slotEndDate.setHours(endHours, endMinutes, 0, 0);
+      
+      // Check if the slot's end date/time has passed
+      return now > slotEndDate;
+    } catch (e) {
+      console.error('Error checking if slot has passed:', e);
+      return false; // If there's an error, show the slot to be safe
     }
   };
 
@@ -621,21 +687,21 @@ export default function BookPage() {
                       <button
                         key={instructor.id}
                         onClick={() => handleSelectInstructor(instructor)}
-                        className={`w-full p-4 rounded-lg border-2 bg-white dark:bg-gray-900 text-left transition-all ${
+                        className={`w-full p-4 rounded-lg border-2 bg-white dark:bg-gray-900 transition-all ${
                           selectedInstructor?.id === instructor.id
                             ? isDark ? 'border-blue-500 bg-blue-900/20' : 'border-blue-500 bg-blue-50 shadow-sm'
                             : `${isDark ? 'border-gray-700 hover:border-gray-600' : 'border-gray-200 hover:border-gray-300 hover:shadow-sm'}`
                         }`}
                       >
-                        <div className="flex items-center space-x-3">
-                          <div className={`w-10 h-10 ${isDark ? 'bg-gradient-to-br from-[#366c6b] to-[#1a3535]' : 'bg-gradient-to-br from-[#4a9d9c] to-[#366c6b]'} rounded-full flex items-center justify-center text-white font-bold shadow-sm`}>
+                        <div className="flex items-center gap-3" dir="ltr">
+                          <div className={`w-10 h-10 flex-shrink-0 ${isDark ? 'bg-gradient-to-br from-[#366c6b] to-[#1a3535]' : 'bg-gradient-to-br from-[#4a9d9c] to-[#366c6b]'} rounded-full flex items-center justify-center text-white font-bold shadow-sm`}>
                             {instructor.first_name?.[0]}{instructor.last_name?.[0]}
                           </div>
-                          <div>
-                            <p className={`font-semibold ${isDark ? 'text-white' : 'text-gray-800'}`}>
+                          <div className="flex-1 min-w-0 text-left">
+                            <p className={`font-semibold truncate ${isDark ? 'text-white' : 'text-gray-800'}`}>
                               {instructor.first_name} {instructor.last_name}
                             </p>
-                            <p className={`text-sm ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
+                            <p className={`text-sm truncate ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
                               {instructor.email}
                             </p>
                           </div>
@@ -662,12 +728,14 @@ export default function BookPage() {
                     <p className={`text-center py-8 ${isDark ? 'text-gray-400' : 'text-gray-700'}`}>
                       {strings.steps.step2.selectInstructorFirst}
                     </p>
-                  ) : instructorSlots.length === 0 ? (
+                  ) : instructorSlots.filter(slot => !isSlotPassed(slot)).length === 0 ? (
                     <p className={`text-center py-8 ${isDark ? 'text-gray-400' : 'text-gray-700'}`}>
                       {strings.steps.step2.noSlots}
                     </p>
                   ) : (
-                    instructorSlots.map((slot) => (
+                    instructorSlots
+                      .filter(slot => !isSlotPassed(slot)) // Filter out past slots
+                      .map((slot) => (
                       <button
                         key={slot.id}
                         onClick={() => handleSelectSlot(slot)}
@@ -686,10 +754,10 @@ export default function BookPage() {
                               {slot.course_name || strings.steps.step2.officeHours}
                             </p>
                             <div className={`text-sm ${isDark ? 'text-gray-400' : 'text-gray-700'} space-y-0.5 font-medium`}>
-                              <p>📅 {slot.day_of_week}</p>
-                              <p>🕐 {formatTime(slot.start_time)} - {formatTime(slot.end_time)}</p>
-                              <p>📍 {slot.location || strings.steps.step2.online}</p>
-                              <p>📆 {formatDate(slot.start_date)} to {formatDate(slot.end_date)}</p>
+                              <p dir="ltr">📅 {slot.day_of_week}</p>
+                              <p dir="ltr">🕐 {formatTime(slot.start_time)} - {formatTime(slot.end_time)}</p>
+                              <p dir="ltr">📍 {slot.location || strings.steps.step2.online}</p>
+                              <p dir="ltr">📆 {formatDate(slot.start_date)} to {formatDate(slot.end_date)}</p>
                             </div>
                           </div>
                           {!slot.status && (
@@ -743,7 +811,7 @@ export default function BookPage() {
                                   : `${isDark ? 'border-gray-700 hover:border-gray-600' : 'border-gray-200 hover:border-gray-300 hover:shadow-sm'}`
                               }`}
                             >
-                              <p className={`font-semibold ${isDark ? 'text-white' : 'text-gray-800'}`}>
+                              <p className={`font-semibold ${isDark ? 'text-white' : 'text-gray-800'}`} dir="ltr">
                                 {formatDate(date)}
                               </p>
                             </button>
@@ -756,11 +824,11 @@ export default function BookPage() {
                     {selectedDate && (
                       <div className="mb-6">
                         <h3 className={`font-semibold ${isDark ? 'text-white' : 'text-gray-800'} mb-3`}>
-                          Select Time
+                          {strings.steps.step3.selectTime}
                         </h3>
                         {timeSlots.length === 0 ? (
                           <p className={`text-center py-4 ${isDark ? 'text-gray-400' : 'text-gray-700'}`}>
-                            No available times for this date
+                            {strings.steps.step3.noAvailableTimes}
                           </p>
                         ) : (
                           <div className="grid grid-cols-2 gap-2 max-h-48 overflow-y-auto">
@@ -773,6 +841,7 @@ export default function BookPage() {
                                     ? isDark ? 'border-blue-500 bg-blue-900/20 text-blue-300' : 'border-blue-500 bg-blue-50 text-blue-700 shadow-sm'
                                     : `${isDark ? 'border-gray-700 hover:border-gray-600 text-gray-300' : 'border-gray-200 hover:border-gray-300 text-gray-700 hover:shadow-sm'}`
                                 }`}
+                                dir="ltr"
                               >
                                 {formatTime(timeSlot.start)}
                               </button>
@@ -789,11 +858,11 @@ export default function BookPage() {
                           {strings.steps.step3.summaryTitle}
                         </h3>
                         <div className={`text-sm ${isDark ? 'text-gray-300' : 'text-gray-800'} space-y-1.5 font-medium`}>
-                          <p>👨‍🏫 {selectedInstructor.first_name || ''} {selectedInstructor.last_name || ''}</p>
+                          <p dir="ltr">👨‍🏫 {selectedInstructor.first_name || ''} {selectedInstructor.last_name || ''}</p>
                           <p>📚 {selectedSlot.course_name || strings.steps.step2.officeHours}</p>
-                          <p>📅 {formatDate(selectedDate)}</p>
-                          <p>🕐 {formatTime(selectedTime)} - {formatTime(calculateEndTime(selectedTime, selectedSlot.duration_minutes))}</p>
-                          <p>📍 {selectedSlot.room || strings.steps.step2.online}</p>
+                          <p dir="ltr">📅 {formatDate(selectedDate)}</p>
+                          <p dir="ltr">🕐 {formatTime(selectedTime)} - {formatTime(calculateEndTime(selectedTime, selectedSlot.duration_minutes))}</p>
+                          <p dir="ltr">📍 {selectedSlot.room || strings.steps.step2.online}</p>
                         </div>
                       </div>
                     )}

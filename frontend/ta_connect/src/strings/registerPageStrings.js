@@ -35,6 +35,9 @@ const REGISTER_PAGE = {
       invalidEmail: "Please enter a valid email address",
       passwordRequired: "Password is required",
       passwordMinLength: "Password must be at least 8 characters",
+      passwordUppercase: "Password must contain at least one uppercase letter",
+      passwordLowercase: "Password must contain at least one lowercase letter",
+      passwordNumber: "Password must contain at least one number",
       confirmPasswordRequired: "Please confirm your password",
       passwordsDoNotMatch: "Passwords do not match",
       userTypeRequired: "Please select your user type",
@@ -42,6 +45,8 @@ const REGISTER_PAGE = {
     messages: {
       success: "Account created successfully! Please check your email to verify your account.",
       successSubtext: "We've sent a verification link to your email address. Click the link to activate your account.",
+      checkSpam: "Check your spam folder if you don't see the email.",
+      goToLogin: "Go to Login",
       error: "Failed to create account. Please try again.",
     },
     footer: {
@@ -85,6 +90,9 @@ const REGISTER_PAGE = {
       invalidEmail: "الرجاء إدخال عنوان بريد إلكتروني صالح",
       passwordRequired: "كلمة المرور مطلوبة",
       passwordMinLength: "يجب أن تكون كلمة المرور 8 أحرف على الأقل",
+      passwordUppercase: "يجب أن تحتوي كلمة المرور على حرف كبير واحد على الأقل",
+      passwordLowercase: "يجب أن تحتوي كلمة المرور على حرف صغير واحد على الأقل",
+      passwordNumber: "يجب أن تحتوي كلمة المرور على رقم واحد على الأقل",
       confirmPasswordRequired: "الرجاء تأكيد كلمة المرور",
       passwordsDoNotMatch: "كلمتا المرور غير متطابقتين",
       userTypeRequired: "الرجاء اختيار نوع المستخدم",
@@ -92,6 +100,8 @@ const REGISTER_PAGE = {
     messages: {
       success: "تم إنشاء الحساب بنجاح! يرجى التحقق من بريدك الإلكتروني للتحقق من حسابك.",
       successSubtext: "لقد أرسلنا رابط التحقق إلى بريدك الإلكتروني. انقر على الرابط لتفعيل حسابك.",
+      checkSpam: "تحقق من مجلد الرسائل غير المرغوب فيها إذا لم تجد البريد الإلكتروني.",
+      goToLogin: "انتقل إلى تسجيل الدخول",
       error: "فشل إنشاء الحساب. الرجاء المحاولة مرة أخرى.",
     },
     footer: {

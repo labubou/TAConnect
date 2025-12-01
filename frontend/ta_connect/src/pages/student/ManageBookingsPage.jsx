@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useTheme } from '../../contexts/ThemeContext';
+import { useLanguage } from '../../contexts/LanguageContext';
 import { useGlobalLoading } from '../../contexts/GlobalLoadingContext';
 import { useLocation } from 'react-router-dom';
 import StudentNavbar from '../../components/student/studentNavbar';
@@ -7,7 +8,7 @@ import Footer from '../../components/General/Footer';
 import axios from 'axios';
 import { useQuery } from '@tanstack/react-query';
 import { useCancelInstructorBooking, useUpdateBooking } from '../../hooks/useApi';
-import strings from '../../strings/manageBookingsStrings';
+import allStrings from '../../strings/manageBookingsStrings';
 
 // Helper function to get current month's date range
 const getCurrentMonthDateRange = () => {
@@ -42,6 +43,8 @@ const getDateRangeForDate = (dateStr) => {
 
 export default function ManageBookingsPage() {
   const { theme } = useTheme();
+  const { language } = useLanguage();
+  const t = allStrings[language];
   const { startLoading, stopLoading, isLoading } = useGlobalLoading();
   const location = useLocation();
   const isDark = theme === 'dark';
@@ -117,7 +120,7 @@ export default function ManageBookingsPage() {
   // Show error if API call fails
   useEffect(() => {
     if (apiError) {
-      setError(strings.messages.error);
+      setError(t.messages.error);
     }
   }, [apiError]);
 
@@ -190,7 +193,7 @@ export default function ManageBookingsPage() {
       }
     } catch (err) {
       console.error('Error fetching available times:', err);
-      setError(strings.modals.errors.noAvailableTimes);
+      setError(t.modals.errors.noAvailableTimes);
       setAvailableTimes([]);
     }
   };
@@ -207,13 +210,13 @@ export default function ManageBookingsPage() {
     if (!selectedBooking) return;
 
     setCancelLoading(true);
-    startLoading('cancel-booking', strings.messages.canceling);
+    startLoading('cancel-booking', t.messages.canceling);
     cancelBookingMutation(
       { bookingId: selectedBooking.id, sendEmail: sendCancelEmail },
       {
         onSuccess: () => {
           stopLoading('cancel-booking');
-          setSuccess(strings.messages.cancelSuccess);
+          setSuccess(t.messages.cancelSuccess);
           setShowCancelModal(false);
           setSelectedBooking(null);
           refetch();
@@ -222,7 +225,7 @@ export default function ManageBookingsPage() {
         onError: (err) => {
           stopLoading('cancel-booking');
           console.error('Error cancelling booking:', err);
-          setError(err.response?.data?.error || strings.messages.cancelError);
+          setError(err.response?.data?.error || t.messages.cancelError);
         },
         onSettled: () => {
           setCancelLoading(false);
@@ -233,11 +236,11 @@ export default function ManageBookingsPage() {
 
   const handleUpdateBooking = async () => {
     if (!selectedBooking || !newDate || !newTime) {
-      setError(strings.modals.errors.selectDateAndTime);
+      setError(t.modals.errors.selectDateAndTime);
       return;
     }
 
-    startLoading('update-booking', strings.messages.updating);
+    startLoading('update-booking', t.messages.updating);
     updateBookingMutation({
       bookingId: selectedBooking.id,
       data: {
@@ -248,7 +251,7 @@ export default function ManageBookingsPage() {
     }, {
       onSuccess: () => {
         stopLoading('update-booking');
-        setSuccess(strings.messages.updateSuccess);
+        setSuccess(t.messages.updateSuccess);
         setShowUpdateModal(false);
         refetch();
         setTimeout(() => setSuccess(''), 3000);
@@ -256,7 +259,7 @@ export default function ManageBookingsPage() {
       onError: (err) => {
         stopLoading('update-booking');
         console.error('Error updating booking:', err);
-        setError(err.response?.data?.error || strings.messages.updateError);
+        setError(err.response?.data?.error || t.messages.updateError);
       }
     });
   };
@@ -270,7 +273,7 @@ export default function ManageBookingsPage() {
         const timePart = time.split('T')[1].split('.')[0].split('Z')[0];
         const [hours, minutes] = timePart.split(':');
         const hour = parseInt(hours);
-        const ampm = hour >= 12 ? 'PM' : 'AM';
+        const ampm = hour >= 12 ? (language === 'ar' ? 'م' : 'PM') : (language === 'ar' ? 'ص' : 'AM');
         const displayHour = hour % 12 || 12;
         return `${displayHour}:${minutes} ${ampm}`;
       }
@@ -279,7 +282,7 @@ export default function ManageBookingsPage() {
       if (timeParts.length >= 2) {
         const hours = parseInt(timeParts[0]);
         const minutes = timeParts[1];
-        const ampm = hours >= 12 ? 'PM' : 'AM';
+        const ampm = hours >= 12 ? (language === 'ar' ? 'م' : 'PM') : (language === 'ar' ? 'ص' : 'AM');
         const displayHour = hours % 12 || 12;
         return `${displayHour}:${minutes} ${ampm}`;
       }
@@ -294,7 +297,7 @@ export default function ManageBookingsPage() {
     if (!date) return '';
     try {
       const d = new Date(date);
-      return d.toLocaleDateString('en-US', {
+      return d.toLocaleDateString(language === 'ar' ? 'ar-EG' : 'en-US', {
         weekday: 'short',
         year: 'numeric',
         month: 'short',
@@ -309,7 +312,7 @@ export default function ManageBookingsPage() {
     const cancelledIds = bookings.filter(b => b.is_cancelled).map(b => b.id);
     const newClearedIds = new Set([...clearedCancelledIds, ...cancelledIds]);
     setClearedCancelledIds(newClearedIds);
-    setSuccess(strings.messages.clearedCancelled);
+    setSuccess(t.messages.clearedCancelled);
     setTimeout(() => setSuccess(''), 3000);
   };
 
@@ -317,7 +320,7 @@ export default function ManageBookingsPage() {
     const completedIds = bookings.filter(b => b.is_completed).map(b => b.id);
     const newClearedIds = new Set([...clearedCompletedIds, ...completedIds]);
     setClearedCompletedIds(newClearedIds);
-    setSuccess(strings.messages.clearedCompleted || 'Completed bookings cleared from view');
+    setSuccess(t.messages.clearedCompleted || 'Completed bookings cleared from view');
     setTimeout(() => setSuccess(''), 3000);
   };
 
@@ -384,10 +387,10 @@ export default function ManageBookingsPage() {
             {/* Header */}
             <div className={`${isDark ? 'bg-gray-800' : 'bg-white'} p-4 sm:p-6 md:p-8 rounded-xl shadow-lg mb-4 sm:mb-6`}>
               <h1 className={`text-2xl sm:text-3xl font-bold ${isDark ? 'text-white' : 'text-gray-900'} mb-2`}>
-                {strings.page.title}
+                {t.page.title}
               </h1>
               <p className={`${isDark ? 'text-gray-300' : 'text-gray-600'} text-sm sm:text-base md:text-lg`}>
-                {strings.page.description}
+                {t.page.description}
               </p>
             </div>
 
@@ -395,11 +398,11 @@ export default function ManageBookingsPage() {
             <div className={`${isDark ? 'bg-gray-800' : 'bg-white'} p-4 sm:p-6 rounded-xl shadow-lg mb-4 sm:mb-6`}>
               <div className="flex flex-col gap-3 sm:gap-4">
                 {/* Top Row: Filters */}
-                <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
+                <div className="flex flex-row gap-3 sm:gap-4">
                   {/* Status Filter */}
-                  <div className="flex-1 min-w-full sm:min-w-[150px]">
+                  <div className="flex-1 min-w-[150px]">
                     <label className={`block text-xs sm:text-sm font-medium ${isDark ? 'text-gray-300' : 'text-gray-700'} mb-1.5 sm:mb-2`}>
-                      {strings.filters.status}
+                      {t.filters.status}
                     </label>
                     <select
                       value={filterStatus}
@@ -410,17 +413,17 @@ export default function ManageBookingsPage() {
                           : 'bg-white border-gray-300 text-gray-900 focus:border-[#366c6b]'
                       } focus:outline-none transition-colors`}
                     >
-                      <option value="all">{strings.filters.allBookings}</option>
-                      <option value="active">{strings.filters.activeOnly}</option>
-                      <option value="cancelled">{strings.filters.cancelledOnly}</option>
-                      <option value="completed">{strings.filters.completedOnly}</option>
+                      <option value="all">{t.filters.allBookings}</option>
+                      <option value="active">{t.filters.activeOnly}</option>
+                      <option value="cancelled">{t.filters.cancelledOnly}</option>
+                      <option value="completed">{t.filters.completedOnly}</option>
                     </select>
                   </div>
 
                   {/* Course Filter */}
-                  <div className="flex-1 min-w-full sm:min-w-[150px]">
+                  <div className="flex-1 min-w-[150px]">
                     <label className={`block text-xs sm:text-sm font-medium ${isDark ? 'text-gray-300' : 'text-gray-700'} mb-1.5 sm:mb-2`}>
-                      {strings.filters.course}
+                      {t.filters.course}
                     </label>
                     <select
                       value={filterCourse}
@@ -431,7 +434,7 @@ export default function ManageBookingsPage() {
                           : 'bg-white border-gray-300 text-gray-900 focus:border-[#366c6b]'
                       } focus:outline-none transition-colors`}
                     >
-                      <option value="all">{strings.filters.allCourses}</option>
+                      <option value="all">{t.filters.allCourses}</option>
                       {uniqueCourses.map(course => (
                         <option key={course} value={course}>{course}</option>
                       ))}
@@ -439,9 +442,9 @@ export default function ManageBookingsPage() {
                   </div>
 
                   {/* Sort By */}
-                  <div className="flex-1 min-w-full sm:min-w-[150px]">
+                  <div className="flex-1 min-w-[150px]">
                     <label className={`block text-xs sm:text-sm font-medium ${isDark ? 'text-gray-300' : 'text-gray-700'} mb-1.5 sm:mb-2`}>
-                      {strings.filters.sortBy}
+                      {t.filters.sortBy}
                     </label>
                     <select
                       value={sortBy}
@@ -452,8 +455,8 @@ export default function ManageBookingsPage() {
                           : 'bg-white border-gray-300 text-gray-900 focus:border-[#366c6b]'
                       } focus:outline-none transition-colors`}
                     >
-                      <option value="date">{strings.filters.byDate}</option>
-                      <option value="course">{strings.filters.byCourse}</option>
+                      <option value="date">{t.filters.byDate}</option>
+                      <option value="course">{t.filters.byCourse}</option>
                     </select>
                   </div>
                 </div>
@@ -462,7 +465,7 @@ export default function ManageBookingsPage() {
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                   <div>
                     <label className={`block text-xs sm:text-sm font-medium ${isDark ? 'text-gray-300' : 'text-gray-700'} mb-1.5 sm:mb-2`}>
-                      From Date
+                      {t.filters.from}
                     </label>
                     <input
                       type="date"
@@ -477,7 +480,7 @@ export default function ManageBookingsPage() {
                   </div>
                   <div>
                     <label className={`block text-xs sm:text-sm font-medium ${isDark ? 'text-gray-300' : 'text-gray-700'} mb-1.5 sm:mb-2`}>
-                      To Date
+                      {t.filters.to}
                     </label>
                     <input
                       type="date"
@@ -493,21 +496,21 @@ export default function ManageBookingsPage() {
                 </div>
 
                 {/* Bottom Row: Action Buttons */}
-                <div className="flex flex-col sm:flex-row gap-2 pt-2 sm:pt-3 border-t border-gray-600/30">
+                <div className="flex flex-row gap-2 pt-2 sm:pt-3 border-t border-gray-600/30">
                   <button
                     onClick={handleClearFilters}
-                    className={`w-full sm:w-auto px-4 py-2 rounded-lg border transition-all ${
+                    className={`w-auto px-4 py-2 rounded-lg border transition-all ${
                       isDark
                         ? 'border-gray-500 text-gray-300 hover:bg-gray-600'
                         : 'border-gray-300 text-gray-700 hover:bg-gray-100'
                     }`}
                   >
-                    Clear Filters
+                    {t.filters.clear}
                   </button>
                   {bookings.some(b => b.is_cancelled) && (
                     <button
                       onClick={handleClearCancelled}
-                      className={`w-full sm:w-auto px-4 py-2 rounded-lg font-medium text-sm transition-all duration-300 flex items-center justify-center gap-2 ${
+                      className={`w-auto px-4 py-2 rounded-lg font-medium text-sm transition-all duration-300 flex items-center justify-center gap-2 ${
                         isDark 
                           ? 'bg-red-900/30 text-red-300 hover:bg-red-900/50 border-2 border-red-700 hover:scale-105' 
                           : 'bg-red-50 text-red-700 hover:bg-red-100 border-2 border-red-300 hover:scale-105'
@@ -516,13 +519,13 @@ export default function ManageBookingsPage() {
                       <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                       </svg>
-                      {strings.buttons.deleteAllCancelled}
+                      {t.buttons.deleteAllCancelled}
                     </button>
                   )}
                   {bookings.some(b => b.is_completed) && (
                     <button
                       onClick={handleClearCompleted}
-                      className={`w-full sm:w-auto px-4 py-2 rounded-lg font-medium text-sm transition-all duration-300 flex items-center justify-center gap-2 ${
+                      className={`w-auto px-4 py-2 rounded-lg font-medium text-sm transition-all duration-300 flex items-center justify-center gap-2 ${
                         isDark 
                           ? 'bg-green-900/30 text-green-300 hover:bg-green-900/50 border-2 border-green-700 hover:scale-105' 
                           : 'bg-green-50 text-green-700 hover:bg-green-100 border-2 border-green-300 hover:scale-105'
@@ -531,7 +534,7 @@ export default function ManageBookingsPage() {
                       <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                       </svg>
-                      {strings.buttons.deleteAllCompleted || 'Clear Completed'}
+                      {t.buttons.deleteAllCompleted || 'Clear Completed'}
                     </button>
                   )}
                 </div>
@@ -572,7 +575,7 @@ export default function ManageBookingsPage() {
                 {filterStatus !== 'cancelled' && filterStatus !== 'completed' && (
                   <div className={`${isDark ? 'bg-gray-800' : 'bg-white'} rounded-xl shadow-lg mb-4 sm:mb-6 p-4 sm:p-6`}>
                     <h2 className={`text-xl sm:text-2xl font-bold ${isDark ? 'text-white' : 'text-gray-900'} mb-4 sm:mb-6`}>
-                      {strings.sections.activeBookings} ({activeBookings.length})
+                      {t.sections.activeBookings} ({activeBookings.length})
                     </h2>
                   
                   {activeBookings.length === 0 ? (
@@ -581,7 +584,7 @@ export default function ManageBookingsPage() {
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                       </svg>
                       <p className={`mt-4 text-lg ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
-                        {strings.messages.noActiveBookings}
+                        {t.messages.noActiveBookings}
                       </p>
                     </div>
                   ) : (
@@ -598,7 +601,7 @@ export default function ManageBookingsPage() {
                               </h3>
                               {booking.section && (
                                 <p className={`text-xs sm:text-sm ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
-                                  {strings.bookingCard.section} {booking.section}
+                                  {t.bookingCard.section} {booking.section}
                                 </p>
                               )}
                             </div>
@@ -607,20 +610,20 @@ export default function ManageBookingsPage() {
                           <div className={`space-y-1.5 sm:space-y-2 mb-3 sm:mb-4 text-sm sm:text-base ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
                             <p className="flex items-center gap-2">
                               <span>👨‍🏫</span>
-                              <span>{booking.instructor?.full_name || 'Instructor'}</span>
+                              <span dir="ltr">{booking.instructor?.full_name || 'Instructor'}</span>
                             </p>
                             <p className="flex items-center gap-2">
                               <span>📅</span>
-                              <span>{formatDate(booking.date)}</span>
+                              <span dir="ltr">{formatDate(booking.date)}</span>
                             </p>
                             <p className="flex items-center gap-2">
                               <span>🕐</span>
-                              <span>{formatTime(booking.start_time)} - {formatTime(booking.end_time)}</span>
+                              <span dir="ltr">{formatTime(booking.start_time)} - {formatTime(booking.end_time)}</span>
                             </p>
                             {booking.room && (
                               <p className="flex items-center gap-2">
                                 <span>📍</span>
-                                <span>{booking.room}</span>
+                                <span dir="ltr">{booking.room}</span>
                               </p>
                             )}
                           </div>
@@ -630,13 +633,13 @@ export default function ManageBookingsPage() {
                               onClick={() => handleUpdateClick(booking)}
                               className="flex-1 px-4 py-2 sm:py-2.5 bg-gradient-to-r from-[#366c6b] to-[#1a3535] text-white rounded-lg hover:shadow-lg transition-all duration-300 hover:scale-105 text-xs sm:text-sm font-medium"
                             >
-                              {strings.buttons.update}
+                              {t.buttons.update}
                             </button>
                             <button
                               onClick={() => handleCancelClick(booking)}
                               className={`flex-1 px-4 py-2 sm:py-2.5 ${isDark ? 'bg-red-900/30 text-red-300 hover:bg-red-900/50' : 'bg-red-100 text-red-700 hover:bg-red-200'} rounded-lg transition-all duration-300 text-xs sm:text-sm font-medium`}
                             >
-                              {strings.buttons.cancel}
+                              {t.buttons.cancel}
                             </button>
                           </div>
                         </div>
@@ -650,7 +653,7 @@ export default function ManageBookingsPage() {
                 {filterStatus !== 'active' && filterStatus !== 'completed' && (
                   <div className={`${isDark ? 'bg-gray-800' : 'bg-white'} rounded-xl shadow-lg mb-4 sm:mb-6 p-4 sm:p-6`}>
                     <h2 className={`text-xl sm:text-2xl font-bold ${isDark ? 'text-white' : 'text-gray-900'} mb-4 sm:mb-6`}>
-                      {strings.sections.cancelledBookings} ({cancelledBookings.length})
+                      {t.sections.cancelledBookings} ({cancelledBookings.length})
                     </h2>
                     
                   {cancelledBookings.length === 0 ? (
@@ -659,7 +662,7 @@ export default function ManageBookingsPage() {
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                       </svg>
                       <p className={`mt-4 text-lg ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
-                        {strings.messages.noCancelledBookings}
+                        {t.messages.noCancelledBookings}
                       </p>
                     </div>
                   ) : (
@@ -675,7 +678,7 @@ export default function ManageBookingsPage() {
                                 {booking.course_name}
                               </h3>
                               <span className={`inline-block mt-1 px-2 py-1 text-xs font-semibold rounded ${isDark ? 'bg-red-900/30 text-red-300' : 'bg-red-100 text-red-700'}`}>
-                                {strings.status.cancelled}
+                                {t.status.cancelled}
                               </span>
                             </div>
                           </div>
@@ -683,15 +686,15 @@ export default function ManageBookingsPage() {
                           <div className={`space-y-1.5 sm:space-y-2 text-sm sm:text-base ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
                             <p className="flex items-center gap-2">
                               <span>👨‍🏫</span>
-                              <span>{booking.instructor?.full_name || 'Instructor'}</span>
+                              <span dir="ltr">{booking.instructor?.full_name || 'Instructor'}</span>
                             </p>
                             <p className="flex items-center gap-2">
                               <span>📅</span>
-                              <span>{formatDate(booking.date)}</span>
+                              <span dir="ltr">{formatDate(booking.date)}</span>
                             </p>
                             <p className="flex items-center gap-2">
                               <span>🕐</span>
-                              <span>{formatTime(booking.start_time)} - {formatTime(booking.end_time)}</span>
+                              <span dir="ltr">{formatTime(booking.start_time)} - {formatTime(booking.end_time)}</span>
                             </p>
                           </div>
                         </div>
@@ -705,7 +708,7 @@ export default function ManageBookingsPage() {
                 {filterStatus !== 'active' && filterStatus !== 'cancelled' && (
                   <div className={`${isDark ? 'bg-gray-800' : 'bg-white'} rounded-xl shadow-lg p-4 sm:p-6`}>
                     <h2 className={`text-xl sm:text-2xl font-bold ${isDark ? 'text-white' : 'text-gray-900'} mb-4 sm:mb-6`}>
-                      {strings.sections.completedBookings} ({completedBookings.length})
+                      {t.sections.completedBookings} ({completedBookings.length})
                     </h2>
                     
                   {completedBookings.length === 0 ? (
@@ -714,7 +717,7 @@ export default function ManageBookingsPage() {
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                       </svg>
                       <p className={`mt-4 text-lg ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
-                        {strings.messages.noCompletedBookings}
+                        {t.messages.noCompletedBookings}
                       </p>
                     </div>
                   ) : (
@@ -730,7 +733,7 @@ export default function ManageBookingsPage() {
                                 {booking.course_name}
                               </h3>
                               <span className={`inline-block mt-1 px-2 py-0.5 text-xs font-semibold rounded ${isDark ? 'bg-green-900/30 text-green-300' : 'bg-green-100 text-green-700'}`}>
-                                {strings.status.completed}
+                                {t.status.completed}
                               </span>
                             </div>
                           </div>
@@ -738,20 +741,20 @@ export default function ManageBookingsPage() {
                           <div className={`space-y-1.5 text-sm ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
                             <p className="flex items-center gap-2">
                               <span>👨‍🏫</span>
-                              <span className="truncate">{booking.instructor?.full_name || 'Instructor'}</span>
+                              <span className="truncate" dir="ltr">{booking.instructor?.full_name || 'Instructor'}</span>
                             </p>
                             <p className="flex items-center gap-2">
                               <span>📅</span>
-                              <span>{formatDate(booking.date)}</span>
+                              <span dir="ltr">{formatDate(booking.date)}</span>
                             </p>
                             <p className="flex items-center gap-2">
                               <span>🕐</span>
-                              <span>{formatTime(booking.start_time)} - {formatTime(booking.end_time)}</span>
+                              <span dir="ltr">{formatTime(booking.start_time)} - {formatTime(booking.end_time)}</span>
                             </p>
                             {booking.room && (
                               <p className="flex items-center gap-2">
                                 <span>📍</span>
-                                <span className="truncate">{booking.room}</span>
+                                <span className="truncate" dir="ltr">{booking.room}</span>
                               </p>
                             )}
                           </div>
@@ -774,20 +777,20 @@ export default function ManageBookingsPage() {
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-3 sm:p-4">
           <div className={`${isDark ? 'bg-gray-800' : 'bg-white'} rounded-xl shadow-2xl max-w-md w-full p-4 sm:p-6`}>
             <h3 className={`text-xl sm:text-2xl font-bold ${isDark ? 'text-white' : 'text-gray-900'} mb-3 sm:mb-4`}>
-              {strings.modals.cancelTitle}
+              {t.modals.cancelTitle}
             </h3>
             <p className={`text-sm sm:text-base ${isDark ? 'text-gray-300' : 'text-gray-600'} mb-4 sm:mb-6`}>
-              {strings.modals.cancelMessage}
+              {t.modals.cancelMessage}
             </p>
             
             <div className={`${isDark ? 'bg-gray-700' : 'bg-gray-50'} p-3 sm:p-4 rounded-lg mb-4`}>
               <p className={`font-semibold ${isDark ? 'text-white' : 'text-gray-900'}`}>
                 {selectedBooking.course_name}
               </p>
-              <p className={`text-sm ${isDark ? 'text-gray-300' : 'text-gray-600'} mt-2`}>
+              <p className={`text-sm ${isDark ? 'text-gray-300' : 'text-gray-600'} mt-2`} dir="ltr">
                 📅 {formatDate(selectedBooking.date)}
               </p>
-              <p className={`text-sm ${isDark ? 'text-gray-300' : 'text-gray-600'}`}>
+              <p className={`text-sm ${isDark ? 'text-gray-300' : 'text-gray-600'}`} dir="ltr">
                 🕐 {formatTime(selectedBooking.start_time)} - {formatTime(selectedBooking.end_time)}
               </p>
             </div>
@@ -798,7 +801,7 @@ export default function ManageBookingsPage() {
                 disabled={cancelLoading}
                 className={`flex-1 px-4 py-2 ${isDark ? 'bg-gray-700 text-white hover:bg-gray-600' : 'bg-gray-200 text-gray-900 hover:bg-gray-300'} rounded-lg transition-all duration-300 font-medium`}
               >
-                {strings.modals.keepBooking}
+                {t.modals.keepBooking}
               </button>
               <button
                 onClick={handleCancelBooking}
@@ -811,7 +814,7 @@ export default function ManageBookingsPage() {
                     <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                   </svg>
                 ) : (
-                  strings.modals.confirmCancel
+                  t.modals.confirmCancel
                 )}
               </button>
             </div>
@@ -824,28 +827,32 @@ export default function ManageBookingsPage() {
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-3 sm:p-4 overflow-y-auto">
           <div className={`${isDark ? 'bg-gray-800' : 'bg-white'} rounded-xl shadow-2xl max-w-2xl w-full p-4 sm:p-6 my-4 sm:my-8`}>
             <h3 className={`text-xl sm:text-2xl font-bold ${isDark ? 'text-white' : 'text-gray-900'} mb-3 sm:mb-4`}>
-              {strings.modals.updateTitle}
+              {t.modals.updateTitle}
             </h3>
             
             <div className={`${isDark ? 'bg-gray-700' : 'bg-gray-50'} p-4 rounded-lg mb-6`}>
               <p className={`font-semibold ${isDark ? 'text-white' : 'text-gray-900'}`}>
-                {strings.modals.currentBooking}
+                {t.modals.currentBooking}
               </p>
-              <p className={`text-sm ${isDark ? 'text-gray-300' : 'text-gray-600'} mt-2`}>
+              <p className={`text-sm ${isDark ? 'text-gray-300' : 'text-gray-600'} mt-2`} dir="ltr">
                 📅 {formatDate(selectedBooking.date)}
               </p>
-              <p className={`text-sm ${isDark ? 'text-gray-300' : 'text-gray-600'}`}>
+              <p className={`text-sm ${isDark ? 'text-gray-300' : 'text-gray-600'}`} dir="ltr">
                 🕐 {formatTime(selectedBooking.start_time)} - {formatTime(selectedBooking.end_time)}
               </p>
             </div>
 
             <div className="mb-6">
               <h4 className={`font-semibold ${isDark ? 'text-white' : 'text-gray-900'} mb-3`}>
-                {strings.modals.selectNewDate}
+                {t.modals.selectNewDate}
               </h4>
               <div className="max-h-48 overflow-y-auto space-y-2">
                 {availableDates.map((date, index) => {
-                  const dateStr = date.toISOString().split('T')[0];
+                  // Use local timezone date formatting to avoid UTC conversion issues
+                  const yyyy = date.getFullYear();
+                  const mm = String(date.getMonth() + 1).padStart(2, '0');
+                  const dd = String(date.getDate()).padStart(2, '0');
+                  const dateStr = `${yyyy}-${mm}-${dd}`;
                   return (
                     <button
                       key={index}
@@ -868,11 +875,11 @@ export default function ManageBookingsPage() {
             {newDate && (
               <div className="mb-6">
                 <h4 className={`font-semibold ${isDark ? 'text-white' : 'text-gray-900'} mb-3`}>
-                  {strings.modals.selectNewTime}
+                  {t.modals.selectNewTime}
                 </h4>
                 {availableTimes.length === 0 ? (
                   <p className={`text-center py-4 ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
-                    {strings.modals.noAvailableTimes}
+                    {t.modals.noAvailableTimes}
                   </p>
                 ) : (
                   <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 max-h-48 overflow-y-auto">
@@ -900,7 +907,7 @@ export default function ManageBookingsPage() {
                 disabled={isUpdating}
                 className={`flex-1 px-4 py-2 ${isDark ? 'bg-gray-700 text-white hover:bg-gray-600' : 'bg-gray-200 text-gray-900 hover:bg-gray-300'} rounded-lg transition-all duration-300 font-medium`}
               >
-                {strings.modals.cancelButton}
+                {t.modals.cancelButton}
               </button>
               <button
                 onClick={handleUpdateBooking}
@@ -913,7 +920,7 @@ export default function ManageBookingsPage() {
                     <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                   </svg>
                 ) : (
-                  strings.modals.confirmUpdate
+                  t.modals.confirmUpdate
                 )}
               </button>
             </div>
