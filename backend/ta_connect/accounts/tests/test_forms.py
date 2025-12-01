@@ -9,6 +9,7 @@ from django.test import TestCase
 from accounts.models import User, InstructorProfile, StudentProfile
 from accounts.serializers.register_serializer import RegisterSerializer
 from accounts.serializers.login_serializer import LoginSerializer
+from accounts.serializers.delete_user_serializer import DeleteUserSerializer
 from accounts.tests.base import BaseTestCase
 
 
@@ -212,4 +213,74 @@ class LoginSerializerTestCase(BaseTestCase):
         serializer = LoginSerializer(data=data)
         # Password is required, so validation should fail
         self.assertFalse(serializer.is_valid())
+    
 
+class DeleteUserSerializerTestCase(BaseTestCase):
+    """
+    Test cases for the DeleteUserSerializer.
+    """
+    
+    def test_serializer_validation_happy_path(self):
+        """Test serializer validation with correct password."""
+        user = self.create_user(
+            username='testuser',
+            email='test@example.com',
+            password='testpass123',
+            user_type='student'
+        )
+        
+        data = {
+            'password': 'testpass123'
+        }
+        
+        serializer = DeleteUserSerializer(data=data, context={'user': user})
+        self.assertTrue(serializer.is_valid(), f"Serializer errors: {serializer.errors}")
+    
+    def test_serializer_validation_incorrect_password(self):
+        """Test serializer validation with incorrect password."""
+        user = self.create_user(
+            username='testuser',
+            email='test@example.com',
+            password='testpass123',
+            user_type='student'
+        )
+        
+        data = {
+            'password': 'wrongpassword123'
+        }
+        
+        serializer = DeleteUserSerializer(data=data, context={'user': user})
+        self.assertFalse(serializer.is_valid())
+        self.assertIn('password', str(serializer.errors))
+    
+    def test_serializer_validation_missing_password(self):
+        """Test serializer validation with missing password."""
+        user = self.create_user(
+            username='testuser',
+            email='test@example.com',
+            password='testpass123',
+            user_type='student'
+        )
+        
+        data = {}
+        
+        serializer = DeleteUserSerializer(data=data, context={'user': user})
+        self.assertFalse(serializer.is_valid())
+        self.assertIn('password', serializer.errors)
+    
+    def test_serializer_validation_short_password(self):
+        """Test serializer validation with password shorter than 8 characters."""
+        user = self.create_user(
+            username='testuser',
+            email='test@example.com',
+            password='testpass123',
+            user_type='student'
+        )
+        
+        data = {
+            'password': 'short'
+        }
+        
+        serializer = DeleteUserSerializer(data=data, context={'user': user})
+        self.assertFalse(serializer.is_valid())
+        self.assertIn('password', serializer.errors)
