@@ -157,7 +157,7 @@ docker compose up --build
 - [x] Email notifications
 - [x] Analytics dashboard
 - [x] Dark/Light theme
-- [ ] Multi-language support
+- [x] Multi-language support
 - [ ] Calendar integrations (Google, Outlook)
 - [ ] AI scheduling assistant
 
