@@ -2,25 +2,29 @@ import { useEffect, useState, useRef } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { useTheme } from '../../contexts/ThemeContext';
+import { useLanguage } from '../../contexts/LanguageContext';
 import { useGlobalLoading } from '../../contexts/GlobalLoadingContext';
 import axios from 'axios';
+import strings from '../../strings/googleCallbackStrings';
 
 const GoogleCallback = () => {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const { login } = useAuth();
   const { theme } = useTheme();
+  const { language } = useLanguage();
   const { startLoading, stopLoading, isLoading: globalIsLoading } = useGlobalLoading();
   const [status, setStatus] = useState('processing');
-  const [message, setMessage] = useState('Processing Google authentication...');
+  const [message, setMessage] = useState('');
   const [isNewUser, setIsNewUser] = useState(false);
   const hasProcessed = useRef(false);
 
   const isDark = theme === 'dark';
+  const t = strings[language];
 
   const googleAuth = async (code) => {
     try {
-      startLoading('google-auth', 'Authenticating with Google...');
+      startLoading('google-auth', t.processing.authenticating);
       const response = await axios.post('/api/auth/google/authenticate/', {
         code,
       });
@@ -38,12 +42,12 @@ const GoogleCallback = () => {
       stopLoading('google-auth');
       console.error('Google authentication failed:', error);
       
-      let errorMessage = 'Google authentication failed';
+      let errorMessage = t.error.failed;
       
       if (error.response?.data?.error) {
         errorMessage = error.response.data.error;
       } else if (error.response?.status === 500) {
-        errorMessage = 'Server error. Please try again later.';
+        errorMessage = t.error.server;
       }
       
       return { 
@@ -63,14 +67,14 @@ const GoogleCallback = () => {
 
       if (error) {
         setStatus('error');
-        setMessage('Google authentication was cancelled or failed.');
+        setMessage(t.error.cancelled);
         setTimeout(() => navigate('/login'), 3000);
         return;
       }
 
       if (!code) {
         setStatus('error');
-        setMessage('No authorization code received from Google.');
+        setMessage(t.error.noCode);
         setTimeout(() => navigate('/login'), 3000);
         return;
       }
@@ -85,13 +89,13 @@ const GoogleCallback = () => {
           
           // Check if user needs to set user_type
           if (result.needsUserType) {
-            setMessage('Account created! Please select your user type to continue.');
+            setMessage(t.success.messageUserType);
             setTimeout(() => navigate('/select-user-type'), 2000);
           } else {
             if (result.isNewUser) {
-              setMessage('Welcome to TA Connect! Your account has been created successfully.');
+              setMessage(t.success.messageNew);
             } else {
-              setMessage('Login successful! Redirecting to dashboard...');
+              setMessage(t.success.messageLogin);
             }
             
             // Navigate based on user type
@@ -111,7 +115,7 @@ const GoogleCallback = () => {
         }
       } catch (error) {
         setStatus('error');
-        setMessage('An unexpected error occurred during authentication.');
+        setMessage(t.error.unexpected);
         setTimeout(() => navigate('/login'), 3000);
       }
     };
@@ -159,9 +163,9 @@ const GoogleCallback = () => {
         {getIcon()}
         
         <h1 className={`text-3xl font-bold ${isDark ? 'text-white' : 'text-gray-900'} mb-4`}>
-          {status === 'processing' && 'Connecting with Google...'}
-          {status === 'success' && (isNewUser ? 'Welcome to TA Connect!' : 'Welcome Back!')}
-          {status === 'error' && 'Authentication Failed'}
+          {status === 'processing' && t.processing.title}
+          {status === 'success' && (isNewUser ? t.success.titleNew : t.success.titleReturning)}
+          {status === 'error' && t.error.title}
         </h1>
         
         <p className={`${isDark ? 'text-gray-400' : 'text-gray-600'} mb-8`}>
@@ -169,11 +173,11 @@ const GoogleCallback = () => {
         </p>
 
         {status === 'processing' && (
-          <div className="mt-6">
+            <div className="mt-6">
             <div className={`w-full ${isDark ? 'bg-gray-700' : 'bg-gray-200'} rounded-full h-2`}>
               <div className="bg-gradient-to-r from-blue-500 via-red-500 to-yellow-500 h-2 rounded-full animate-pulse" style={{ width: '75%' }}></div>
             </div>
-            <p className={`${isDark ? 'text-gray-500' : 'text-gray-500'} text-sm mt-2`}>Authenticating with Google...</p>
+            <p className={`${isDark ? 'text-gray-500' : 'text-gray-500'} text-sm mt-2`}>{t.processing.authenticating}</p>
           </div>
         )}
 
@@ -184,7 +188,7 @@ const GoogleCallback = () => {
                 <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clipRule="evenodd" />
               </svg>
               <span className={`${isDark ? 'text-blue-300' : 'text-blue-700'} font-medium text-sm`}>
-                Redirecting to your dashboard...
+                {t.success.redirecting}
               </span>
             </div>
           </div>
@@ -197,7 +201,7 @@ const GoogleCallback = () => {
                 <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
               </svg>
               <div className="text-left">
-                <p className={`${isDark ? 'text-red-300' : 'text-red-700'} font-medium text-sm`}>Authentication Error</p>
+                <p className={`${isDark ? 'text-red-300' : 'text-red-700'} font-medium text-sm`}>{t.error.heading}</p>
                 <p className={`${isDark ? 'text-red-300' : 'text-red-600'} text-sm mt-1`}>{message}</p>
               </div>
             </div>

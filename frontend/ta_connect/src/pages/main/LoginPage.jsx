@@ -158,15 +158,15 @@ function LoginPage() {
 
   return (
     <div className={`min-h-screen ${isDark ? 'bg-gray-900' : 'bg-gray-50'}`}>
-      <nav className={`w-full flex items-center justify-between p-4 ${isDark ? 'bg-gray-800' : 'bg-white'} shadow-md`}>
+      <nav className={`w-full flex items-center justify-between p-4 sm:px-6 lg:px-8 ${isDark ? 'bg-gray-800' : 'bg-white'} shadow-md`}>
         <div className={`text-2xl font-bold ${isDark ? 'text-white' : 'text-gray-900'} cursor-pointer`} 
             onClick={() => navigate('/')}>
-        <img src={Logo2} alt="TA Connect Logo" className="logo" />        
+        <img src={Logo2} alt="TA Connect Logo" className="h-12 sm:h-14 md:h-16 w-auto object-contain cursor-pointer transition-transform duration-300 hover:scale-110" />        
         </div>
-        <div className="flex items-center space-x-4">
+        <div className="flex items-center gap-3">
           <button
             onClick={() => navigate(returnUrl ? `/register?returnUrl=${encodeURIComponent(returnUrl)}` : '/register')}
-            className="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600"
+            className="px-4 sm:px-6 py-2 sm:py-2.5 bg-green-500 text-white rounded-xl hover:bg-green-600 transition-all duration-300 hover:scale-105 text-sm sm:text-base font-medium"
           >
             {t.registerButton}
           </button>

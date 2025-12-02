@@ -117,11 +117,14 @@ const StudentNavbar = ({ onToggle }) => {
                     />
                   </div>
                 </div>
-              <div className="text-center">
-                <p className="text-gray-500 dark:text-gray-400 text-xs font-medium">
-                  {t.appName}
-                </p>
-              </div>
+                <div className="text-center">
+                  <h2 className="text-xl font-bold bg-gradient-to-r from-[#366c6b] to-[#1a3535] bg-clip-text text-transparent mb-1">
+                    {t.appName}
+                  </h2>
+                  <p className="text-gray-500 dark:text-gray-400 text-xs font-medium">
+                    {t.user.studentPortal || 'Student Portal'}
+                  </p>
+                </div>
               </div>
 
               
