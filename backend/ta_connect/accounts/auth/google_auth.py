@@ -161,6 +161,7 @@ class GoogleAuthView(GenericAPIView):
                         'first_name': user.first_name,
                         'last_name': user.last_name,
                         'user_type': user.user_type if user.user_type else None,
+                        'email_verify': user.email_verify,
                     },
                     'needs_user_type': not bool(user.user_type)
                 }, status=status.HTTP_200_OK)
