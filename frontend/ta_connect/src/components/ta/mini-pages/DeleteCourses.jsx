@@ -1,8 +1,11 @@
 import { useState } from "react";
 import axios from "axios";
-import strings from "../../../strings/manageCoursesPageStrings";
+import { useLanguage } from "../../../contexts/LanguageContext";
+import allStrings from "../../../strings/manageCoursesPageStrings";
 
 export default function DeleteCourses({ isDark, slot, onSlotDeleted, onClose }) {
+  const { language } = useLanguage();
+  const strings = allStrings[language];
   const [error, setError] = useState("");
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);

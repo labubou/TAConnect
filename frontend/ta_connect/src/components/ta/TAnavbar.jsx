@@ -3,6 +3,7 @@ import { useAuth } from '../../contexts/AuthContext';
 import { Link, useLocation } from 'react-router-dom';
 import Logo from '../../assets/Logo2.png';
 import { useTheme } from '../../contexts/ThemeContext';
+import { useLanguage } from '../../contexts/LanguageContext';
 import ThemeToggle from '../General/ThemeToggle';
 import strings from '../../strings/TANavbarStrings';
 
@@ -12,6 +13,8 @@ const TAnavbar = ({ onToggle }) => {
   const [isOpen, setIsOpen] = useState(true);
   const [isMobile, setIsMobile] = useState(false);
   const { theme } = useTheme();
+  const { language, toggleLanguage } = useLanguage();
+  const t = strings[language];
 
   useEffect(() => {
     const checkScreenSize = () => {
@@ -66,8 +69,8 @@ const TAnavbar = ({ onToggle }) => {
       <button 
         className="fixed top-4 left-4 z-50 w-12 h-12 bg-white/80 dark:bg-gray-800/80 backdrop-blur-xl border border-white/30 dark:border-gray-700 rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-300 hover:scale-110 flex items-center justify-center group"
         onClick={toggleNavbar}
-        aria-label={strings.aria.toggleNav}
-        title={isOpen ? strings.aria.collapseSidebar : strings.aria.expandSidebar}
+        aria-label={t.aria.toggleNav}
+        title={isOpen ? t.aria.collapseSidebar : t.aria.expandSidebar}
       >
         <svg 
           className={`w-6 h-6 text-gray-700 dark:text-gray-200 transition-transform duration-300 ${isOpen ? 'rotate-180' : ''} group-hover:text-[#366c6b]`}
@@ -83,8 +86,18 @@ const TAnavbar = ({ onToggle }) => {
         </svg>
       </button>
 
-      {/* Theme toggle - top right */}
-      <div className="fixed top-4 right-4 z-50">
+      {/* Theme toggle and Language toggle - top right */}
+      <div className="fixed top-4 right-4 z-50 flex items-center gap-2">
+        <button
+          onClick={toggleLanguage}
+          className="w-12 h-12 bg-white/80 dark:bg-gray-800/80 backdrop-blur-xl border border-white/30 dark:border-gray-700 rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-300 hover:scale-110 flex items-center justify-center group"
+          aria-label="Toggle Language"
+          title={language === 'en' ? 'التبديل إلى العربية' : 'Switch to English'}
+        >
+          <span className="text-sm font-bold text-gray-700 dark:text-gray-200 group-hover:text-[#366c6b]">
+            {language === 'en' ? 'AR' : 'EN'}
+          </span>
+        </button>
         <ThemeToggle />
       </div>
 
@@ -118,7 +131,7 @@ const TAnavbar = ({ onToggle }) => {
                     textShadow: '0 2px 8px rgba(124,58,237,0.12)'
                   }}
                 >
-                  {strings.appName}
+                  TA Connect
                 </div>
               </div>
 
@@ -130,13 +143,15 @@ const TAnavbar = ({ onToggle }) => {
                       {user?.first_name ? user.first_name.charAt(0).toUpperCase() : user?.username?.charAt(0).toUpperCase() || 'U'}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-gray-800 dark:text-gray-100 font-semibold text-sm truncate">
+                      <p className="text-gray-800 dark:text-gray-100 font-semibold text-sm truncate" dir={language === 'ar' ? 'rtl' : 'ltr'}>
                         {user?.first_name && user?.last_name 
-                          ? `${user.first_name} ${user.last_name}`
-                          : user?.username || strings.user.defaultName
+                          ? language === 'ar' 
+                            ? `${user.first_name} ${user.last_name}`
+                            : `${user.first_name} ${user.last_name}`
+                          : user?.username || t.user.defaultName
                         }
                       </p>
-                      <p className="text-gray-600 dark:text-gray-300 text-xs truncate">{user?.email}</p>
+                      <p className="text-gray-600 dark:text-gray-300 text-xs truncate" dir="ltr">{user?.email}</p>
                     </div>
                   </div>
                   {!user?.email_verify && (
@@ -145,7 +160,7 @@ const TAnavbar = ({ onToggle }) => {
                         <svg className="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
                           <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
                         </svg>
-                        {strings.user.emailNotVerified}
+                        {t.user.emailNotVerified}
                       </span>
                     </div>
                   )}
@@ -175,7 +190,7 @@ const TAnavbar = ({ onToggle }) => {
                       <rect x="13" y="13" width="8" height="8" rx="1" />
                     </svg>
                   </div>
-                  <span className="font-semibold">{strings.navigation.dashboard}</span>
+                  <span className="font-semibold">{t.navigation.dashboard}</span>
                 </Link>
 
 
@@ -197,7 +212,7 @@ const TAnavbar = ({ onToggle }) => {
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                     </svg>
                   </div>
-                  <span className="font-semibold">{strings.navigation.profile}</span>
+                  <span className="font-semibold">{t.navigation.profile}</span>
                 </Link>
 
                 <Link 
@@ -219,7 +234,7 @@ const TAnavbar = ({ onToggle }) => {
                     </svg>
 
                   </div>
-                  <span className="font-semibold">{strings.navigation.manageCourses}</span>
+                  <span className="font-semibold">{t.navigation.manageCourses}</span>
                 </Link>
 
                 <Link 
@@ -240,7 +255,7 @@ const TAnavbar = ({ onToggle }) => {
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
                     </svg>
                   </div>
-                  <span className="font-semibold">{strings.navigation.analytics}</span>
+                  <span className="font-semibold">{t.navigation.analytics}</span>
                 </Link>
 
                 <Link 
@@ -261,7 +276,7 @@ const TAnavbar = ({ onToggle }) => {
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                     </svg>
                   </div>
-                  <span className="font-semibold">{strings.navigation.emailPreferences}</span>
+                  <span className="font-semibold">{t.navigation.emailPreferences}</span>
                 </Link>
 
                 <Link 
@@ -282,7 +297,7 @@ const TAnavbar = ({ onToggle }) => {
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
                     </svg>
                   </div>
-                  <span className="font-semibold">{strings.navigation.manageBookings}</span>
+                  <span className="font-semibold">{t.navigation.manageBookings}</span>
                 </Link>
               </div>
             </div>
@@ -298,11 +313,11 @@ const TAnavbar = ({ onToggle }) => {
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
                   </svg>
                 </div>
-                <span className="font-semibold">{strings.navigation.logout}</span>
+                <span className="font-semibold">{t.navigation.logout}</span>
               </button>
               <div className="text-center">
                 <p className="text-gray-500 dark:text-gray-400 text-xs font-medium">
-                  {strings.appName}
+                  TA Connect
                 </p>
               </div>
             </div>

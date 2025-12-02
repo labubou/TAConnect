@@ -343,7 +343,7 @@ export default function ManageBookings() {
                         : 'border-gray-200 hover:border-gray-300 bg-gray-50 text-gray-600'
                     }`}
                   >
-                    Active
+                    {strings.status.active}
                   </button>
                   <button
                     onClick={() => setStatusFilter(prev => ({ ...prev, cancelled: !prev.cancelled }))}
@@ -357,7 +357,7 @@ export default function ManageBookings() {
                         : 'border-gray-200 hover:border-gray-300 bg-gray-50 text-gray-600'
                     }`}
                   >
-                    Cancelled
+                    {strings.status.cancelled}
                   </button>
                 </div>
               </div>
@@ -389,7 +389,7 @@ export default function ManageBookings() {
               </div>
 
               {/* Action Buttons */}
-              <div className="flex flex-col sm:flex-row gap-2">
+              <div className="flex flex-wrap gap-2">
                 <button
                   onClick={handleClearFilters}
                   className={`px-4 py-2 rounded-lg border transition-all ${

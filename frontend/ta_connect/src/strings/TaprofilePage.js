@@ -19,6 +19,8 @@ const profilePageStrings = {
       student: "Student",
       change: "Change",
       changePassword: "Change Password",
+      dangerZone: "Danger Zone",
+      deleteAccountButton: "Delete Account",
     },
     emailModal: {
       title: "Change Email Address",
@@ -94,6 +96,8 @@ const profilePageStrings = {
       student: "طالب",
       change: "تغيير",
       changePassword: "تغيير كلمة المرور",
+      dangerZone: "منطقة الخطر",
+      deleteAccountButton: "حذف الحساب",
     },
     emailModal: {
       title: "تغيير عنوان البريد الإلكتروني",

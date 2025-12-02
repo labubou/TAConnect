@@ -1,6 +1,7 @@
 import { useState, useMemo } from "react";
 import axios from "axios";
-import strings from "../../../strings/manageCoursesPageStrings";
+import { useLanguage } from "../../../contexts/LanguageContext";
+import allStrings from "../../../strings/manageCoursesPageStrings";
 import WarningModal from "../../General/WarningModal";
 
 export default function ViewCourses({
@@ -16,6 +17,8 @@ export default function ViewCourses({
   isExporting,
   onShareSlot,
 }) {
+  const { language } = useLanguage();
+  const strings = allStrings[language];
   const [toggleLoading, setToggleLoading] = useState({});
   const [sortBy, setSortBy] = useState("course_name");
   const [searchTerm, setSearchTerm] = useState("");
@@ -150,10 +153,10 @@ export default function ViewCourses({
                 {slots.length} {strings.view.slotsFound}
               </p>
             </div>
-            <div className="flex flex-col sm:flex-row gap-3">
+            <div className="flex flex-wrap gap-3">
               <button
                 onClick={onRefresh}
-                className={`w-full sm:w-auto px-4 py-2 rounded-xl font-semibold transition-all flex items-center justify-center gap-2 text-sm sm:text-base ${
+                className={`flex-1 sm:flex-none px-4 py-2 rounded-xl font-semibold transition-all flex items-center justify-center gap-2 text-sm sm:text-base ${
                   isDark
                     ? "bg-gray-800 hover:bg-gray-700 text-white"
                     : "bg-gray-100 hover:bg-gray-200 text-gray-800"
@@ -178,7 +181,7 @@ export default function ViewCourses({
                 <button
                   onClick={onExportSlots}
                   disabled={isExporting}
-                  className={`w-full sm:w-auto px-4 py-2 rounded-xl font-semibold transition-all flex items-center justify-center gap-2 text-sm sm:text-base ${
+                  className={`flex-1 sm:flex-none px-4 py-2 rounded-xl font-semibold transition-all flex items-center justify-center gap-2 text-sm sm:text-base ${
                     isDark
                       ? "bg-blue-600 hover:bg-blue-500 text-white disabled:opacity-50"
                       : "bg-blue-500 hover:bg-blue-600 text-white disabled:opacity-50"
@@ -193,7 +196,7 @@ export default function ViewCourses({
               )}
               <button
                 onClick={onAddCourse}
-                className={`w-full sm:w-auto px-4 py-2 rounded-xl font-semibold transition-all flex items-center justify-center gap-2 text-sm sm:text-base ${
+                className={`flex-1 sm:flex-none px-4 py-2 rounded-xl font-semibold transition-all flex items-center justify-center gap-2 text-sm sm:text-base ${
                   isDark
                     ? "bg-emerald-600 hover:bg-emerald-500 text-white"
                     : "bg-emerald-500 hover:bg-emerald-600 text-white"
@@ -327,7 +330,7 @@ export default function ViewCourses({
                         </p>
                       </div>
                       <span
-                        className={`px-3 py-1 rounded-full text-xs font-semibold ${
+                        className={`px-3 py-1 rounded-full text-xs font-semibold whitespace-nowrap ${
                           slot.status
                             ? "bg-emerald-100 text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-300"
                             : "bg-gray-200 text-gray-800 dark:bg-gray-600 dark:text-gray-300"
@@ -344,7 +347,7 @@ export default function ViewCourses({
                       </div>
                       <div className="flex items-center justify-between">
                         <span className={isDark ? "text-gray-400" : "text-gray-500"}>{strings.view.time}</span>
-                        <span className={isDark ? "text-white" : "text-gray-900"}>
+                        <span className={isDark ? "text-white" : "text-gray-900"} dir="ltr">
                           {slot.start_time} - {slot.end_time}
                         </span>
                       </div>
@@ -358,7 +361,7 @@ export default function ViewCourses({
                       </div>
                       <div className="flex items-center justify-between">
                         <span className={isDark ? "text-gray-400" : "text-gray-500"}>{strings.view.dates}</span>
-                        <span className={`text-right ${isDark ? "text-white" : "text-gray-900"}`}>
+                        <span className={isDark ? "text-white" : "text-gray-900"} dir="ltr">
                           {slot.start_date} {strings.view.to} {slot.end_date}
                         </span>
                       </div>
@@ -438,12 +441,12 @@ export default function ViewCourses({
                           <span>{strings.view.buttons.share || "Share"}</span>
                         </button>
                       </div>
-                      {/* Second row: Manage Students, Activate/Deactivate */}
+                      {/* Second row: Manage Students */}
                       <div className="flex gap-2">
                         <button
                           onClick={() => onManageStudents && onManageStudents(slot)}
                           disabled={!onManageStudents}
-                          className={`flex-1 py-2 px-3 rounded-lg font-semibold text-xs sm:text-sm flex items-center justify-center gap-1 border whitespace-nowrap ${
+                          className={`w-full py-2 px-3 rounded-lg font-semibold text-xs sm:text-sm flex items-center justify-center gap-1 border whitespace-nowrap ${
                             isDark
                               ? "border-gray-700 text-gray-200 hover:bg-gray-800"
                               : "border-gray-200 text-gray-700 hover:bg-gray-100"
@@ -453,10 +456,13 @@ export default function ViewCourses({
                           <span className="hidden md:inline">{strings.view.buttons.manageStudents}</span>
                           <span className="md:hidden text-xs">Students</span>
                         </button>
+                      </div>
+                      {/* Third row: Activate/Deactivate */}
+                      <div className="flex gap-2">
                         <button
                           onClick={() => handleToggleStatus(slot.id, slot.status)}
                           disabled={toggleLoading[slot.id]}
-                          className={`flex-1 py-2 px-3 rounded-lg font-semibold text-xs sm:text-sm flex items-center justify-center gap-1 whitespace-nowrap ${
+                          className={`w-full py-2 px-3 rounded-lg font-semibold text-xs sm:text-sm flex items-center justify-center gap-1 whitespace-nowrap ${
                             toggleLoading[slot.id] ? "opacity-50 cursor-not-allowed" : ""
                           } ${
                             slot.status

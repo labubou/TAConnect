@@ -9,9 +9,11 @@ export default function ThemeToggle() {
       onClick={toggleTheme}
       aria-label="Toggle theme"
       title={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
-      className="rounded-2xl bg-white/80 dark:bg-gray-800/80 backdrop-blur-xl border border-white/30 dark:border-gray-700 px-3 py-2 text-sm text-gray-800 dark:text-gray-200 shadow hover:shadow-lg transition"
+      className="w-12 h-12 bg-white/80 dark:bg-gray-800/80 backdrop-blur-xl border border-white/30 dark:border-gray-700 rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-300 hover:scale-110 flex items-center justify-center group"
     >
-      {theme === 'dark' ? 'Light' : 'Dark'}
+      <span className="text-sm font-bold text-gray-700 dark:text-gray-200 group-hover:text-[#366c6b]">
+        {theme === 'dark' ? '☀️' : '🌙'}
+      </span>
     </button>
   );
 }

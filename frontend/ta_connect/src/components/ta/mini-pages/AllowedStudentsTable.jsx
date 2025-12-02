@@ -1,5 +1,6 @@
 import { useState, useMemo } from "react";
-import strings from "../../../strings/allowedStudentsPageStrings";
+import { useLanguage } from "../../../contexts/LanguageContext";
+import allStrings from "../../../strings/allowedStudentsPageStrings";
 
 export default function AllowedStudentsTable({
   isDark,
@@ -11,6 +12,8 @@ export default function AllowedStudentsTable({
   onDeleteStudent,
   selectedSlot,
 }) {
+  const { language } = useLanguage();
+  const strings = allStrings[language] || allStrings.en;
   const [sortBy, setSortBy] = useState("email");
   const [searchTerm, setSearchTerm] = useState("");
 
