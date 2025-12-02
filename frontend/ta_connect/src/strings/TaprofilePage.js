@@ -61,6 +61,18 @@ const profilePageStrings = {
       requirement3: "One lowercase letter",
       requirement4: "One number",
     },
+    deleteModal: {
+      title: "Delete Account",
+      warning: "Warning: This action cannot be undone!",
+      description: "Deleting your account will permanently remove all your data, including bookings and settings. Please enter your password to confirm.",
+      password: "Current Password",
+      passwordRequired: "Password is required to delete account",
+      cancel: "Cancel",
+      deleting: "Deleting...",
+      deleteAccount: "Delete Account",
+      successMessage: "Account deleted successfully. You will be logged out.",
+      errorMessage: "Failed to delete account. Please check your password and try again.",
+    },
   },
   ar: {
     profilePage: {
@@ -123,6 +135,18 @@ const profilePageStrings = {
       requirement2: "حرف كبير واحد",
       requirement3: "حرف صغير واحد",
       requirement4: "رقم واحد",
+    },
+    deleteModal: {
+      title: "حذف الحساب",
+      warning: "تحذير: لا يمكن التراجع عن هذا الإجراء!",
+      description: "سيؤدي حذف حسابك إلى إزالة جميع بياناتك بشكل دائم، بما في ذلك الحجوزات والإعدادات. يرجى إدخال كلمة المرور للتأكيد.",
+      password: "كلمة المرور الحالية",
+      passwordRequired: "كلمة المرور مطلوبة لحذف الحساب",
+      cancel: "إلغاء",
+      deleting: "جارٍ الحذف...",
+      deleteAccount: "حذف الحساب",
+      successMessage: "تم حذف الحساب بنجاح. سيتم تسجيل خروجك.",
+      errorMessage: "فشل حذف الحساب. يرجى التحقق من كلمة المرور والمحاولة مرة أخرى.",
     },
   },
 };
