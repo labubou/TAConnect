@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useAuth } from "../../../contexts/AuthContext";
-import strings from "../../../strings/manageCoursesPageStrings";
+import { useLanguage } from "../../../contexts/LanguageContext";
+import allStrings from "../../../strings/manageCoursesPageStrings";
 
 const getBaseUrl = () => {
   if (import.meta.env.MODE === 'production') {
@@ -11,6 +12,8 @@ const getBaseUrl = () => {
 
 export default function ShareSlotModal({ isDark, slot, onClose }) {
   const { user } = useAuth();
+  const { language } = useLanguage();
+  const strings = allStrings[language];
   const [copySuccess, setCopySuccess] = useState(false);
   const [copyError, setCopyError] = useState("");
 

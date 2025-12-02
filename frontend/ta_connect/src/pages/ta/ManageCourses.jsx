@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useTheme } from "../../contexts/ThemeContext";
+import { useLanguage } from "../../contexts/LanguageContext";
 import TAnavbar from "../../components/ta/TAnavbar";
 import CreateCourse from "../../components/ta/mini-pages/CreateCourse";
 import ViewCourses from "../../components/ta/mini-pages/ViewCourses";
@@ -8,51 +9,58 @@ import DeleteCourses from "../../components/ta/mini-pages/DeleteCourses";
 import ManageAllowedStudentsModal from "../../components/ta/mini-pages/ManageAllowedStudentsModal";
 import ShareSlotModal from "../../components/ta/mini-pages/ShareSlotModal";
 import { SkeletonLoader } from "../../components/General/SkeletonLoader";
-import strings from "../../strings/manageCoursesPageStrings";
+import allStrings from "../../strings/manageCoursesPageStrings";
 import { useInstructorSlots } from "../../hooks/useApi";
 import { exportTimeSlotsAsCSV } from "../../services/exportService";
 
-const Modal = ({ title, onClose, isDark, children }) => (
-  <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-    <div
-      className="absolute inset-0 bg-black/40 backdrop-blur-sm"
-      onClick={onClose}
-    ></div>
-    <div
-      className={`relative w-full max-w-2xl sm:max-w-3xl lg:max-w-4xl max-h-[85vh] overflow-hidden rounded-2xl sm:rounded-3xl shadow-2xl ${
-        isDark
-          ? "bg-gray-900 border border-gray-800"
-          : "bg-white border border-gray-100"
-      }`}
-    >
-      <div className="flex items-center justify-between px-4 sm:px-6 py-4 border-b border-white/10 gap-4">
-        <h3 className={`text-lg sm:text-xl font-semibold flex-1 truncate ${isDark ? "text-white" : "text-gray-900"}`}>
-          {title}
-        </h3>
-        <button
-          onClick={onClose}
-          className={`p-2 rounded-lg transition-all ${
-            isDark
-              ? "bg-gray-800 hover:bg-gray-700 text-white"
-              : "bg-gray-100 hover:bg-gray-200 text-gray-700"
-          }`}
-          aria-label={strings.modals.close}
-        >
-          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-          </svg>
-        </button>
-      </div>
-      <div className="overflow-y-auto max-h-[75vh] px-4 sm:px-6 py-4">
-        {children}
+const Modal = ({ title, onClose, isDark, children }) => {
+  const { language } = useLanguage();
+  const strings = allStrings[language];
+  
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+      <div
+        className="absolute inset-0 bg-black/40 backdrop-blur-sm"
+        onClick={onClose}
+      ></div>
+      <div
+        className={`relative w-full max-w-2xl sm:max-w-3xl lg:max-w-4xl max-h-[85vh] overflow-hidden rounded-2xl sm:rounded-3xl shadow-2xl ${
+          isDark
+            ? "bg-gray-900 border border-gray-800"
+            : "bg-white border border-gray-100"
+        }`}
+      >
+        <div className="flex items-center justify-between px-4 sm:px-6 py-4 border-b border-white/10 gap-4">
+          <h3 className={`text-lg sm:text-xl font-semibold flex-1 truncate ${isDark ? "text-white" : "text-gray-900"}`}>
+            {title}
+          </h3>
+          <button
+            onClick={onClose}
+            className={`p-2 rounded-lg transition-all ${
+              isDark
+                ? "bg-gray-800 hover:bg-gray-700 text-white"
+                : "bg-gray-100 hover:bg-gray-200 text-gray-700"
+            }`}
+            aria-label={strings.modals.close}
+          >
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+        <div className="overflow-y-auto max-h-[75vh] px-4 sm:px-6 py-4">
+          {children}
+        </div>
       </div>
     </div>
-  </div>
-);
+  );
+};
 
 export default function ManageCourses() {
   const { theme } = useTheme();
+  const { language } = useLanguage();
   const isDark = theme === "dark";
+  const strings = allStrings[language];
   const [isNavbarOpen, setIsNavbarOpen] = useState(true);
   const [modalState, setModalState] = useState({ type: null, slot: null });
   const [infoBanner, setInfoBanner] = useState("");

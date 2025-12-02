@@ -2,14 +2,17 @@ import { useState, useEffect } from 'react';
 import axios from 'axios';
 import { Bell, Mail, X, Save, RefreshCw } from 'lucide-react';
 import { useTheme } from '../../contexts/ThemeContext';
+import { useLanguage } from '../../contexts/LanguageContext';
 import { useAuth } from '../../contexts/AuthContext';
 import { useGlobalLoading } from '../../contexts/GlobalLoadingContext';
 import TAnavbar from '../../components/ta/TAnavbar';
 import Footer from '../../components/General/Footer';
-import strings from '../../strings/TANavbarStrings';
+import allStrings from '../../strings/TANavbarStrings';
 
 export default function EmailPreferencesPage() {
   const { theme } = useTheme();
+  const { language } = useLanguage();
+  const strings = allStrings[language];
   const { user } = useAuth();
   const { startLoading, stopLoading, isLoading } = useGlobalLoading();
   const isDark = theme === 'dark';
@@ -152,7 +155,7 @@ export default function EmailPreferencesPage() {
                     {strings.emailPreferences?.title || 'Email Preferences'}
                   </h1>
                   <p className={`text-sm sm:text-base mt-1 ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
-                    Manage your email notification settings
+                    {strings.emailPreferences?.manageSettings || 'Manage your email notification settings'}
                   </p>
                 </div>
               </div>
@@ -167,7 +170,7 @@ export default function EmailPreferencesPage() {
                 title="Reset to default"
               >
                 <RefreshCw className={`w-5 h-5 ${saving ? 'animate-spin' : ''}`} />
-                <span className="text-sm font-medium">Reset to Default</span>
+                <span className="text-sm font-medium">{strings.emailPreferences?.resetToDefault || 'Reset to Default'}</span>
               </button>
             </div>
           </div>
@@ -230,7 +233,7 @@ export default function EmailPreferencesPage() {
                     {strings.emailPreferences?.bookingLabel || 'Email on Booking'}
                   </h2>
                   <p className={`text-sm mt-1 ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
-                    Get notified when students book a session
+                    {strings.emailPreferences?.bookingDescription || 'Get notified when students book a session'}
                   </p>
                 </div>
               </div>
@@ -272,12 +275,12 @@ export default function EmailPreferencesPage() {
                       </p>
                       {preferences.email_on_booking && (
                         <span className={`text-xs px-2 py-0.5 rounded-full inline-block w-fit ${isDark ? 'bg-emerald-700 text-emerald-100' : 'bg-emerald-200 text-emerald-800'}`}>
-                          Enabled
+                          {strings.emailPreferences?.enabled || 'Enabled'}
                         </span>
                       )}
                     </div>
                     <p className={`text-sm mt-1 ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
-                      Receive email when a student books your office hours
+                      {strings.emailPreferences?.receiveBookingEmail || 'Receive email when a student books your office hours'}
                     </p>
                   </div>
                   <Mail className={`w-5 h-5 flex-shrink-0 ${
@@ -302,7 +305,7 @@ export default function EmailPreferencesPage() {
                     {strings.emailPreferences?.cancellationLabel || 'Email on Cancellation'}
                   </h2>
                   <p className={`text-sm mt-1 ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
-                    Get notified when students cancel their bookings
+                    {strings.emailPreferences?.cancellationDescription || 'Get notified when students cancel their bookings'}
                   </p>
                 </div>
               </div>
@@ -344,12 +347,12 @@ export default function EmailPreferencesPage() {
                       </p>
                       {preferences.email_on_cancellation && (
                         <span className={`text-xs px-2 py-0.5 rounded-full inline-block w-fit ${isDark ? 'bg-emerald-700 text-emerald-100' : 'bg-emerald-200 text-emerald-800'}`}>
-                          Enabled
+                          {strings.emailPreferences?.enabled || 'Enabled'}
                         </span>
                       )}
                     </div>
                     <p className={`text-sm mt-1 ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
-                      Receive email when a student cancels a booking
+                      {strings.emailPreferences?.receiveCancelEmail || 'Receive email when a student cancels a booking'}
                     </p>
                   </div>
                   <Mail className={`w-5 h-5 flex-shrink-0 ${
@@ -416,12 +419,12 @@ export default function EmailPreferencesPage() {
                       </p>
                       {preferences.email_on_update && (
                         <span className={`text-xs px-2 py-0.5 rounded-full inline-block w-fit ${isDark ? 'bg-emerald-700 text-emerald-100' : 'bg-emerald-200 text-emerald-800'}`}>
-                          Enabled
+                          {strings.emailPreferences?.enabled || 'Enabled'}
                         </span>
                       )}
                     </div>
                     <p className={`text-sm mt-1 ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
-                      Receive email when a student updates or reschedules a booking
+                      {strings.emailPreferences?.receiveUpdateEmail || 'Receive email when a student updates or reschedules a booking'}
                     </p>
                   </div>
                   <RefreshCw className={`w-5 h-5 flex-shrink-0 ${

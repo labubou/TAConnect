@@ -1,6 +1,9 @@
-import strings from '../../strings/manageBookingsStrings';
+import { useLanguage } from '../../contexts/LanguageContext';
+import allStrings from '../../strings/manageBookingsStrings';
 
 export default function CancelBookingModal({ booking, isDark, onConfirm, onCancel, isLoading }) {
+  const { language } = useLanguage();
+  const strings = allStrings[language] || allStrings.en;
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       {/* Backdrop */}

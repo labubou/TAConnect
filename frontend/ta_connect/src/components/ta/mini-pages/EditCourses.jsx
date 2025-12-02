@@ -1,9 +1,12 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
-import strings from "../../../strings/manageCoursesPageStrings";
+import { useLanguage } from "../../../contexts/LanguageContext";
+import allStrings from "../../../strings/manageCoursesPageStrings";
 import WarningModal from "../../General/WarningModal";
 
 export default function EditCourses({ isDark, slot, onSlotUpdated, onClose }) {
+  const { language } = useLanguage();
+  const strings = allStrings[language];
   const [form, setForm] = useState({
     course_name: "",
     section: "",

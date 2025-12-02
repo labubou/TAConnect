@@ -1,8 +1,9 @@
 const allowedStudentsPageStrings = {
-  page: {
-    title: "Manage Allowed Students",
-    description: "Control which students are allowed to book office hours",
-  },
+  en: {
+    page: {
+      title: "Manage Allowed Students",
+      description: "Control which students are allowed to book office hours",
+    },
   modals: {
     close: "Close",
     addTitle: "Add Allowed Student",
@@ -97,6 +98,108 @@ const allowedStudentsPageStrings = {
     toggleNav: "Toggle navigation",
     openMenu: "Open menu",
     closeMenu: "Close menu",
+  },
+  },
+  ar: {
+    page: {
+      title: "إدارة الطلاب المسموح لهم",
+      description: "التحكم في الطلاب المسموح لهم بحجز الساعات المكتبية",
+    },
+    modals: {
+      close: "إغلاق",
+      addTitle: "إضافة طالب مسموح له",
+      editTitle: "تعديل طالب مسموح له",
+      deleteTitle: "حذف طالب مسموح له",
+      statusTitle: "إعدادات سياسة الحجز",
+    },
+    buttons: {
+      add: "إضافة طالب",
+      edit: "تعديل",
+      delete: "حذف",
+      refresh: "تحديث",
+      save: "حفظ",
+      cancel: "إلغاء",
+      confirm: "تأكيد",
+      back: "رجوع",
+      close: "إغلاق",
+    },
+    forms: {
+      firstName: "الاسم الأول",
+      lastName: "اسم العائلة",
+      idNumber: "الرقم الجامعي",
+      email: "البريد الإلكتروني",
+      placeholders: {
+        firstName: "أدخل الاسم الأول",
+        lastName: "أدخل اسم العائلة",
+        idNumber: "أدخل الرقم الجامعي",
+        email: "أدخل البريد الإلكتروني",
+      },
+      validation: {
+        required: "هذا الحقل مطلوب",
+        invalidEmail: "البريد الإلكتروني غير صحيح",
+        duplicateEmail: "هذا البريد الإلكتروني مسموح له بالفعل",
+        duplicateId: "هذا الرقم الجامعي مسموح له بالفعل",
+      },
+    },
+    table: {
+      title: "الطلاب المسموح لهم",
+      empty: "لا يوجد طلاب مسموح لهم",
+      headers: {
+        firstName: "الاسم الأول",
+        lastName: "اسم العائلة",
+        idNumber: "الرقم الجامعي",
+        email: "البريد الإلكتروني",
+        actions: "الإجراءات",
+      },
+      studentsFound: "طالب",
+      noResults: "لا يوجد طلاب تطابق بحثك",
+    },
+    search: {
+      placeholder: "البحث بالاسم، الرقم الجامعي، أو البريد الإلكتروني...",
+      label: "بحث",
+    },
+    sort: {
+      label: "ترتيب حسب",
+      byName: "الاسم الأول",
+      byEmail: "البريد الإلكتروني",
+      byId: "الرقم الجامعي",
+    },
+    status: {
+      title: "إعدادات سياسة الحجز",
+      description: "تكوين من يمكنه حجز الساعات المكتبية لهذا الموعد",
+      allowedOnly: "الطلاب المسموح لهم فقط",
+      allowedOnlyDesc: "فقط الطلاب في القائمة أعلاه يمكنهم الحجز",
+      allStudents: "جميع الطلاب مسموح لهم",
+      allStudentsDesc: "أي طالب يمكنه حجز الساعات المكتبية",
+      currentStatus: "الحالة الحالية",
+      toggle: "تغيير الإعداد",
+    },
+    messages: {
+      loading: "جارٍ التحميل...",
+      adding: "جارٍ إضافة الطالب...",
+      updating: "جارٍ تحديث الطالب...",
+      deleting: "جارٍ حذف الطالب...",
+      success: "تمت العملية بنجاح",
+      addSuccess: "تمت إضافة الطالب بنجاح",
+      editSuccess: "تم تحديث الطالب بنجاح",
+      deleteSuccess: "تم حذف الطالب بنجاح",
+      noSlotSelected: "يرجى اختيار موعد أولاً",
+      selectSlot: "اختر موعداً لعرض أو إدارة الطلاب المسموح لهم",
+      error: "حدث خطأ. يرجى المحاولة مرة أخرى.",
+      confirmDelete: "هل أنت متأكد من حذف هذا الطالب؟",
+      deleteWarning: "لا يمكن التراجع عن هذا الإجراء.",
+    },
+    slots: {
+      title: "اختر موعداً",
+      selectPlaceholder: "اختر موعداً",
+      empty: "لا توجد مواعيد متاحة",
+      noSlots: "قم بإنشاء موعد أولاً لإدارة الطلاب المسموح لهم",
+    },
+    aria: {
+      toggleNav: "تبديل التنقل",
+      openMenu: "فتح القائمة",
+      closeMenu: "إغلاق القائمة",
+    },
   },
 };
 

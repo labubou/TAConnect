@@ -1,8 +1,11 @@
 import { useState, useEffect } from 'react';
 import { useInstructorBookings } from '../../hooks/useApi';
-import strings from '../../strings/WeeklyScheduleStrings';
+import { useLanguage } from '../../contexts/LanguageContext';
+import allStrings from '../../strings/WeeklyScheduleStrings';
 
 export default function WeeklySchedule({ isDark = false }) {
+  const { language } = useLanguage();
+  const strings = allStrings[language] || allStrings.en;
   const [weekDates, setWeekDates] = useState([]);
   const [weekStartDate, setWeekStartDate] = useState('');
   const [weekEndDate, setWeekEndDate] = useState('');

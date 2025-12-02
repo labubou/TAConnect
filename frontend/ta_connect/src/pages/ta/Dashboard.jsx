@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useTheme } from '../../contexts/ThemeContext';
+import { useLanguage } from '../../contexts/LanguageContext';
 import TAnavbar from '../../components/ta/TAnavbar';
 import MonthlyCalendar from '../../components/ta/MonthlyCalendar';
 import WeeklySchedule from '../../components/ta/WeeklySchedule';
@@ -7,9 +8,12 @@ import ErrorBoundary from '../../components/General/ErrorBoundary';
 import Footer from '../../components/General/Footer';
 import { SkeletonLoader } from '../../components/General/SkeletonLoader';
 import { useInstructorSlots } from '../../hooks/useApi';
+import allStrings from '../../strings/dashboardStrings';
 
 export default function Dashboard() {
   const { theme } = useTheme();
+  const { language } = useLanguage();
+  const strings = allStrings[language];
   const isDark = theme === 'dark';
   const [isNavbarOpen, setIsNavbarOpen] = useState(true);
 
@@ -40,10 +44,10 @@ export default function Dashboard() {
             {/* Header */}
             <div className="mb-6 sm:mb-8">
               <h1 className={`text-2xl sm:text-3xl lg:text-4xl font-bold mb-2 ${isDark ? 'text-white' : 'text-gray-900'}`}>
-                Dashboard
+                {strings.page.title}
               </h1>
               <p className={`text-sm sm:text-base ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
-                View your availability and upcoming bookings
+                {strings.page.description}
               </p>
             </div>
 
@@ -55,9 +59,9 @@ export default function Dashboard() {
                     <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
                   </svg>
                   <div className="flex-1">
-                    <p className="font-medium">Failed to load dashboard data</p>
+                    <p className="font-medium">{strings.errors.loadingFailed}</p>
                     <p className="text-sm mt-1">
-                      {error?.message || 'Please try refreshing the page or contact support if the problem persists.'}
+                      {error?.message || strings.errors.tryAgain}
                     </p>
                   </div>
                 </div>
@@ -69,13 +73,13 @@ export default function Dashboard() {
               <div className="space-y-6">
                 <div>
                   <h2 className={`text-lg sm:text-xl font-semibold mb-4 ${isDark ? 'text-gray-300' : 'text-gray-900'}`}>
-                    Month Calendar
+                    {strings.calendar.title}
                   </h2>
                   <SkeletonLoader isDark={isDark} count={1} height="h-80" />
                 </div>
                 <div>
                   <h2 className={`text-lg sm:text-xl font-semibold mb-4 ${isDark ? 'text-gray-300' : 'text-gray-900'}`}>
-                    This Week's Bookings
+                    {strings.weeklySchedule.title}
                   </h2>
                   <SkeletonLoader isDark={isDark} count={1} height="h-80" />
                 </div>

@@ -6,11 +6,12 @@ export default function LanguageToggle() {
   return (
     <button
       onClick={toggleLanguage}
-      className="p-2 rounded-lg bg-gray-400 dark:bg-gray-700 hover:bg-gray-800 dark:hover:bg-gray-600 transition-colors duration-200 flex items-center gap-2"
+      className="w-12 h-12 bg-white/80 dark:bg-gray-800/80 backdrop-blur-xl border border-white/30 dark:border-gray-700 rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-300 hover:scale-110 flex items-center justify-center group"
       aria-label="Toggle Language"
+      title={language === 'en' ? 'التبديل إلى العربية' : 'Switch to English'}
     >
-      <span className="text-sm font-medium">
-        {language === 'en' ? ' AR' : ' EN'}
+      <span className="text-sm font-bold text-gray-700 dark:text-gray-200 group-hover:text-[#366c6b]">
+        {language === 'en' ? 'AR' : 'EN'}
       </span>
     </button>
   );

@@ -1,17 +1,20 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
+import { useLanguage } from "../../../contexts/LanguageContext";
 import AllowedStudentsTable from "./AllowedStudentsTable";
 import AddAllowedStudent from "./AddAllowedStudent";
 import EditAllowedStudent from "./EditAllowedStudent";
 import DeleteAllowedStudent from "./DeleteAllowedStudent";
 import AllowedStudentsStatus from "./AllowedStudentsStatus";
-import strings from "../../../strings/allowedStudentsPageStrings";
+import allStrings from "../../../strings/allowedStudentsPageStrings";
 
 export default function ManageAllowedStudentsModal({
   isDark,
   slot,
   onClose,
 }) {
+  const { language } = useLanguage();
+  const strings = allStrings[language] || allStrings.en;
   const [allowedStudents, setAllowedStudents] = useState([]);
   const [loading, setLoading] = useState(true);
   const [modalState, setModalState] = useState({ type: null, student: null });
