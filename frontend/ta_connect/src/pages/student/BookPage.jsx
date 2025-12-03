@@ -150,7 +150,7 @@ export default function BookPage() {
             console.log('[BookPage] Generated available dates:', dates.length);
           } else {
             console.log('[BookPage] Slot not found in slots:', slots.map(s => s.id));
-            setError('The requested time slot was not found. Please select a slot manually.');
+            setError(strings.errors.slotNotFound);
           }
           
           // Mark these params as loaded
@@ -159,7 +159,7 @@ export default function BookPage() {
         } catch (err) {
           console.error('Error loading from URL parameters:', err);
           console.error('Error details:', err.response?.data);
-          setError('Failed to load booking details from link. Please search manually.');
+          setError(strings.errors.failedLoadFromLink);
         } finally {
           stopLoading('load-params');
         }
@@ -562,10 +562,13 @@ export default function BookPage() {
                   </svg>
                   <div>
                     <span className={`${isDark ? 'text-blue-200' : 'text-blue-700'} font-semibold`}>
-                      Instructor and slot pre-selected from link
+                      {strings.preselected.title}
                     </span>
-                    <p className={`text-sm ${isDark ? 'text-blue-300' : 'text-blue-600'} mt-1`}>
-                      Booking with {selectedInstructor.full_name} for {selectedSlot.course?.course_name || 'office hours'} on {selectedSlot.day_of_week}. Just select your preferred date and time below.
+                    <p className={`text-sm ${isDark ? 'text-blue-300' : 'text-blue-600'} mt-1`} dir={language === 'ar' ? 'rtl' : 'ltr'}>
+                      {strings.preselected.description
+                        .replace('{instructor}', selectedInstructor.full_name)
+                        .replace('{course}', selectedSlot.course?.course_name || strings.preselected.officeHours)
+                        .replace('{day}', selectedSlot.day_of_week)}
                     </p>
                   </div>
                 </div>

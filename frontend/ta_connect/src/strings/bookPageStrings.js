@@ -57,6 +57,8 @@ export const bookPageStrings = {
     errors: {
       failedLoadTimes: 'Failed to load available times for this date',
       selectAll: 'Please select a slot, date, and time',
+      slotNotFound: 'The requested time slot was not found. Please select a slot manually.',
+      failedLoadFromLink: 'Failed to load booking details from link. Please search manually.',
     },
     
     successModal: {
@@ -64,6 +66,12 @@ export const bookPageStrings = {
       emailSent: 'A confirmation has been sent to your email.',
       emailDisabled: 'Your booking is confirmed. Email notifications are disabled in your preferences.',
       doneButton: 'Done',
+    },
+
+    preselected: {
+      title: 'Instructor and slot pre-selected from link',
+      description: 'Booking with {instructor} for {course} on {day}. Just select your preferred date and time below.',
+      officeHours: 'office hours',
     },
   },
   ar: {
@@ -124,6 +132,8 @@ export const bookPageStrings = {
     errors: {
       failedLoadTimes: 'فشل تحميل الأوقات المتاحة لهذا التاريخ',
       selectAll: 'يرجى اختيار الموعد والتاريخ والوقت',
+      slotNotFound: 'لم يتم العثور على الموعد المطلوب. يرجى اختيار موعد يدويًا.',
+      failedLoadFromLink: 'فشل تحميل تفاصيل الحجز من الرابط. يرجى البحث يدويًا.',
     },
     
     successModal: {
@@ -131,6 +141,12 @@ export const bookPageStrings = {
       emailSent: 'تم إرسال رسالة التأكيد إلى بريدك الإلكتروني.',
       emailDisabled: 'تم تأكيد حجزك. إشعارات البريد الإلكتروني معطلة في إعداداتك.',
       doneButton: 'تم',
+    },
+
+    preselected: {
+      title: 'تم تحديد المعيد والموعد مسبقًا من الرابط',
+      description: 'الحجز مع {instructor} لـ {course} يوم {day}. فقط اختر التاريخ والوقت المفضل أدناه.',
+      officeHours: 'الساعات المكتبية',
     },
   },
 };
