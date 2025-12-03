@@ -53,6 +53,23 @@ else:
     SECURE_HSTS_SECONDS = 31536000  # 1 year
     SECURE_HSTS_INCLUDE_SUBDOMAINS = True
     SECURE_HSTS_PRELOAD = True
+    SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
+
+SECURE_REFERRER_POLICY = 'strict-origin-when-cross-origin'
+SECURE_CROSS_ORIGIN_OPENER_POLICY = 'same-origin'
+
+# Session security settings
+SESSION_COOKIE_HTTPONLY = True  # Prevent JavaScript access to session cookie
+SESSION_COOKIE_SAMESITE = 'Lax'  # CSRF protection for cookies
+SESSION_COOKIE_AGE = 86400  # 24 hours
+SESSION_EXPIRE_AT_BROWSER_CLOSE = False
+
+# CSRF cookie settings
+CSRF_COOKIE_HTTPONLY = True
+CSRF_COOKIE_SAMESITE = 'Lax'
 
 # Application definition
 INSTALLED_APPS = [
@@ -82,7 +99,19 @@ REST_FRAMEWORK = {
         'rest_framework.permissions.IsAuthenticated',
     ],
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
-    'PAGE_SIZE': 20
+    'PAGE_SIZE': 20,
+    # Add default throttling
+    'DEFAULT_THROTTLE_CLASSES': [
+        'rest_framework.throttling.AnonRateThrottle',
+        'rest_framework.throttling.UserRateThrottle'
+    ],
+    'DEFAULT_THROTTLE_RATES': {
+        'anon': '100/hour',
+        'user': '1000/hour',
+        'login': '5/minute',
+        'password_reset': '3/hour',
+        'burst': '10/second',  # Add burst protection
+    }
 }
 
 # drf-yasg / Swagger configuration
@@ -114,7 +143,6 @@ SIMPLE_JWT = {
     'ROTATE_REFRESH_TOKENS': True,
     'BLACKLIST_AFTER_ROTATION': True,
 }
-
 
 MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
@@ -268,10 +296,21 @@ LOGGING = {
             'format': '{levelname} {asctime} {module} {message}',
             'style': '{',
         },
+        'security': {
+            'format': '{levelname} {asctime} {name} {message} - IP: %(ip)s',
+            'style': '{',
+        },
     },
     'handlers': {
         'console': {
             'class': 'logging.StreamHandler',
+            'formatter': 'verbose',
+        },
+        'security_file': {
+            'class': 'logging.handlers.RotatingFileHandler',
+            'filename': LOGS_DIR / 'security.log',
+            'maxBytes': 1024 * 1024 * 10,  # 10 MB
+            'backupCount': 10,
             'formatter': 'verbose',
         },
     },
@@ -298,6 +337,11 @@ LOGGING = {
         'django.request': {
             'handlers': ['console'],
             'level': 'ERROR',
+            'propagate': False,
+        },
+        'security': {
+            'handlers': ['console', 'security_file'] if not DEBUG else ['console'],
+            'level': 'WARNING',
             'propagate': False,
         },
     },
@@ -335,50 +379,6 @@ SOCIALACCOUNT_PROVIDERS = {
     }
 }
 
-CONTENT_SECURITY_POLICY = {
-    "DIRECTIVES": {
-        "default-src": ("'self'",),
-        "script-src": (
-            "'self'",
-            "'unsafe-inline'",  # Remove if you want to block inline scripts
-            "https://cdnjs.cloudflare.com",
-            "https://cdn.jsdelivr.net",
-            "https://unpkg.com",
-        ),
-        "style-src": (
-            "'self'",
-            "'unsafe-inline'",
-            "https://fonts.googleapis.com",
-            "https://cdnjs.cloudflare.com",
-            "https://cdn.jsdelivr.net",
-        ),
-        "font-src": (
-            "'self'",
-            "https://fonts.gstatic.com",
-            "https://cdnjs.cloudflare.com",
-        ),
-        "img-src": (
-            "'self'",
-            "data:",
-            "blob:",
-            "https:",
-        ),
-        "connect-src": (
-            "'self'",
-            frontend_url,
-            "https://api.github.com",
-        ),
-        "frame-ancestors": ("'none'",),
-        "base-uri": ("'self'",),
-        "object-src": ("'none'",),
-    }
-}
-
-# Use report-only mode in development
-if DEBUG:
-    CONTENT_SECURITY_POLICY_REPORT_ONLY = CONTENT_SECURITY_POLICY
-else:
-    CONTENT_SECURITY_POLICY_REPORT_ONLY = None
 
 # Email Change Verification Settings
 EMAIL_CHANGE_TIMEOUT_HOURS = 24  # Email change links expire after 24 hours
