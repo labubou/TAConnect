@@ -1,4 +1,3 @@
-# yourapp/serializers/update_booking.py
 from rest_framework import serializers
 from django.utils import timezone
 from student.utils.book_is_time_available import is_time_available
@@ -10,6 +9,9 @@ class UpdateBookingSerializer(serializers.Serializer):
     def validate(self, attrs):
         booking = self.instance
         slot = booking.office_hour
+
+        if booking.start_time == attrs['new_time'] and booking.date == attrs['new_date']:
+            raise serializers.ValidationError("Nothing has changed")
 
         naive_dt = timezone.datetime.combine(attrs['new_date'], attrs['new_time'])
         new_start_dt = timezone.make_aware(naive_dt) if timezone.is_naive(naive_dt) else naive_dt
