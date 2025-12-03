@@ -155,6 +155,9 @@ class BookingDetailView(GenericAPIView):
 
         booking = get_object_or_404(Booking, id=pk, student=request.user)
 
+        old_date = booking.date
+        old_time = booking.start_time
+
         serializer = self.get_serializer(instance=booking, data=request.data, context={'request': request})
 
         if not serializer.is_valid():
@@ -166,12 +169,11 @@ class BookingDetailView(GenericAPIView):
             student=request.user,
             instructor=booking.office_hour.instructor,
             slot=booking.office_hour,
-            old_date=booking.date,
-            old_time=booking.start_time,
+            old_date=old_date,
+            old_time=old_time,
             new_date=updated_booking.date,
             new_time=updated_booking.start_time
         )
-        
         
         return Response({
             'success': True, 
