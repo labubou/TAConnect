@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import axios from "axios";
 import { useLanguage } from "../../../contexts/LanguageContext";
 import allStrings from "../../../strings/manageCoursesPageStrings";
@@ -25,6 +25,9 @@ export default function EditCourses({ isDark, slot, onSlotUpdated, onClose }) {
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
   const [showWarningModal, setShowWarningModal] = useState(false);
+  const [csvStatus, setCsvStatus] = useState(null);
+  const [isDragging, setIsDragging] = useState(false);
+  const fileInputRef = useRef(null);
 
   useEffect(() => {
     if (slot) {
@@ -53,7 +56,61 @@ export default function EditCourses({ isDark, slot, onSlotUpdated, onClose }) {
 
   const handleFileChange = (e) => {
     const file = e.target.files && e.target.files[0];
-    setForm((prev) => ({ ...prev, csv_file: file || null }));
+    if (file && file.name.endsWith('.csv')) {
+      setForm((prev) => ({ ...prev, csv_file: file }));
+    }
+  };
+
+  const handleDragOver = (e) => {
+    e.preventDefault();
+    setIsDragging(true);
+  };
+
+  const handleDragLeave = (e) => {
+    e.preventDefault();
+    setIsDragging(false);
+  };
+
+  const handleDrop = (e) => {
+    e.preventDefault();
+    setIsDragging(false);
+    const file = e.dataTransfer.files && e.dataTransfer.files[0];
+    if (file && file.name.endsWith('.csv')) {
+      setForm((prev) => ({ ...prev, csv_file: file }));
+    }
+  };
+
+  const removeFile = () => {
+    setForm((prev) => ({ ...prev, csv_file: null }));
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
+  };
+
+  const uploadCsvFile = async (slotId) => {
+    if (!form.csv_file) return null;
+    
+    try {
+      const formData = new FormData();
+      formData.append("file", form.csv_file);
+      
+      const res = await axios.post(`/api/instructor/upload-csv/${slotId}/`, formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
+      
+      return {
+        success: true,
+        created: res.data.created_users?.length || 0,
+        errors: res.data.errors || [],
+      };
+    } catch (err) {
+      console.error("CSV upload error:", err);
+      return {
+        success: false,
+        created: 0,
+        errors: [err.response?.data?.error || err.message || strings.create.csv.uploadError],
+      };
+    }
   };
 
   const handleSubmit = (e) => {
@@ -76,6 +133,7 @@ export default function EditCourses({ isDark, slot, onSlotUpdated, onClose }) {
 
     setError("");
     setMessage("");
+    setCsvStatus(null);
     setLoading(true);
     setShowWarningModal(false);
 
@@ -129,32 +187,29 @@ export default function EditCourses({ isDark, slot, onSlotUpdated, onClose }) {
         set_student_limit: form.set_student_limit,
       };
 
-      let res;
-      if (form.csv_file) {
-        const formData = new FormData();
-        Object.keys(payloadObj).forEach((k) => formData.append(k, payloadObj[k]));
-        formData.append("file", form.csv_file);
-
-        res = await axios.patch(
-          `/api/instructor/time-slots/${slot.id}/`,
-          formData,
-          { headers: { "Content-Type": "multipart/form-data" } }
-        );
-      } else {
-        res = await axios.patch(
-          `/api/instructor/time-slots/${slot.id}/`,
-          payloadObj
-        );
-      }
+      // Update slot without CSV in the payload
+      const res = await axios.patch(
+        `/api/instructor/time-slots/${slot.id}/`,
+        payloadObj
+      );
 
       if (res?.data?.success) {
+        // Upload CSV separately if provided
+        let csvResult = null;
+        if (form.csv_file) {
+          csvResult = await uploadCsvFile(slot.id);
+          setCsvStatus(csvResult);
+        }
+
         setMessage(strings.edit.success);
         onSlotUpdated &&
           onSlotUpdated({
             ...slot,
             ...payloadObj,
           });
-        if (onClose) {
+        
+        // Delay closing if CSV was uploaded to show results
+        if (!csvResult && onClose) {
           onClose();
         }
       } else {
@@ -258,6 +313,48 @@ export default function EditCourses({ isDark, slot, onSlotUpdated, onClose }) {
           <span className="font-semibold">{strings.edit.editing}:</span> {slot.course_name}
         </p>
       </div>
+
+      {/* CSV Upload Status */}
+      {csvStatus && (
+        <div
+          className={`mb-4 p-4 rounded-lg ${
+            csvStatus.success
+              ? isDark
+                ? "bg-blue-900/30 border border-blue-700 text-blue-300"
+                : "bg-blue-100 border border-blue-400 text-blue-700"
+              : isDark
+                ? "bg-yellow-900/30 border border-yellow-700 text-yellow-300"
+                : "bg-yellow-100 border border-yellow-400 text-yellow-700"
+          }`}
+        >
+          <div className="flex items-start">
+            <svg className="w-5 h-5 mr-2 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+              <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+            </svg>
+            <div>
+              <p className="font-medium">
+                {csvStatus.success ? strings.create.csv.uploadSuccess : strings.create.csv.uploadError}
+              </p>
+              {csvStatus.created > 0 && (
+                <p className="text-sm mt-1">{csvStatus.created} {strings.create.csv.studentsCreated}</p>
+              )}
+              {csvStatus.errors.length > 0 && (
+                <div className="text-sm mt-1">
+                  <p>{csvStatus.errors.length} {strings.create.csv.errors}:</p>
+                  <ul className="list-disc list-inside mt-1 max-h-24 overflow-y-auto">
+                    {csvStatus.errors.slice(0, 5).map((err, idx) => (
+                      <li key={idx} className="truncate">{err}</li>
+                    ))}
+                    {csvStatus.errors.length > 5 && (
+                      <li>...and {csvStatus.errors.length - 5} more</li>
+                    )}
+                  </ul>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
 
       <form onSubmit={handleSubmit} className="space-y-4">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -485,25 +582,128 @@ export default function EditCourses({ isDark, slot, onSlotUpdated, onClose }) {
             </p>
           </div>
 
-          <div>
-            <label
-              className={`block text-sm font-medium mb-2 ${
-                isDark ? "text-gray-200" : "text-gray-700"
+          {/* Replace the old CSV input with this new section */}
+        </div>
+
+        {/* CSV Import Section - Full Width */}
+        <div className="col-span-full mt-6">
+          <label className={`block text-sm font-medium mb-2 ${isDark ? "text-gray-200" : "text-gray-700"}`}>
+            {strings.create.csv.label}
+            <span className={`ml-2 text-xs font-normal ${isDark ? "text-gray-400" : "text-gray-500"}`}>
+              ({strings.create.csv.optional})
+            </span>
+          </label>
+          
+          {!form.csv_file ? (
+            <div
+              onDragOver={handleDragOver}
+              onDragLeave={handleDragLeave}
+              onDrop={handleDrop}
+              onClick={() => fileInputRef.current?.click()}
+              className={`relative cursor-pointer rounded-xl border-2 border-dashed p-6 transition-all ${
+                isDragging
+                  ? isDark
+                    ? "border-emerald-500 bg-emerald-900/20"
+                    : "border-emerald-500 bg-emerald-50"
+                  : isDark
+                    ? "border-gray-600 hover:border-gray-500 bg-gray-700/50 hover:bg-gray-700"
+                    : "border-gray-300 hover:border-gray-400 bg-gray-50 hover:bg-gray-100"
               }`}
             >
-              Import CSV (optional)
-            </label>
-            <input
-              type="file"
-              accept=".csv"
-              name="csv"
-              onChange={handleFileChange}
-              className={`w-full text-sm ${isDark ? "text-gray-300" : "text-gray-700"}`}
-            />
-            <p className={`text-xs mt-1 ${isDark ? "text-gray-400" : "text-gray-500"}`}>
-              CSV import is optional. Uploaded file will be sent to the backend.
-            </p>
-          </div>
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept=".csv"
+                onChange={handleFileChange}
+                className="hidden"
+              />
+              <div className="flex flex-col items-center text-center">
+                <svg
+                  className={`w-10 h-10 mb-3 ${
+                    isDragging
+                      ? "text-emerald-500"
+                      : isDark
+                        ? "text-gray-400"
+                        : "text-gray-500"
+                  }`}
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={1.5}
+                    d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
+                  />
+                </svg>
+                <p className={`text-sm font-medium ${isDark ? "text-gray-200" : "text-gray-700"}`}>
+                  {strings.create.csv.dragDrop}
+                </p>
+                <p className={`text-xs mt-2 ${isDark ? "text-gray-400" : "text-gray-500"}`}>
+                  {strings.create.csv.hint}
+                </p>
+              </div>
+            </div>
+          ) : (
+            <div
+              className={`rounded-xl border p-4 ${
+                isDark
+                  ? "border-emerald-700 bg-emerald-900/20"
+                  : "border-emerald-200 bg-emerald-50"
+              }`}
+            >
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div
+                    className={`p-2 rounded-lg ${
+                      isDark ? "bg-emerald-800" : "bg-emerald-100"
+                    }`}
+                  >
+                    <svg
+                      className={`w-6 h-6 ${
+                        isDark ? "text-emerald-300" : "text-emerald-600"
+                      }`}
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                      />
+                    </svg>
+                  </div>
+                  <div>
+                    <p className={`text-sm font-medium ${isDark ? "text-emerald-200" : "text-emerald-800"}`}>
+                      {strings.create.csv.selectedFile}
+                    </p>
+                    <p className={`text-sm ${isDark ? "text-emerald-300" : "text-emerald-700"}`}>
+                      {form.csv_file.name}
+                    </p>
+                    <p className={`text-xs ${isDark ? "text-emerald-400" : "text-emerald-600"}`}>
+                      {(form.csv_file.size / 1024).toFixed(1)} KB
+                    </p>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={removeFile}
+                  className={`p-2 rounded-lg transition-all ${
+                    isDark
+                      ? "hover:bg-red-900/30 text-red-400 hover:text-red-300"
+                      : "hover:bg-red-100 text-red-500 hover:text-red-600"
+                  }`}
+                >
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                  </svg>
+                </button>
+              </div>
+            </div>
+          )}
         </div>
 
         <div className="flex flex-col sm:flex-row gap-4 pt-6">
