@@ -34,7 +34,7 @@ jobs:
           ALLOWED_HOSTS=*
           CORS_ALLOWED_ORIGINS=http://localhost:3000
           MAIL_PASSWORD=dummy-password-for-ci
-          FIELD_ENCRYPTION_KEY=ci-test-field-encryption-key-change-in-production
+          FIELD_ENCRYPTION_KEY=lmXKbgoUf6Y5SEfpXWIXGXuQmu4G36dCOFV3uphRSt0=
           EOF
 
       - name: Build and start services (wait for healthchecks)
