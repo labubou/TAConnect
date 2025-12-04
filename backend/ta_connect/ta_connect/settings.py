@@ -85,6 +85,7 @@ INSTALLED_APPS = [
     'corsheaders',
     'csp',
     'drf_yasg',
+    'encrypted_model_fields',
     'accounts',
     'instructor',
     'student',
@@ -386,3 +387,5 @@ EMAIL_CHANGE_TIMEOUT_HOURS = 24  # Email change links expire after 24 hours
 # Django's built-in password reset timeout (also affects token validity)
 # This is in seconds - 24 hours = 86400 seconds
 PASSWORD_RESET_TIMEOUT = 86400
+
+FIELD_ENCRYPTION_KEY = config('FIELD_ENCRYPTION_KEY')
