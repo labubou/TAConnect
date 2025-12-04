@@ -29,6 +29,17 @@ Welcome to the **TAConnect Technical Documentation**. This guide covers everythi
 git clone https://github.com/Kbassem10/TAConnect.git
 cd TAConnect
 cp backend/ta_connect/.env.example backend/ta_connect/.env
+```
+
+**Generate the encryption key:**
+```bash
+pip install django-encrypted-model-fields
+python -c "from cryptography.fernet import Fernet; print(Fernet.generate_key().decode())"
+```
+
+Add the generated key to `backend/ta_connect/.env` as `FIELD_ENCRYPTION_KEY`.
+
+```bash
 docker compose up --build
 ```
 

@@ -2,6 +2,7 @@ from django.conf import settings
 from django.db import models
 from django.utils import timezone
 import datetime
+from encrypted_model_fields.fields import EncryptedCharField
 
 # Create your models here.
 class OfficeHourSlot(models.Model):
@@ -82,7 +83,7 @@ class AllowedStudents(models.Model):
     )
     first_name = models.CharField(max_length=100)
     last_name = models.CharField(max_length=100)
-    id_number = models.CharField(max_length=100)
+    id_number = EncryptedCharField(max_length=100)
     email = models.EmailField()
 
     class Meta:
