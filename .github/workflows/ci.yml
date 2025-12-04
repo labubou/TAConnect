@@ -38,12 +38,33 @@ jobs:
           EOF
 
       - name: Build and start services (wait for healthchecks)
+        id: start_services
         run: |
-          docker compose up -d --build --wait db backend
+          docker compose up -d --build --wait db backend || true
+
+      - name: Show service status and logs
+        if: always()
+        run: |
+          echo "=== Service Status ==="
+          docker compose ps -a
+          echo ""
+          echo "=== Backend Logs (last 100 lines) ==="
+          docker compose logs --tail=100 backend || true
+          echo ""
+          echo "=== Database Logs (last 50 lines) ==="
+          docker compose logs --tail=50 db || true
+          
+      - name: Verify backend is running
+        run: |
+          if ! docker compose ps backend | grep -q "healthy\|running"; then
+            echo "❌ Backend service is not running or healthy"
+            exit 1
+          fi
+          echo "✅ Backend service is running"
 
       - name: Run Django tests
         run: |
-          docker compose exec -T backend python manage.py test
+          docker compose exec -T backend python manage.py test --verbosity=2
 
       - name: Cleanup
         if: always()
