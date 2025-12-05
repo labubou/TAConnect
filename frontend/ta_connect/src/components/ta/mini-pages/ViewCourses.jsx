@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect, useRef } from "react";
 import axios from "axios";
 import { useLanguage } from "../../../contexts/LanguageContext";
 import allStrings from "../../../strings/manageCoursesPageStrings";
@@ -24,6 +24,8 @@ export default function ViewCourses({
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [warningModal, setWarningModal] = useState({ show: false, slotId: null, isDeactivating: false });
+  const [visibleCards, setVisibleCards] = useState(new Set());
+  const cardRefs = useRef({});
 
   const handleToggleStatus = (slotId, isDeactivating) => {
     // Show warning modal first
@@ -86,6 +88,49 @@ export default function ViewCourses({
         }
       });
   }, [slots, searchTerm, sortBy, statusFilter]);
+
+  // Intersection Observer for scroll animations
+  // Run after filteredSlots is computed and DOM is updated
+  useEffect(() => {
+    // Reset visible cards when slots change
+    setVisibleCards(new Set());
+
+    let observer = null;
+    const timeoutId = setTimeout(() => {
+      const observerOptions = {
+        root: null,
+        rootMargin: '0px',
+        threshold: 0.1,
+      };
+
+      observer = new IntersectionObserver((entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            setVisibleCards((prev) => {
+              const newSet = new Set(prev);
+              newSet.add(entry.target.dataset.slotId);
+              return newSet;
+            });
+          }
+        });
+      }, observerOptions);
+
+      // Observe all card elements
+      Object.values(cardRefs.current).forEach((ref) => {
+        if (ref) observer.observe(ref);
+      });
+    }, 0);
+
+    return () => {
+      clearTimeout(timeoutId);
+      if (observer) {
+        Object.values(cardRefs.current).forEach((ref) => {
+          if (ref) observer.unobserve(ref);
+        });
+        observer.disconnect();
+      }
+    };
+  }, [filteredSlots.length, slots.length]); // Use length instead of the whole array
 
   if (loading) {
     return (
@@ -156,7 +201,7 @@ export default function ViewCourses({
             <div className="flex flex-wrap gap-3">
               <button
                 onClick={onRefresh}
-                className={`flex-1 sm:flex-none px-4 py-2 rounded-xl font-semibold transition-all flex items-center justify-center gap-2 text-sm sm:text-base ${
+                className={`flex-1 sm:flex-none px-4 py-2 rounded-xl font-semibold transition-all duration-200 hover:scale-105 active:scale-95 flex items-center justify-center gap-2 text-sm sm:text-base ${
                   isDark
                     ? "bg-gray-800 hover:bg-gray-700 text-white"
                     : "bg-gray-100 hover:bg-gray-200 text-gray-800"
@@ -181,7 +226,7 @@ export default function ViewCourses({
                 <button
                   onClick={onExportSlots}
                   disabled={isExporting}
-                  className={`flex-1 sm:flex-none px-4 py-2 rounded-xl font-semibold transition-all flex items-center justify-center gap-2 text-sm sm:text-base ${
+                  className={`flex-1 sm:flex-none px-4 py-2 rounded-xl font-semibold transition-all duration-200 hover:scale-105 active:scale-95 disabled:scale-100 flex items-center justify-center gap-2 text-sm sm:text-base ${
                     isDark
                       ? "bg-blue-600 hover:bg-blue-500 text-white disabled:opacity-50"
                       : "bg-blue-500 hover:bg-blue-600 text-white disabled:opacity-50"
@@ -191,12 +236,12 @@ export default function ViewCourses({
                   <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
                   </svg>
-                  {isExporting ? 'Exporting...' : 'Export CSV'}
+                  {isExporting ? strings.view.buttons.exporting : strings.view.buttons.export}
                 </button>
               )}
               <button
                 onClick={onAddCourse}
-                className={`flex-1 sm:flex-none px-4 py-2 rounded-xl font-semibold transition-all flex items-center justify-center gap-2 text-sm sm:text-base ${
+                className={`flex-1 sm:flex-none px-4 py-2 rounded-xl font-semibold transition-all duration-200 hover:scale-105 active:scale-95 flex items-center justify-center gap-2 text-sm sm:text-base shadow-lg hover:shadow-xl ${
                   isDark
                     ? "bg-emerald-600 hover:bg-emerald-500 text-white"
                     : "bg-emerald-500 hover:bg-emerald-600 text-white"
@@ -230,7 +275,7 @@ export default function ViewCourses({
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 placeholder={strings.view.searchPlaceholder}
-                className={`w-full px-4 py-2 rounded-lg border transition-all ${
+                className={`w-full px-4 py-2 rounded-lg border transition-all duration-200 focus:scale-[1.02] ${
                   isDark
                     ? "bg-gray-800 border-gray-700 text-white placeholder-gray-500 focus:border-emerald-500"
                     : "bg-white border-gray-300 text-gray-900 placeholder-gray-400 focus:border-emerald-500"
@@ -301,14 +346,26 @@ export default function ViewCourses({
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-              {filteredSlots.map((slot) => (
+              {filteredSlots.map((slot, index) => {
+                const isVisible = visibleCards.has(String(slot.id));
+                return (
                 <div
                   key={slot.id}
-                  className={`rounded-2xl border transition-all hover:shadow-lg ${
+                  ref={(el) => (cardRefs.current[slot.id] = el)}
+                  data-slot-id={slot.id}
+                  className={`rounded-2xl border transition-all duration-300 hover:shadow-xl hover:scale-[1.02] hover:-translate-y-1 ${
                     isDark
                       ? "bg-gray-900/60 border-gray-800"
                       : "bg-white border-gray-100"
+                  } ${
+                    isVisible 
+                      ? "animate-slideInFromBottom opacity-100" 
+                      : "opacity-0"
                   }`}
+                  style={{
+                    animationDelay: isVisible ? `${index * 50}ms` : '0ms',
+                    animationFillMode: 'both'
+                  }}
                 >
                   <div className="p-5 flex flex-col gap-4">
                     <div className="flex items-start justify-between gap-3">
@@ -372,7 +429,7 @@ export default function ViewCourses({
                       <div className="flex gap-2">
                         <button
                           onClick={() => onEditSlot && onEditSlot(slot)}
-                          className={`flex-1 py-2 px-3 rounded-lg font-semibold text-xs sm:text-sm flex items-center justify-center gap-1 ${
+                          className={`flex-1 py-2 px-3 rounded-lg font-semibold text-xs sm:text-sm flex items-center justify-center gap-1 transition-all duration-200 hover:scale-105 active:scale-95 ${
                             isDark
                               ? "bg-blue-600 hover:bg-blue-500 text-white"
                               : "bg-blue-500 hover:bg-blue-600 text-white"
@@ -395,7 +452,7 @@ export default function ViewCourses({
                         </button>
                         <button
                           onClick={() => onDeleteSlot && onDeleteSlot(slot)}
-                          className={`flex-1 py-2 px-3 rounded-lg font-semibold text-xs sm:text-sm flex items-center justify-center gap-1 ${
+                          className={`flex-1 py-2 px-3 rounded-lg font-semibold text-xs sm:text-sm flex items-center justify-center gap-1 transition-all duration-200 hover:scale-105 active:scale-95 ${
                             isDark
                               ? "bg-red-600 hover:bg-red-500 text-white"
                               : "bg-red-500 hover:bg-red-600 text-white"
@@ -419,7 +476,7 @@ export default function ViewCourses({
                         <button
                           onClick={() => onShareSlot && onShareSlot(slot)}
                           disabled={!onShareSlot}
-                          className={`flex-1 py-2 px-3 rounded-lg font-semibold text-xs sm:text-sm flex items-center justify-center gap-1 ${
+                          className={`flex-1 py-2 px-3 rounded-lg font-semibold text-xs sm:text-sm flex items-center justify-center gap-1 transition-all duration-200 hover:scale-105 active:scale-95 disabled:scale-100 ${
                             isDark
                               ? "bg-purple-600 hover:bg-purple-500 text-white"
                               : "bg-purple-500 hover:bg-purple-600 text-white"
@@ -446,7 +503,7 @@ export default function ViewCourses({
                         <button
                           onClick={() => onManageStudents && onManageStudents(slot)}
                           disabled={!onManageStudents}
-                          className={`w-full py-2 px-3 rounded-lg font-semibold text-xs sm:text-sm flex items-center justify-center gap-1 border whitespace-nowrap ${
+                          className={`w-full py-2 px-3 rounded-lg font-semibold text-xs sm:text-sm flex items-center justify-center gap-1 border whitespace-nowrap transition-all duration-200 hover:scale-105 active:scale-95 disabled:scale-100 ${
                             isDark
                               ? "border-gray-700 text-gray-200 hover:bg-gray-800"
                               : "border-gray-200 text-gray-700 hover:bg-gray-100"
@@ -462,7 +519,7 @@ export default function ViewCourses({
                         <button
                           onClick={() => handleToggleStatus(slot.id, slot.status)}
                           disabled={toggleLoading[slot.id]}
-                          className={`w-full py-2 px-3 rounded-lg font-semibold text-xs sm:text-sm flex items-center justify-center gap-1 whitespace-nowrap ${
+                          className={`w-full py-2 px-3 rounded-lg font-semibold text-xs sm:text-sm flex items-center justify-center gap-1 whitespace-nowrap transition-all duration-200 hover:scale-105 active:scale-95 disabled:scale-100 ${
                             toggleLoading[slot.id] ? "opacity-50 cursor-not-allowed" : ""
                           } ${
                             slot.status
@@ -484,7 +541,8 @@ export default function ViewCourses({
                     </div>
                   </div>
                 </div>
-              ))}
+                );
+              })}
             </div>
           )}
         </div>
