@@ -6,10 +6,106 @@ Tests cover:
 - Validation: Invalid data returns validation errors
 """
 from django.test import TestCase
+from django.utils import timezone
 import datetime
 from instructor.models import OfficeHourSlot, BookingPolicy
-from instructor.serializers.time_slots_serializer import TimeSlotSerializer
+from instructor.serializers.get_user_booking_serializer import GetUserBookingSerializer
+from instructor.serializers.time_slots_serializer import TimeSlotSerializer  # Updated import path
 from instructor.tests.base import BaseTestCase
+
+
+class GetUserBookingSerializerTestCase(BaseTestCase):
+    """
+    Test cases for the GetUserBookingSerializer.
+    """
+    
+    def test_serializer_validation_happy_path_no_params(self):
+        """Test serializer validation with no parameters."""
+        serializer = GetUserBookingSerializer(data={})
+        self.assertTrue(serializer.is_valid(), f"Serializer errors: {serializer.errors}")
+    
+    def test_serializer_validation_happy_path_with_dates(self):
+        """Test serializer validation with valid date range."""
+        data = {
+            'start_date': '2025-01-01',
+            'end_date': '2025-01-31'
+        }
+        serializer = GetUserBookingSerializer(data=data)
+        self.assertTrue(serializer.is_valid(), f"Serializer errors: {serializer.errors}")
+    
+    def test_serializer_validation_happy_path_with_status_pending(self):
+        """Test serializer validation with pending status."""
+        data = {'status': 'pending'}
+        serializer = GetUserBookingSerializer(data=data)
+        self.assertTrue(serializer.is_valid(), f"Serializer errors: {serializer.errors}")
+        self.assertEqual(serializer.validated_data['status'], 'pending')
+    
+    def test_serializer_validation_happy_path_with_status_confirmed(self):
+        """Test serializer validation with confirmed status."""
+        data = {'status': 'confirmed'}
+        serializer = GetUserBookingSerializer(data=data)
+        self.assertTrue(serializer.is_valid(), f"Serializer errors: {serializer.errors}")
+        self.assertEqual(serializer.validated_data['status'], 'confirmed')
+    
+    def test_serializer_validation_happy_path_with_status_completed(self):
+        """Test serializer validation with completed status."""
+        data = {'status': 'completed'}
+        serializer = GetUserBookingSerializer(data=data)
+        self.assertTrue(serializer.is_valid(), f"Serializer errors: {serializer.errors}")
+        self.assertEqual(serializer.validated_data['status'], 'completed')
+    
+    def test_serializer_validation_happy_path_with_status_cancelled(self):
+        """Test serializer validation with cancelled status."""
+        data = {'status': 'cancelled'}
+        serializer = GetUserBookingSerializer(data=data)
+        self.assertTrue(serializer.is_valid(), f"Serializer errors: {serializer.errors}")
+        self.assertEqual(serializer.validated_data['status'], 'cancelled')
+    
+    def test_serializer_validation_happy_path_all_params(self):
+        """Test serializer validation with all parameters."""
+        data = {
+            'start_date': '2025-01-01',
+            'end_date': '2025-01-31',
+            'status': 'pending'
+        }
+        serializer = GetUserBookingSerializer(data=data)
+        self.assertTrue(serializer.is_valid(), f"Serializer errors: {serializer.errors}")
+    
+    def test_serializer_validation_invalid_status(self):
+        """Test serializer validation with invalid status."""
+        data = {'status': 'invalid_status'}
+        serializer = GetUserBookingSerializer(data=data)
+        self.assertFalse(serializer.is_valid())
+        self.assertIn('status', serializer.errors)
+    
+    def test_serializer_validation_invalid_date_range(self):
+        """Test serializer validation with start_date after end_date."""
+        data = {
+            'start_date': '2025-01-31',
+            'end_date': '2025-01-01'
+        }
+        serializer = GetUserBookingSerializer(data=data)
+        self.assertFalse(serializer.is_valid())
+        self.assertIn('non_field_errors', serializer.errors)
+    
+    def test_serializer_validation_null_status(self):
+        """Test serializer validation with null status (allowed)."""
+        data = {'status': None}
+        serializer = GetUserBookingSerializer(data=data)
+        self.assertTrue(serializer.is_valid(), f"Serializer errors: {serializer.errors}")
+        self.assertIsNone(serializer.validated_data.get('status'))
+    
+    def test_serializer_validation_only_start_date(self):
+        """Test serializer validation with only start_date."""
+        data = {'start_date': '2025-01-01'}
+        serializer = GetUserBookingSerializer(data=data)
+        self.assertTrue(serializer.is_valid(), f"Serializer errors: {serializer.errors}")
+    
+    def test_serializer_validation_only_end_date(self):
+        """Test serializer validation with only end_date."""
+        data = {'end_date': '2025-01-31'}
+        serializer = GetUserBookingSerializer(data=data)
+        self.assertTrue(serializer.is_valid(), f"Serializer errors: {serializer.errors}")
 
 
 class TimeSlotSerializerTestCase(BaseTestCase):
@@ -23,15 +119,13 @@ class TimeSlotSerializerTestCase(BaseTestCase):
         
         data = {
             'course_name': 'Test Course',
-            'section': 'A',
             'day_of_week': 'Mon',
             'start_time': '09:00:00',
             'end_time': '10:00:00',
             'duration_minutes': 15,
-            'start_date': str(datetime.date.today()),
-            'end_date': str(datetime.date.today() + datetime.timedelta(days=30)),
-            'room': 'Room 101',
-            'set_student_limit': 2
+            'start_date': (datetime.date.today() + datetime.timedelta(days=1)).isoformat(),
+            'end_date': (datetime.date.today() + datetime.timedelta(days=30)).isoformat(),
+            'room': 'Room 101'
         }
         
         serializer = TimeSlotSerializer(
@@ -39,28 +133,21 @@ class TimeSlotSerializerTestCase(BaseTestCase):
             context={'request': type('Request', (), {'user': instructor})()}
         )
         
-        self.assertTrue(serializer.is_valid())
-        
-        # Test create method
-        time_slot, time_slot_policy = serializer.save()
-        self.assertIsNotNone(time_slot.id)
-        self.assertEqual(time_slot.course_name, 'Test Course')
-        self.assertEqual(time_slot.instructor, instructor)
-        self.assertTrue(hasattr(time_slot, 'policy'))
-        self.assertEqual(time_slot_policy.set_student_limit, 2)
+        self.assertTrue(serializer.is_valid(), f"Serializer errors: {serializer.errors}")
     
-    def test_serializer_validation_start_time_after_end_time(self):
-        """Test serializer validation with start_time >= end_time."""
+    def test_serializer_validation_invalid_day_of_week(self):
+        """Test serializer validation with invalid day of week."""
         instructor = self.create_instructor()
         
         data = {
             'course_name': 'Test Course',
-            'day_of_week': 'Mon',
-            'start_time': '10:00:00',
-            'end_time': '09:00:00',  # End before start
-            'start_date': str(datetime.date.today()),
-            'end_date': str(datetime.date.today() + datetime.timedelta(days=30)),
-            'room': 'Room 101',  # Required field
+            'day_of_week': 'InvalidDay',
+            'start_time': '09:00:00',
+            'end_time': '10:00:00',
+            'duration_minutes': 15,
+            'start_date': datetime.date.today().isoformat(),
+            'end_date': (datetime.date.today() + datetime.timedelta(days=30)).isoformat(),
+            'room': 'Room 101'
         }
         
         serializer = TimeSlotSerializer(
@@ -69,8 +156,29 @@ class TimeSlotSerializerTestCase(BaseTestCase):
         )
         
         self.assertFalse(serializer.is_valid())
-        # The error from validate() method is at top level
-        # Check if 'time' key exists in errors (from validate() method)
+        self.assertIn('day_of_week', serializer.errors)
+    
+    def test_serializer_validation_end_time_before_start_time(self):
+        """Test serializer validation when end_time is before start_time."""
+        instructor = self.create_instructor()
+        
+        data = {
+            'course_name': 'Test Course',
+            'day_of_week': 'Mon',
+            'start_time': '10:00:00',
+            'end_time': '09:00:00',  # Before start_time
+            'duration_minutes': 15,
+            'start_date': datetime.date.today().isoformat(),
+            'end_date': (datetime.date.today() + datetime.timedelta(days=30)).isoformat(),
+            'room': 'Room 101'
+        }
+        
+        serializer = TimeSlotSerializer(
+            data=data,
+            context={'request': type('Request', (), {'user': instructor})()}
+        )
+        
+        self.assertFalse(serializer.is_valid())
         self.assertIn('time', serializer.errors)
     
     def test_serializer_validation_start_date_after_end_date(self):

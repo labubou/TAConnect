@@ -4,9 +4,12 @@ Provides common setup for user creation and authentication.
 """
 from rest_framework.test import APITestCase
 from rest_framework_simplejwt.tokens import RefreshToken
-from accounts.models import User, InstructorProfile
+from accounts.models import User, InstructorProfile, StudentProfile
 from instructor.models import OfficeHourSlot, BookingPolicy
+from student.models import Booking
+from django.utils import timezone
 import datetime
+import uuid
 
 
 class BaseTestCase(APITestCase):
@@ -60,8 +63,6 @@ class BaseTestCase(APITestCase):
         Returns:
             User: The created student user instance
         """
-        from accounts.models import StudentProfile
-        
         user = User.objects.create_user(
             username=username,
             email=email,
@@ -101,7 +102,6 @@ class BaseTestCase(APITestCase):
         """
         if instructor is None:
             # Create unique instructor to avoid username conflicts
-            import uuid
             unique_id = str(uuid.uuid4())[:8]
             instructor = self.create_instructor(
                 username=f'instructor_{unique_id}',
@@ -141,6 +141,63 @@ class BaseTestCase(APITestCase):
         )
         
         return slot, policy
+    
+    def create_booking(self, student=None, office_hour_slot=None, date=None,
+                      start_time=None, **kwargs):
+        """
+        Helper method to create a Booking.
+        
+        Args:
+            student: User instance (student). If None, creates one.
+            office_hour_slot: OfficeHourSlot instance. If None, creates one.
+            date: Booking date (defaults to tomorrow)
+            start_time: Start time as datetime or string. If None, uses slot start_time.
+            **kwargs: Additional fields for Booking
+        
+        Returns:
+            Booking: The created booking instance
+        """
+        if student is None:
+            import uuid
+            unique_id = str(uuid.uuid4())[:8]
+            student = self.create_student(
+                username=f'student_{unique_id}',
+                email=f'student_{unique_id}@example.com'
+            )
+        
+        if office_hour_slot is None:
+            office_hour_slot, _ = self.create_office_hour_slot()
+        
+        if date is None:
+            date = datetime.date.today() + datetime.timedelta(days=1)
+        
+        if start_time is None:
+            # Combine date with slot's start_time
+            start_time = datetime.datetime.combine(
+                date,
+                office_hour_slot.start_time
+            )
+        elif isinstance(start_time, str):
+            # Parse string datetime
+            start_time = datetime.datetime.strptime(start_time, '%Y-%m-%d %H:%M:%S')
+        elif isinstance(start_time, datetime.time):
+            # Combine date with time
+            start_time = datetime.datetime.combine(date, start_time)
+        
+        # Make datetime timezone-aware if it's naive
+        from django.utils import timezone as tz
+        if tz.is_naive(start_time):
+            start_time = tz.make_aware(start_time)
+        
+        booking = Booking.objects.create(
+            student=student,
+            office_hour=office_hour_slot,
+            date=date,
+            start_time=start_time,
+            **kwargs
+        )
+        
+        return booking
     
     def authenticate_user(self, user):
         """

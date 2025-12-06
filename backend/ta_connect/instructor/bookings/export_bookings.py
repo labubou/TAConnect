@@ -58,7 +58,7 @@ class BookingsExport(GenericAPIView):
                 'Booking ID', 'Student Name', 'Student Email', 'Student Username',
                 'Office Hour ID', 'Course Name', 'Section', 'Room', 
                 'Date', 'Start Time', 'End Time', 'Day of Week',
-                'Is Cancelled', 'Is Completed', 'Created At'
+                'Status', 'Created At'
             ])  # CSV Header
             
             for booking in bookings:
@@ -75,8 +75,7 @@ class BookingsExport(GenericAPIView):
                     booking.start_time.strftime('%Y-%m-%d %H:%M:%S') if booking.start_time else '',
                     booking.end_time.strftime('%Y-%m-%d %H:%M:%S') if booking.end_time else '',
                     booking.office_hour.day_of_week,
-                    'Yes' if booking.is_cancelled else 'No',
-                    'Yes' if booking.is_completed else 'No',
+                    booking.status,
                     booking.created_at.strftime('%Y-%m-%d %H:%M:%S') if booking.created_at else ''
                 ])
             

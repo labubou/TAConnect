@@ -127,6 +127,7 @@ get_bookings_swagger = {
                                 'end_time': openapi.Schema(type=openapi.TYPE_STRING, format='date-time', example='2025-11-24T14:20:00Z'),
                                 'is_cancelled': openapi.Schema(type=openapi.TYPE_BOOLEAN, example=False),
                                 'is_completed': openapi.Schema(type=openapi.TYPE_BOOLEAN, example=True),
+                                'status': openapi.Schema(type=openapi.TYPE_STRING, example='completed'),
                             }
                         )
                     )

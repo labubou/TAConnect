@@ -45,6 +45,8 @@ const manageBookingsStrings = {
     status: {
       active: "Active",
       cancelled: "Cancelled",
+      pending: "Pending",
+      confirmed: "Confirmed",
       completed: "✓ Completed",
     },
     buttons: {
@@ -153,6 +155,8 @@ const manageBookingsStrings = {
     status: {
       active: "نشط",
       cancelled: "ملغي",
+      pending: "قيد الانتظار",
+      confirmed: "مؤكد",
       completed: "✓ مكتمل",
     },
     buttons: {

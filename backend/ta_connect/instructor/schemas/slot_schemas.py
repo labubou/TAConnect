@@ -49,43 +49,6 @@ get_user_slots_response = openapi.Schema(
                 }
             )
         ),
-        'bookings': openapi.Schema(
-            type=openapi.TYPE_ARRAY,
-            items=openapi.Schema(
-                type=openapi.TYPE_OBJECT,
-                properties={
-                    'id': openapi.Schema(type=openapi.TYPE_INTEGER),
-                    'student': openapi.Schema(
-                        type=openapi.TYPE_OBJECT,
-                        properties={
-                            'id': openapi.Schema(type=openapi.TYPE_INTEGER),
-                            'username': openapi.Schema(type=openapi.TYPE_STRING),
-                            'email': openapi.Schema(type=openapi.TYPE_STRING, format='email'),
-                            'first_name': openapi.Schema(type=openapi.TYPE_STRING),
-                            'last_name': openapi.Schema(type=openapi.TYPE_STRING),
-                        }
-                    ),
-                    'office_hour': openapi.Schema(
-                        type=openapi.TYPE_OBJECT,
-                        properties={
-                            'id': openapi.Schema(type=openapi.TYPE_INTEGER),
-                            'course_name': openapi.Schema(type=openapi.TYPE_STRING),
-                            'section': openapi.Schema(type=openapi.TYPE_STRING, nullable=True),
-                            'day_of_week': openapi.Schema(type=openapi.TYPE_STRING),
-                            'start_time': openapi.Schema(type=openapi.TYPE_STRING, format='time'),
-                            'end_time': openapi.Schema(type=openapi.TYPE_STRING, format='time'),
-                            'duration_minutes': openapi.Schema(type=openapi.TYPE_INTEGER),
-                            'room': openapi.Schema(type=openapi.TYPE_STRING),
-                            'status': openapi.Schema(type=openapi.TYPE_BOOLEAN),
-                        }
-                    ),
-                    'date': openapi.Schema(type=openapi.TYPE_STRING, format='date'),
-                    'start_time': openapi.Schema(type=openapi.TYPE_STRING, format='date-time'),
-                    'is_cancelled': openapi.Schema(type=openapi.TYPE_BOOLEAN),
-                    'created_at': openapi.Schema(type=openapi.TYPE_STRING, format='date-time'),
-                }
-            )
-        ),
         'error': openapi.Schema(type=openapi.TYPE_STRING, description='Error message if request fails'),
     },
     description='Response containing office hour slots and their associated bookings'
@@ -160,7 +123,7 @@ get_user_slots_swagger = {
 }
 
 get_user_bookings_swagger = {
-    'operation_description': 'Get all bookings for the logged-in instructor. Optionally filter by date range.',
+    'operation_description': 'Get all bookings for the logged-in instructor. Optionally filter by date range and status.',
     'manual_parameters': [
         openapi.Parameter(
             'start_date',
@@ -179,6 +142,15 @@ get_user_bookings_swagger = {
             format='date',
             required=False,
             example='2025-01-31'
+        ),
+        openapi.Parameter(
+            'status',
+            openapi.IN_QUERY,
+            description='Filter by booking status. Optional.',
+            type=openapi.TYPE_STRING,
+            enum=['pending', 'confirmed', 'completed', 'cancelled'],
+            required=False,
+            example='confirmed'
         )
     ],
     'responses': {
@@ -220,6 +192,8 @@ get_user_bookings_swagger = {
                                 'date': openapi.Schema(type=openapi.TYPE_STRING, format='date'),
                                 'start_time': openapi.Schema(type=openapi.TYPE_STRING, format='date-time'),
                                 'is_cancelled': openapi.Schema(type=openapi.TYPE_BOOLEAN),
+                                'is_completed': openapi.Schema(type=openapi.TYPE_BOOLEAN),
+                                'status': openapi.Schema(type=openapi.TYPE_STRING),
                                 'created_at': openapi.Schema(type=openapi.TYPE_STRING, format='date-time'),
                             }
                         )

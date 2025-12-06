@@ -133,6 +133,84 @@ class CreateBookingSerializerTestCase(BaseTestCase):
         self.assertIn('non_field_errors', serializer.errors)
 
 
+class ConfirmBookingSerializerTestCase(BaseTestCase):
+    """
+    Test cases for the ConfirmBookingSerializer.
+    """
+    
+    def test_serializer_validation_happy_path(self):
+        """Test serializer validation with valid confirm data."""
+        from student.serializers.confirm_book_serializer import ConfirmBookingSerializer
+        
+        booking = self.create_booking()
+        booking.status = 'pending'
+        booking.save()
+        
+        serializer = ConfirmBookingSerializer(
+            instance=booking,
+            data={'status': 'confirmed'},
+            partial=True
+        )
+        
+        self.assertTrue(serializer.is_valid(), f"Serializer errors: {serializer.errors}")
+        
+        # Test update method
+        confirmed_booking = serializer.save()
+        self.assertEqual(confirmed_booking.status, 'confirmed')
+    
+    def test_serializer_validation_already_confirmed(self):
+        """Test serializer validation when booking is already confirmed."""
+        from student.serializers.confirm_book_serializer import ConfirmBookingSerializer
+        
+        booking = self.create_booking()
+        booking.status = 'confirmed'
+        booking.save()
+        
+        serializer = ConfirmBookingSerializer(
+            instance=booking,
+            data={'status': 'confirmed'},
+            partial=True
+        )
+        
+        self.assertFalse(serializer.is_valid())
+        self.assertIn('non_field_errors', serializer.errors)
+    
+    def test_serializer_validation_cancelled_booking(self):
+        """Test serializer validation when booking is cancelled."""
+        from student.serializers.confirm_book_serializer import ConfirmBookingSerializer
+        
+        booking = self.create_booking()
+        booking.cancel()
+        booking.save()
+        
+        serializer = ConfirmBookingSerializer(
+            instance=booking,
+            data={'status': 'confirmed'},
+            partial=True
+        )
+        
+        self.assertFalse(serializer.is_valid())
+        self.assertIn('non_field_errors', serializer.errors)
+    
+    def test_serializer_validation_completed_booking(self):
+        """Test serializer validation when booking is completed."""
+        from student.serializers.confirm_book_serializer import ConfirmBookingSerializer
+        
+        booking = self.create_booking()
+        booking.status = 'completed'
+        booking.is_completed = True
+        booking.save()
+        
+        serializer = ConfirmBookingSerializer(
+            instance=booking,
+            data={'status': 'confirmed'},
+            partial=True
+        )
+        
+        self.assertFalse(serializer.is_valid())
+        self.assertIn('non_field_errors', serializer.errors)
+
+
 class UpdateBookingSerializerTestCase(BaseTestCase):
     """
     Test cases for the UpdateBookingSerializer.
@@ -211,6 +289,31 @@ class UpdateBookingSerializerTestCase(BaseTestCase):
         # End time should be recalculated
         self.assertIsNotNone(updated_booking.end_time)
         self.assertNotEqual(updated_booking.end_time, original_end_time)
+    
+    def test_serializer_sets_pending_status(self):
+        """Test that update sets booking status to pending."""
+        booking = self.create_booking()
+        booking.status = 'confirmed'
+        booking.save()
+        
+        new_date = booking.date + datetime.timedelta(days=1)
+        new_time = booking.office_hour.start_time
+        
+        data = {
+            'new_date': new_date.isoformat(),
+            'new_time': new_time.strftime('%H:%M:%S')
+        }
+        
+        serializer = UpdateBookingSerializer(
+            instance=booking,
+            data=data
+        )
+        
+        self.assertTrue(serializer.is_valid())
+        updated_booking = serializer.save()
+        
+        # Verify status is set to pending
+        self.assertEqual(updated_booking.status, 'pending')
 
 
 class CancelBookingSerializerTestCase(BaseTestCase):

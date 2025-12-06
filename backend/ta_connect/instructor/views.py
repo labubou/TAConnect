@@ -73,30 +73,27 @@ class GetUserBookingView(GenericAPIView):
                     status=status.HTTP_400_BAD_REQUEST
                 )
             
+            booking_status = serializer.validated_data.get('status')
             start_date = serializer.validated_data.get('start_date')
             end_date = serializer.validated_data.get('end_date')
 
             # Get all slots for the instructor
             slots = OfficeHourSlot.objects.filter(instructor=user)
 
+            # Start with base query
+            books = Booking.objects.filter(office_hour__in=slots)
+
             # Filter bookings based on date range if provided
             if start_date and end_date:
-                books = Booking.objects.filter(
-                    office_hour__in=slots,
-                    date__range=(start_date, end_date)
-                )
+                books = books.filter(date__range=(start_date, end_date))
             elif start_date:
-                books = Booking.objects.filter(
-                    office_hour__in=slots,
-                    date__gte=start_date
-                )
+                books = books.filter(date__gte=start_date)
             elif end_date:
-                books = Booking.objects.filter(
-                    office_hour__in=slots,
-                    date__lte=end_date
-                )
-            else:
-                books = Booking.objects.filter(office_hour__in=slots)
+                books = books.filter(date__lte=end_date)
+            
+            # Filter by status if provided
+            if booking_status:
+                books = books.filter(status=booking_status)
             
             for book in books:
                 if not book.is_completed:
@@ -127,6 +124,8 @@ class GetUserBookingView(GenericAPIView):
                         'date': book.date.strftime('%Y-%m-%d') if book.date else None,
                         'start_time': book.start_time.strftime('%Y-%m-%d %H:%M:%S') if book.start_time else None,
                         'is_cancelled': book.is_cancelled,
+                        'is_completed': book.is_completed,
+                        'status': book.status,
                         'created_at': book.created_at.isoformat() if book.created_at else None,
                     } for book in books
                 ]

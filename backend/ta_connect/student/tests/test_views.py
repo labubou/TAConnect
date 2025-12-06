@@ -154,6 +154,46 @@ class BookingCreateViewTestCase(BaseTestCase):
         response = self.client.post(self.create_booking_url, data, format='json')
         
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+    
+    def test_create_booking_status_is_pending(self):
+        """Test that newly created booking has pending status."""
+        student, token = self.create_and_authenticate_student()
+        slot, policy = self.create_office_hour_slot()
+        
+        booking_date = (datetime.date.today() + datetime.timedelta(days=1)).isoformat()
+        start_time = slot.start_time.strftime('%H:%M:%S')
+        
+        data = {
+            'slot_id': slot.id,
+            'date': booking_date,
+            'start_time': start_time
+        }
+        
+        response = self.client.post(self.create_booking_url, data, format='json')
+        
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        
+        # Verify booking status is pending
+        booking = Booking.objects.get(id=response.data['booking_id'])
+        self.assertEqual(booking.status, 'pending')
+    
+    def test_get_bookings_filter_by_status(self):
+        """Test filtering student bookings by status."""
+        student, token = self.create_and_authenticate_student()
+        
+        # Create bookings with different statuses
+        booking1 = self.create_booking(student=student)
+        booking1.status = 'pending'
+        booking1.save()
+        
+        booking2 = self.create_booking(student=student)
+        booking2.status = 'confirmed'
+        booking2.save()
+        
+        # Get all bookings (should return both)
+        response = self.client.get(self.get_bookings_url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertGreaterEqual(len(response.data['bookings']), 2)
 
 
 class BookingDetailViewTestCase(BaseTestCase):
@@ -269,4 +309,63 @@ class BookingDetailViewTestCase(BaseTestCase):
         
         # Should return 404 because booking doesn't belong to student1
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+    
+    def test_update_booking_sets_pending_status(self):
+        """Test that updating a booking sets status back to pending."""
+        student, token = self.create_and_authenticate_student()
+        booking = self.create_booking(student=student)
+        
+        # First confirm the booking
+        booking.status = 'confirmed'
+        booking.save()
+        
+        new_date = (booking.date + datetime.timedelta(days=1)).isoformat()
+        new_time = booking.office_hour.start_time.strftime('%H:%M:%S')
+        
+        data = {
+            'new_date': new_date,
+            'new_time': new_time
+        }
+        
+        url = reverse('booking_detail', kwargs={'pk': booking.id})
+        response = self.client.patch(url, data, format='json')
+        
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        
+        # Verify booking status is back to pending
+        booking.refresh_from_db()
+        self.assertEqual(booking.status, 'pending')
+    
+    def test_cancel_confirmed_booking(self):
+        """Test cancelling a confirmed booking."""
+        student, token = self.create_and_authenticate_student()
+        booking = self.create_booking(student=student)
+        booking.status = 'confirmed'
+        booking.save()
+        
+        url = reverse('booking_detail', kwargs={'pk': booking.id})
+        response = self.client.delete(url)
+        
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        
+        # Verify booking was cancelled
+        booking.refresh_from_db()
+        self.assertTrue(booking.is_cancelled)
+        self.assertEqual(booking.status, 'cancelled')
+    
+    def test_cancel_pending_booking(self):
+        """Test cancelling a pending booking."""
+        student, token = self.create_and_authenticate_student()
+        booking = self.create_booking(student=student)
+        booking.status = 'pending'
+        booking.save()
+        
+        url = reverse('booking_detail', kwargs={'pk': booking.id})
+        response = self.client.delete(url)
+        
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        
+        # Verify booking was cancelled
+        booking.refresh_from_db()
+        self.assertTrue(booking.is_cancelled)
 

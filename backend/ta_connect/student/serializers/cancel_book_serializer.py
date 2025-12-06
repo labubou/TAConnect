@@ -14,6 +14,6 @@ class CancelBookingSerializer(serializers.Serializer):
 
     def update(self, instance, validated_data):
         booking = instance
-        booking.is_cancelled = True
+        booking.cancel()
         booking.save()
         return booking
