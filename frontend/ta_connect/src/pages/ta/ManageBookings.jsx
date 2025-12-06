@@ -7,7 +7,6 @@ import ErrorBoundary from '../../components/General/ErrorBoundary';
 import Footer from '../../components/General/Footer';
 import { SkeletonLoader } from '../../components/General/SkeletonLoader';
 import allStrings from '../../strings/manageBookingsStrings';
-import { useInstructorBookings } from '../../hooks/useApi';
 import CancelBookingModal from '../../components/ta/CancelBookingModal';
 import { exportBookingsAsCSV } from '../../services/exportService';
 import axios from 'axios';
@@ -22,7 +21,6 @@ const getCurrentMonthDateRange = () => {
   const monthEnd = new Date(currentYear, currentMonth + 1, 0);
   
   const formatDate = (date) => {
-    // Use local date to avoid timezone issues
     const year = date.getFullYear();
     const month = String(date.getMonth() + 1).padStart(2, '0');
     const day = String(date.getDate()).padStart(2, '0');
@@ -39,82 +37,76 @@ export default function ManageBookings() {
   const { theme } = useTheme();
   const { language } = useLanguage();
   const strings = allStrings[language];
-  const { startLoading, stopLoading, isLoading: globalIsLoading } = useGlobalLoading();
+  const { startLoading, stopLoading } = useGlobalLoading();
   const isDark = theme === 'dark';
   const [isNavbarOpen, setIsNavbarOpen] = useState(true);
+  const [bookings, setBookings] = useState([]);
   const [filteredBookings, setFilteredBookings] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
-  const [statusFilter, setStatusFilter] = useState({ active: true, cancelled: false });
+  const [statusFilter, setStatusFilter] = useState(''); // Empty string means no filter (all bookings)
   const [dateRange, setDateRange] = useState(() => getCurrentMonthDateRange());
   const [selectedBooking, setSelectedBooking] = useState(null);
   const [showCancelModal, setShowCancelModal] = useState(false);
   const [isCancelling, setIsCancelling] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const [successMessage, setSuccessMessage] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
   const [backendError, setBackendError] = useState(null);
   const [isExporting, setIsExporting] = useState(false);
   const [showExportModal, setShowExportModal] = useState(false);
 
-  // Fetch bookings data with current month date range
-  // Auto-refetch every 30 seconds to update completed status
-  const { data: bookings = [], isLoading, error, refetch } = useInstructorBookings(
-    dateRange.start,
-    dateRange.end,
-    {
-      refetchInterval: 30000, // Refetch every 30 seconds to check for completed bookings
-      refetchIntervalInBackground: false, // Don't refetch when tab is not active
+  // Fetch bookings from backend
+  const fetchBookings = async () => {
+    setIsLoading(true);
+    setBackendError(null);
+    
+    try {
+      const params = {};
+      if (dateRange.start) params.start_date = dateRange.start;
+      if (dateRange.end) params.end_date = dateRange.end;
+      if (statusFilter) params.status = statusFilter;
+      
+      const response = await axios.get('/api/instructor/get-user-bookings/', { params });
+      setBookings(response.data.bookings || []);
+    } catch (err) {
+      console.error('Failed to fetch bookings:', err);
+      const errMsg = err?.response?.data?.error || err?.message || strings.messages.error;
+      setBackendError(errMsg);
+    } finally {
+      setIsLoading(false);
     }
-  );
+  };
 
-  // Filter and search bookings
+  // Fetch bookings when filters change
+  useEffect(() => {
+    fetchBookings();
+  }, [dateRange.start, dateRange.end, statusFilter]);
+
+  // Filter bookings by search term (client-side)
   useEffect(() => {
     let filtered = bookings;
-
-    // Filter by status - show both active and cancelled if both are selected, or just one if only one is selected
-    if (statusFilter.active && statusFilter.cancelled) {
-      // Show all bookings
-    } else if (statusFilter.active) {
-      filtered = filtered.filter(b => !b.is_cancelled);
-    } else if (statusFilter.cancelled) {
-      filtered = filtered.filter(b => b.is_cancelled);
-    } else {
-      // If neither is selected, show nothing
-      filtered = [];
-    }
-
-    // Filter by date range
-    if (dateRange.start) {
-      filtered = filtered.filter(b => new Date(b.date) >= new Date(dateRange.start));
-    }
-    if (dateRange.end) {
-      filtered = filtered.filter(b => new Date(b.date) <= new Date(dateRange.end));
-    }
 
     // Search by student name or email
     if (searchTerm) {
       const search = searchTerm.toLowerCase();
       filtered = filtered.filter(b => 
-        b.student.first_name.toLowerCase().includes(search) ||
-        b.student.last_name.toLowerCase().includes(search) ||
-        b.student.email.toLowerCase().includes(search) ||
-        b.student.username.toLowerCase().includes(search)
+        b.student.first_name?.toLowerCase().includes(search) ||
+        b.student.last_name?.toLowerCase().includes(search) ||
+        b.student.email?.toLowerCase().includes(search) ||
+        b.student.username?.toLowerCase().includes(search)
       );
     }
 
     setFilteredBookings(filtered);
-  }, [bookings, statusFilter, dateRange, searchTerm]);
+  }, [bookings, searchTerm]);
 
-  // Surface backend errors to user-facing error message (only once when error changes)
+  // Auto-clear backend error after 5 seconds
   useEffect(() => {
-    if (error) {
-      const errMsg = error?.response?.data?.error || error?.message || strings.messages.error;
-      setBackendError(errMsg);
-      
-      // Auto-clear backend error after 5 seconds
+    if (backendError) {
       const timer = setTimeout(() => setBackendError(null), 5000);
       return () => clearTimeout(timer);
     }
-  }, [error]);
+  }, [backendError]);
 
   // Auto-clear success messages after 5 seconds
   useEffect(() => {
@@ -155,7 +147,7 @@ export default function ManageBookings() {
         setShowCancelModal(false);
         setSelectedBooking(null);
         // Refresh the bookings list
-        await refetch();
+        await fetchBookings();
       } else {
         stopLoading('cancel-booking');
         throw new Error(response.data.error || strings.messages.error);
@@ -181,9 +173,35 @@ export default function ManageBookings() {
     }
   };
 
+  const handleConfirmBooking = async (booking) => {
+    startLoading('confirm-booking', 'Confirming booking...');
+    
+    try {
+      const response = await axios.post(`/api/instructor/confirm-booking/${booking.id}/`);
+      
+      if (response.data.success) {
+        stopLoading('confirm-booking');
+        setSuccessMessage('Booking confirmed successfully');
+        await fetchBookings();
+      } else {
+        stopLoading('confirm-booking');
+        throw new Error(response.data.error || 'Failed to confirm booking');
+      }
+    } catch (err) {
+      stopLoading('confirm-booking');
+      console.error('Failed to confirm booking:', err);
+      
+      let errorMsg = 'Failed to confirm booking';
+      if (err.response?.data?.error) {
+        errorMsg = err.response.data.error;
+      }
+      setErrorMessage(errorMsg);
+    }
+  };
+
   const handleClearFilters = () => {
     setSearchTerm('');
-    setStatusFilter({ active: true, cancelled: false });
+    setStatusFilter('');
     setDateRange(getCurrentMonthDateRange());
   };
 
@@ -204,7 +222,6 @@ export default function ManageBookings() {
       await exportBookingsAsCSV(dateRange.start, dateRange.end);
       setSuccessMessage('Bookings exported successfully with filters');
       
-      // Clear success message after 3 seconds
       setTimeout(() => setSuccessMessage(''), 3000);
     } catch (error) {
       console.error('Export failed:', error);
@@ -220,14 +237,12 @@ export default function ManageBookings() {
     setShowExportModal(false);
     
     try {
-      // Get all bookings by using a very wide date range
       const startOfYear = new Date(new Date().getFullYear(), 0, 1).toISOString().split('T')[0];
       const endOfYear = new Date(new Date().getFullYear() + 1, 11, 31).toISOString().split('T')[0];
       
       await exportBookingsAsCSV(startOfYear, endOfYear);
       setSuccessMessage('All bookings exported successfully');
       
-      // Clear success message after 3 seconds
       setTimeout(() => setSuccessMessage(''), 3000);
     } catch (error) {
       console.error('Export failed:', error);
@@ -245,16 +260,9 @@ export default function ManageBookings() {
     });
   };
 
-  const formatTime = (timeString) => {
-    if (!timeString) return 'N/A';
-    const [hours, minutes] = timeString.split(':');
-    return `${hours}:${minutes}`;
-  };
-
   const formatBookingDateTime = (dateTimeString) => {
     if (!dateTimeString) return 'N/A';
     try {
-      // Handle ISO format datetime (YYYY-MM-DD HH:MM:SS or with Z)
       const date = new Date(dateTimeString);
       const hours = String(date.getHours()).padStart(2, '0');
       const minutes = String(date.getMinutes()).padStart(2, '0');
@@ -265,25 +273,59 @@ export default function ManageBookings() {
   };
 
   const getStatusColor = (booking) => {
-    if (booking.is_cancelled) {
-      return isDark ? 'bg-red-900/20 text-red-300' : 'bg-red-50 text-red-700';
+    switch (booking.status) {
+      case 'pending':
+        return isDark ? 'bg-yellow-900/20 text-yellow-300' : 'bg-yellow-50 text-yellow-700';
+      case 'confirmed':
+        return isDark ? 'bg-green-900/20 text-green-300' : 'bg-green-50 text-green-700';
+      case 'completed':
+        return isDark ? 'bg-blue-900/20 text-blue-300' : 'bg-blue-50 text-blue-700';
+      case 'cancelled':
+        return isDark ? 'bg-red-900/20 text-red-300' : 'bg-red-50 text-red-700';
+      default:
+        return isDark ? 'bg-gray-900/20 text-gray-300' : 'bg-gray-50 text-gray-700';
     }
-    return isDark ? 'bg-green-900/20 text-green-300' : 'bg-green-50 text-green-700';
   };
 
   const getStatusIcon = (booking) => {
-    if (booking.is_cancelled) {
-      return (
-        <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-          <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
-        </svg>
-      );
+    switch (booking.status) {
+      case 'pending':
+        return (
+          <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+            <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clipRule="evenodd" />
+          </svg>
+        );
+      case 'confirmed':
+        return (
+          <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+            <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+          </svg>
+        );
+      case 'completed':
+        return (
+          <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+            <path fillRule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+          </svg>
+        );
+      case 'cancelled':
+        return (
+          <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+            <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
+          </svg>
+        );
+      default:
+        return null;
     }
-    return (
-      <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-      </svg>
-    );
+  };
+
+  const getStatusLabel = (status) => {
+    switch (status) {
+      case 'pending': return strings.status?.pending || 'Pending';
+      case 'confirmed': return strings.status?.confirmed || 'Confirmed';
+      case 'completed': return strings.status?.completed || 'Completed';
+      case 'cancelled': return strings.status?.cancelled || 'Cancelled';
+      default: return status;
+    }
   };
 
   return (
@@ -329,35 +371,77 @@ export default function ManageBookings() {
                   />
                 </div>
 
-                {/* Status Toggle Buttons */}
-                <div className="flex gap-4 flex-wrap">
+                {/* Status Filter Buttons */}
+                <div className="flex gap-2 flex-wrap mb-4">
                   <button
-                    onClick={() => setStatusFilter(prev => ({ ...prev, active: !prev.active }))}
-                    className={`px-12 py-5 rounded-xl border-3 transition-all font-bold text-xl min-w-[180px] ${
-                      statusFilter.active
+                    onClick={() => setStatusFilter('')}
+                    className={`px-4 py-2 rounded-lg border-2 transition-all font-medium ${
+                      statusFilter === ''
+                        ? isDark
+                          ? 'border-[#366c6b] bg-[#366c6b]/20 text-[#4fd1c5]'
+                          : 'border-[#366c6b] bg-[#366c6b]/10 text-[#366c6b]'
+                        : isDark
+                        ? 'border-gray-600 hover:border-gray-500 bg-gray-800/50 text-gray-300'
+                        : 'border-gray-200 hover:border-gray-300 bg-gray-50 text-gray-600'
+                    }`}
+                  >
+                    All
+                  </button>
+                  <button
+                    onClick={() => setStatusFilter('pending')}
+                    className={`px-4 py-2 rounded-lg border-2 transition-all font-medium ${
+                      statusFilter === 'pending'
+                        ? isDark
+                          ? 'border-yellow-600 bg-yellow-900/20 text-yellow-200'
+                          : 'border-yellow-500 bg-yellow-50 text-yellow-700'
+                        : isDark
+                        ? 'border-gray-600 hover:border-gray-500 bg-gray-800/50 text-gray-300'
+                        : 'border-gray-200 hover:border-gray-300 bg-gray-50 text-gray-600'
+                    }`}
+                  >
+                    {strings.status?.pending || 'Pending'}
+                  </button>
+                  <button
+                    onClick={() => setStatusFilter('confirmed')}
+                    className={`px-4 py-2 rounded-lg border-2 transition-all font-medium ${
+                      statusFilter === 'confirmed'
                         ? isDark
                           ? 'border-emerald-600 bg-emerald-900/20 text-emerald-200'
                           : 'border-emerald-500 bg-emerald-50 text-emerald-700'
                         : isDark
-                        ? 'border-gray-700 hover:border-gray-600 bg-gray-800/50 text-gray-300'
+                        ? 'border-gray-600 hover:border-gray-500 bg-gray-800/50 text-gray-300'
                         : 'border-gray-200 hover:border-gray-300 bg-gray-50 text-gray-600'
                     }`}
                   >
-                    {strings.status.active}
+                    {strings.status?.confirmed || 'Confirmed'}
                   </button>
                   <button
-                    onClick={() => setStatusFilter(prev => ({ ...prev, cancelled: !prev.cancelled }))}
-                    className={`px-12 py-5 rounded-xl border-3 transition-all font-bold text-xl min-w-[180px] ${
-                      statusFilter.cancelled
+                    onClick={() => setStatusFilter('completed')}
+                    className={`px-4 py-2 rounded-lg border-2 transition-all font-medium ${
+                      statusFilter === 'completed'
+                        ? isDark
+                          ? 'border-blue-600 bg-blue-900/20 text-blue-200'
+                          : 'border-blue-500 bg-blue-50 text-blue-700'
+                        : isDark
+                        ? 'border-gray-600 hover:border-gray-500 bg-gray-800/50 text-gray-300'
+                        : 'border-gray-200 hover:border-gray-300 bg-gray-50 text-gray-600'
+                    }`}
+                  >
+                    {strings.status?.completed || 'Completed'}
+                  </button>
+                  <button
+                    onClick={() => setStatusFilter('cancelled')}
+                    className={`px-4 py-2 rounded-lg border-2 transition-all font-medium ${
+                      statusFilter === 'cancelled'
                         ? isDark
                           ? 'border-red-600 bg-red-900/20 text-red-200'
                           : 'border-red-500 bg-red-50 text-red-700'
                         : isDark
-                        ? 'border-gray-700 hover:border-gray-600 bg-gray-800/50 text-gray-300'
+                        ? 'border-gray-600 hover:border-gray-500 bg-gray-800/50 text-gray-300'
                         : 'border-gray-200 hover:border-gray-300 bg-gray-50 text-gray-600'
                     }`}
                   >
-                    {strings.status.cancelled}
+                    {strings.status?.cancelled || 'Cancelled'}
                   </button>
                 </div>
               </div>
@@ -403,7 +487,7 @@ export default function ManageBookings() {
                 <button
                   onClick={handleExportClick}
                   disabled={isExporting}
-                  className={`px-4 py-2 rounded-lg font-medium transition-all flex items-center  justify-center gap-2 ${
+                  className={`px-4 py-2 rounded-lg font-medium transition-all flex items-center justify-center gap-2 ${
                     isDark
                       ? 'bg-blue-600 text-white hover:bg-blue-500 disabled:opacity-50'
                       : 'bg-blue-500 text-white hover:bg-blue-600 disabled:opacity-50'
@@ -432,7 +516,7 @@ export default function ManageBookings() {
               </div>
             )}
 
-            {/* Error Message from User Actions */}
+            {/* Error Message */}
             {errorMessage && (
               <div className={`mb-6 p-4 rounded-lg ${
                 isDark ? 'bg-red-900/30 border-red-600' : 'bg-red-50 border-red-300'
@@ -446,7 +530,7 @@ export default function ManageBookings() {
               </div>
             )}
 
-            {/* Backend Error Message */}
+            {/* Backend Error */}
             {backendError && (
               <div className={`mb-6 p-4 rounded-lg ${
                 isDark ? 'bg-yellow-900/30 border-yellow-600' : 'bg-yellow-50 border-yellow-300'
@@ -463,13 +547,6 @@ export default function ManageBookings() {
             {/* Loading State */}
             {isLoading && (
               <SkeletonLoader isDark={isDark} count={5} height="h-24" className="mb-6" />
-            )}
-
-            {/* Error State */}
-            {error && !isLoading && (
-              <div className={`p-4 rounded-lg mb-6 ${isDark ? 'bg-red-900/20 text-red-300' : 'bg-red-50 text-red-700'}`}>
-                <p className="text-sm font-medium">{strings.messages.error}</p>
-              </div>
             )}
 
             {/* Bookings List */}
@@ -513,7 +590,7 @@ export default function ManageBookings() {
                         </thead>
                         <tbody>
                           {filteredBookings.map((booking) => (
-                            <tr key={booking.id}>
+                            <tr key={booking.id} className={isDark ? 'border-gray-700' : 'border-gray-200'} style={{borderTopWidth: '1px'}}>
                               <td className={`px-6 py-4 text-sm ${isDark ? 'text-gray-300' : 'text-gray-900'}`}>
                                 <div>
                                   <p className="font-medium">
@@ -545,20 +622,30 @@ export default function ManageBookings() {
                               <td className={`px-6 py-4`}>
                                 <div className={`inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(booking)}`}>
                                   {getStatusIcon(booking)}
-                                  {booking.is_cancelled ? strings.status.cancelled : strings.status.active}
+                                  {getStatusLabel(booking.status)}
                                 </div>
                               </td>
                               <td className={`px-6 py-4 text-sm`}>
-                                {!booking.is_cancelled && (
-                                  <button
-                                    onClick={() => handleCancelClick(booking)}
-                                    disabled={isCancelling}
-                                    className="px-4 py-2 bg-red-50 text-red-600 hover:bg-red-100 dark:bg-red-900/20 dark:text-red-400 dark:hover:bg-red-900/40 rounded-lg transition-all font-medium text-sm disabled:opacity-50"
-                                    aria-label={strings.aria.cancelBooking}
-                                  >
-                                    {isCancelling ? 'Cancelling...' : strings.buttons.cancel}
-                                  </button>
-                                )}
+                                <div className="flex gap-2">
+                                  {booking.status === 'pending' && (
+                                    <button
+                                      onClick={() => handleConfirmBooking(booking)}
+                                      className="px-3 py-1 bg-green-50 text-green-600 hover:bg-green-100 dark:bg-green-900/20 dark:text-green-400 dark:hover:bg-green-900/40 rounded-lg transition-all font-medium text-sm"
+                                    >
+                                      Confirm
+                                    </button>
+                                  )}
+                                  {(booking.status === 'pending' || booking.status === 'confirmed') && (
+                                    <button
+                                      onClick={() => handleCancelClick(booking)}
+                                      disabled={isCancelling}
+                                      className="px-3 py-1 bg-red-50 text-red-600 hover:bg-red-100 dark:bg-red-900/20 dark:text-red-400 dark:hover:bg-red-900/40 rounded-lg transition-all font-medium text-sm disabled:opacity-50"
+                                      aria-label={strings.aria.cancelBooking}
+                                    >
+                                      {strings.buttons.cancel}
+                                    </button>
+                                  )}
+                                </div>
                               </td>
                             </tr>
                           ))}
@@ -577,22 +664,31 @@ export default function ManageBookings() {
                               : 'bg-white border-gray-200'
                           } hover:shadow-lg`}
                         >
-                          {/* Status Badge */}
+                          {/* Status Badge and Actions */}
                           <div className="flex justify-between items-start mb-3">
                             <div className={`inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(booking)}`}>
                               {getStatusIcon(booking)}
-                              {booking.is_cancelled ? strings.status.cancelled : strings.status.active}
+                              {getStatusLabel(booking.status)}
                             </div>
-                            {!booking.is_cancelled && (
-                              <button
-                                onClick={() => handleCancelClick(booking)}
-                                disabled={isCancelling}
-                                className="px-3 py-1 bg-red-50 text-red-600 hover:bg-red-100 dark:bg-red-900/20 dark:text-red-400 dark:hover:bg-red-900/40 rounded-lg transition-all font-medium text-xs disabled:opacity-50"
-                                aria-label={strings.aria.cancelBooking}
-                              >
-                                {isCancelling ? 'Cancelling...' : strings.buttons.cancel}
-                              </button>
-                            )}
+                            <div className="flex gap-2">
+                              {booking.status === 'pending' && (
+                                <button
+                                  onClick={() => handleConfirmBooking(booking)}
+                                  className="px-2 py-1 bg-green-50 text-green-600 hover:bg-green-100 dark:bg-green-900/20 dark:text-green-400 dark:hover:bg-green-900/40 rounded-lg transition-all font-medium text-xs"
+                                >
+                                  Confirm
+                                </button>
+                              )}
+                              {(booking.status === 'pending' || booking.status === 'confirmed') && (
+                                <button
+                                  onClick={() => handleCancelClick(booking)}
+                                  disabled={isCancelling}
+                                  className="px-2 py-1 bg-red-50 text-red-600 hover:bg-red-100 dark:bg-red-900/20 dark:text-red-400 dark:hover:bg-red-900/40 rounded-lg transition-all font-medium text-xs disabled:opacity-50"
+                                >
+                                  {strings.buttons.cancel}
+                                </button>
+                              )}
+                            </div>
                           </div>
 
                           {/* Student Info */}
@@ -635,18 +731,6 @@ export default function ManageBookings() {
                               </p>
                             </div>
                           </div>
-
-                          {/* Room Info */}
-                          {booking.office_hour.room && (
-                            <div className={`mt-3 pt-3 border-t ${isDark ? 'border-gray-600' : 'border-gray-200'}`}>
-                              <p className={`text-xs font-semibold ${isDark ? 'text-gray-400' : 'text-gray-600'} uppercase`}>
-                                {strings.bookingCard.room}
-                              </p>
-                              <p className={`text-sm ${isDark ? 'text-white' : 'text-gray-900'}`}>
-                                {booking.office_hour.room}
-                              </p>
-                            </div>
-                          )}
                         </div>
                       ))}
                     </div>
@@ -660,7 +744,7 @@ export default function ManageBookings() {
 
       <Footer />
 
-      {/* Export Bookings Modal */}
+      {/* Export Modal */}
       {showExportModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
           <div
