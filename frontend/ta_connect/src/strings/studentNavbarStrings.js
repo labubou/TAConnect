@@ -18,7 +18,7 @@ const strings = {
       profile: 'Profile',
       book: 'Book',
       manageBooked: 'Manage Booked',
-      emailPreferences: 'Email Preferences',
+      settings: 'Settings',
       logout: 'Logout'
     }
   },
@@ -41,7 +41,7 @@ const strings = {
       profile: 'الملف الشخصي',
       book: 'حجز موعد',
       manageBooked: 'حجوزاتي',
-      emailPreferences: 'إعدادات البريد الإلكتروني',
+      settings: 'الإعدادات',
       logout: 'تسجيل الخروج'
     }
   }
