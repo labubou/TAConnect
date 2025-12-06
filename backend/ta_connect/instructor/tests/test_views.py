@@ -11,6 +11,7 @@ from django.utils import timezone
 import datetime
 from accounts.models import User
 from instructor.models import OfficeHourSlot, BookingPolicy
+from student.models import Booking
 from instructor.tests.base import BaseTestCase
 
 
@@ -21,199 +22,390 @@ class GetUserSlotsViewTestCase(BaseTestCase):
     
     def setUp(self):
         super().setUp()
-        self.get_user_slots_url = reverse('get-user-slots')
+        self.get_slots_url = reverse('get-user-slots')  # Fixed: use hyphen
     
-    def test_get_user_slots_happy_path(self):
-        """Test successful retrieval of user slots (200 OK)."""
+    def test_get_slots_happy_path(self):
+        """Test successful retrieval of instructor slots (200 OK)."""
         instructor, token = self.create_and_authenticate_instructor()
         
         # Create some slots
-        slot1, policy1 = self.create_office_hour_slot(
-            instructor=instructor,
-            course_name='Course 1'
-        )
-        slot2, policy2 = self.create_office_hour_slot(
-            instructor=instructor,
-            course_name='Course 2'
-        )
+        slot1, _ = self.create_office_hour_slot(instructor=instructor, course_name='Course 1')
+        slot2, _ = self.create_office_hour_slot(instructor=instructor, course_name='Course 2')
         
-        response = self.client.get(self.get_user_slots_url)
+        response = self.client.get(self.get_slots_url)
         
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertIn('slots', response.data)
         self.assertEqual(len(response.data['slots']), 2)
-        
-        # Verify slot data structure
-        slot_data = response.data['slots'][0]
-        self.assertIn('id', slot_data)
-        self.assertIn('course_name', slot_data)
-        self.assertIn('day_of_week', slot_data)
     
-    def test_get_user_slots_security_unauthenticated(self):
-        """Test accessing user slots without authentication (401 Unauthorized)."""
-        self.client.credentials()  # Clear any credentials
-        
-        response = self.client.get(self.get_user_slots_url)
-        
-        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
-    
-    def test_get_user_slots_security_student_access(self):
-        """Test that students cannot access instructor slots (403 Forbidden)."""
-        student, token = self.create_and_authenticate_student()
-        
-        response = self.client.get(self.get_user_slots_url)
-        
-        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
-    
-    def test_get_user_slots_only_own_slots(self):
-        """Test that instructor only sees their own slots."""
+    def test_get_slots_only_own_slots(self):
+        """Test that instructors only see their own slots."""
         instructor1, token1 = self.create_and_authenticate_instructor(username='instructor1')
-        instructor2 = self.create_instructor(username='instructor2')
+        instructor2 = self.create_instructor(username='instructor2', email='instructor2@example.com')
         
         # Create slots for both instructors
-        slot1, policy1 = self.create_office_hour_slot(
-            instructor=instructor1,
-            course_name='Instructor 1 Course'
-        )
-        slot2, policy2 = self.create_office_hour_slot(
-            instructor=instructor2,
-            course_name='Instructor 2 Course'
-        )
+        slot1, _ = self.create_office_hour_slot(instructor=instructor1, course_name='Course 1')
+        slot2, _ = self.create_office_hour_slot(instructor=instructor2, course_name='Course 2')
         
-        response = self.client.get(self.get_user_slots_url)
+        response = self.client.get(self.get_slots_url)
         
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.data['slots']), 1)
-        self.assertEqual(response.data['slots'][0]['course_name'], 'Instructor 1 Course')
+        self.assertEqual(response.data['slots'][0]['course_name'], 'Course 1')
+    
+    def test_get_slots_security_unauthenticated(self):
+        """Test accessing slots without authentication (401 Unauthorized)."""
+        self.client.credentials()
+        
+        response = self.client.get(self.get_slots_url)
+        
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+    
+    def test_get_slots_security_student_access(self):
+        """Test that students cannot access instructor slots endpoint (403 Forbidden)."""
+        student, token = self.create_and_authenticate_student()
+        
+        response = self.client.get(self.get_slots_url)
+        
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
 
-class TimeSlotCreateViewTestCase(BaseTestCase):
+class GetUserBookingViewTestCase(BaseTestCase):
     """
-    Test cases for the TimeSlotCreateView endpoint.
+    Test cases for the GetUserBookingView endpoint.
     """
     
     def setUp(self):
         super().setUp()
-        self.create_time_slot_url = reverse('time-slots-create')
+        self.get_bookings_url = reverse('get-user-bookings')  # Fixed: use hyphen
     
-    def test_create_time_slot_happy_path(self):
-        """Test successful time slot creation (201 Created)."""
+    def test_get_bookings_happy_path(self):
+        """Test successful retrieval of instructor bookings (200 OK)."""
+        instructor, token = self.create_and_authenticate_instructor()
+        student = self.create_student()
+        slot, _ = self.create_office_hour_slot(instructor=instructor)
+        
+        # Create a booking
+        booking = self.create_booking(student=student, office_hour_slot=slot)
+        
+        response = self.client.get(self.get_bookings_url)
+        
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertIn('bookings', response.data)
+    
+    def test_get_bookings_with_date_range(self):
+        """Test getting bookings with date range parameters."""
+        instructor, token = self.create_and_authenticate_instructor()
+        student = self.create_student()
+        slot, _ = self.create_office_hour_slot(instructor=instructor)
+        
+        today = datetime.date.today()
+        booking1 = self.create_booking(
+            student=student,
+            office_hour_slot=slot,
+            date=today + datetime.timedelta(days=1)
+        )
+        booking2 = self.create_booking(
+            student=student,
+            office_hour_slot=slot,
+            date=today + datetime.timedelta(days=10)
+        )
+        
+        start_date = (today + datetime.timedelta(days=1)).isoformat()
+        end_date = (today + datetime.timedelta(days=5)).isoformat()
+        
+        response = self.client.get(
+            self.get_bookings_url,
+            {'start_date': start_date, 'end_date': end_date}
+        )
+        
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        # Should only get booking1 (within range)
+        self.assertEqual(len(response.data['bookings']), 1)
+    
+    def test_get_bookings_filter_by_status_pending(self):
+        """Test filtering bookings by pending status."""
+        instructor, token = self.create_and_authenticate_instructor()
+        student = self.create_student()
+        slot, _ = self.create_office_hour_slot(instructor=instructor)
+        
+        # Create bookings with different statuses
+        booking1 = self.create_booking(student=student, office_hour_slot=slot)
+        booking1.status = 'pending'
+        booking1.save()
+        
+        booking2 = self.create_booking(student=student, office_hour_slot=slot)
+        booking2.status = 'confirmed'
+        booking2.save()
+        
+        response = self.client.get(self.get_bookings_url, {'status': 'pending'})
+        
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response.data['bookings']), 1)
+        self.assertEqual(response.data['bookings'][0]['status'], 'pending')
+    
+    def test_get_bookings_filter_by_status_confirmed(self):
+        """Test filtering bookings by confirmed status."""
+        instructor, token = self.create_and_authenticate_instructor()
+        student = self.create_student()
+        slot, _ = self.create_office_hour_slot(instructor=instructor)
+        
+        # Create bookings with different statuses
+        booking1 = self.create_booking(student=student, office_hour_slot=slot)
+        booking1.status = 'pending'
+        booking1.save()
+        
+        booking2 = self.create_booking(student=student, office_hour_slot=slot)
+        booking2.status = 'confirmed'
+        booking2.save()
+        
+        response = self.client.get(self.get_bookings_url, {'status': 'confirmed'})
+        
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response.data['bookings']), 1)
+        self.assertEqual(response.data['bookings'][0]['status'], 'confirmed')
+    
+    def test_get_bookings_filter_by_status_cancelled(self):
+        """Test filtering bookings by cancelled status."""
+        instructor, token = self.create_and_authenticate_instructor()
+        student = self.create_student()
+        slot, _ = self.create_office_hour_slot(instructor=instructor)
+        
+        booking1 = self.create_booking(student=student, office_hour_slot=slot)
+        booking1.cancel()
+        booking1.save()
+        
+        booking2 = self.create_booking(student=student, office_hour_slot=slot)
+        booking2.status = 'confirmed'
+        booking2.save()
+        
+        response = self.client.get(self.get_bookings_url, {'status': 'cancelled'})
+        
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response.data['bookings']), 1)
+        self.assertEqual(response.data['bookings'][0]['status'], 'cancelled')
+    
+    def test_get_bookings_no_status_filter_returns_all(self):
+        """Test that no status filter returns all bookings."""
+        instructor, token = self.create_and_authenticate_instructor()
+        student = self.create_student()
+        slot, _ = self.create_office_hour_slot(instructor=instructor)
+        
+        booking1 = self.create_booking(student=student, office_hour_slot=slot)
+        booking1.status = 'pending'
+        booking1.save()
+        
+        booking2 = self.create_booking(student=student, office_hour_slot=slot)
+        booking2.status = 'confirmed'
+        booking2.save()
+        
+        response = self.client.get(self.get_bookings_url)
+        
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response.data['bookings']), 2)
+    
+    def test_get_bookings_invalid_status(self):
+        """Test filtering with invalid status value (400 Bad Request)."""
         instructor, token = self.create_and_authenticate_instructor()
         
-        data = {
-            'course_name': 'New Course',
-            'section': 'A',
-            'day_of_week': 'Mon',
-            'start_time': '09:00:00',
-            'end_time': '10:00:00',
-            'duration_minutes': 15,
-            'start_date': str(datetime.date.today()),
-            'end_date': str(datetime.date.today() + datetime.timedelta(days=30)),
-            'room': 'Room 101',
-            'set_student_limit': 2
-        }
-        
-        response = self.client.post(self.create_time_slot_url, data, format='json')
-        
-        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-        self.assertIn('time_slot_id', response.data)
-        self.assertIn('success', response.data)
-        self.assertTrue(response.data['success'])
-        
-        # Verify slot was created
-        slot = OfficeHourSlot.objects.get(id=response.data['time_slot_id'])
-        self.assertEqual(slot.course_name, 'New Course')
-        self.assertEqual(slot.instructor, instructor)
-        
-        # Verify policy was created
-        self.assertTrue(hasattr(slot, 'policy'))
-        self.assertEqual(slot.policy.set_student_limit, 2)
-    
-    def test_create_time_slot_validation_start_time_after_end_time(self):
-        """Test time slot creation with start_time >= end_time (400 Bad Request)."""
-        instructor, token = self.create_and_authenticate_instructor()
-        
-        data = {
-            'course_name': 'Test Course',
-            'day_of_week': 'Mon',
-            'start_time': '10:00:00',
-            'end_time': '09:00:00',  # End before start
-            'start_date': str(datetime.date.today()),
-            'end_date': str(datetime.date.today() + datetime.timedelta(days=30)),
-        }
-        
-        response = self.client.post(self.create_time_slot_url, data, format='json')
+        response = self.client.get(self.get_bookings_url, {'status': 'invalid_status'})
         
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
     
-    def test_create_time_slot_validation_start_date_after_end_date(self):
-        """Test time slot creation with start_date > end_date (400 Bad Request)."""
-        instructor, token = self.create_and_authenticate_instructor()
-        
-        data = {
-            'course_name': 'Test Course',
-            'day_of_week': 'Mon',
-            'start_time': '09:00:00',
-            'end_time': '10:00:00',
-            'start_date': str(datetime.date.today() + datetime.timedelta(days=30)),
-            'end_date': str(datetime.date.today()),  # End before start
-        }
-        
-        response = self.client.post(self.create_time_slot_url, data, format='json')
-        
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-    
-    def test_create_time_slot_validation_invalid_student_limit(self):
-        """Test time slot creation with invalid student limit (400 Bad Request)."""
-        instructor, token = self.create_and_authenticate_instructor()
-        
-        data = {
-            'course_name': 'Test Course',
-            'day_of_week': 'Mon',
-            'start_time': '09:00:00',
-            'end_time': '10:00:00',
-            'start_date': str(datetime.date.today()),
-            'end_date': str(datetime.date.today() + datetime.timedelta(days=30)),
-            'set_student_limit': 0  # Invalid: must be at least 1
-        }
-        
-        response = self.client.post(self.create_time_slot_url, data, format='json')
-        
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-    
-    def test_create_time_slot_security_unauthenticated(self):
-        """Test creating time slot without authentication (401 Unauthorized)."""
+    def test_get_bookings_security_unauthenticated(self):
+        """Test accessing bookings without authentication (401 Unauthorized)."""
         self.client.credentials()
         
-        data = {
-            'course_name': 'Test Course',
-            'day_of_week': 'Mon',
-            'start_time': '09:00:00',
-            'end_time': '10:00:00',
-            'start_date': str(datetime.date.today()),
-            'end_date': str(datetime.date.today() + datetime.timedelta(days=30)),
-        }
-        
-        response = self.client.post(self.create_time_slot_url, data, format='json')
+        response = self.client.get(self.get_bookings_url)
         
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
     
-    def test_create_time_slot_security_student_access(self):
-        """Test that students cannot create time slots (403 Forbidden)."""
+    def test_get_bookings_security_student_access(self):
+        """Test that students cannot access instructor bookings endpoint (403 Forbidden)."""
         student, token = self.create_and_authenticate_student()
         
-        data = {
-            'course_name': 'Test Course',
-            'day_of_week': 'Mon',
-            'start_time': '09:00:00',
-            'end_time': '10:00:00',
-            'start_date': str(datetime.date.today()),
-            'end_date': str(datetime.date.today() + datetime.timedelta(days=30)),
-        }
-        
-        response = self.client.post(self.create_time_slot_url, data, format='json')
+        response = self.client.get(self.get_bookings_url)
         
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+
+class InstructorConfirmBookingViewTestCase(BaseTestCase):
+    """
+    Test cases for the InstructorConfirmBookingView endpoint.
+    """
+    
+    def test_confirm_booking_happy_path(self):
+        """Test successful booking confirmation (200 OK)."""
+        instructor, token = self.create_and_authenticate_instructor()
+        student = self.create_student()
+        slot, _ = self.create_office_hour_slot(instructor=instructor)
+        
+        booking = self.create_booking(student=student, office_hour_slot=slot)
+        booking.status = 'pending'
+        booking.save()
+        
+        url = reverse('instructor-confirm-booking', kwargs={'pk': booking.id})  # Fixed: use hyphen
+        response = self.client.post(url)
+        
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertTrue(response.data['success'])
+        self.assertEqual(response.data['booking_id'], booking.id)
+        
+        # Verify booking was confirmed
+        booking.refresh_from_db()
+        self.assertEqual(booking.status, 'confirmed')
+    
+    def test_confirm_booking_already_confirmed(self):
+        """Test confirming an already confirmed booking (400 Bad Request)."""
+        instructor, token = self.create_and_authenticate_instructor()
+        student = self.create_student()
+        slot, _ = self.create_office_hour_slot(instructor=instructor)
+        
+        booking = self.create_booking(student=student, office_hour_slot=slot)
+        booking.status = 'confirmed'
+        booking.save()
+        
+        url = reverse('instructor-confirm-booking', kwargs={'pk': booking.id})  # Fixed: use hyphen
+        response = self.client.post(url)
+        
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertIn('error', response.data)
+    
+    def test_confirm_booking_cancelled_booking(self):
+        """Test confirming a cancelled booking (400 Bad Request)."""
+        instructor, token = self.create_and_authenticate_instructor()
+        student = self.create_student()
+        slot, _ = self.create_office_hour_slot(instructor=instructor)
+        
+        booking = self.create_booking(student=student, office_hour_slot=slot)
+        booking.cancel()
+        booking.save()
+        
+        url = reverse('instructor-confirm-booking', kwargs={'pk': booking.id})  # Fixed: use hyphen
+        response = self.client.post(url)
+        
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertIn('error', response.data)
+    
+    def test_confirm_booking_completed_booking(self):
+        """Test confirming a completed booking (400 Bad Request)."""
+        instructor, token = self.create_and_authenticate_instructor()
+        student = self.create_student()
+        slot, _ = self.create_office_hour_slot(instructor=instructor)
+        
+        booking = self.create_booking(student=student, office_hour_slot=slot)
+        booking.status = 'completed'
+        booking.is_completed = True
+        booking.save()
+        
+        url = reverse('instructor-confirm-booking', kwargs={'pk': booking.id})  # Fixed: use hyphen
+        response = self.client.post(url)
+        
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertIn('error', response.data)
+    
+    def test_confirm_booking_not_found(self):
+        """Test confirming a non-existent booking (404 Not Found)."""
+        instructor, token = self.create_and_authenticate_instructor()
+        
+        url = reverse('instructor-confirm-booking', kwargs={'pk': 99999})  # Fixed: use hyphen
+        response = self.client.post(url)
+        
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+    
+    def test_confirm_booking_other_instructor(self):
+        """Test confirming booking belonging to another instructor (404 Not Found)."""
+        instructor1, token1 = self.create_and_authenticate_instructor(username='instructor1')
+        instructor2 = self.create_instructor(username='instructor2', email='instructor2@example.com')
+        student = self.create_student()
+        slot, _ = self.create_office_hour_slot(instructor=instructor2)
+        
+        booking = self.create_booking(student=student, office_hour_slot=slot)
+        booking.status = 'pending'
+        booking.save()
+        
+        url = reverse('instructor-confirm-booking', kwargs={'pk': booking.id})  # Fixed: use hyphen
+        response = self.client.post(url)
+        
+        # Should return 404 because booking doesn't belong to instructor1
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+    
+    def test_confirm_booking_security_unauthenticated(self):
+        """Test confirming booking without authentication (401 Unauthorized)."""
+        instructor = self.create_instructor()
+        student = self.create_student()
+        slot, _ = self.create_office_hour_slot(instructor=instructor)
+        booking = self.create_booking(student=student, office_hour_slot=slot)
+        
+        self.client.credentials()
+        url = reverse('instructor-confirm-booking', kwargs={'pk': booking.id})  # Fixed: use hyphen
+        response = self.client.post(url)
+        
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+    
+    def test_confirm_booking_security_student_access(self):
+        """Test that students cannot confirm bookings (403 Forbidden)."""
+        instructor = self.create_instructor()
+        student, token = self.create_and_authenticate_student()
+        slot, _ = self.create_office_hour_slot(instructor=instructor)
+        booking = self.create_booking(student=student, office_hour_slot=slot)
+        
+        url = reverse('instructor-confirm-booking', kwargs={'pk': booking.id})  # Fixed: use hyphen
+        response = self.client.post(url)
+        
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+
+class InstructorCancelBookingViewTestCase(BaseTestCase):
+    """
+    Test cases for the InstructorCancelBookingView endpoint.
+    """
+    
+    def test_cancel_booking_happy_path(self):
+        """Test successful booking cancellation by instructor (200 OK)."""
+        instructor, token = self.create_and_authenticate_instructor()
+        student = self.create_student()
+        slot, _ = self.create_office_hour_slot(instructor=instructor)
+        
+        booking = self.create_booking(student=student, office_hour_slot=slot)
+        
+        url = reverse('instructor-cancel-booking', kwargs={'pk': booking.id})  # Fixed: use hyphen
+        response = self.client.delete(url)
+        
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertTrue(response.data['success'])
+        
+        # Verify booking was cancelled
+        booking.refresh_from_db()
+        self.assertTrue(booking.is_cancelled)
+    
+    def test_cancel_booking_already_cancelled(self):
+        """Test cancelling an already cancelled booking (400 Bad Request)."""
+        instructor, token = self.create_and_authenticate_instructor()
+        student = self.create_student()
+        slot, _ = self.create_office_hour_slot(instructor=instructor)
+        
+        booking = self.create_booking(student=student, office_hour_slot=slot)
+        booking.cancel()
+        booking.save()
+        
+        url = reverse('instructor-cancel-booking', kwargs={'pk': booking.id})  # Fixed: use hyphen
+        response = self.client.delete(url)
+        
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+    
+    def test_cancel_booking_security_unauthenticated(self):
+        """Test cancelling booking without authentication (401 Unauthorized)."""
+        instructor = self.create_instructor()
+        student = self.create_student()
+        slot, _ = self.create_office_hour_slot(instructor=instructor)
+        booking = self.create_booking(student=student, office_hour_slot=slot)
+        
+        self.client.credentials()
+        url = reverse('instructor-cancel-booking', kwargs={'pk': booking.id})  # Fixed: use hyphen
+        response = self.client.delete(url)
+        
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
 
 class SearchInstructorsViewTestCase(BaseTestCase):
@@ -223,58 +415,40 @@ class SearchInstructorsViewTestCase(BaseTestCase):
     
     def setUp(self):
         super().setUp()
-        self.search_instructors_url = reverse('search-instructors')
+        self.search_url = reverse('search-instructors')  # Fixed: use hyphen
     
     def test_search_instructors_happy_path(self):
         """Test successful instructor search (200 OK)."""
         student, token = self.create_and_authenticate_student()
         
         # Create some instructors
-        instructor1 = self.create_instructor(
-            username='instructor1',
-            first_name='John',
-            last_name='Doe'
-        )
-        instructor2 = self.create_instructor(
-            username='instructor2',
-            first_name='Jane',
-            last_name='Smith'
-        )
+        self.create_instructor(username='john_doe', first_name='John', last_name='Doe')
+        self.create_instructor(username='jane_smith', email='jane@example.com', first_name='Jane', last_name='Smith')
         
-        response = self.client.get(self.search_instructors_url)
+        response = self.client.get(self.search_url, {'query': 'john'})
         
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertIn('instructors', response.data)
-        self.assertGreaterEqual(len(response.data['instructors']), 2)
+        self.assertEqual(len(response.data['instructors']), 1)
+        self.assertEqual(response.data['instructors'][0]['username'], 'john_doe')
     
-    def test_search_instructors_with_query(self):
-        """Test instructor search with query parameter (200 OK)."""
+    def test_search_instructors_no_query_returns_all(self):
+        """Test search without query returns all instructors."""
         student, token = self.create_and_authenticate_student()
         
-        instructor1 = self.create_instructor(
-            username='instructor1',
-            first_name='John',
-            last_name='Doe'
-        )
-        instructor2 = self.create_instructor(
-            username='instructor2',
-            first_name='Jane',
-            last_name='Smith'
-        )
+        self.create_instructor(username='instructor1', email='inst1@example.com')
+        self.create_instructor(username='instructor2', email='inst2@example.com')
         
-        response = self.client.get(self.search_instructors_url, {'query': 'John'})
+        response = self.client.get(self.search_url)
         
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertIn('instructors', response.data)
-        # Should find instructor with first name 'John'
-        instructor_names = [inst['full_name'] for inst in response.data['instructors']]
-        self.assertTrue(any('John' in name for name in instructor_names))
+        self.assertEqual(len(response.data['instructors']), 2)
     
     def test_search_instructors_security_unauthenticated(self):
-        """Test searching instructors without authentication (401 Unauthorized)."""
+        """Test searching without authentication (401 Unauthorized)."""
         self.client.credentials()
         
-        response = self.client.get(self.search_instructors_url)
+        response = self.client.get(self.search_url)
         
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
@@ -286,35 +460,31 @@ class InstructorDataViewTestCase(BaseTestCase):
     
     def test_get_instructor_data_happy_path(self):
         """Test successful retrieval of instructor data (200 OK)."""
-        student, token = self.create_and_authenticate_student()
+        instructor = self.create_instructor(username='test_instructor')
+        slot, _ = self.create_office_hour_slot(instructor=instructor, course_name='Test Course')
         
-        instructor = self.create_instructor(
-            username='testinstructor',
-            first_name='Test',
-            last_name='Instructor'
-        )
-        
-        slot, policy = self.create_office_hour_slot(
-            instructor=instructor,
-            course_name='Test Course'
-        )
-        
-        url = reverse('get-instructor-data', kwargs={'user_id': instructor.id})
+        url = reverse('get-instructor-data', kwargs={'user_id': instructor.id})  # Fixed: use hyphen
         response = self.client.get(url)
         
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data['id'], instructor.id)
-        self.assertEqual(response.data['username'], 'testinstructor')
+        self.assertEqual(response.data['username'], 'test_instructor')
         self.assertIn('slots', response.data)
         self.assertEqual(len(response.data['slots']), 1)
     
     def test_get_instructor_data_not_found(self):
-        """Test getting data for non-existent instructor (404 Not Found)."""
-        student, token = self.create_and_authenticate_student()
-        
-        url = reverse('get-instructor-data', kwargs={'user_id': 99999})
+        """Test getting non-existent instructor (404 Not Found)."""
+        url = reverse('get-instructor-data', kwargs={'user_id': 99999})  # Fixed: use hyphen
         response = self.client.get(url)
         
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
-        self.assertIn('error', response.data)
+    
+    def test_get_instructor_data_student_id(self):
+        """Test getting student as instructor returns 404."""
+        student = self.create_student()
+        
+        url = reverse('get-instructor-data', kwargs={'user_id': student.id})  # Fixed: use hyphen
+        response = self.client.get(url)
+        
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 

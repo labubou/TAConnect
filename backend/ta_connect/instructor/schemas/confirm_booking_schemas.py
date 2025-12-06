@@ -12,18 +12,6 @@ confirm_booking_instructor_swagger = {
             example=1
         )
     ],
-    'request_body': openapi.Schema(
-        type=openapi.TYPE_OBJECT,
-        properties={
-            'send_email': openapi.Schema(
-                type=openapi.TYPE_BOOLEAN,
-                description='Whether to send confirmation email to the student',
-                default=True,
-                example=True
-            ),
-        },
-        required=[]
-    ),
     'responses': {
         200: openapi.Response(
             description='Booking confirmed successfully',
@@ -54,6 +42,11 @@ confirm_booking_instructor_swagger = {
                 }
             )
         ),
-        500: 'Internal Server Error'
+        401: openapi.Response(
+            description='Unauthorized - Authentication required',
+        ),
+        403: openapi.Response(
+            description='Forbidden - Only instructors can confirm bookings',
+        ),
     }
 }
