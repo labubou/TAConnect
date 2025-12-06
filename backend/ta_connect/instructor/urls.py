@@ -9,6 +9,7 @@ from .allowed_students.allowed_students_operations import AllowedStudentsUpdateD
 from .allowed_students.update_allowed_students_status import UpdateAllowedStudentsStatusView
 from .analytics import BookingAnalyticsView
 from .bookings.cancel_book import InstructorCancelBookingView
+from .bookings.confirm_book import InstructorConfirmBookingView
 
 urlpatterns = [
     # URLs for time slots
@@ -34,6 +35,7 @@ urlpatterns = [
     
     # URL for cancelling bookings
     path('cancel-booking/<int:pk>/', InstructorCancelBookingView.as_view(), name='instructor-cancel-booking'),
+    path('confirm-booking/<int:pk>/', InstructorConfirmBookingView.as_view(), name='instructor-confirm-booking'),
     
     # URL for exporting bookings
     path('bookings/export/', BookingsExport.as_view(), name='bookings-export'),

@@ -123,7 +123,7 @@ get_user_slots_swagger = {
 }
 
 get_user_bookings_swagger = {
-    'operation_description': 'Get all bookings for the logged-in instructor. Optionally filter by date range.',
+    'operation_description': 'Get all bookings for the logged-in instructor. Optionally filter by date range and status.',
     'manual_parameters': [
         openapi.Parameter(
             'start_date',
@@ -142,6 +142,15 @@ get_user_bookings_swagger = {
             format='date',
             required=False,
             example='2025-01-31'
+        ),
+        openapi.Parameter(
+            'status',
+            openapi.IN_QUERY,
+            description='Filter by booking status. Optional.',
+            type=openapi.TYPE_STRING,
+            enum=['pending', 'confirmed', 'completed', 'cancelled'],
+            required=False,
+            example='confirmed'
         )
     ],
     'responses': {
