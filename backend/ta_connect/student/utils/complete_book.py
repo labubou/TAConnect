@@ -7,12 +7,12 @@ def complete_booking(booking):
     """
     now = timezone.now()
     
-    if not booking or booking.is_cancelled:
+    if not booking or booking.status != "confirmed":
         return False, "Invalid or cancelled booking."
     if booking.end_time >= now:
         return False, "Booking has not ended yet."
     try:
-        booking.is_completed = True
+        booking.completed()
         booking.save()
         return True, "Booking marked as completed."
     except Exception as e:
