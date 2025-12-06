@@ -32,7 +32,7 @@ def cancel_student_bookings(time_slot, bookings=None, cancellation_reason=None):
         bookings_list = list(bookings)
         
         for booking in bookings_list:
-            booking.is_cancelled = True
+            booking.cancel()
             booking.save()
             cancelled_count += 1
 
