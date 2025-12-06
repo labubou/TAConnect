@@ -10,6 +10,9 @@ class UpdateBookingSerializer(serializers.Serializer):
         booking = self.instance
         slot = booking.office_hour
 
+        if booking.is_cancelled or booking.is_completed:
+            raise serializers.ValidationError("Cannot update a cancelled or completed booking")
+        
         if booking.start_time == attrs['new_time'] and booking.date == attrs['new_date']:
             raise serializers.ValidationError("Nothing has changed")
 

@@ -72,6 +72,7 @@ class BookingCreateView(GenericAPIView):
                         'end_time': booking.end_time,
                         'is_cancelled': booking.is_cancelled,
                         'is_completed': booking.is_completed,
+                        'status': booking.status,
                         'office_hour': {
                             'id': booking.office_hour.id,
                             'start_date': booking.office_hour.start_date,

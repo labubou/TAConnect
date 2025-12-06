@@ -127,6 +127,8 @@ class GetUserBookingView(GenericAPIView):
                         'date': book.date.strftime('%Y-%m-%d') if book.date else None,
                         'start_time': book.start_time.strftime('%Y-%m-%d %H:%M:%S') if book.start_time else None,
                         'is_cancelled': book.is_cancelled,
+                        'is_completed': book.is_completed,
+                        'status': book.status,
                         'created_at': book.created_at.isoformat() if book.created_at else None,
                     } for book in books
                 ]
