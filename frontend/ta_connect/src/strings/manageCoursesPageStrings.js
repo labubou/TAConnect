@@ -117,6 +117,12 @@ const manageCoursesPageStrings = {
       addCourse: "Add Slot",
       saving: "Saving...",
       share: "Share",
+      export: "Export CSV",
+      exporting: "Exporting...",
+    },
+    export: {
+      success: "Time slots exported successfully",
+      error: "Failed to export time slots",
     },
   },
 
@@ -359,6 +365,12 @@ ar: {
       addCourse: "إضافة موعد",
       saving: "جارٍ الحفظ...",
       share: "مشاركة",
+      export: "تصدير CSV",
+      exporting: "جارٍ التصدير...",
+    },
+    export: {
+      success: "تم تصدير المواعيد بنجاح",
+      error: "فشل تصدير المواعيد",
     },
   },
   edit: {
