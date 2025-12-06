@@ -8,7 +8,7 @@ from rest_framework.response import Response
 from drf_yasg.utils import swagger_auto_schema
 from student.utils.complete_book import complete_booking
 from student.models import Booking
-from student.sendBookingEmail import send_booking_confirmation_email, send_booking_cancelled_email,send_booking_update_email
+from student.sendBookingEmail import send_booking_cancelled_email,send_booking_update_email, send_booking_pending_email
 from instructor.models import OfficeHourSlot
 from accounts.permissions import IsStudent
 from student.serializers.create_book_serializer import CreateBookingSerializer
@@ -107,12 +107,13 @@ class BookingCreateView(GenericAPIView):
             booking = serializer.save()
 
             # Send booking confirmation emails
-            send_booking_confirmation_email(
+            send_booking_pending_email(
                 student=request.user,
                 instructor=slot.instructor,
                 slot=slot,
                 booking_date=serializer.validated_data['date'],
-                booking_time=serializer.validated_data['start_time']
+                booking_time=serializer.validated_data['start_time'],
+                booking_id=booking.id
             )
 
             return Response({
@@ -156,6 +157,7 @@ class BookingDetailView(GenericAPIView):
 
         booking = get_object_or_404(Booking, id=pk, student=request.user)
 
+        #!these old values before update are not used currently but may be useful in the future
         old_date = booking.date
         old_time = booking.start_time
 
@@ -165,15 +167,15 @@ class BookingDetailView(GenericAPIView):
             return Response(format_serializer_errors(serializer.errors), status=status.HTTP_400_BAD_REQUEST)
 
         updated_booking = serializer.save()
+
         #send email notifications
-        send_booking_update_email(
+        send_booking_pending_email(
             student=request.user,
             instructor=booking.office_hour.instructor,
             slot=booking.office_hour,
-            old_date=old_date,
-            old_time=old_time,
-            new_date=updated_booking.date,
-            new_time=updated_booking.start_time
+            booking_date=updated_booking.date,
+            booking_time=updated_booking.start_time,
+            booking_id=updated_booking.id
         )
         
         return Response({
@@ -182,7 +184,6 @@ class BookingDetailView(GenericAPIView):
             'message': 'Booking updated successfully.'
         }, status=status.HTTP_200_OK)
        
-
     @swagger_auto_schema(**cancel_booking_swagger)
     def delete(self, request, pk):
         """

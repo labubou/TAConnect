@@ -37,5 +37,6 @@ class UpdateBookingSerializer(serializers.Serializer):
         booking.start_time = validated_data['new_start_datetime']
         # Clear end_time so it gets recalculated in the save() method
         booking.end_time = None
+        booking.pending()
         booking.save()
         return booking

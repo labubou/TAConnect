@@ -47,7 +47,7 @@ def send_booking_pending_email(student, instructor, slot, booking_date, booking_
     encoded_booking_id = urlsafe_base64_encode(force_bytes(booking_id))
     
     # Generate approval URL for instructor
-    approval_url = f"{frontend_url}/ta/pending-bookings/{booking_id}"
+    approval_url = f"{frontend_url}/ta/pending-bookings/?booking_id={booking_id}"
 
     # Prepare email context
     email_context = {

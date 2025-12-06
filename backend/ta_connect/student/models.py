@@ -48,6 +48,13 @@ class Booking(models.Model):
             self.end_time = self.start_time + datetime.timedelta(minutes=self.office_hour.duration_minutes)
         super().save(*args, **kwargs)
 
+    def pending(self):
+        """Helper method to mark a booking as pending."""
+        self.status = "pending"
+        self.is_cancelled = False
+        self.is_completed = False
+        self.save()
+
     def confirm(self):
         """Helper method to confirm a booking."""
         self.status = "confirmed"
@@ -58,11 +65,13 @@ class Booking(models.Model):
     def cancel(self):
         """Helper method to cancel a booking."""
         self.is_cancelled = True
+        self.status = "cancelled"
         self.save()
 
     def complete(self):
         """Helper method to complete a booking."""
         self.is_completed = True
+        self.status = "completed"
         self.save()
 
     def __str__(self):
