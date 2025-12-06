@@ -197,4 +197,113 @@ class BookingModelTestCase(BaseTestCase):
         # Should be close to now (within 1 second)
         time_diff = abs((timezone.now() - booking.created_at).total_seconds())
         self.assertLess(time_diff, 1)
+    
+    def test_booking_end_time_timezone_aware(self):
+        """Test that end_time is timezone-aware when auto-calculated."""
+        student = self.create_student()
+        slot, policy = self.create_office_hour_slot(duration_minutes=15)
+        
+        booking_date = datetime.date.today() + datetime.timedelta(days=1)
+        start_time = datetime.datetime.combine(booking_date, slot.start_time)
+        
+        # Make start_time timezone-aware
+        if timezone.is_naive(start_time):
+            start_time = timezone.make_aware(start_time)
+        
+        booking = Booking.objects.create(
+            student=student,
+            office_hour=slot,
+            date=booking_date,
+            start_time=start_time
+        )
+        
+        # Verify end_time is timezone-aware
+        self.assertIsNotNone(booking.end_time)
+        self.assertTrue(timezone.is_aware(booking.end_time))
+    
+    def test_booking_start_time_timezone_aware(self):
+        """Test that start_time remains timezone-aware after save."""
+        student = self.create_student()
+        slot, policy = self.create_office_hour_slot()
+        
+        booking_date = datetime.date.today() + datetime.timedelta(days=1)
+        start_time = timezone.now() + datetime.timedelta(days=1)
+        
+        booking = Booking.objects.create(
+            student=student,
+            office_hour=slot,
+            date=booking_date,
+            start_time=start_time
+        )
+        
+        booking.refresh_from_db()
+        self.assertTrue(timezone.is_aware(booking.start_time))
+    
+    def test_booking_status_sync_with_is_cancelled(self):
+        """Test that status syncs correctly with is_cancelled flag."""
+        booking = self.create_booking()
+        
+        # Set is_cancelled to True
+        booking.is_cancelled = True
+        booking.save()
+        
+        booking.refresh_from_db()
+        self.assertEqual(booking.status, 'cancelled')
+        self.assertTrue(booking.is_cancelled)
+    
+    def test_booking_status_sync_with_is_completed(self):
+        """Test that status syncs correctly with is_completed flag."""
+        booking = self.create_booking()
+        
+        # Set is_completed to True
+        booking.is_completed = True
+        booking.save()
+        
+        booking.refresh_from_db()
+        self.assertEqual(booking.status, 'completed')
+        self.assertTrue(booking.is_completed)
+    
+    def test_booking_pending_method(self):
+        """Test the pending() helper method."""
+        booking = self.create_booking()
+        booking.status = 'confirmed'
+        booking.save()
+        
+        booking.pending()
+        
+        booking.refresh_from_db()
+        self.assertEqual(booking.status, 'pending')
+        self.assertFalse(booking.is_cancelled)
+        self.assertFalse(booking.is_completed)
+    
+    def test_booking_confirm_method(self):
+        """Test the confirm() helper method."""
+        booking = self.create_booking()
+        
+        booking.confirm()
+        
+        booking.refresh_from_db()
+        self.assertEqual(booking.status, 'confirmed')
+        self.assertFalse(booking.is_cancelled)
+        self.assertFalse(booking.is_completed)
+    
+    def test_booking_cancel_method(self):
+        """Test the cancel() helper method."""
+        booking = self.create_booking()
+        
+        booking.cancel()
+        
+        booking.refresh_from_db()
+        self.assertEqual(booking.status, 'cancelled')
+        self.assertTrue(booking.is_cancelled)
+    
+    def test_booking_complete_method(self):
+        """Test the complete() helper method."""
+        booking = self.create_booking()
+        
+        booking.complete()
+        
+        booking.refresh_from_db()
+        self.assertEqual(booking.status, 'completed')
+        self.assertTrue(booking.is_completed)
 
