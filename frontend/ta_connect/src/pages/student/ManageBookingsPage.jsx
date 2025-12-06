@@ -380,11 +380,15 @@ export default function ManageBookingsPage() {
   const completedBookings = filteredBookings.filter(b => b.is_completed);
 
   return (
-    <div className={`min-h-screen flex flex-col ${isDark ? 'bg-gray-900' : 'bg-gray-50'}`}>
+    <div className={`min-h-screen flex flex-col ${isDark ? 'bg-gray-900' : 'bg-gray-50'}`} dir={language === 'ar' ? 'rtl' : 'ltr'}>
       <StudentNavbar onToggle={setIsNavbarOpen} />
       
       <div 
-        className={`flex-1 transition-all duration-300 ${isNavbarOpen ? 'lg:ml-64' : 'ml-0'} pt-16 sm:pt-20`}
+        className={`flex-1 transition-all duration-500 ease-in-out ${
+          language === 'ar'
+            ? (isNavbarOpen ? 'lg:mr-64' : 'mr-0')
+            : (isNavbarOpen ? 'lg:ml-64' : 'ml-0')
+        } pt-16 sm:pt-20`}
         style={{ minHeight: 'calc(100vh - 4rem)' }}
       >
         <main className={`${isDark ? 'bg-gray-900' : 'bg-gray-50'} p-3 sm:p-6`}>
