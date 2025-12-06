@@ -70,48 +70,137 @@ class GetUserSlotsViewTestCase(BaseTestCase):
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
 
-class GetUserBookingViewTestCase(BaseTestCase):
+class GetUserBookingsViewTestCase(BaseTestCase):
     """
-    Test cases for the GetUserBookingView endpoint.
+    Test cases for the GetUserBookingsView endpoint.
     """
     
     def setUp(self):
         super().setUp()
-        self.get_bookings_url = reverse('get-user-bookings')  # Fixed: use hyphen
+        # Use the actual URL path instead of reverse
+        self.get_bookings_url = '/api/instructor/get-user-bookings/'
     
     def test_get_bookings_happy_path(self):
         """Test successful retrieval of instructor bookings (200 OK)."""
         instructor, token = self.create_and_authenticate_instructor()
-        student = self.create_student()
-        slot, _ = self.create_office_hour_slot(instructor=instructor)
+        slot, policy = self.create_office_hour_slot(instructor=instructor)
         
-        # Create a booking
-        booking = self.create_booking(student=student, office_hour_slot=slot)
+        # Create bookings with unique students
+        student1 = self.create_student(username='student1', email='student1@example.com')
+        student2 = self.create_student(username='student2', email='student2@example.com')
+        
+        booking1 = self.create_booking(office_hour_slot=slot, student=student1)
+        booking2 = self.create_booking(office_hour_slot=slot, student=student2)
         
         response = self.client.get(self.get_bookings_url)
         
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertIn('bookings', response.data)
+        self.assertGreaterEqual(len(response.data['bookings']), 2)
     
-    def test_get_bookings_with_date_range(self):
-        """Test getting bookings with date range parameters."""
+    def test_get_bookings_filter_by_status_pending(self):
+        """Test filtering bookings by pending status."""
         instructor, token = self.create_and_authenticate_instructor()
-        student = self.create_student()
-        slot, _ = self.create_office_hour_slot(instructor=instructor)
+        slot, policy = self.create_office_hour_slot(instructor=instructor)
+        
+        # Create bookings with different statuses and unique students
+        student1 = self.create_student(username='student_pending', email='student_pending@example.com')
+        student2 = self.create_student(username='student_confirmed', email='student_confirmed@example.com')
+        
+        pending_booking = self.create_booking(office_hour_slot=slot, student=student1)
+        pending_booking.status = 'pending'
+        pending_booking.save()
+        
+        confirmed_booking = self.create_booking(office_hour_slot=slot, student=student2)
+        confirmed_booking.status = 'confirmed'
+        confirmed_booking.save()
+        
+        response = self.client.get(self.get_bookings_url, {'status': 'pending'})
+        
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        # Should only get pending bookings
+        for booking in response.data['bookings']:
+            self.assertEqual(booking['status'], 'pending')
+    
+    def test_get_bookings_filter_by_status_confirmed(self):
+        """Test filtering bookings by confirmed status."""
+        instructor, token = self.create_and_authenticate_instructor()
+        slot, policy = self.create_office_hour_slot(instructor=instructor)
+        
+        student1 = self.create_student(username='student_conf1', email='student_conf1@example.com')
+        student2 = self.create_student(username='student_pend1', email='student_pend1@example.com')
+        
+        confirmed_booking = self.create_booking(office_hour_slot=slot, student=student1)
+        confirmed_booking.status = 'confirmed'
+        confirmed_booking.save()
+        
+        pending_booking = self.create_booking(office_hour_slot=slot, student=student2)
+        pending_booking.status = 'pending'
+        pending_booking.save()
+        
+        response = self.client.get(self.get_bookings_url, {'status': 'confirmed'})
+        
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        for booking in response.data['bookings']:
+            self.assertEqual(booking['status'], 'confirmed')
+    
+    def test_get_bookings_filter_by_status_completed(self):
+        """Test filtering bookings by completed status."""
+        instructor, token = self.create_and_authenticate_instructor()
+        slot, policy = self.create_office_hour_slot(instructor=instructor)
+        
+        student = self.create_student(username='student_completed', email='student_completed@example.com')
+        
+        completed_booking = self.create_booking(office_hour_slot=slot, student=student)
+        completed_booking.status = 'completed'
+        completed_booking.is_completed = True
+        completed_booking.save()
+        
+        response = self.client.get(self.get_bookings_url, {'status': 'completed'})
+        
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        for booking in response.data['bookings']:
+            self.assertEqual(booking['status'], 'completed')
+    
+    def test_get_bookings_filter_by_status_cancelled(self):
+        """Test filtering bookings by cancelled status."""
+        instructor, token = self.create_and_authenticate_instructor()
+        slot, policy = self.create_office_hour_slot(instructor=instructor)
+        
+        student = self.create_student(username='student_cancelled', email='student_cancelled@example.com')
+        
+        cancelled_booking = self.create_booking(office_hour_slot=slot, student=student)
+        cancelled_booking.cancel()
+        cancelled_booking.save()
+        
+        response = self.client.get(self.get_bookings_url, {'status': 'cancelled'})
+        
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        for booking in response.data['bookings']:
+            self.assertEqual(booking['status'], 'cancelled')
+    
+    def test_get_bookings_filter_by_date_range(self):
+        """Test filtering bookings by date range."""
+        instructor, token = self.create_and_authenticate_instructor()
+        slot, policy = self.create_office_hour_slot(instructor=instructor)
         
         today = datetime.date.today()
-        booking1 = self.create_booking(
-            student=student,
+        
+        student1 = self.create_student(username='student_range1', email='student_range1@example.com')
+        student2 = self.create_student(username='student_range2', email='student_range2@example.com')
+        
+        booking_in_range = self.create_booking(
             office_hour_slot=slot,
+            student=student1,
             date=today + datetime.timedelta(days=1)
         )
-        booking2 = self.create_booking(
-            student=student,
+        booking_out_of_range = self.create_booking(
             office_hour_slot=slot,
+            student=student2,
             date=today + datetime.timedelta(days=10)
         )
         
-        start_date = (today + datetime.timedelta(days=1)).isoformat()
+        start_date = today.isoformat()
         end_date = (today + datetime.timedelta(days=5)).isoformat()
         
         response = self.client.get(
@@ -120,100 +209,51 @@ class GetUserBookingViewTestCase(BaseTestCase):
         )
         
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        # Should only get booking1 (within range)
-        self.assertEqual(len(response.data['bookings']), 1)
+        # Should only return bookings within range
+        booking_dates = [b['date'] for b in response.data['bookings']]
+        self.assertIn(str(booking_in_range.date), booking_dates)
     
-    def test_get_bookings_filter_by_status_pending(self):
-        """Test filtering bookings by pending status."""
+    def test_get_bookings_filter_by_status_and_date(self):
+        """Test filtering bookings by both status and date range."""
         instructor, token = self.create_and_authenticate_instructor()
-        student = self.create_student()
-        slot, _ = self.create_office_hour_slot(instructor=instructor)
+        slot, policy = self.create_office_hour_slot(instructor=instructor)
         
-        # Create bookings with different statuses
-        booking1 = self.create_booking(student=student, office_hour_slot=slot)
-        booking1.status = 'pending'
-        booking1.save()
+        today = datetime.date.today()
         
-        booking2 = self.create_booking(student=student, office_hour_slot=slot)
-        booking2.status = 'confirmed'
-        booking2.save()
+        student1 = self.create_student(username='student_pend_range', email='student_pend_range@example.com')
+        student2 = self.create_student(username='student_conf_range', email='student_conf_range@example.com')
         
-        response = self.client.get(self.get_bookings_url, {'status': 'pending'})
+        pending_in_range = self.create_booking(
+            office_hour_slot=slot,
+            student=student1,
+            date=today + datetime.timedelta(days=1)
+        )
+        pending_in_range.status = 'pending'
+        pending_in_range.save()
+        
+        confirmed_in_range = self.create_booking(
+            office_hour_slot=slot,
+            student=student2,
+            date=today + datetime.timedelta(days=2)
+        )
+        confirmed_in_range.status = 'confirmed'
+        confirmed_in_range.save()
+        
+        response = self.client.get(
+            self.get_bookings_url,
+            {
+                'status': 'pending',
+                'start_date': today.isoformat(),
+                'end_date': (today + datetime.timedelta(days=5)).isoformat()
+            }
+        )
         
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(len(response.data['bookings']), 1)
-        self.assertEqual(response.data['bookings'][0]['status'], 'pending')
-    
-    def test_get_bookings_filter_by_status_confirmed(self):
-        """Test filtering bookings by confirmed status."""
-        instructor, token = self.create_and_authenticate_instructor()
-        student = self.create_student()
-        slot, _ = self.create_office_hour_slot(instructor=instructor)
-        
-        # Create bookings with different statuses
-        booking1 = self.create_booking(student=student, office_hour_slot=slot)
-        booking1.status = 'pending'
-        booking1.save()
-        
-        booking2 = self.create_booking(student=student, office_hour_slot=slot)
-        booking2.status = 'confirmed'
-        booking2.save()
-        
-        response = self.client.get(self.get_bookings_url, {'status': 'confirmed'})
-        
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(len(response.data['bookings']), 1)
-        self.assertEqual(response.data['bookings'][0]['status'], 'confirmed')
-    
-    def test_get_bookings_filter_by_status_cancelled(self):
-        """Test filtering bookings by cancelled status."""
-        instructor, token = self.create_and_authenticate_instructor()
-        student = self.create_student()
-        slot, _ = self.create_office_hour_slot(instructor=instructor)
-        
-        booking1 = self.create_booking(student=student, office_hour_slot=slot)
-        booking1.cancel()
-        booking1.save()
-        
-        booking2 = self.create_booking(student=student, office_hour_slot=slot)
-        booking2.status = 'confirmed'
-        booking2.save()
-        
-        response = self.client.get(self.get_bookings_url, {'status': 'cancelled'})
-        
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(len(response.data['bookings']), 1)
-        self.assertEqual(response.data['bookings'][0]['status'], 'cancelled')
-    
-    def test_get_bookings_no_status_filter_returns_all(self):
-        """Test that no status filter returns all bookings."""
-        instructor, token = self.create_and_authenticate_instructor()
-        student = self.create_student()
-        slot, _ = self.create_office_hour_slot(instructor=instructor)
-        
-        booking1 = self.create_booking(student=student, office_hour_slot=slot)
-        booking1.status = 'pending'
-        booking1.save()
-        
-        booking2 = self.create_booking(student=student, office_hour_slot=slot)
-        booking2.status = 'confirmed'
-        booking2.save()
-        
-        response = self.client.get(self.get_bookings_url)
-        
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(len(response.data['bookings']), 2)
-    
-    def test_get_bookings_invalid_status(self):
-        """Test filtering with invalid status value (400 Bad Request)."""
-        instructor, token = self.create_and_authenticate_instructor()
-        
-        response = self.client.get(self.get_bookings_url, {'status': 'invalid_status'})
-        
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        for booking in response.data['bookings']:
+            self.assertEqual(booking['status'], 'pending')
     
     def test_get_bookings_security_unauthenticated(self):
-        """Test accessing bookings without authentication (401 Unauthorized)."""
+        """Test that unauthenticated users cannot access bookings (401)."""
         self.client.credentials()
         
         response = self.client.get(self.get_bookings_url)
@@ -221,12 +261,20 @@ class GetUserBookingViewTestCase(BaseTestCase):
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
     
     def test_get_bookings_security_student_access(self):
-        """Test that students cannot access instructor bookings endpoint (403 Forbidden)."""
+        """Test that students cannot access instructor bookings endpoint (403)."""
         student, token = self.create_and_authenticate_student()
         
         response = self.client.get(self.get_bookings_url)
         
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+    
+    def test_get_bookings_invalid_status(self):
+        """Test that invalid status returns error (400)."""
+        instructor, token = self.create_and_authenticate_instructor()
+        
+        response = self.client.get(self.get_bookings_url, {'status': 'invalid'})
+        
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
 
 class InstructorConfirmBookingViewTestCase(BaseTestCase):

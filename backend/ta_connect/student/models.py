@@ -1,6 +1,8 @@
 from django.db import models
 from django.conf import settings
 import datetime
+from django.utils import timezone
+from utils.convert_datetime import get_cairo_time
 # Create your models here.
 
 class Booking(models.Model):
@@ -73,6 +75,38 @@ class Booking(models.Model):
         self.is_completed = True
         self.status = "completed"
         self.save()
+
+    @property
+    def is_ended(self):
+        """
+        Returns True if the booking time has passed.
+        Uses get_cairo_time() for 'Now', but uses raw DB time for 'End'.
+        """
+        if not self.end_time:
+            return False
+
+        now_cairo = get_cairo_time() 
+        now_simple = now_cairo.replace(tzinfo=None, second=0, microsecond=0)
+
+        end_simple = self.end_time.replace(tzinfo=None, second=0, microsecond=0)
+
+        return now_simple >= end_simple
+
+    def complete_if_ended(self):
+        """Encapsulates the completion logic you wrote."""
+        if not self.is_ended:
+            return False, "Booking has not ended yet."
+            
+        if self.status == "confirmed":
+            self.complete() # Assuming you have this method
+            self.save()
+            return True, "Booking marked as completed."
+        elif self.status == "pending":
+            self.cancel() # Assuming you have this method
+            self.save()
+            return True, "Booking was pending and is now cancelled."
+        
+        return False, "Booking status invalid."
 
     def __str__(self):
         # office_hour.course_name exists on OfficeHourSlot; section may be optional

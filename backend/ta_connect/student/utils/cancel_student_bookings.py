@@ -22,7 +22,7 @@ def cancel_student_bookings(time_slot, bookings=None, cancellation_reason=None):
 
     try:
         if bookings is None:
-            bookings = Booking.objects.filter(office_hour=time_slot, is_cancelled=False, is_completed=False)
+            bookings = Booking.objects.filter(office_hour=time_slot, status__in=['pending', 'confirmed'], is_cancelled=False, is_completed=False)
             
         if not bookings.exists():
             return "No bookings to cancel.", None
