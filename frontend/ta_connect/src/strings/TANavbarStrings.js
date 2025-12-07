@@ -43,6 +43,20 @@ const TANavbarStrings = {
       receiveBookingEmail: "Receive email when a student books your office hours",
       receiveCancelEmail: "Receive email when a student cancels a booking",
       receiveUpdateEmail: "Receive email when a student updates or reschedules a booking",
+    },
+
+    pushNotifications: {
+      title: "Push Notifications",
+      enable: "Enable Push Notifications",
+      disable: "Disable Push Notifications",
+      enabled: "Push notifications are enabled",
+      disabled: "Push notifications are disabled",
+      notSupported: "Push notifications are not supported in this browser",
+      permissionDenied: "Notification permission was denied",
+      subscribeSuccess: "Successfully subscribed to push notifications",
+      unsubscribeSuccess: "Successfully unsubscribed from push notifications",
+      error: "Failed to update push notification settings",
+      description: "Receive instant notifications for booking updates",
     }
   },
   ar: {
@@ -89,6 +103,20 @@ const TANavbarStrings = {
       receiveBookingEmail: "استلام بريد إلكتروني عندما يحجز طالب ساعاتك المكتبية",
       receiveCancelEmail: "استلام بريد إلكتروني عندما يلغي طالب حجزاً",
       receiveUpdateEmail: "استلام بريد إلكتروني عندما يحدث طالب أو يعيد جدولة حجز",
+    },
+
+    pushNotifications: {
+      title: "إشعارات الدفع",
+      enable: "تفعيل إشعارات الدفع",
+      disable: "إلغاء تفعيل إشعارات الدفع",
+      enabled: "إشعارات الدفع مفعّلة",
+      disabled: "إشعارات الدفع غير مفعّلة",
+      notSupported: "إشعارات الدفع غير مدعومة في هذا المتصفح",
+      permissionDenied: "تم رفض إذن الإشعارات",
+      subscribeSuccess: "تم الاشتراك في إشعارات الدفع بنجاح",
+      unsubscribeSuccess: "تم إلغاء الاشتراك في إشعارات الدفع بنجاح",
+      error: "فشل تحديث إعدادات إشعارات الدفع",
+      description: "تلقي إشعارات فورية لتحديثات الحجز",
     }
   }
 };
