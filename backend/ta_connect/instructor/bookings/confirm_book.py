@@ -5,7 +5,7 @@ from rest_framework.response import Response
 from drf_yasg.utils import swagger_auto_schema
 from student.models import Booking
 from utils.email_sending.booking.send_booking_confirmation import send_booking_confirmation_email
-from utils.push_notifications import send_booking_confirmed_push
+from utils.push_notifications.booking.send_booking_confirmed import send_booking_confirmed_push
 from student.serializers.confirm_book_serializer import ConfirmBookingSerializer
 from accounts.permissions import IsInstructor
 from instructor.schemas.confirm_booking_schemas import confirm_booking_instructor_swagger

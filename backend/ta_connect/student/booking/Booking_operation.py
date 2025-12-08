@@ -9,7 +9,8 @@ from drf_yasg.utils import swagger_auto_schema
 from student.utils.complete_book import complete_booking
 from student.models import Booking
 from student.sendBookingEmail import send_booking_cancelled_email,send_booking_update_email, send_booking_pending_email
-from utils.push_notifications import send_booking_pending_push, send_booking_cancelled_push
+from utils.push_notifications.booking.send_booking_cancelled import send_booking_cancelled_push
+from utils.push_notifications.booking.send_booking_pending import send_booking_pending_push
 from instructor.models import OfficeHourSlot
 from accounts.permissions import IsStudent
 from student.serializers.create_book_serializer import CreateBookingSerializer
