@@ -35,6 +35,8 @@ jobs:
           CORS_ALLOWED_ORIGINS=http://localhost:3000
           MAIL_PASSWORD=dummy-password-for-ci
           FIELD_ENCRYPTION_KEY=lmXKbgoUf6Y5SEfpXWIXGXuQmu4G36dCOFV3uphRSt0=
+          VAPID_PUBLIC_KEY=BDLnRsPxtyKUf2WxhE0DgYoOSJk_6yhalzM6Qb1KO0yEOPMtJ0CwUzlhsBk0QazQOs28TKENIoksCmea0eh143s
+          VAPID_PRIVATE_KEY=B95nSkvXozDh2sfSYrwfhZK7GtsawzBm-TDQBYZaeAQ
           EOF
 
       - name: Build and start services (wait for healthchecks)
