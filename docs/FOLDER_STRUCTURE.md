@@ -51,12 +51,28 @@ TAConnect/
 │   ├── ta_connect/             # React app root (Vite)
 │   │   ├── src/
 │   │   │   ├── components/
+│   │   │   │   ├── General/
+│   │   │   │   │   ├── PushNotificationToggle.jsx  # Push notification UI
+│   │   │   │   │   └── ...
+│   │   │   │   └── ...
 │   │   │   ├── contexts/
+│   │   │   ├── hooks/
+│   │   │   │   ├── usePushNotifications.js  # Push notification hook
+│   │   │   │   └── ...
 │   │   │   ├── pages/
+│   │   │   ├── strings/
+│   │   │   │   ├── pushNotificationStrings.js  # i18n strings
+│   │   │   │   └── ...
+│   │   │   ├── utils/
+│   │   │   │   ├── pushNotifications.js  # Push utility functions
+│   │   │   │   └── ...
 │   │   │   ├── config/
 │   │   │   └── index.css
 │   │   ├── public/
+│   │   │   ├── sw.js           # Service worker for push notifications
+│   │   │   └── ...
 │   │   ├── package.json
+│   │   ├── .env.example        # Environment variables template
 │   │   ├── tailwind.config.js
 │   │   ├── postcss.config.js
 │   │   ├── vite.config.js
