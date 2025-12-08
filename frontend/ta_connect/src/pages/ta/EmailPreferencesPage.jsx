@@ -8,6 +8,7 @@ import { useGlobalLoading } from '../../contexts/GlobalLoadingContext';
 import TAnavbar from '../../components/ta/TAnavbar';
 import Footer from '../../components/General/Footer';
 import allStrings from '../../strings/TANavbarStrings';
+import PushNotificationToggle from '../../components/General/PushNotificationToggle';
 
 export default function EmailPreferencesPage() {
   const { theme } = useTheme();
@@ -221,6 +222,9 @@ export default function EmailPreferencesPage() {
           {/* Preferences Section - Hidden while loading */}
           {!loading && (
             <>
+          {/* Push Notification Toggle - New Section */}
+          <PushNotificationToggle className="mb-6" />
+
           {/* Email on Booking */}
           <div className={`rounded-2xl ${isDark ? 'bg-gray-900/60' : 'bg-white'} shadow-lg border ${isDark ? 'border-gray-800' : 'border-gray-100'} overflow-hidden`}>
             <div className="p-4 sm:p-6">

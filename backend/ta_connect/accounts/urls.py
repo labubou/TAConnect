@@ -9,6 +9,7 @@ from rest_framework_simplejwt.views import (
 from . import views
 from .auth.email_sending_preference import ProfileEmailPreferenceView
 from .auth.delete_account import DeleteAccountView
+from accounts.push_subscription import PushSubscriptionView
 
 urlpatterns = [
 
@@ -41,5 +42,6 @@ urlpatterns = [
     
     path('profile/email-preferences/', ProfileEmailPreferenceView.as_view(), name='email_preferences'),
     path('auth/delete-account/', DeleteAccountView.as_view(), name='delete_account'),
+    path('push/subscribe/', PushSubscriptionView.as_view(), name='push-subscribe'),
 
 ]

@@ -46,6 +46,35 @@ FIELD_ENCRYPTION_KEY='your-generated-key-here'
 
 > ⚠️ **Important:** Keep this key secure and never commit it to version control. If you lose this key, encrypted data cannot be recovered.
 
+### Generate VAPID Keys (Push Notifications)
+
+TAConnect uses Web Push API for real-time browser notifications. You need to generate VAPID (Voluntary Application Server Identification) keys.
+
+**Option 1: Using web-push (Node.js):**
+```bash
+npm install -g web-push
+web-push generate-vapid-keys
+```
+
+**Option 2: Using py-vapid (Python):**
+```bash
+pip install py-vapid
+vapid --gen
+```
+
+**Add to your backend `.env` file:**
+```env
+VAPID_PUBLIC_KEY='your-generated-public-key'
+VAPID_PRIVATE_KEY='your-generated-private-key'
+```
+
+**Add to your frontend `.env` file (create if not exists):**
+```env
+VITE_VAPID_PUBLIC_KEY='your-generated-public-key'
+```
+
+> ⚠️ **Important:** The `VITE_VAPID_PUBLIC_KEY` in frontend must match `VAPID_PUBLIC_KEY` in backend.
+
 ## Setup with Docker (Recommended)
 
 ```bash
@@ -90,4 +119,13 @@ cd frontend
 npm install
 npm run dev
 ```
+
+### Frontend Environment (Optional)
+
+Create `frontend/ta_connect/.env` for push notifications:
+```bash
+cp frontend/ta_connect/.env.example frontend/ta_connect/.env
+```
+
+Edit the file and set `VITE_VAPID_PUBLIC_KEY` to match your backend's `VAPID_PUBLIC_KEY`.
 

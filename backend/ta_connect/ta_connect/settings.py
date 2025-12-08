@@ -13,6 +13,7 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 from pathlib import Path
 import os
 from decouple import config
+from datetime import timedelta
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -86,6 +87,7 @@ INSTALLED_APPS = [
     'csp',
     'drf_yasg',
     'encrypted_model_fields',
+    'webpush',
     'accounts',
     'instructor',
     'student',
@@ -135,9 +137,6 @@ SWAGGER_SETTINGS = {
     'DEFAULT_INFO': 'ta_connect.urls.api_info',
 }
 
-# Simple JWT configuration
-from datetime import timedelta
-
 SIMPLE_JWT = {
     'ACCESS_TOKEN_LIFETIME': timedelta(minutes=60),
     'REFRESH_TOKEN_LIFETIME': timedelta(days=30),
@@ -184,6 +183,13 @@ EMAIL_PORT = 587
 EMAIL_USE_TLS = True
 EMAIL_HOST_USER = 'taconnect.team@gmail.com'
 EMAIL_HOST_PASSWORD = config('MAIL_PASSWORD')
+
+#Webpush settings
+WEBPUSH_SETTINGS = {
+    "VAPID_PUBLIC_KEY": config("VAPID_PUBLIC_KEY"),
+    "VAPID_PRIVATE_KEY": config("VAPID_PRIVATE_KEY"),
+    "VAPID_ADMIN_EMAIL": EMAIL_HOST_USER
+}
 
 WSGI_APPLICATION = 'ta_connect.wsgi.application'
 

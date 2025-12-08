@@ -9,6 +9,8 @@ from drf_yasg.utils import swagger_auto_schema
 from student.utils.complete_book import complete_booking
 from student.models import Booking
 from student.sendBookingEmail import send_booking_cancelled_email,send_booking_update_email, send_booking_pending_email
+from utils.push_notifications.booking.send_booking_cancelled import send_booking_cancelled_push
+from utils.push_notifications.booking.send_booking_pending import send_booking_pending_push
 from instructor.models import OfficeHourSlot
 from accounts.permissions import IsStudent
 from student.serializers.create_book_serializer import CreateBookingSerializer
@@ -106,7 +108,7 @@ class BookingCreateView(GenericAPIView):
             
             booking = serializer.save()
 
-            # Send booking confirmation emails
+            # Send booking pending emails
             send_booking_pending_email(
                 student=request.user,
                 instructor=slot.instructor,
@@ -115,6 +117,20 @@ class BookingCreateView(GenericAPIView):
                 booking_time=serializer.validated_data['start_time'],
                 booking_id=booking.id
             )
+
+            # Send push notifications
+            try:
+                send_booking_pending_push(
+                    student=request.user,
+                    instructor=slot.instructor,
+                    slot=slot,
+                    booking_date=serializer.validated_data['date'],
+                    booking_time=serializer.validated_data['start_time'],
+                    booking_id=booking.id
+                )
+            except Exception as e:
+                # Log but don't fail the booking
+                print(f"Failed to send push notification: {e}")
 
             return Response({
                 'slot_id': slot.id,
@@ -130,6 +146,7 @@ class BookingCreateView(GenericAPIView):
                 {'error': 'An error occurred while creating the booking'},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
+
 
 class BookingDetailView(GenericAPIView):
     queryset = Booking.objects.all()
@@ -177,6 +194,19 @@ class BookingDetailView(GenericAPIView):
             booking_time=updated_booking.start_time,
             booking_id=updated_booking.id
         )
+
+        # Send push notifications
+        try:
+            send_booking_pending_push(
+                student=request.user,
+                instructor=booking.office_hour.instructor,
+                slot=booking.office_hour,
+                booking_date=updated_booking.date,
+                booking_time=updated_booking.start_time,
+                booking_id=updated_booking.id
+            )
+        except Exception as e:
+            print(f"Failed to send push notification: {e}")
         
         return Response({
             'success': True, 
@@ -215,6 +245,20 @@ class BookingDetailView(GenericAPIView):
             booking_date=booking.date,
             booking_time=booking.start_time
         )
+
+        # Send push notifications (cancelled by student)
+        try:
+            send_booking_cancelled_push(
+                student=request.user,
+                instructor=booking.office_hour.instructor,
+                slot=booking.office_hour,
+                booking_date=booking.date,
+                booking_time=booking.start_time,
+                booking_id=booking.id,
+                cancelled_by='student'
+            )
+        except Exception as e:
+            print(f"Failed to send push notification: {e}")
 
         return Response({
             'success': True,
@@ -260,5 +304,4 @@ class BookingDetailView(GenericAPIView):
         
         except Exception as e:
             return Response({'error': f'An error occurred {str(e)}'}, status=500)
-    
-    
+

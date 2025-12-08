@@ -9,6 +9,7 @@ import { useGlobalLoading } from '../../contexts/GlobalLoadingContext';
 import StudentNavbar from '../../components/student/studentNavbar';
 import Footer from '../../components/General/Footer';
 import { settingsStrings as allStrings } from '../../strings/settingsSTUStrings';
+import PushNotificationToggle from '../../components/General/PushNotificationToggle';
 
 export default function SettingsPage() {
   const { theme } = useTheme();
@@ -526,252 +527,255 @@ export default function SettingsPage() {
               {/* Preferences Section - Hidden while loading */}
               {!loading && (
                 <>
-          {/* Email on Booking */}
-          <div className={`rounded-2xl ${isDark ? 'bg-gray-800' : 'bg-white'} shadow-lg border ${isDark ? 'border-gray-700' : 'border-gray-100'} overflow-hidden`}>
-            <div className="p-4 sm:p-6">
-              <div className={`flex items-start gap-3 sm:gap-4 mb-4 ${language === 'ar' ? 'flex-row-reverse' : ''}`}>
-                <div className={`p-2 rounded-lg ${isDark ? 'bg-blue-900/20' : 'bg-blue-100'}`}>
-                  <Mail className={`w-5 h-5 ${isDark ? 'text-blue-400' : 'text-blue-600'}`} />
-                </div>
-                <div className={`flex-1 ${language === 'ar' ? 'text-right' : 'text-left'}`}>
-                  <h2 className={`text-lg sm:text-xl font-semibold ${isDark ? 'text-white' : 'text-gray-900'} ${language === 'ar' ? 'text-right' : 'text-left'}`}>
-                    {t.bookingSection.title}
-                  </h2>
-                  <p className={`text-sm mt-1 ${isDark ? 'text-gray-400' : 'text-gray-600'} ${language === 'ar' ? 'text-right' : 'text-left'}`}>
-                    {t.bookingSection.subtitle}
-                  </p>
-                </div>
-              </div>
+                  {/* Push Notifications Toggle - Add this before email sections */}
+                  <PushNotificationToggle className="mb-4" />
 
-              <div
-                onClick={() => !saving && handleToggle('email_on_booking')}
-                className={`rounded-xl p-4 border-2 transition-all cursor-pointer ${
-                  saving ? 'opacity-50 cursor-not-allowed' : ''
-                } ${
-                  preferences.email_on_booking
-                    ? isDark
-                      ? 'border-blue-600 bg-blue-900/20'
-                      : 'border-blue-500 bg-blue-50'
-                    : isDark
-                    ? 'border-gray-700 hover:border-gray-600 bg-gray-800/50'
-                    : 'border-gray-200 hover:border-gray-300 bg-gray-50'
-                }`}
-              >
-                <div className={`flex items-start gap-3 ${language === 'ar' ? 'flex-row-reverse' : ''}`}>
-                  <div
-                    className={`mt-0.5 w-5 h-5 rounded-full border-2 flex items-center justify-center flex-shrink-0 transition-all ${
-                      preferences.email_on_booking
-                        ? isDark
-                          ? 'border-blue-500 bg-blue-500'
-                          : 'border-blue-500 bg-blue-500'
-                        : isDark
-                        ? 'border-gray-600'
-                        : 'border-gray-300'
-                    }`}
-                  >
-                    {preferences.email_on_booking && (
-                      <div className="w-2 h-2 bg-white rounded-full"></div>
-                    )}
-                  </div>
-                  <div className={`flex-1 ${language === 'ar' ? 'text-right' : 'text-left'}`}>
-                    <div className={`flex w-full flex-col sm:flex-row sm:items-center gap-2 ${language === 'ar' ? 'items-end text-right sm:flex-row-reverse sm:justify-start' : 'items-start text-left sm:justify-start'}`}>
-                      <p className={`flex-1 font-semibold ${isDark ? 'text-white' : 'text-gray-900'}`}>
-                        {t.bookingSection.optionTitle}
-                      </p>
-                      {preferences.email_on_booking && (
-                        <span className={`text-xs px-2 py-0.5 rounded-full inline-block w-fit ${isDark ? 'bg-blue-700 text-blue-100' : 'bg-blue-200 text-blue-800'}`}>
-                          {t.status.enabled}
-                        </span>
-                      )}
+                  {/* Email on Booking */}
+                  <div className={`rounded-2xl ${isDark ? 'bg-gray-800' : 'bg-white'} shadow-lg border ${isDark ? 'border-gray-700' : 'border-gray-100'} overflow-hidden`}>
+                    <div className="p-4 sm:p-6">
+                      <div className={`flex items-start gap-3 sm:gap-4 mb-4 ${language === 'ar' ? 'flex-row-reverse' : ''}`}>
+                        <div className={`p-2 rounded-lg ${isDark ? 'bg-blue-900/20' : 'bg-blue-100'}`}>
+                          <Mail className={`w-5 h-5 ${isDark ? 'text-blue-400' : 'text-blue-600'}`} />
+                        </div>
+                        <div className={`flex-1 ${language === 'ar' ? 'text-right' : 'text-left'}`}>
+                          <h2 className={`text-lg sm:text-xl font-semibold ${isDark ? 'text-white' : 'text-gray-900'} ${language === 'ar' ? 'text-right' : 'text-left'}`}>
+                            {t.bookingSection.title}
+                          </h2>
+                          <p className={`text-sm mt-1 ${isDark ? 'text-gray-400' : 'text-gray-600'} ${language === 'ar' ? 'text-right' : 'text-left'}`}>
+                            {t.bookingSection.subtitle}
+                          </p>
+                        </div>
+                      </div>
+
+                      <div
+                        onClick={() => !saving && handleToggle('email_on_booking')}
+                        className={`rounded-xl p-4 border-2 transition-all cursor-pointer ${
+                          saving ? 'opacity-50 cursor-not-allowed' : ''
+                        } ${
+                          preferences.email_on_booking
+                            ? isDark
+                              ? 'border-blue-600 bg-blue-900/20'
+                              : 'border-blue-500 bg-blue-50'
+                            : isDark
+                            ? 'border-gray-700 hover:border-gray-600 bg-gray-800/50'
+                            : 'border-gray-200 hover:border-gray-300 bg-gray-50'
+                        }`}
+                      >
+                        <div className={`flex items-start gap-3 ${language === 'ar' ? 'flex-row-reverse' : ''}`}>
+                          <div
+                            className={`mt-0.5 w-5 h-5 rounded-full border-2 flex items-center justify-center flex-shrink-0 transition-all ${
+                              preferences.email_on_booking
+                                ? isDark
+                                  ? 'border-blue-500 bg-blue-500'
+                                  : 'border-blue-500 bg-blue-500'
+                                : isDark
+                                ? 'border-gray-600'
+                                : 'border-gray-300'
+                            }`}
+                          >
+                            {preferences.email_on_booking && (
+                              <div className="w-2 h-2 bg-white rounded-full"></div>
+                            )}
+                          </div>
+                          <div className={`flex-1 ${language === 'ar' ? 'text-right' : 'text-left'}`}>
+                            <div className={`flex w-full flex-col sm:flex-row sm:items-center gap-2 ${language === 'ar' ? 'items-end text-right sm:flex-row-reverse sm:justify-start' : 'items-start text-left sm:justify-start'}`}>
+                              <p className={`flex-1 font-semibold ${isDark ? 'text-white' : 'text-gray-900'}`}>
+                                {t.bookingSection.optionTitle}
+                              </p>
+                              {preferences.email_on_booking && (
+                                <span className={`text-xs px-2 py-0.5 rounded-full inline-block w-fit ${isDark ? 'bg-blue-700 text-blue-100' : 'bg-blue-200 text-blue-800'}`}>
+                                  {t.status.enabled}
+                                </span>
+                              )}
+                            </div>
+                            <p className={`text-sm mt-1 ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
+                              {t.bookingSection.optionDescription}
+                            </p>
+                          </div>
+                          <Mail className={`w-5 h-5 flex-shrink-0 ${
+                            preferences.email_on_booking
+                              ? isDark ? 'text-blue-400' : 'text-blue-600'
+                              : isDark ? 'text-gray-600' : 'text-gray-400'
+                          }`} />
+                        </div>
+                      </div>
                     </div>
-                    <p className={`text-sm mt-1 ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
-                      {t.bookingSection.optionDescription}
-                    </p>
                   </div>
-                  <Mail className={`w-5 h-5 flex-shrink-0 ${
-                    preferences.email_on_booking
-                      ? isDark ? 'text-blue-400' : 'text-blue-600'
-                      : isDark ? 'text-gray-600' : 'text-gray-400'
-                  }`} />
-                </div>
-              </div>
-            </div>
-          </div>
 
-          {/* Email on Cancellation */}
-          <div className={`rounded-2xl ${isDark ? 'bg-gray-800' : 'bg-white'} shadow-lg border ${isDark ? 'border-gray-700' : 'border-gray-100'} overflow-hidden`}>
-            <div className="p-4 sm:p-6">
-              <div className={`flex items-start gap-3 sm:gap-4 mb-4 ${language === 'ar' ? 'flex-row-reverse' : ''}`}>
-                <div className={`p-2 rounded-lg ${isDark ? 'bg-red-900/20' : 'bg-red-100'}`}>
-                  <X className={`w-5 h-5 ${isDark ? 'text-red-400' : 'text-red-600'}`} />
-                </div>
-                <div className={`flex-1 ${language === 'ar' ? 'text-right' : 'text-left'}`}>
-                  <h2 className={`text-lg sm:text-xl font-semibold ${isDark ? 'text-white' : 'text-gray-900'} ${language === 'ar' ? 'text-right' : 'text-left'}`}>
-                    {t.cancellationSection.title}
-                  </h2>
-                  <p className={`text-sm mt-1 ${isDark ? 'text-gray-400' : 'text-gray-600'} ${language === 'ar' ? 'text-right' : 'text-left'}`}>
-                    {t.cancellationSection.subtitle}
-                  </p>
-                </div>
-              </div>
+                  {/* Email on Cancellation */}
+                  <div className={`rounded-2xl ${isDark ? 'bg-gray-800' : 'bg-white'} shadow-lg border ${isDark ? 'border-gray-700' : 'border-gray-100'} overflow-hidden`}>
+                    <div className="p-4 sm:p-6">
+                      <div className={`flex items-start gap-3 sm:gap-4 mb-4 ${language === 'ar' ? 'flex-row-reverse' : ''}`}>
+                        <div className={`p-2 rounded-lg ${isDark ? 'bg-red-900/20' : 'bg-red-100'}`}>
+                          <X className={`w-5 h-5 ${isDark ? 'text-red-400' : 'text-red-600'}`} />
+                        </div>
+                        <div className={`flex-1 ${language === 'ar' ? 'text-right' : 'text-left'}`}>
+                          <h2 className={`text-lg sm:text-xl font-semibold ${isDark ? 'text-white' : 'text-gray-900'} ${language === 'ar' ? 'text-right' : 'text-left'}`}>
+                            {t.cancellationSection.title}
+                          </h2>
+                          <p className={`text-sm mt-1 ${isDark ? 'text-gray-400' : 'text-gray-600'} ${language === 'ar' ? 'text-right' : 'text-left'}`}>
+                            {t.cancellationSection.subtitle}
+                          </p>
+                        </div>
+                      </div>
 
-              <div
-                onClick={() => !saving && handleToggle('email_on_cancellation')}
-                className={`rounded-xl p-4 border-2 transition-all cursor-pointer ${
-                  saving ? 'opacity-50 cursor-not-allowed' : ''
-                } ${
-                  preferences.email_on_cancellation
-                    ? isDark
-                      ? 'border-blue-600 bg-blue-900/20'
-                      : 'border-blue-500 bg-blue-50'
-                    : isDark
-                    ? 'border-gray-700 hover:border-gray-600 bg-gray-800/50'
-                    : 'border-gray-200 hover:border-gray-300 bg-gray-50'
-                }`}
-              >
-                <div className={`flex items-start gap-3 ${language === 'ar' ? 'flex-row-reverse' : ''}`}>
-                  <div
-                    className={`mt-0.5 w-5 h-5 rounded-full border-2 flex items-center justify-center flex-shrink-0 transition-all ${
-                      preferences.email_on_cancellation
-                        ? isDark
-                          ? 'border-blue-500 bg-blue-500'
-                          : 'border-blue-500 bg-blue-500'
-                        : isDark
-                        ? 'border-gray-600'
-                        : 'border-gray-300'
-                    }`}
-                  >
-                    {preferences.email_on_cancellation && (
-                      <div className="w-2 h-2 bg-white rounded-full"></div>
-                    )}
-                  </div>
-                  <div className={`flex-1 ${language === 'ar' ? 'text-right' : 'text-left'}`}>
-                    <div className={`flex w-full flex-col sm:flex-row sm:items-center gap-2 ${language === 'ar' ? 'items-end text-right sm:flex-row-reverse sm:justify-start' : 'items-start text-left sm:justify-start'}`}>
-                      <p className={`flex-1 font-semibold ${isDark ? 'text-white' : 'text-gray-900'}`}>
-                        {t.cancellationSection.optionTitle}
-                      </p>
-                      {preferences.email_on_cancellation && (
-                        <span className={`text-xs px-2 py-0.5 rounded-full inline-block w-fit ${isDark ? 'bg-blue-700 text-blue-100' : 'bg-blue-200 text-blue-800'}`}>
-                          {t.status.enabled}
-                        </span>
-                      )}
+                      <div
+                        onClick={() => !saving && handleToggle('email_on_cancellation')}
+                        className={`rounded-xl p-4 border-2 transition-all cursor-pointer ${
+                          saving ? 'opacity-50 cursor-not-allowed' : ''
+                        } ${
+                          preferences.email_on_cancellation
+                            ? isDark
+                              ? 'border-blue-600 bg-blue-900/20'
+                              : 'border-blue-500 bg-blue-50'
+                            : isDark
+                            ? 'border-gray-700 hover:border-gray-600 bg-gray-800/50'
+                            : 'border-gray-200 hover:border-gray-300 bg-gray-50'
+                        }`}
+                      >
+                        <div className={`flex items-start gap-3 ${language === 'ar' ? 'flex-row-reverse' : ''}`}>
+                          <div
+                            className={`mt-0.5 w-5 h-5 rounded-full border-2 flex items-center justify-center flex-shrink-0 transition-all ${
+                              preferences.email_on_cancellation
+                                ? isDark
+                                  ? 'border-blue-500 bg-blue-500'
+                                  : 'border-blue-500 bg-blue-500'
+                                : isDark
+                                ? 'border-gray-600'
+                                : 'border-gray-300'
+                            }`}
+                          >
+                            {preferences.email_on_cancellation && (
+                              <div className="w-2 h-2 bg-white rounded-full"></div>
+                            )}
+                          </div>
+                          <div className={`flex-1 ${language === 'ar' ? 'text-right' : 'text-left'}`}>
+                            <div className={`flex w-full flex-col sm:flex-row sm:items-center gap-2 ${language === 'ar' ? 'items-end text-right sm:flex-row-reverse sm:justify-start' : 'items-start text-left sm:justify-start'}`}>
+                              <p className={`flex-1 font-semibold ${isDark ? 'text-white' : 'text-gray-900'}`}>
+                                {t.cancellationSection.optionTitle}
+                              </p>
+                              {preferences.email_on_cancellation && (
+                                <span className={`text-xs px-2 py-0.5 rounded-full inline-block w-fit ${isDark ? 'bg-blue-700 text-blue-100' : 'bg-blue-200 text-blue-800'}`}>
+                                  {t.status.enabled}
+                                </span>
+                              )}
+                            </div>
+                            <p className={`text-sm mt-1 ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
+                              {t.cancellationSection.optionDescription}
+                            </p>
+                          </div>
+                          <Mail className={`w-5 h-5 flex-shrink-0 ${
+                            preferences.email_on_cancellation
+                              ? isDark ? 'text-blue-400' : 'text-blue-600'
+                              : isDark ? 'text-gray-600' : 'text-gray-400'
+                          }`} />
+                        </div>
+                      </div>
                     </div>
-                    <p className={`text-sm mt-1 ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
-                      {t.cancellationSection.optionDescription}
-                    </p>
                   </div>
-                  <Mail className={`w-5 h-5 flex-shrink-0 ${
-                    preferences.email_on_cancellation
-                      ? isDark ? 'text-blue-400' : 'text-blue-600'
-                      : isDark ? 'text-gray-600' : 'text-gray-400'
-                  }`} />
-                </div>
-              </div>
-            </div>
-          </div>
 
-          {/* Email on Update */}
-          <div className={`rounded-2xl ${isDark ? 'bg-gray-800' : 'bg-white'} shadow-lg border ${isDark ? 'border-gray-700' : 'border-gray-100'} overflow-hidden`}>
-            <div className="p-4 sm:p-6">
-              <div className={`flex items-start gap-3 sm:gap-4 mb-4 ${language === 'ar' ? 'flex-row-reverse' : ''}`}>
-                <div className={`p-2 rounded-lg ${isDark ? 'bg-yellow-900/20' : 'bg-yellow-100'}`}>
-                  <RefreshCw className={`w-5 h-5 ${isDark ? 'text-yellow-400' : 'text-yellow-600'}`} />
-                </div>
-                <div className={`flex-1 ${language === 'ar' ? 'text-right' : 'text-left'}`}>
-                  <h2 className={`text-lg sm:text-xl font-semibold ${isDark ? 'text-white' : 'text-gray-900'} ${language === 'ar' ? 'text-right' : 'text-left'}`}>
-                    {t.updateSection.title}
-                  </h2>
-                  <p className={`text-sm mt-1 ${isDark ? 'text-gray-400' : 'text-gray-600'} ${language === 'ar' ? 'text-right' : 'text-left'}`}>
-                    {t.updateSection.subtitle}
-                  </p>
-                </div>
-              </div>
+                  {/* Email on Update */}
+                  <div className={`rounded-2xl ${isDark ? 'bg-gray-800' : 'bg-white'} shadow-lg border ${isDark ? 'border-gray-700' : 'border-gray-100'} overflow-hidden`}>
+                    <div className="p-4 sm:p-6">
+                      <div className={`flex items-start gap-3 sm:gap-4 mb-4 ${language === 'ar' ? 'flex-row-reverse' : ''}`}>
+                        <div className={`p-2 rounded-lg ${isDark ? 'bg-yellow-900/20' : 'bg-yellow-100'}`}>
+                          <RefreshCw className={`w-5 h-5 ${isDark ? 'text-yellow-400' : 'text-yellow-600'}`} />
+                        </div>
+                        <div className={`flex-1 ${language === 'ar' ? 'text-right' : 'text-left'}`}>
+                          <h2 className={`text-lg sm:text-xl font-semibold ${isDark ? 'text-white' : 'text-gray-900'} ${language === 'ar' ? 'text-right' : 'text-left'}`}>
+                            {t.updateSection.title}
+                          </h2>
+                          <p className={`text-sm mt-1 ${isDark ? 'text-gray-400' : 'text-gray-600'} ${language === 'ar' ? 'text-right' : 'text-left'}`}>
+                            {t.updateSection.subtitle}
+                          </p>
+                        </div>
+                      </div>
 
-              <div
-                onClick={() => !saving && handleToggle('email_on_update')}
-                className={`rounded-xl p-4 border-2 transition-all cursor-pointer ${
-                  saving ? 'opacity-50 cursor-not-allowed' : ''
-                } ${
-                  preferences.email_on_update
-                    ? isDark
-                      ? 'border-blue-600 bg-blue-900/20'
-                      : 'border-blue-500 bg-blue-50'
-                    : isDark
-                    ? 'border-gray-700 hover:border-gray-600 bg-gray-800/50'
-                    : 'border-gray-200 hover:border-gray-300 bg-gray-50'
-                }`}
-              >
-                <div className={`flex items-start gap-3 ${language === 'ar' ? 'flex-row-reverse' : ''}`}>
-                  <div
-                    className={`mt-0.5 w-5 h-5 rounded-full border-2 flex items-center justify-center flex-shrink-0 transition-all ${
-                      preferences.email_on_update
-                        ? isDark
-                          ? 'border-blue-500 bg-blue-500'
-                          : 'border-blue-500 bg-blue-500'
-                        : isDark
-                        ? 'border-gray-600'
-                        : 'border-gray-300'
-                    }`}
-                  >
-                    {preferences.email_on_update && (
-                      <div className="w-2 h-2 bg-white rounded-full"></div>
-                    )}
-                  </div>
-                  <div className={`flex-1 ${language === 'ar' ? 'text-right' : 'text-left'}`}>
-                    <div className={`flex w-full flex-col sm:flex-row sm:items-center gap-2 ${language === 'ar' ? 'items-end text-right sm:flex-row-reverse sm:justify-start' : 'items-start text-left sm:justify-start'}`}>
-                      <p className={`flex-1 font-semibold ${isDark ? 'text-white' : 'text-gray-900'}`}>
-                        {t.updateSection.optionTitle}
-                      </p>
-                      {preferences.email_on_update && (
-                        <span className={`text-xs px-2 py-0.5 rounded-full inline-block w-fit ${isDark ? 'bg-blue-700 text-blue-100' : 'bg-blue-200 text-blue-800'}`}>
-                          {t.status.enabled}
-                        </span>
-                      )}
+                      <div
+                        onClick={() => !saving && handleToggle('email_on_update')}
+                        className={`rounded-xl p-4 border-2 transition-all cursor-pointer ${
+                          saving ? 'opacity-50 cursor-not-allowed' : ''
+                        } ${
+                          preferences.email_on_update
+                            ? isDark
+                              ? 'border-blue-600 bg-blue-900/20'
+                              : 'border-blue-500 bg-blue-50'
+                            : isDark
+                            ? 'border-gray-700 hover:border-gray-600 bg-gray-800/50'
+                            : 'border-gray-200 hover:border-gray-300 bg-gray-50'
+                        }`}
+                      >
+                        <div className={`flex items-start gap-3 ${language === 'ar' ? 'flex-row-reverse' : ''}`}>
+                          <div
+                            className={`mt-0.5 w-5 h-5 rounded-full border-2 flex items-center justify-center flex-shrink-0 transition-all ${
+                              preferences.email_on_update
+                                ? isDark
+                                  ? 'border-blue-500 bg-blue-500'
+                                  : 'border-blue-500 bg-blue-500'
+                                : isDark
+                                ? 'border-gray-600'
+                                : 'border-gray-300'
+                            }`}
+                          >
+                            {preferences.email_on_update && (
+                              <div className="w-2 h-2 bg-white rounded-full"></div>
+                            )}
+                          </div>
+                          <div className={`flex-1 ${language === 'ar' ? 'text-right' : 'text-left'}`}>
+                            <div className={`flex w-full flex-col sm:flex-row sm:items-center gap-2 ${language === 'ar' ? 'items-end text-right sm:flex-row-reverse sm:justify-start' : 'items-start text-left sm:justify-start'}`}>
+                              <p className={`flex-1 font-semibold ${isDark ? 'text-white' : 'text-gray-900'}`}>
+                                {t.updateSection.optionTitle}
+                              </p>
+                              {preferences.email_on_update && (
+                                <span className={`text-xs px-2 py-0.5 rounded-full inline-block w-fit ${isDark ? 'bg-blue-700 text-blue-100' : 'bg-blue-200 text-blue-800'}`}>
+                                  {t.status.enabled}
+                                </span>
+                              )}
+                            </div>
+                            <p className={`text-sm mt-1 ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
+                              {t.updateSection.optionDescription}
+                            </p>
+                          </div>
+                          <Mail className={`w-5 h-5 flex-shrink-0 ${
+                            preferences.email_on_update
+                              ? isDark ? 'text-blue-400' : 'text-blue-600'
+                              : isDark ? 'text-gray-600' : 'text-gray-400'
+                          }`} />
+                        </div>
+                      </div>
                     </div>
-                    <p className={`text-sm mt-1 ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
-                      {t.updateSection.optionDescription}
-                    </p>
                   </div>
-                  <Mail className={`w-5 h-5 flex-shrink-0 ${
-                    preferences.email_on_update
-                      ? isDark ? 'text-blue-400' : 'text-blue-600'
-                      : isDark ? 'text-gray-600' : 'text-gray-400'
-                  }`} />
-                </div>
-              </div>
-            </div>
-          </div>
 
-          
+                  
 
-          {/* Save Button */}
-          <div className={`rounded-2xl ${isDark ? 'bg-gray-800' : 'bg-white'} shadow-lg border ${isDark ? 'border-gray-700' : 'border-gray-100'} p-4 sm:p-6`}>
-            <button
-              onClick={handleSave}
-              disabled={saving || loading || isLoading}
-              className={`w-full py-3 px-6 rounded-xl font-semibold transition-all flex items-center justify-center gap-2 ${
-                (saving || loading || isLoading)
-                  ? 'opacity-50 cursor-not-allowed'
-                  : 'hover:shadow-lg hover:scale-105'
-              } ${
-                isDark
-                  ? 'bg-gradient-to-r from-[#4a9d9c] to-[#366c6b] hover:from-[#3d8584] hover:to-[#2d5857] text-white'
-                  : 'bg-gradient-to-r from-[#4a9d9c] to-[#366c6b] hover:from-[#3d8584] hover:to-[#2d5857] text-white'
-              }`}
-            >
-              {saving || isLoading ? (
-                <>
-                  <RefreshCw className="w-5 h-5 animate-spin" />
-                  {t.buttons.saving}
-                </>
-              ) : (
-                <>
-                  <Save className="w-5 h-5" />
-                  {t.buttons.save}
-                </>
-              )}
-            </button>
-          </div>
+                  {/* Save Button */}
+                  <div className={`rounded-2xl ${isDark ? 'bg-gray-800' : 'bg-white'} shadow-lg border ${isDark ? 'border-gray-700' : 'border-gray-100'} p-4 sm:p-6`}>
+                    <button
+                      onClick={handleSave}
+                      disabled={saving || loading || isLoading}
+                      className={`w-full py-3 px-6 rounded-xl font-semibold transition-all flex items-center justify-center gap-2 ${
+                        (saving || loading || isLoading)
+                          ? 'opacity-50 cursor-not-allowed'
+                          : 'hover:shadow-lg hover:scale-105'
+                      } ${
+                        isDark
+                          ? 'bg-gradient-to-r from-[#4a9d9c] to-[#366c6b] hover:from-[#3d8584] hover:to-[#2d5857] text-white'
+                          : 'bg-gradient-to-r from-[#4a9d9c] to-[#366c6b] hover:from-[#3d8584] hover:to-[#2d5857] text-white'
+                      }`}
+                    >
+                      {saving || isLoading ? (
+                        <>
+                          <RefreshCw className="w-5 h-5 animate-spin" />
+                          {t.buttons.saving}
+                        </>
+                      ) : (
+                        <>
+                          <Save className="w-5 h-5" />
+                          {t.buttons.save}
+                        </>
+                      )}
+                    </button>
+                  </div>
                 </>
               )}
             </>
@@ -1099,7 +1103,7 @@ export default function SettingsPage() {
                 {emailErrors.newEmail && (
                   <p className={`text-sm mt-2 flex items-center gap-1.5 ${isDark ? 'text-red-400' : 'text-red-600'}`}>
                     <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                      <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                      <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
                     </svg>
                     {emailErrors.newEmail}
                   </p>
@@ -1125,7 +1129,7 @@ export default function SettingsPage() {
                 {emailErrors.confirmEmail && (
                   <p className={`text-sm mt-2 flex items-center gap-1.5 ${isDark ? 'text-red-400' : 'text-red-600'}`}>
                     <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                      <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                      <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
                     </svg>
                     {emailErrors.confirmEmail}
                   </p>

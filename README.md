@@ -69,6 +69,7 @@
 - Cancellation alerts
 - Booking update notifications
 - Customizable preferences
+- **Push notifications** (real-time browser alerts)
 
 </td>
 </tr>
@@ -158,6 +159,7 @@ docker compose up --build
 - [x] Analytics dashboard
 - [x] Dark/Light theme
 - [x] Multi-language support
+- [x] Push notifications (Web Push API)
 - [ ] Calendar integrations (Google, Outlook)
 - [ ] AI scheduling assistant
 

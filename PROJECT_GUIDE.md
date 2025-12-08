@@ -39,6 +39,16 @@ python -c "from cryptography.fernet import Fernet; print(Fernet.generate_key().d
 
 Add the generated key to `backend/ta_connect/.env` as `FIELD_ENCRYPTION_KEY`.
 
+**Generate VAPID keys for push notifications:**
+```bash
+npm install -g web-push
+web-push generate-vapid-keys
+```
+
+Add the keys to your environment files:
+- `VAPID_PUBLIC_KEY` and `VAPID_PRIVATE_KEY` → `backend/ta_connect/.env`
+- `VITE_VAPID_PUBLIC_KEY` (same as public key) → `frontend/ta_connect/.env`
+
 ```bash
 docker compose up --build
 ```

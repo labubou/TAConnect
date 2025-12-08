@@ -3,13 +3,14 @@ import { ThemeProvider } from './contexts/ThemeContext'
 import { LanguageProvider } from './contexts/LanguageContext'
 import { GlobalLoadingProvider } from './contexts/GlobalLoadingContext'
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
-import { lazy, Suspense } from 'react'
+import { lazy, Suspense, useEffect } from 'react'
 import ProtectedRoute from './components/General/ProtectedRoute';
 import PublicRoute from './components/General/PublicRoute';
 import PublicBookingRedirect from './components/General/PublicBookingRedirect';
 import { SkeletonLoader } from './components/General/SkeletonLoader';
 import GlobalLoadingOverlay from './components/General/GlobalLoadingOverlay';
 import { useTheme } from './contexts/ThemeContext';
+import { registerServiceWorker } from './utils/registerServiceWorker';
 
 // Eager-loaded critical pages
 import LandingPage from './pages/main/LandingPage'
@@ -53,6 +54,11 @@ const PageLoader = () => {
 };
 
 function App() {
+  // Register service worker on app mount
+  useEffect(() => {
+    registerServiceWorker();
+  }, []);
+
   return (
     <ThemeProvider>
       <LanguageProvider>
