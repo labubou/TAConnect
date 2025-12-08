@@ -10,6 +10,7 @@ class CreateBookingSerializer(serializers.Serializer):
     date = serializers.DateField()
     start_time = serializers.TimeField()
     send_email = serializers.BooleanField(default=True, required=False)
+    book_description = serializers.CharField(max_length=500, required=False, allow_blank=True)
 
     def validate(self, attrs):
         request = self.context.get('request')
@@ -58,5 +59,6 @@ class CreateBookingSerializer(serializers.Serializer):
             student=user,
             date=validated_data['date'],
             start_time=validated_data['start_datetime'],
+            book_description=validated_data.get('book_description', ''),
         )
         return booking

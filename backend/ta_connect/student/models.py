@@ -24,6 +24,7 @@ class Booking(models.Model):
     date = models.DateField(default=datetime.date.today)
     created_at = models.DateTimeField(auto_now_add=True)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default="pending")
+    book_description = models.TextField(blank=True, null=True, default="")
     
     is_cancelled = models.BooleanField(default=False)
     is_completed = models.BooleanField(default=False)

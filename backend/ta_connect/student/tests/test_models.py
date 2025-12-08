@@ -306,4 +306,68 @@ class BookingModelTestCase(BaseTestCase):
         booking.refresh_from_db()
         self.assertEqual(booking.status, 'completed')
         self.assertTrue(booking.is_completed)
+    
+    def test_booking_book_description_field(self):
+        """Test the book_description field."""
+        student = self.create_student()
+        slot, policy = self.create_office_hour_slot()
+        
+        booking_date = datetime.date.today() + datetime.timedelta(days=1)
+        start_time = datetime.datetime.combine(booking_date, slot.start_time)
+        
+        # Make timezone-aware
+        if timezone.is_naive(start_time):
+            start_time = timezone.make_aware(start_time)
+        
+        description = "Need help with homework assignment 3"
+        
+        booking = Booking.objects.create(
+            student=student,
+            office_hour=slot,
+            date=booking_date,
+            start_time=start_time,
+            book_description=description
+        )
+        
+        self.assertEqual(booking.book_description, description)
+    
+    def test_booking_book_description_default_empty(self):
+        """Test that book_description defaults to empty string."""
+        booking = self.create_booking()
+        
+        # book_description should default to empty string
+        self.assertEqual(booking.book_description, "")
+    
+    def test_booking_book_description_nullable(self):
+        """Test that book_description can be blank or null."""
+        student = self.create_student()
+        slot, policy = self.create_office_hour_slot()
+        
+        booking_date = datetime.date.today() + datetime.timedelta(days=1)
+        start_time = datetime.datetime.combine(booking_date, slot.start_time)
+        
+        if timezone.is_naive(start_time):
+            start_time = timezone.make_aware(start_time)
+        
+        # Test with blank string
+        booking = Booking.objects.create(
+            student=student,
+            office_hour=slot,
+            date=booking_date,
+            start_time=start_time,
+            book_description=""
+        )
+        
+        self.assertEqual(booking.book_description, "")
+    
+    def test_booking_book_description_update(self):
+        """Test updating the book_description field."""
+        booking = self.create_booking()
+        
+        new_description = "Updated: Need help with midterm prep"
+        booking.book_description = new_description
+        booking.save()
+        
+        booking.refresh_from_db()
+        self.assertEqual(booking.book_description, new_description)
 

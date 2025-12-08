@@ -199,12 +199,13 @@ docker exec taconnect-backend-1 python manage.py test accounts.tests.test_views 
 - `TimeSlotSerializerTestCase`: Time slot serializer (create, update, validation)
 
 **Student App Tests:**
-- `BookingModelTestCase`: Booking creation, end time calculation, relationships
+- `BookingModelTestCase`: Booking creation, end time calculation, relationships, book_description field
 - `BookingCreateViewTestCase`: Create bookings, get bookings list (date ranges)
 - `BookingDetailViewTestCase`: Update bookings, cancel bookings, get available times
-- `CreateBookingSerializerTestCase`: Booking creation validation (date ranges, overlaps)
+- `CreateBookingSerializerTestCase`: Booking creation validation (date ranges, overlaps, book_description)
 - `UpdateBookingSerializerTestCase`: Booking update validation
 - `CancelBookingSerializerTestCase`: Booking cancellation validation (past bookings)
+- `ConfirmBookingSerializerTestCase`: Booking confirmation validation
 
 ### Writing New Tests
 

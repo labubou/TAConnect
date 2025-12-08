@@ -8,9 +8,9 @@ import logging
 User = get_user_model()
 
 class BookingAdmin(admin.ModelAdmin):
-    list_display = ("id", "student", "office_hour", "date", "start_time", "end_time", "created_at", "is_cancelled", "is_completed", "status")
+    list_display = ("id", "student", "office_hour", "date", "start_time", "end_time", "book_description", "created_at", "is_cancelled", "is_completed", "status")
     list_filter = ("is_cancelled", "is_completed","status", "date", "created_at")
-    search_fields = ("student__username", "student__email", "office_hour__course_name")
+    search_fields = ("student__username", "student__email", "office_hour__course_name", "book_description")
     date_hierarchy = "date"
     readonly_fields = ("created_at", "end_time")
 
