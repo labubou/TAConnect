@@ -12,18 +12,36 @@ export default defineConfig({
     // Enable code splitting for better caching
     rollupOptions: {
       output: {
-        manualChunks: {
+        manualChunks(id) {
           // Vendor chunks
-          'vendor-react': ['react', 'react-dom', 'react-router-dom'],
-          'vendor-query': ['@tanstack/react-query'],
-          'vendor-charts': ['recharts'],
-          'vendor-axios': ['axios'],
-          'vendor-icons': ['lucide-react'],
+          if (id.includes('node_modules')) {
+            if (id.includes('react') || id.includes('react-dom') || id.includes('react-router-dom')) {
+              return 'vendor-react';
+            }
+            if (id.includes('@tanstack/react-query')) {
+              return 'vendor-query';
+            }
+            if (id.includes('recharts')) {
+              return 'vendor-charts';
+            }
+            if (id.includes('axios')) {
+              return 'vendor-axios';
+            }
+            if (id.includes('lucide-react')) {
+              return 'vendor-icons';
+            }
+          }
           
           // Feature chunks
-          'pages-auth': ['./src/pages/main/LoginPage.jsx', './src/pages/main/RegisterPage.jsx'],
-          'pages-ta': ['./src/pages/ta/TAPage.jsx', './src/pages/ta/ManageCourses.jsx', './src/pages/ta/AnalyticsDashboard.jsx'],
-          'pages-student': ['./src/pages/student/BookPage.jsx', './src/pages/student/studentHomePage.jsx'],
+          if (id.includes('/pages/main/LoginPage') || id.includes('/pages/main/RegisterPage')) {
+            return 'pages-auth';
+          }
+          if (id.includes('/pages/ta/TAPage') || id.includes('/pages/ta/ManageCourses') || id.includes('/pages/ta/AnalyticsDashboard')) {
+            return 'pages-ta';
+          }
+          if (id.includes('/pages/student/BookPage') || id.includes('/pages/student/studentHomePage')) {
+            return 'pages-student';
+          }
         },
       },
     },
