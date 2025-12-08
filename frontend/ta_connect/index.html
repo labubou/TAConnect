@@ -2,12 +2,117 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <link rel="icon" type="image/png" href="/src/assets/Logo.png" />
+    <link rel="apple-touch-icon" href="/src/assets/Logo.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>ta_connect</title>
+    <meta name="theme-color" content="#366c6b" />
+    <meta name="description" content="TA Connect - Connecting Teaching Assistants with Students for Better Learning. Book office hours, manage appointments, and enhance your academic experience." />
+    <meta name="keywords" content="TA Connect, Teaching Assistant, Office Hours, Student Booking, Academic Support, University" />
+    <meta name="author" content="TA Connect Team" />
+    
+    <!-- Open Graph / Social Media Meta Tags -->
+    <meta property="og:title" content="TA Connect - Office Hours Made Easy" />
+    <meta property="og:description" content="Connecting Teaching Assistants with Students for Better Learning" />
+    <meta property="og:type" content="website" />
+    <meta property="og:image" content="/src/assets/Logo.png" />
+    
+    <!-- Twitter Card Meta Tags -->
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:title" content="TA Connect - Office Hours Made Easy" />
+    <meta name="twitter:description" content="Connecting Teaching Assistants with Students for Better Learning" />
+    
+    <title>TA Connect - Office Hours Made Easy</title>
+    
+    <!-- Preconnect to improve performance -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    
+    <style>
+      /* Loading spinner for initial page load */
+      #initial-loader {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        z-index: 9999;
+        transition: opacity 0.3s ease-out;
+      }
+      
+      @media (prefers-color-scheme: dark) {
+        #initial-loader {
+          background: linear-gradient(135deg, #111827 0%, #1f2937 100%);
+        }
+        #initial-loader .loader-text {
+          color: #e5e7eb;
+        }
+      }
+      
+      .loader-spinner {
+        width: 50px;
+        height: 50px;
+        border: 4px solid #e5e7eb;
+        border-top-color: #366c6b;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+      }
+      
+      .loader-text {
+        margin-top: 16px;
+        font-family: system-ui, -apple-system, sans-serif;
+        font-size: 18px;
+        font-weight: 600;
+        color: #366c6b;
+        letter-spacing: 0.5px;
+      }
+      
+      @keyframes spin {
+        to { transform: rotate(360deg); }
+      }
+      
+      .loader-hidden {
+        opacity: 0;
+        pointer-events: none;
+      }
+    </style>
   </head>
   <body>
+    <!-- Initial loading screen -->
+    <div id="initial-loader">
+      <div class="loader-spinner"></div>
+      <div class="loader-text">TA Connect</div>
+    </div>
+    
     <div id="root"></div>
+    
     <script type="module" src="/src/main.jsx"></script>
+    
+    <script>
+      // Hide loader when app is ready
+      window.addEventListener('load', function() {
+        setTimeout(function() {
+          var loader = document.getElementById('initial-loader');
+          if (loader) {
+            loader.classList.add('loader-hidden');
+            setTimeout(function() {
+              loader.style.display = 'none';
+            }, 300);
+          }
+        }, 100);
+      });
+    </script>
+    
+    <!-- No JavaScript fallback -->
+    <noscript>
+      <div style="padding: 20px; text-align: center; font-family: system-ui, sans-serif;">
+        <h1>TA Connect</h1>
+        <p>Please enable JavaScript to use this application.</p>
+      </div>
+    </noscript>
   </body>
 </html>
