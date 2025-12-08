@@ -5,7 +5,7 @@ import { useAuth } from '../../contexts/AuthContext';
 import { useGlobalLoading } from '../../contexts/GlobalLoadingContext';
 import ThemeToggle from '../../components/General/ThemeToggle';
 import Footer from '../../components/General/Footer';
-import Logo2 from '../../assets/Logo2.png';
+import Logo from '../../assets/Logo.png';
 import axios from 'axios';
 
 function VerifyEmailChangePage() {
@@ -100,7 +100,7 @@ function VerifyEmailChangePage() {
           className="cursor-pointer"
           onClick={() => navigate('/')}
         >
-          <img src={Logo2} alt="TA Connect Logo" className="logo" />
+          <img src={Logo} alt="TA Connect Logo" className="h-14 sm:h-16 md:h-20 w-auto object-contain transition-transform duration-300 hover:scale-110" />
         </div>
         <div className="flex items-center space-x-4">
           <button

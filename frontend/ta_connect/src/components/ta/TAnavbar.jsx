@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import { Link, useLocation } from 'react-router-dom';
-import Logo from '../../assets/Logo2.png';
+import Logo from '../../assets/Logo.png';
 import { useTheme } from '../../contexts/ThemeContext';
 import { useLanguage } from '../../contexts/LanguageContext';
 import ThemeToggle from '../General/ThemeToggle';
@@ -114,11 +114,11 @@ const TAnavbar = ({ onToggle }) => {
               
               <div className="mb-8 pt-12">
                 <div className="flex items-center justify-center mb-4">
-                  <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-[#366c6b] to-[#1a3535] rounded-full shadow-lg border-4 border-white dark:border-gray-800">
+                  <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-[#366c6b] to-[#1a3535] rounded-full shadow-lg border-4 border-white dark:border-gray-800">
                     <img 
                       src={Logo} 
                       alt="Logo" 
-                      className="w-12 h-12 object-contain"
+                      className="w-14 h-14 object-contain"
                       onError={(e) => { e.currentTarget.src = '/vite.svg'; }}
                     />
                   </div>
