@@ -9,6 +9,7 @@
 [![Django](https://img.shields.io/badge/Django-6.0-092E20?style=for-the-badge&logo=django)](https://www.djangoproject.com/)
 [![React](https://img.shields.io/badge/React-19.x-61DAFB?style=for-the-badge&logo=react)](https://reactjs.org/)
 [![Docker](https://img.shields.io/badge/Docker-Ready-2496ED?style=for-the-badge&logo=docker)](https://www.docker.com/)
+[![Netlify Status](https://api.netlify.com/api/v1/badges/b2e725fc-2473-44b9-9e19-16c2b4bf9093/deploy-status)](https://app.netlify.com/projects/taconnect/deploys)
 
 **Simplify academic scheduling. Connect TAs with students. Maximize learning.**
 
