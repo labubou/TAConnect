@@ -1,5 +1,6 @@
 from student.models import Booking
 from utils.email_sending.booking.send_cancel_booking_email_mass import send_cancel_booking_email_mass
+from utils.push_notifications.booking.send_booking_cancelled_mass import send_booking_cancelled_push_mass
 
 def cancel_student_bookings(time_slot, bookings=None, cancellation_reason=None):
     """
@@ -48,6 +49,18 @@ def cancel_student_bookings(time_slot, bookings=None, cancellation_reason=None):
         except Exception as e:
             # Log error but don't fail the cancellation
             print(f"Failed to send bulk cancellation emails: {e}")
+
+        #send bulk cancellation push notifications
+        try:
+            push_result = send_booking_cancelled_push_mass(bookings_list, cancellation_reason)
+            
+            if not push_result['success']:
+                print(f"Warning: {push_result['failed_count']} cancellation push notifications failed to send")
+            else:
+                print(f"Successfully sent {push_result['sent_count']} cancellation push notifications")
+            
+        except Exception as e:
+            print(f"Failed to send bulk cancellation push notifications: {e}")
 
         return f"Cancelled {cancelled_count} bookings.", None
 

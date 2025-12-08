@@ -10,6 +10,7 @@ from student.serializers.cancel_book_serializer import CancelBookingSerializer #
 from accounts.permissions import IsInstructor
 from instructor.schemas.cancel_booking_schemas import cancel_booking_instructor_swagger
 from utils.error_formatter import format_serializer_errors
+from utils.push_notifications.booking.send_booking_cancelled import send_booking_cancelled_push
 
 class InstructorCancelBookingView(GenericAPIView):
     """
@@ -82,6 +83,21 @@ class InstructorCancelBookingView(GenericAPIView):
         except Exception as e:
             # Log error but don't fail the cancellation
             print(f"Failed to send cancellation email: {e}")
+
+        # Send push notification (cancelled by instructor)
+        try:
+            send_booking_cancelled_push(
+                student=booking.student,
+                instructor=request.user,
+                slot=booking.office_hour,
+                booking_date=booking.date,
+                booking_time=booking.start_time,
+                booking_id=booking.id,
+                cancelled_by='instructor'
+            )
+        except Exception as e:
+            # Log error but don't fail the cancellation
+            print(f"Failed to send cancellation push notification: {e}")
 
         return Response({
             'success': True,
