@@ -6,7 +6,7 @@ import { useAuth } from '../../contexts/AuthContext';
 import { useGlobalLoading } from '../../contexts/GlobalLoadingContext';
 import Footer from '../../components/General/Footer';
 import ThemeToggle from '../../components/General/ThemeToggle';
-import Logo2 from '../../assets/Logo2.png';
+import Logo from '../../assets/Logo.png';
 import axios from 'axios';
 import strings from '../../strings/PublicBookingPageStrings';
 
@@ -120,7 +120,7 @@ export default function PublicBookingPage() {
       <nav className={`w-full flex items-center justify-between p-4 ${isDark ? 'bg-gray-800' : 'bg-white'} shadow-md`}>
         <div className={`text-2xl font-bold ${isDark ? 'text-white' : 'text-gray-900'} cursor-pointer`} 
             onClick={() => navigate('/')}>
-          <img src={Logo2} alt="TA Connect Logo" className="logo" />
+          <img src={Logo} alt="TA Connect Logo" className="h-14 sm:h-16 md:h-20 w-auto object-contain transition-transform duration-300 hover:scale-110" />
         </div>
         <div className="flex items-center gap-2">
           <button

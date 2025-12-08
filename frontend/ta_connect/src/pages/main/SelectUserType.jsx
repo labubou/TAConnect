@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useTheme } from '../../contexts/ThemeContext';
 import { useAuth } from '../../contexts/AuthContext';
 import axios from 'axios';
-import Logo2 from '../../assets/Logo2.png';
+import Logo from '../../assets/Logo.png';
 
 function SelectUserType() {
   const [selectedType, setSelectedType] = useState('');
@@ -54,7 +54,7 @@ function SelectUserType() {
   return (
     <div className={`min-h-screen ${isDark ? 'bg-gray-900' : 'bg-gray-50'}`}>
       <nav className={`w-full flex items-center justify-center p-4 ${isDark ? 'bg-gray-800' : 'bg-white'} shadow-md`}>
-        <img src={Logo2} alt="TA Connect Logo" className="logo" />
+        <img src={Logo} alt="TA Connect Logo" className="h-14 sm:h-16 md:h-20 w-auto object-contain" />
       </nav>
 
       <div className="flex items-center justify-center min-h-[calc(100vh-80px)] p-4">

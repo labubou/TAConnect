@@ -6,7 +6,7 @@ import { useGlobalLoading } from '../../contexts/GlobalLoadingContext';
 import ThemeToggle from '../../components/General/ThemeToggle';
 import LanguageToggle from '../../components/General/LanguageToggle';
 import Footer from '../../components/General/Footer';
-import Logo2 from '../../assets/Logo2.png';
+import Logo from '../../assets/Logo.png';
 import strings from '../../strings/registerPageStrings';
 import axios from 'axios';
 
@@ -196,7 +196,7 @@ function RegisterPage() {
           className="cursor-pointer"
           onClick={() => navigate('/')}
         >
-          <img src={Logo2} alt="TA Connect Logo" className="h-12 sm:h-14 md:h-16 w-auto object-contain cursor-pointer transition-transform duration-300 hover:scale-110" />
+          <img src={Logo} alt="TA Connect Logo" className="h-14 sm:h-16 md:h-20 w-auto object-contain cursor-pointer transition-transform duration-300 hover:scale-110" />
         </div>
         <div className="flex items-center gap-3">
           <button
