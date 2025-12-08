@@ -42,7 +42,7 @@ if DEBUG:
     CORS_ALLOW_ALL_ORIGINS = True
 else:
     SITE_DOMAIN = 'https://taconnect.pythonanywhere.com' 
-    frontend_url = "https://taconnect.vercel.app"
+    frontend_url = "https://taconnect.netlify.app"
     # Security settings - keep these as they are
     SECURE_SSL_REDIRECT = True
     SESSION_COOKIE_SECURE = True
@@ -277,7 +277,7 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 CSRF_TRUSTED_ORIGINS = [
     "http://localhost:3000",
     "http://127.0.0.1:3000",
-    "https://taconnect.vercel.app",
+    "https://taconnect.netlify.app",
     "https://taconnect.pythonanywhere.com",
 ]
 
@@ -285,7 +285,7 @@ CSRF_TRUSTED_ORIGINS = [
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",
     "http://127.0.0.1:3000",
-    "https://taconnect.vercel.app",
+    "https://taconnect.netlify.app",
     "https://taconnect.pythonanywhere.com",
 ]
 

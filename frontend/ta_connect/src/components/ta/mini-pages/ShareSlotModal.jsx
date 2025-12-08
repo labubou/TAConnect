@@ -5,7 +5,7 @@ import allStrings from "../../../strings/manageCoursesPageStrings";
 
 const getBaseUrl = () => {
   if (import.meta.env.MODE === 'production') {
-    return 'https://taconnect.vercel.app';
+    return 'https://taconnect.netlify.app';
   }
   return 'http://localhost:3000';
 };
