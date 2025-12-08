@@ -72,6 +72,7 @@ class BookingCreateView(GenericAPIView):
                         'date': booking.date,
                         'start_time': booking.start_time,
                         'end_time': booking.end_time,
+                        'book_description': booking.book_description,
                         'is_cancelled': booking.is_cancelled,
                         'is_completed': booking.is_completed,
                         'status': booking.status,
@@ -137,6 +138,7 @@ class BookingCreateView(GenericAPIView):
                 'booking_id': booking.id,
                 'date': serializer.validated_data['date'],
                 'start_time': serializer.validated_data['start_time'],
+                'book_description': booking.book_description,
                 'message': f"Successfully booked slot {slot.id} on {serializer.validated_data['date']} at {serializer.validated_data['start_time']}."
             }, status=status.HTTP_201_CREATED)
         

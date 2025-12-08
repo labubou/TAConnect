@@ -8,6 +8,7 @@ book_slot_response = openapi.Schema(
         'slot_id': openapi.Schema(type=openapi.TYPE_INTEGER, description='OfficeHourSlot ID'),
         'date_str': openapi.Schema(type=openapi.TYPE_STRING, description='Booking date'),
         'start_time_str': openapi.Schema(type=openapi.TYPE_STRING, description='Start time'),
+        'book_description': openapi.Schema(type=openapi.TYPE_STRING, description='Optional description or notes for the booking'),
     }
 )
 
@@ -42,6 +43,7 @@ create_booking_request = openapi.Schema(
         'slot_id': openapi.Schema(type=openapi.TYPE_INTEGER, description='OfficeHourSlot ID', example=1),
         'date_str': openapi.Schema(type=openapi.TYPE_STRING, description='Booking date in YYYY-MM-DD format', example='2025-12-01'),
         'start_time_str': openapi.Schema(type=openapi.TYPE_STRING, description='Start time in HH:MM format', example='14:30'),
+        'book_description': openapi.Schema(type=openapi.TYPE_STRING, description='Optional description or notes for the booking', example='Need help with assignment 3'),
     },
     required=['slot_id', 'date_str', 'start_time_str']
 )
@@ -55,6 +57,7 @@ create_booking_swagger = {
             'slot_id': openapi.Schema(type=openapi.TYPE_INTEGER, description='OfficeHourSlot ID', example=1),
             'date': openapi.Schema(type=openapi.TYPE_STRING, format='date', description='Booking date in YYYY-MM-DD format', example='2025-12-01'),
             'start_time': openapi.Schema(type=openapi.TYPE_STRING, format='time', description='Start time in HH:MM format', example='14:30'),
+            'book_description': openapi.Schema(type=openapi.TYPE_STRING, description='Optional description or notes for the booking (max 500 characters)', example='Need help with assignment 3'),
         },
         required=['slot_id', 'date', 'start_time']
     ),
@@ -68,6 +71,7 @@ create_booking_swagger = {
                     'booking_id': openapi.Schema(type=openapi.TYPE_INTEGER, example=1),
                     'date': openapi.Schema(type=openapi.TYPE_STRING, format='date', example='2025-12-01'),
                     'start_time': openapi.Schema(type=openapi.TYPE_STRING, format='time', example='14:30:00'),
+                    'book_description': openapi.Schema(type=openapi.TYPE_STRING, example='Need help with assignment 3'),
                     'message': openapi.Schema(type=openapi.TYPE_STRING, example='Successfully booked slot 1 on 2025-12-01 at 14:30:00.'),
                 }
             )
@@ -125,6 +129,7 @@ get_bookings_swagger = {
                                 'date': openapi.Schema(type=openapi.TYPE_STRING, format='date', example='2025-11-24'),
                                 'start_time': openapi.Schema(type=openapi.TYPE_STRING, format='date-time', example='2025-11-24T14:00:00Z'),
                                 'end_time': openapi.Schema(type=openapi.TYPE_STRING, format='date-time', example='2025-11-24T14:20:00Z'),
+                                'book_description': openapi.Schema(type=openapi.TYPE_STRING, nullable=True, example='Need help with assignment 3'),
                                 'is_cancelled': openapi.Schema(type=openapi.TYPE_BOOLEAN, example=False),
                                 'is_completed': openapi.Schema(type=openapi.TYPE_BOOLEAN, example=True),
                                 'status': openapi.Schema(type=openapi.TYPE_STRING, example='completed'),

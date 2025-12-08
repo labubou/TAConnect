@@ -50,6 +50,90 @@ class CreateBookingSerializerTestCase(BaseTestCase):
         self.assertEqual(booking.student, student)
         self.assertEqual(booking.office_hour, slot)
     
+    def test_serializer_validation_with_book_description(self):
+        """Test serializer validation with book_description field."""
+        student = self.create_student()
+        slot, policy = self.create_office_hour_slot()
+        
+        booking_date = datetime.date.today() + datetime.timedelta(days=1)
+        start_time = slot.start_time
+        description = "Need help with homework assignment 3"
+        
+        data = {
+            'slot_id': slot.id,
+            'date': booking_date.isoformat(),
+            'start_time': start_time.strftime('%H:%M:%S'),
+            'book_description': description
+        }
+        
+        serializer = CreateBookingSerializer(
+            data=data,
+            context={
+                'request': type('Request', (), {'user': student})(),
+                'slot': slot
+            }
+        )
+        
+        self.assertTrue(serializer.is_valid(), f"Serializer errors: {serializer.errors}")
+        
+        # Test create method saves the description
+        booking = serializer.save()
+        self.assertIsNotNone(booking.id)
+        self.assertEqual(booking.book_description, description)
+    
+    def test_serializer_validation_book_description_optional(self):
+        """Test that book_description is optional."""
+        student = self.create_student()
+        slot, policy = self.create_office_hour_slot()
+        
+        booking_date = datetime.date.today() + datetime.timedelta(days=1)
+        start_time = slot.start_time
+        
+        # No book_description field
+        data = {
+            'slot_id': slot.id,
+            'date': booking_date.isoformat(),
+            'start_time': start_time.strftime('%H:%M:%S')
+        }
+        
+        serializer = CreateBookingSerializer(
+            data=data,
+            context={
+                'request': type('Request', (), {'user': student})(),
+                'slot': slot
+            }
+        )
+        
+        self.assertTrue(serializer.is_valid(), f"Serializer errors: {serializer.errors}")
+        
+        booking = serializer.save()
+        self.assertEqual(booking.book_description, "")
+    
+    def test_serializer_validation_book_description_blank(self):
+        """Test that book_description can be blank."""
+        student = self.create_student()
+        slot, policy = self.create_office_hour_slot()
+        
+        booking_date = datetime.date.today() + datetime.timedelta(days=1)
+        start_time = slot.start_time
+        
+        data = {
+            'slot_id': slot.id,
+            'date': booking_date.isoformat(),
+            'start_time': start_time.strftime('%H:%M:%S'),
+            'book_description': ''
+        }
+        
+        serializer = CreateBookingSerializer(
+            data=data,
+            context={
+                'request': type('Request', (), {'user': student})(),
+                'slot': slot
+            }
+        )
+        
+        self.assertTrue(serializer.is_valid(), f"Serializer errors: {serializer.errors}")
+
     def test_serializer_validation_date_outside_range(self):
         """Test serializer validation with date outside slot range."""
         student = self.create_student()
