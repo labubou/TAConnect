@@ -27,6 +27,9 @@ SECRET_KEY = config('SECRET_KEY', default='django-insecure-1ogqe*_xg$2$kfkdp582m
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = config('DEBUG', default=True, cast=bool)
 
+SITE_DOMAIN = config('SITE_DOMAIN', default='http://127.0.0.1:8000')
+frontend_url = config('frontend_url', default='http://localhost:3000')
+
 ALLOWED_HOSTS = [
     'localhost',
     '127.0.0.1',
@@ -35,14 +38,13 @@ ALLOWED_HOSTS = [
     'taconnect.pythonanywhere.com',
     ]
 
+ALLOWED_HOSTS.append(frontend_url.replace('http://', '').replace('https://', ''))
+ALLOWED_HOSTS.append(SITE_DOMAIN.replace('http://', '').replace('https://', ''))
+
 if DEBUG:
     # Add this to your settings
-    SITE_DOMAIN = 'http://127.0.0.1:8000'
-    frontend_url = "http://localhost:3000"
     CORS_ALLOW_ALL_ORIGINS = True
 else:
-    SITE_DOMAIN = 'https://taconnect.pythonanywhere.com' 
-    frontend_url = "https://taconnect.netlify.app"
     # Security settings - keep these as they are
     SECURE_SSL_REDIRECT = True
     SESSION_COOKIE_SECURE = True
@@ -199,39 +201,42 @@ AUTH_USER_MODEL = 'accounts.User'
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
-# DATABASES = {
-#     'default': {
-#         'ENGINE': 'django.db.backends.sqlite3',
-#         'NAME': BASE_DIR / 'db.sqlite3',
-#     }
-# }
-
-# Mysql database for production
-# DATABASES = {
-#     'default': {
-#         'ENGINE': 'django.db.backends.mysql',
-#         'NAME': config('DATABASE_NAME'),
-#         'USER': config('DATABASE_USER'),
-#         'PASSWORD': config('DATABASE_PASSWORD'),
-#         'HOST': config('DATABASE_HOST'),
-#         'PORT': '3306',
-#         'OPTIONS': {
-#             'charset': 'utf8mb4',  # Optional: Set the character set
-#         },
-#     }
-# }
-
-# PostgreSQL database configuration
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': config('DATABASE_NAME'),
-        'USER': config('DATABASE_USER'),
-        'PASSWORD': config('DATABASE_PASSWORD'),
-        'HOST': config('DATABASE_HOST'), 
-        'PORT': '5432',
+if config('database_type', default='sqlite') == 'sqlite':
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': BASE_DIR / 'db.sqlite3',
+        }
     }
-}
+
+elif config('database_type') == 'mysql':
+    # Mysql database for production
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.mysql',
+            'NAME': config('DATABASE_NAME'),
+            'USER': config('DATABASE_USER'),
+            'PASSWORD': config('DATABASE_PASSWORD'),
+            'HOST': config('DATABASE_HOST'),
+            'PORT': '3306',
+            'OPTIONS': {
+                'charset': 'utf8mb4',  # Optional: Set the character set
+            },
+        }
+    }
+
+else:
+    # PostgreSQL database configuration
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.postgresql',
+            'NAME': config('DATABASE_NAME'),
+            'USER': config('DATABASE_USER'),
+            'PASSWORD': config('DATABASE_PASSWORD'),
+            'HOST': config('DATABASE_HOST'), 
+            'PORT': '5432',
+        }
+    }
 
 # Password validation
 # https://docs.djangoproject.com/en/5.2/ref/settings/#auth-password-validators
@@ -277,17 +282,17 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 CSRF_TRUSTED_ORIGINS = [
     "http://localhost:3000",
     "http://127.0.0.1:3000",
-    "https://taconnect.netlify.app",
-    "https://taconnect.pythonanywhere.com",
 ]
+CSRF_TRUSTED_ORIGINS.append(frontend_url)
+CSRF_TRUSTED_ORIGINS.append(SITE_DOMAIN)
 
 # CORS settings for development
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",
     "http://127.0.0.1:3000",
-    "https://taconnect.netlify.app",
-    "https://taconnect.pythonanywhere.com",
 ]
+CORS_ALLOWED_ORIGINS.append(frontend_url)
+CORS_ALLOWED_ORIGINS.append(SITE_DOMAIN)
 
 # Create logs directory if it doesn't exist
 LOGS_DIR = BASE_DIR / 'logs'
