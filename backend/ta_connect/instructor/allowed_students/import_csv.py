@@ -42,6 +42,7 @@ class CSVUploadView(GenericAPIView):
                     'errors': errors
                 }, status=status.HTTP_201_CREATED)
             except Exception as e:
-                return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+                print(f"Error processing CSV: {str(e)}")
+                return Response({"error": "An error occurred while processing the CSV file."}, status=status.HTTP_400_BAD_REQUEST)
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

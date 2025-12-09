@@ -113,7 +113,7 @@ class PushSubscriptionView(APIView):
         except Exception as e:
             logger.error(f"Error creating push subscription: {str(e)}")
             return Response(
-                {'error': str(e)},
+                {'error': "An error occurred while processing the subscription."},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
 
@@ -156,7 +156,7 @@ class PushSubscriptionView(APIView):
         except Exception as e:
             logger.error(f"Error removing push subscription: {str(e)}")
             return Response(
-                {'error': str(e)},
+                {'error': "An error occurred while processing the subscription."},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
 
@@ -177,6 +177,6 @@ class PushSubscriptionView(APIView):
         except Exception as e:
             logger.error(f"Error checking push subscription: {str(e)}")
             return Response(
-                {'error': str(e)},
+                {'error': "An error occurred while processing the subscription."},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
