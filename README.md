@@ -24,9 +24,21 @@
 
 ## 📖 About
 
-**TAConnect** is an open-source platform that streamlines office hours management for Teaching Assistants and students. Built with modern technologies, it offers conflict-free booking, real-time analytics, and a beautiful user experience.
+**TAConnect** is an open-source, **fully self-hostable** platform that streamlines office hours management for Teaching Assistants and students. Built with modern technologies, it offers conflict-free booking, real-time analytics, and a beautiful user experience.
 
 > *"Maximize Your Learning. Minimize the Wait."*
+
+### 🏠 100% Self-Hostable - Deploy Anywhere
+
+TAConnect is designed to be **completely self-hostable** with no external dependencies or vendor lock-in. You have full control:
+
+- **Deploy anywhere**: Your own server, cloud provider (AWS, Azure, GCP), or your institution's infrastructure
+- **Complete data ownership**: All data stays on your servers - no third-party services required
+- **Privacy first**: No tracking, no analytics sent to external services
+- **Free to use**: Use it for free for any purpose (academic, personal, or institutional)
+- **Easy setup**: One-command Docker deployment or manual installation
+
+Whether you're a university IT department, a small academic institution, or an individual TA, you can run TAConnect on your own infrastructure with complete autonomy. See the [Setup Guide](docs/SETUP.md) for detailed deployment instructions.
 
 ---
 
@@ -91,6 +103,7 @@
 - Docker one-command setup
 - Comprehensive test suite
 - Modular architecture
+- **100% self-hostable** - deploy on your own infrastructure
 
 </td>
 </tr>
@@ -168,12 +181,25 @@ docker compose up --build
 
 ## 📄 License
 
-This project uses a **dual-license model**:
+### Free to Use, Not to Sell
 
-- **AGPL-3.0** for academic and non-commercial use
-- **Commercial License** for enterprise/proprietary usage
+**TAConnect is free to use** for any purpose - academic, personal, institutional, or commercial use within your organization. You can:
 
-For commercial inquiries: [taconnect.team@gmail.com](mailto:taconnect.team@gmail.com)
+- ✅ Use it for free in your institution
+- ✅ Deploy it on your own servers
+- ✅ Modify and customize it for your needs
+- ✅ Share it with others
+- ✅ Use it commercially within your organization
+
+**However**, you **cannot**:
+
+- ❌ Sell TAConnect as a product or service to others
+- ❌ Resell or redistribute TAConnect as a commercial offering
+- ❌ Use TAConnect to provide a competing service to third parties
+
+If you want to sell TAConnect or use it to provide services to others, you need explicit permission. For commercial licensing inquiries: [taconnect.team@gmail.com](mailto:taconnect.team@gmail.com)
+
+**In summary**: Use it freely for your own purposes, but don't sell it without permission.
 
 ---
 

@@ -1,6 +1,6 @@
 # 🛠️ TAConnect Project Guide
 
-Welcome to the **TAConnect Technical Documentation**. This guide covers everything you need to set up, develop, test, and contribute to the project.
+Welcome to the **TAConnect Technical Documentation**. TAConnect is a **fully self-hostable** platform that you can deploy on your own infrastructure. This guide covers everything you need to set up, develop, test, and contribute to the project.
 
 ---
 
@@ -95,7 +95,17 @@ See [Contributing Guide](docs/CONTRIBUTING.md) for details.
 
 ---
 
+## 🏠 Self-Hosting
+
+TAConnect is designed to be **100% self-hostable**. You can deploy it on:
+- Your own servers
+- Cloud providers (AWS, Azure, GCP, DigitalOcean, etc.)
+- Your institution's infrastructure
+- Any environment where you have control
+
+All data stays on your servers - no external dependencies or vendor lock-in. See the [Setup Guide](docs/SETUP.md) for deployment instructions.
+
 ## 📖 Additional Resources
 
-- [README.md](README.md) – Project overview
-- [LICENSE.md](LICENSE.md) – License information
+- [README.md](README.md) – Project overview and self-hosting information
+- [LICENSE.md](LICENSE.md) – License information (free to use, not to sell)

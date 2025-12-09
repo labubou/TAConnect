@@ -1,7 +1,11 @@
 # 🚀 Setup Guide
 
+## 🏠 Self-Hostable Platform
+
+**TAConnect is 100% self-hostable** - you can deploy it on your own infrastructure with complete control over your data. This guide covers both Docker (recommended) and manual setup options.
+
 ## Prerequisites
-- **Docker & Docker Compose** – [Install Docker](https://docs.docker.com/get-docker/)
+- **Docker & Docker Compose** – [Install Docker](https://docs.docker.com/get-docker/) (recommended for easy deployment)
 - **Git** – [Install Git](https://git-scm.com/downloads)
 
 ## Initial Setup
@@ -77,21 +81,27 @@ VITE_VAPID_PUBLIC_KEY='your-generated-public-key'
 
 ## Setup with Docker (Recommended)
 
+Docker provides the easiest way to self-host TAConnect. It handles all dependencies and ensures a consistent environment.
+
 ```bash
 git clone https://github.com/Kbassem10/TAConnect.git
 cd TAConnect
 docker compose up --build
 ```
 
-Access Points:
+**Access Points:**
 - Frontend → http://localhost:3000
 - Backend API → http://localhost:8000
 - Swagger Docs → http://localhost:8000/swagger/
 - Django Admin → http://localhost:8000/admin/
 
+> 💡 **Self-Hosting Tip**: For production deployment, update `ALLOWED_HOSTS` and `CORS_ALLOWED_ORIGINS` in your `.env` file to match your domain. You can deploy this Docker setup on any server, cloud provider, or your institution's infrastructure.
+
 ---
 
 ## 🧰 Manual Setup (Alternative)
+
+If you prefer not to use Docker, you can set up TAConnect manually. This gives you more control over the environment and is useful for custom deployments or when Docker isn't available.
 
 ### Backend
 ```bash
