@@ -14,6 +14,7 @@ from rest_framework_simplejwt.tokens import RefreshToken, AccessToken
 import requests
 from ta_connect.settings import SITE_DOMAIN, GOOGLE_OAUTH2_CLIENT_ID, GOOGLE_OAUTH2_CLIENT_SECRET, frontend_url
 from decouple import config
+import re
 from drf_yasg.utils import swagger_auto_schema
 from accounts.schemas.auth_schemas import (
     google_login_url_response,
@@ -232,7 +233,12 @@ class GoogleCallbackView(APIView):
             return redirect(f"{frontend_url}/login?error=google_auth_cancelled")
         
         if code:
-            return redirect(f"{frontend_url}/auth/google/callback?code={code}")
+            # Validate the code parameter to ensure it contains only safe characters.
+            if re.fullmatch(r'[A-Za-z0-9-_.]+', code):
+                return redirect(f"{frontend_url}/auth/google/callback?code={code}")
+            else:
+                # Invalid code; redirect with error
+                return redirect(f"{frontend_url}/login?error=invalid_code")
         
         return redirect(f"{frontend_url}/login?error=google_auth_failed")
 
