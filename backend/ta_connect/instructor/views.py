@@ -54,7 +54,7 @@ class GetUserSlotsView(GenericAPIView):
             }, status=200)
         
         except Exception as e:
-            return Response({'error': f'An error occurred {str(e)}'}, status=500)
+            return Response({'error': f'An error occurred'}, status=500)
 
 class GetUserBookingView(GenericAPIView):
     permission_classes = [IsInstructor]
@@ -174,7 +174,7 @@ class SearchInstructorsView(GenericAPIView):
             }, status=200)
         
         except Exception as e:
-            return Response({'error': f'An error occurred: {str(e)}'}, status=500)
+            return Response({'error': f'An error occurred'}, status=500)
 
 class InstructorDataView(GenericAPIView):
     permission_classes = [AllowAny]
@@ -214,5 +214,5 @@ class InstructorDataView(GenericAPIView):
         except User.DoesNotExist:
             return Response({'error': 'Instructor not found'}, status=404)
         except Exception as e:
-            return Response({'error': f'An error occurred: {str(e)}'}, status=500)
+            return Response({'error': 'An error occurred'}, status=500)
 

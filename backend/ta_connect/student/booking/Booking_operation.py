@@ -305,5 +305,5 @@ class BookingDetailView(GenericAPIView):
             }, status=200)
         
         except Exception as e:
-            return Response({'error': f'An error occurred {str(e)}'}, status=500)
+            return Response({'error': 'An error occurred'}, status=500)
 
