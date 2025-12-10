@@ -24,6 +24,10 @@ export default function BookingsList({
     if (emptyIcon) return emptyIcon;
     
     switch (status) {
+      case 'pending':
+        return (
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+        );
       case 'cancelled':
         return (
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />

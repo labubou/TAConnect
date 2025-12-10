@@ -17,6 +17,8 @@ export default function BookingCard({
 
   const getCardStyles = () => {
     switch (status) {
+      case 'pending':
+        return `${isDark ? 'bg-gradient-to-br from-yellow-900/20 to-gray-700 border-yellow-600/40' : 'bg-gradient-to-br from-yellow-50 to-white border-yellow-400/40'} border-2 rounded-xl p-4 sm:p-6 transition-all duration-300 hover:shadow-lg`;
       case 'cancelled':
         return `${isDark ? 'bg-gray-700/50 border-gray-600' : 'bg-gray-50 border-gray-300'} border-2 rounded-xl p-4 sm:p-6 opacity-75`;
       case 'completed':
@@ -27,6 +29,13 @@ export default function BookingCard({
   };
 
   const getStatusBadge = () => {
+    if (status === 'pending') {
+      return (
+        <span className={`inline-block mt-1 px-2 py-1 text-xs font-semibold rounded ${isDark ? 'bg-yellow-900/30 text-yellow-300' : 'bg-yellow-100 text-yellow-700'}`}>
+          {t.status.pending}
+        </span>
+      );
+    }
     if (status === 'cancelled') {
       return (
         <span className={`inline-block mt-1 px-2 py-1 text-xs font-semibold rounded ${isDark ? 'bg-red-900/30 text-red-300' : 'bg-red-100 text-red-700'}`}>
@@ -91,7 +100,7 @@ export default function BookingCard({
         )}
       </div>
 
-      {status === 'active' && (
+      {(status === 'active' || status === 'pending') && (
         <div className="flex flex-col xs:flex-row gap-2">
           <button
             onClick={() => onUpdate(booking)}

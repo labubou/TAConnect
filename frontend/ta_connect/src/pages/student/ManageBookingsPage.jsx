@@ -345,7 +345,9 @@ export default function ManageBookingsPage() {
 
     // Status filter
     if (filterStatus === 'active') {
-      filtered = filtered.filter(b => !b.is_cancelled && !b.is_completed);
+      filtered = filtered.filter(b => !b.is_cancelled && !b.is_completed && b.status === 'confirmed');
+    } else if (filterStatus === 'pending') {
+      filtered = filtered.filter(b => !b.is_cancelled && !b.is_completed && b.status === 'pending');
     } else if (filterStatus === 'cancelled') {
       filtered = filtered.filter(b => b.is_cancelled);
     } else if (filterStatus === 'completed') {
@@ -375,7 +377,8 @@ export default function ManageBookingsPage() {
   };
 
   const filteredBookings = getFilteredBookings();
-  const activeBookings = filteredBookings.filter(b => !b.is_cancelled && !b.is_completed);
+  const activeBookings = filteredBookings.filter(b => !b.is_cancelled && !b.is_completed && b.status === 'confirmed');
+  const pendingBookings = filteredBookings.filter(b => !b.is_cancelled && !b.is_completed && b.status === 'pending');
   const cancelledBookings = filteredBookings.filter(b => b.is_cancelled);
   const completedBookings = filteredBookings.filter(b => b.is_completed);
 
@@ -445,8 +448,22 @@ export default function ManageBookingsPage() {
               </div>
             ) : (
               <>
+                {/* Pending Bookings */}
+                {filterStatus !== 'active' && filterStatus !== 'cancelled' && filterStatus !== 'completed' && (
+                  <BookingsList
+                    title={t.sections.pendingBookings}
+                    bookings={pendingBookings}
+                    status="pending"
+                    emptyMessage={t.messages.noPendingBookings}
+                    formatDate={formatDate}
+                    formatTime={formatTime}
+                    onUpdate={handleUpdateClick}
+                    onCancel={handleCancelClick}
+                  />
+                )}
+
                 {/* Active Bookings */}
-                {filterStatus !== 'cancelled' && filterStatus !== 'completed' && (
+                {filterStatus !== 'pending' && filterStatus !== 'cancelled' && filterStatus !== 'completed' && (
                   <BookingsList
                     title={t.sections.activeBookings}
                     bookings={activeBookings}
@@ -460,7 +477,7 @@ export default function ManageBookingsPage() {
                 )}
 
                 {/* Cancelled Bookings */}
-                {filterStatus !== 'active' && filterStatus !== 'completed' && (
+                {filterStatus !== 'active' && filterStatus !== 'pending' && filterStatus !== 'completed' && (
                   <BookingsList
                     title={t.sections.cancelledBookings}
                     bookings={cancelledBookings}
@@ -472,7 +489,7 @@ export default function ManageBookingsPage() {
                 )}
 
                 {/* Completed Bookings */}
-                {filterStatus !== 'active' && filterStatus !== 'cancelled' && (
+                {filterStatus !== 'active' && filterStatus !== 'pending' && filterStatus !== 'cancelled' && (
                   <BookingsList
                     title={t.sections.completedBookings}
                     bookings={completedBookings}

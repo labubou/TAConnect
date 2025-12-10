@@ -44,6 +44,7 @@ export default function FilterControls({
             >
               <option value="all">{t.filters.allBookings}</option>
               <option value="active">{t.filters.activeOnly}</option>
+              <option value="pending">{t.filters.pendingOnly}</option>
               <option value="cancelled">{t.filters.cancelledOnly}</option>
               <option value="completed">{t.filters.completedOnly}</option>
             </select>
