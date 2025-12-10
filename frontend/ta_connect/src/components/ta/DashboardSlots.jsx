@@ -223,6 +223,11 @@ export default function DashboardSlots({ isDark, slots, bookings, loading, error
                                     <div className={`text-xs ${isDark ? 'text-gray-500' : 'text-gray-500'}`}>
                                       🕐 {booking.start_time ? formatTime((booking.start_time + '').split(' ')[1] || '') : ''}
                                     </div>
+                                    {booking.description && (
+                                      <div className={`text-xs mt-2 pt-2 border-t italic ${isDark ? 'border-gray-700 text-gray-400' : 'border-gray-200 text-gray-600'}`}>
+                                        💬 {booking.description}
+                                      </div>
+                                    )}
                                   </div>
                                 ))}
                               </div>

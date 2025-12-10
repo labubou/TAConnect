@@ -575,6 +575,9 @@ export default function ManageBookings() {
                               {strings.table.headers.studentName}
                             </th>
                             <th className={`px-6 py-3 text-left text-sm font-semibold ${isDark ? 'text-gray-200' : 'text-gray-900'}`}>
+                              {strings.table.headers.description}
+                            </th>
+                            <th className={`px-6 py-3 text-left text-sm font-semibold ${isDark ? 'text-gray-200' : 'text-gray-900'}`}>
                               {strings.table.headers.course}
                             </th>
                             <th className={`px-6 py-3 text-left text-sm font-semibold ${isDark ? 'text-gray-200' : 'text-gray-900'}`}>
@@ -600,6 +603,19 @@ export default function ManageBookings() {
                                     {booking.student.email}
                                   </p>
                                 </div>
+                              </td>
+                              <td className={`px-6 py-4 text-sm ${isDark ? 'text-gray-300' : 'text-gray-900'}`}>
+                                {booking.description ? (
+                                  <div className="max-w-xs">
+                                    <p className="text-sm line-clamp-2" title={booking.description}>
+                                      {booking.description}
+                                    </p>
+                                  </div>
+                                ) : (
+                                  <span className={`text-xs italic ${isDark ? 'text-gray-500' : 'text-gray-400'}`}>
+                                    {strings.bookingCard.noDescription}
+                                  </span>
+                                )}
                               </td>
                               <td className={`px-6 py-4 text-sm ${isDark ? 'text-gray-300' : 'text-gray-900'}`}>
                                 <div>
@@ -700,6 +716,18 @@ export default function ManageBookings() {
                               {booking.student.email}
                             </p>
                           </div>
+
+                          {/* Description */}
+                          {booking.description && (
+                            <div className="mb-3">
+                              <p className={`text-xs font-semibold ${isDark ? 'text-gray-400' : 'text-gray-600'} uppercase mb-1`}>
+                                {strings.bookingCard.description}
+                              </p>
+                              <p className={`text-sm ${isDark ? 'text-gray-300' : 'text-gray-700'} italic`}>
+                                {booking.description}
+                              </p>
+                            </div>
+                          )}
 
                           {/* Course Info */}
                           <div className="mb-3">

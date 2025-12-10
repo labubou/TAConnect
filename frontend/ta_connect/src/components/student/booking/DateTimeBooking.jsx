@@ -12,6 +12,8 @@ export default function DateTimeBooking({
   selectedDate,
   selectedTime,
   timeSlots,
+  description,
+  onDescriptionChange,
   onDateSelect,
   onTimeSelect,
   onBook,
@@ -156,6 +158,30 @@ export default function DateTimeBooking({
                   ))}
                 </div>
               )}
+            </div>
+          )}
+
+          {/* Description Field */}
+          {selectedDate && selectedTime && (
+            <div className="mb-4">
+              <label className={`block font-semibold ${isDark ? 'text-white' : 'text-gray-800'} mb-2`}>
+                {strings.steps.step3.descriptionLabel}
+              </label>
+              <textarea
+                value={description}
+                onChange={(e) => onDescriptionChange(e.target.value)}
+                placeholder={strings.steps.step3.descriptionPlaceholder}
+                rows={3}
+                maxLength={500}
+                className={`w-full p-3 rounded-lg border-2 transition-all resize-none ${
+                  isDark 
+                    ? 'bg-gray-900 border-gray-700 text-white placeholder-gray-500 focus:border-blue-500' 
+                    : 'bg-white border-gray-200 text-gray-900 placeholder-gray-400 focus:border-blue-500'
+                } focus:outline-none focus:ring-2 focus:ring-blue-500/20`}
+              />
+              <p className={`text-xs mt-1 ${isDark ? 'text-gray-400' : 'text-gray-500'} text-right`}>
+                {description.length}/500
+              </p>
             </div>
           )}
 

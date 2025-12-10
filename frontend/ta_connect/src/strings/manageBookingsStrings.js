@@ -43,6 +43,8 @@ const manageBookingsStrings = {
       status: "Status",
       bookedOn: "Booked on",
       actions: "Actions",
+      description: "Booking Reason",
+      noDescription: "No reason provided",
     },
     status: {
       active: "Active",
@@ -100,6 +102,7 @@ const manageBookingsStrings = {
     table: {
       headers: {
         studentName: "Student Name",
+        description: "Reason",
         course: "Slot",
         date: "Date & Time",
         status: "Status",
@@ -152,10 +155,12 @@ const manageBookingsStrings = {
       date: "التاريخ",
       time: "الوقت",
       duration: "المدة",
-      room: "المكان",
+      room: "الغرفة",
       status: "الحالة",
-      bookedOn: "تاريخ الحجز",
+      bookedOn: "تم الحجز في",
       actions: "الإجراءات",
+      description: "سبب الحجز",
+      noDescription: "لم يتم تقديم سبب",
     },
     status: {
       active: "نشط",
@@ -213,6 +218,7 @@ const manageBookingsStrings = {
     table: {
       headers: {
         studentName: "اسم الطالب",
+        description: "السبب",
         course: "الموعد",
         date: "التاريخ والوقت",
         status: "الحالة",

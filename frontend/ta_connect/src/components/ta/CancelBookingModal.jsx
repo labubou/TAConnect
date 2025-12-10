@@ -118,6 +118,16 @@ export default function CancelBookingModal({ booking, isDark, onConfirm, onCance
                 {booking.start_time}
               </span>
             </div>
+            {booking.description && (
+              <div className="pt-2 border-t" style={{borderColor: isDark ? '#374151' : '#e5e7eb'}}>
+                <span className={`block mb-1 ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
+                  {strings.bookingCard.description}:
+                </span>
+                <span className={`font-medium italic ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
+                  {booking.description}
+                </span>
+              </div>
+            )}
           </div>
         </div>
 

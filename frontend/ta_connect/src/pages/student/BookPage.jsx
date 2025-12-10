@@ -33,6 +33,7 @@ export default function BookPage() {
   const [availableDates, setAvailableDates] = useState([]);
   const [selectedDate, setSelectedDate] = useState('');
   const [selectedTime, setSelectedTime] = useState('');
+  const [description, setDescription] = useState('');
   const [timeSlots, setTimeSlots] = useState([]);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
@@ -367,7 +368,8 @@ export default function BookPage() {
         slot_id: selectedSlot.id,
         date: selectedDate,
         start_time: selectedTime,
-        send_email: sendEmailNotification
+        send_email: sendEmailNotification,
+        book_description: description
       },
       {
         onSuccess: (response) => {
@@ -490,6 +492,8 @@ export default function BookPage() {
                 selectedDate={selectedDate}
                 selectedTime={selectedTime}
                 timeSlots={timeSlots}
+                description={description}
+                onDescriptionChange={setDescription}
                 onDateSelect={handleDateSelect}
                 onTimeSelect={setSelectedTime}
                 onBook={handleBookSlot}

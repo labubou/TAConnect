@@ -237,6 +237,11 @@ export default function WeeklySchedule({ isDark = false }) {
                         <p className={`text-xs ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
                           {booking.student.email}
                         </p>
+                        {booking.description && (
+                          <p className={`text-xs mt-1 italic ${isDark ? 'text-gray-500' : 'text-gray-500'}`}>
+                            💬 {booking.description}
+                          </p>
+                        )}
                       </div>
                     </td>
                     <td className={`px-4 sm:px-6 py-4 text-sm ${isDark ? 'text-gray-300' : 'text-gray-900'}`}>
@@ -299,6 +304,11 @@ export default function WeeklySchedule({ isDark = false }) {
                   <p className={`text-xs ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
                     {booking.student.email}
                   </p>
+                  {booking.description && (
+                    <p className={`text-xs mt-2 pt-2 italic border-t ${isDark ? 'border-gray-700 text-gray-500' : 'border-gray-200 text-gray-500'}`}>
+                      💬 {booking.description}
+                    </p>
+                  )}
                 </div>
 
                 {/* Course and Room */}
