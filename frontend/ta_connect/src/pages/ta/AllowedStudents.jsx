@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { useTheme } from "../../contexts/ThemeContext";
+import { useLanguage } from "../../contexts/LanguageContext";
 import { useGlobalLoading } from "../../contexts/GlobalLoadingContext";
 import TAnavbar from "../../components/ta/TAnavbar";
 import AllowedStudentsTable from "../../components/ta/mini-pages/AllowedStudentsTable";
@@ -50,6 +51,7 @@ const Modal = ({ title, onClose, isDark, children }) => (
 
 export default function AllowedStudents() {
   const { theme } = useTheme();
+  const { language } = useLanguage();
   const { startLoading, stopLoading, isLoading } = useGlobalLoading();
   const isDark = theme === "dark";
   const [isNavbarOpen, setIsNavbarOpen] = useState(true);
@@ -158,8 +160,10 @@ export default function AllowedStudents() {
       <TAnavbar onToggle={setIsNavbarOpen} />
 
       <main
-        className={`transition-all duration-300 ${
-          isNavbarOpen ? "ml-64" : "ml-0"
+        className={`transition-all duration-500 ease-in-out ${
+          language === 'ar'
+            ? (isNavbarOpen ? "mr-64" : "mr-0")
+            : (isNavbarOpen ? "ml-64" : "ml-0")
         } pt-20 min-h-screen`}
       >
         <div className="px-4 sm:px-6 lg:px-10 py-6 space-y-6">

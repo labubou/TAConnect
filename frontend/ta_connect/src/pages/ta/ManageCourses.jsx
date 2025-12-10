@@ -188,8 +188,10 @@ export default function ManageCourses() {
       <TAnavbar onToggle={setIsNavbarOpen} />
 
       <main
-        className={`transition-all duration-300 ease-in-out ${
-          isNavbarOpen ? "ml-0 sm:ml-64" : "ml-0"
+        className={`transition-all duration-500 ease-in-out ${
+          language === 'ar'
+            ? (isNavbarOpen ? "mr-0 sm:mr-64" : "mr-0")
+            : (isNavbarOpen ? "ml-0 sm:ml-64" : "ml-0")
         } pt-20 min-h-screen`}
       >
         <div className="px-3 sm:px-6 lg:px-10 py-4 sm:py-6 space-y-4 sm:space-y-6">
