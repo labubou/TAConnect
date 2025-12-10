@@ -25,7 +25,6 @@ export default function SettingsPage() {
   const [preferences, setPreferences] = useState({
     email_on_booking: true,
     email_on_cancellation: true,
-    email_on_update: true,
   });
 
   const [loading, setLoading] = useState(true);
@@ -112,7 +111,6 @@ export default function SettingsPage() {
       setPreferences({
         email_on_booking: data.email_on_booking !== false,
         email_on_cancellation: data.email_on_cancellation !== false,
-        email_on_update: data.email_on_update !== false,
       });
     } catch (err) {
       console.error('Failed to fetch preferences:', err);
@@ -123,7 +121,6 @@ export default function SettingsPage() {
       setPreferences({
         email_on_booking: true,
         email_on_cancellation: true,
-        email_on_update: true,
       });
     } finally {
       stopLoading('fetch-email-prefs');
@@ -142,7 +139,6 @@ export default function SettingsPage() {
     setPreferences({
       email_on_booking: true,
       email_on_cancellation: true,
-      email_on_update: true,
     });
     setMessage({ 
       type: 'success', 
@@ -153,7 +149,7 @@ export default function SettingsPage() {
   // ==================================================================================
   // BACKEND CONNECTION - SAVE PREFERENCES
   // Endpoint: PATCH /api/profile/email-preferences/
-  // Request Payload: { email_on_booking: boolean, email_on_cancellation: boolean, email_on_update: boolean }
+  // Request Payload: { email_on_booking: boolean, email_on_cancellation: boolean }
   // Expected Response: { status: 200 } or { error: string }
   // This sends the updated preferences to the backend and saves them to the database
   // ==================================================================================
@@ -166,7 +162,6 @@ export default function SettingsPage() {
       const response = await axios.patch('/api/profile/email-preferences/', {
         email_on_booking: preferences.email_on_booking,
         email_on_cancellation: preferences.email_on_cancellation,
-        email_on_update: preferences.email_on_update,
       });
 
       if (response.status === 200) {
@@ -673,80 +668,6 @@ export default function SettingsPage() {
                       </div>
                     </div>
                   </div>
-
-                  {/* Email on Update */}
-                  <div className={`rounded-2xl ${isDark ? 'bg-gray-800' : 'bg-white'} shadow-lg border ${isDark ? 'border-gray-700' : 'border-gray-100'} overflow-hidden`}>
-                    <div className="p-4 sm:p-6">
-                      <div className={`flex items-start gap-3 sm:gap-4 mb-4 ${language === 'ar' ? 'flex-row-reverse' : ''}`}>
-                        <div className={`p-2 rounded-lg ${isDark ? 'bg-yellow-900/20' : 'bg-yellow-100'}`}>
-                          <RefreshCw className={`w-5 h-5 ${isDark ? 'text-yellow-400' : 'text-yellow-600'}`} />
-                        </div>
-                        <div className={`flex-1 ${language === 'ar' ? 'text-right' : 'text-left'}`}>
-                          <h2 className={`text-lg sm:text-xl font-semibold ${isDark ? 'text-white' : 'text-gray-900'} ${language === 'ar' ? 'text-right' : 'text-left'}`}>
-                            {t.updateSection.title}
-                          </h2>
-                          <p className={`text-sm mt-1 ${isDark ? 'text-gray-400' : 'text-gray-600'} ${language === 'ar' ? 'text-right' : 'text-left'}`}>
-                            {t.updateSection.subtitle}
-                          </p>
-                        </div>
-                      </div>
-
-                      <div
-                        onClick={() => !saving && handleToggle('email_on_update')}
-                        className={`rounded-xl p-4 border-2 transition-all cursor-pointer ${
-                          saving ? 'opacity-50 cursor-not-allowed' : ''
-                        } ${
-                          preferences.email_on_update
-                            ? isDark
-                              ? 'border-blue-600 bg-blue-900/20'
-                              : 'border-blue-500 bg-blue-50'
-                            : isDark
-                            ? 'border-gray-700 hover:border-gray-600 bg-gray-800/50'
-                            : 'border-gray-200 hover:border-gray-300 bg-gray-50'
-                        }`}
-                      >
-                        <div className={`flex items-start gap-3 ${language === 'ar' ? 'flex-row-reverse' : ''}`}>
-                          <div
-                            className={`mt-0.5 w-5 h-5 rounded-full border-2 flex items-center justify-center flex-shrink-0 transition-all ${
-                              preferences.email_on_update
-                                ? isDark
-                                  ? 'border-blue-500 bg-blue-500'
-                                  : 'border-blue-500 bg-blue-500'
-                                : isDark
-                                ? 'border-gray-600'
-                                : 'border-gray-300'
-                            }`}
-                          >
-                            {preferences.email_on_update && (
-                              <div className="w-2 h-2 bg-white rounded-full"></div>
-                            )}
-                          </div>
-                          <div className={`flex-1 ${language === 'ar' ? 'text-right' : 'text-left'}`}>
-                            <div className={`flex w-full flex-col sm:flex-row sm:items-center gap-2 ${language === 'ar' ? 'items-end text-right sm:flex-row-reverse sm:justify-start' : 'items-start text-left sm:justify-start'}`}>
-                              <p className={`flex-1 font-semibold ${isDark ? 'text-white' : 'text-gray-900'}`}>
-                                {t.updateSection.optionTitle}
-                              </p>
-                              {preferences.email_on_update && (
-                                <span className={`text-xs px-2 py-0.5 rounded-full inline-block w-fit ${isDark ? 'bg-blue-700 text-blue-100' : 'bg-blue-200 text-blue-800'}`}>
-                                  {t.status.enabled}
-                                </span>
-                              )}
-                            </div>
-                            <p className={`text-sm mt-1 ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
-                              {t.updateSection.optionDescription}
-                            </p>
-                          </div>
-                          <Mail className={`w-5 h-5 flex-shrink-0 ${
-                            preferences.email_on_update
-                              ? isDark ? 'text-blue-400' : 'text-blue-600'
-                              : isDark ? 'text-gray-600' : 'text-gray-400'
-                          }`} />
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  
 
                   {/* Save Button */}
                   <div className={`rounded-2xl ${isDark ? 'bg-gray-800' : 'bg-white'} shadow-lg border ${isDark ? 'border-gray-700' : 'border-gray-100'} p-4 sm:p-6`}>
