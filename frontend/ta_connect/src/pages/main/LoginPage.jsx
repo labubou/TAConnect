@@ -56,11 +56,11 @@ function LoginPage() {
           axios.defaults.headers.common['Authorization'] = `Bearer ${access}`;
         }
         
-        // Login and let AuthContext handle fetching user data
+        // Login with fresh user data from server (not cached response)
         await login({
           access,
           refresh,
-          user: response.data.user
+          user: null  // Force fresh fetch of user data
         });
         
         // Fetch user data to get user_type for navigation
