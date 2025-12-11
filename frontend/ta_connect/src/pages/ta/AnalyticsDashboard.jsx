@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useTheme } from '../../contexts/ThemeContext';
+import { useLanguage } from '../../contexts/LanguageContext';
 import TAnavbar from '../../components/ta/TAnavbar';
 import BookingsChart from '../../components/ta/BookingsChart';
 import StudentActivityChart from '../../components/ta/StudentActivityChart';
@@ -23,6 +24,7 @@ import { useAnalyticsData, useBookingAnalytics } from '../../hooks/useApi';
 
 export default function AnalyticsDashboard() {
   const { theme } = useTheme();
+  const { language } = useLanguage();
   const isDark = theme === 'dark';
   const [isNavbarOpen, setIsNavbarOpen] = useState(true);
   const [bookingsData, setBookingsData] = useState([]);
@@ -112,7 +114,11 @@ export default function AnalyticsDashboard() {
       <TAnavbar onToggle={setIsNavbarOpen} />
       
       <div 
-        className={`flex-1 transition-all duration-300 ${isNavbarOpen ? 'ml-0 sm:ml-64' : 'ml-0'} pt-20`}
+        className={`flex-1 transition-all duration-500 ease-in-out ${
+          language === 'ar'
+            ? (isNavbarOpen ? 'mr-0 sm:mr-64' : 'mr-0')
+            : (isNavbarOpen ? 'ml-0 sm:ml-64' : 'ml-0')
+        } pt-20`}
         style={{ minHeight: 'calc(100vh - 4rem)' }}
       >
         <main className={`${isDark ? 'bg-gray-900' : 'bg-gray-50'} p-3 sm:p-6 lg:p-8`}>

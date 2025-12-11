@@ -13,6 +13,7 @@ const manageBookingsStrings = {
       filterByStatus: "Filter by Status",
       allBookings: "All Bookings",
       activeOnly: "Active Only",
+      pendingOnly: "Pending Only",
       cancelledOnly: "Cancelled Only",
       completedOnly: "Completed Only",
       allCourses: "All Slots",
@@ -27,6 +28,7 @@ const manageBookingsStrings = {
     },
     sections: {
       activeBookings: "Active Bookings",
+      pendingBookings: "Pending Bookings",
       cancelledBookings: "Cancelled Bookings",
       completedBookings: "Completed Bookings",
     },
@@ -41,6 +43,8 @@ const manageBookingsStrings = {
       status: "Status",
       bookedOn: "Booked on",
       actions: "Actions",
+      description: "Booking Reason",
+      noDescription: "No reason provided",
     },
     status: {
       active: "Active",
@@ -87,6 +91,7 @@ const manageBookingsStrings = {
       updateError: "Failed to update booking",
       clearedCancelled: "All cancelled bookings have been cleared from view",
       noActiveBookings: "No active bookings",
+      noPendingBookings: "No pending bookings",
       noCancelledBookings: "No cancelled bookings",
       noCompletedBookings: "No completed bookings",
       loading: "Loading bookings...",
@@ -97,6 +102,7 @@ const manageBookingsStrings = {
     table: {
       headers: {
         studentName: "Student Name",
+        description: "Reason",
         course: "Slot",
         date: "Date & Time",
         status: "Status",
@@ -123,6 +129,7 @@ const manageBookingsStrings = {
       filterByStatus: "تصفية حسب الحالة",
       allBookings: "جميع الحجوزات",
       activeOnly: "النشطة فقط",
+      pendingOnly: "قيد الانتظار فقط",
       cancelledOnly: "الملغاة فقط",
       completedOnly: "المكتملة فقط",
       allCourses: "جميع المواعيد",
@@ -137,6 +144,7 @@ const manageBookingsStrings = {
     },
     sections: {
       activeBookings: "الحجوزات النشطة",
+      pendingBookings: "الحجوزات قيد الانتظار",
       cancelledBookings: "الحجوزات الملغاة",
       completedBookings: "الحجوزات المكتملة",
     },
@@ -147,10 +155,12 @@ const manageBookingsStrings = {
       date: "التاريخ",
       time: "الوقت",
       duration: "المدة",
-      room: "المكان",
+      room: "الغرفة",
       status: "الحالة",
-      bookedOn: "تاريخ الحجز",
+      bookedOn: "تم الحجز في",
       actions: "الإجراءات",
+      description: "سبب الحجز",
+      noDescription: "لم يتم تقديم سبب",
     },
     status: {
       active: "نشط",
@@ -197,6 +207,7 @@ const manageBookingsStrings = {
       updateError: "فشل تعديل الحجز",
       clearedCancelled: "تم إزالة جميع الحجوزات الملغاة من العرض",
       noActiveBookings: "لا توجد حجوزات نشطة",
+      noPendingBookings: "لا توجد حجوزات قيد الانتظار",
       noCancelledBookings: "لا توجد حجوزات ملغاة",
       noCompletedBookings: "لا توجد حجوزات مكتملة",
       loading: "جارٍ التحميل...",
@@ -207,6 +218,7 @@ const manageBookingsStrings = {
     table: {
       headers: {
         studentName: "اسم الطالب",
+        description: "السبب",
         course: "الموعد",
         date: "التاريخ والوقت",
         status: "الحالة",

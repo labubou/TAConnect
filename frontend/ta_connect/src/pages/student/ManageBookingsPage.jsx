@@ -53,7 +53,7 @@ export default function ManageBookingsPage() {
   const { startLoading, stopLoading, isLoading } = useGlobalLoading();
   const location = useLocation();
   const isDark = theme === 'dark';
-  const [isNavbarOpen, setIsNavbarOpen] = useState(window.innerWidth >= 1024);
+  const [isNavbarOpen, setIsNavbarOpen] = useState(true);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [selectedBooking, setSelectedBooking] = useState(null);
@@ -345,7 +345,9 @@ export default function ManageBookingsPage() {
 
     // Status filter
     if (filterStatus === 'active') {
-      filtered = filtered.filter(b => !b.is_cancelled && !b.is_completed);
+      filtered = filtered.filter(b => !b.is_cancelled && !b.is_completed && b.status === 'confirmed');
+    } else if (filterStatus === 'pending') {
+      filtered = filtered.filter(b => !b.is_cancelled && !b.is_completed && b.status === 'pending');
     } else if (filterStatus === 'cancelled') {
       filtered = filtered.filter(b => b.is_cancelled);
     } else if (filterStatus === 'completed') {
@@ -375,7 +377,8 @@ export default function ManageBookingsPage() {
   };
 
   const filteredBookings = getFilteredBookings();
-  const activeBookings = filteredBookings.filter(b => !b.is_cancelled && !b.is_completed);
+  const activeBookings = filteredBookings.filter(b => !b.is_cancelled && !b.is_completed && b.status === 'confirmed');
+  const pendingBookings = filteredBookings.filter(b => !b.is_cancelled && !b.is_completed && b.status === 'pending');
   const cancelledBookings = filteredBookings.filter(b => b.is_cancelled);
   const completedBookings = filteredBookings.filter(b => b.is_completed);
 
@@ -384,18 +387,14 @@ export default function ManageBookingsPage() {
       <StudentNavbar onToggle={setIsNavbarOpen} />
       
       <div 
-        className={`flex-1 transition-all duration-500 ease-in-out ${
-          language === 'ar'
-            ? (isNavbarOpen ? 'lg:mr-64' : 'mr-0')
-            : (isNavbarOpen ? 'lg:ml-64' : 'ml-0')
-        } pt-16 sm:pt-20`}
+        className="flex-1 pt-16 md:pt-20"
         style={{ minHeight: 'calc(100vh - 4rem)' }}
       >
-        <main className={`${isDark ? 'bg-gray-900' : 'bg-gray-50'} p-3 sm:p-6`}>
+        <main className={`${isDark ? 'bg-gray-900' : 'bg-gray-50'} p-3 sm:p-4 md:p-6`}>
           <div className="max-w-7xl mx-auto">
             {/* Header */}
             <div className={`${isDark ? 'bg-gray-800' : 'bg-white'} p-4 sm:p-6 md:p-8 rounded-xl shadow-lg mb-4 sm:mb-6`}>
-              <h1 className={`text-2xl sm:text-3xl font-bold ${isDark ? 'text-white' : 'text-gray-900'} mb-2`}>
+              <h1 className={`text-xl sm:text-2xl md:text-3xl font-bold ${isDark ? 'text-white' : 'text-gray-900'} mb-2`}>
                 {t.page.title}
               </h1>
               <p className={`${isDark ? 'text-gray-300' : 'text-gray-600'} text-sm sm:text-base md:text-lg`}>
@@ -445,8 +444,22 @@ export default function ManageBookingsPage() {
               </div>
             ) : (
               <>
+                {/* Pending Bookings */}
+                {filterStatus !== 'active' && filterStatus !== 'cancelled' && filterStatus !== 'completed' && (
+                  <BookingsList
+                    title={t.sections.pendingBookings}
+                    bookings={pendingBookings}
+                    status="pending"
+                    emptyMessage={t.messages.noPendingBookings}
+                    formatDate={formatDate}
+                    formatTime={formatTime}
+                    onUpdate={handleUpdateClick}
+                    onCancel={handleCancelClick}
+                  />
+                )}
+
                 {/* Active Bookings */}
-                {filterStatus !== 'cancelled' && filterStatus !== 'completed' && (
+                {filterStatus !== 'pending' && filterStatus !== 'cancelled' && filterStatus !== 'completed' && (
                   <BookingsList
                     title={t.sections.activeBookings}
                     bookings={activeBookings}
@@ -460,7 +473,7 @@ export default function ManageBookingsPage() {
                 )}
 
                 {/* Cancelled Bookings */}
-                {filterStatus !== 'active' && filterStatus !== 'completed' && (
+                {filterStatus !== 'active' && filterStatus !== 'pending' && filterStatus !== 'completed' && (
                   <BookingsList
                     title={t.sections.cancelledBookings}
                     bookings={cancelledBookings}
@@ -472,7 +485,7 @@ export default function ManageBookingsPage() {
                 )}
 
                 {/* Completed Bookings */}
-                {filterStatus !== 'active' && filterStatus !== 'cancelled' && (
+                {filterStatus !== 'active' && filterStatus !== 'pending' && filterStatus !== 'cancelled' && (
                   <BookingsList
                     title={t.sections.completedBookings}
                     bookings={completedBookings}

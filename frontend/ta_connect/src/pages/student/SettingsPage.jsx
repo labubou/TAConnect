@@ -25,7 +25,6 @@ export default function SettingsPage() {
   const [preferences, setPreferences] = useState({
     email_on_booking: true,
     email_on_cancellation: true,
-    email_on_update: true,
   });
 
   const [loading, setLoading] = useState(true);
@@ -112,7 +111,6 @@ export default function SettingsPage() {
       setPreferences({
         email_on_booking: data.email_on_booking !== false,
         email_on_cancellation: data.email_on_cancellation !== false,
-        email_on_update: data.email_on_update !== false,
       });
     } catch (err) {
       console.error('Failed to fetch preferences:', err);
@@ -123,7 +121,6 @@ export default function SettingsPage() {
       setPreferences({
         email_on_booking: true,
         email_on_cancellation: true,
-        email_on_update: true,
       });
     } finally {
       stopLoading('fetch-email-prefs');
@@ -142,7 +139,6 @@ export default function SettingsPage() {
     setPreferences({
       email_on_booking: true,
       email_on_cancellation: true,
-      email_on_update: true,
     });
     setMessage({ 
       type: 'success', 
@@ -153,7 +149,7 @@ export default function SettingsPage() {
   // ==================================================================================
   // BACKEND CONNECTION - SAVE PREFERENCES
   // Endpoint: PATCH /api/profile/email-preferences/
-  // Request Payload: { email_on_booking: boolean, email_on_cancellation: boolean, email_on_update: boolean }
+  // Request Payload: { email_on_booking: boolean, email_on_cancellation: boolean }
   // Expected Response: { status: 200 } or { error: string }
   // This sends the updated preferences to the backend and saves them to the database
   // ==================================================================================
@@ -166,7 +162,6 @@ export default function SettingsPage() {
       const response = await axios.patch('/api/profile/email-preferences/', {
         email_on_booking: preferences.email_on_booking,
         email_on_cancellation: preferences.email_on_cancellation,
-        email_on_update: preferences.email_on_update,
       });
 
       if (response.status === 200) {
@@ -414,34 +409,30 @@ export default function SettingsPage() {
       <StudentNavbar onToggle={setIsNavbarOpen} />
 
       <main
-        className={`transition-all duration-500 ease-in-out flex-1 ${
-          language === 'ar' 
-            ? (isNavbarOpen ? 'mr-64' : 'mr-0')
-            : (isNavbarOpen ? 'ml-64' : 'ml-0')
-        } pt-20 px-3 sm:px-6 lg:px-10 pb-20`}
+        className="flex-1 pt-16 md:pt-20 px-3 sm:px-6 lg:px-10 pb-12 sm:pb-20"
       >
-        <div className="max-w-4xl mx-auto space-y-4 sm:space-y-6">
+        <div className="max-w-4xl mx-auto space-y-3 sm:space-y-4 md:space-y-6">
           {/* Header */}
-          <div className={`rounded-2xl ${isDark ? 'bg-gray-800' : 'bg-white'} shadow-lg border ${isDark ? 'border-gray-700' : 'border-gray-100'} p-4 sm:p-6`}>
-            <div className={`flex items-start gap-3 sm:gap-4 mb-6 ${language === 'ar' ? 'flex-row-reverse' : ''}`}>
-              <div className={`p-2 sm:p-3 rounded-xl ${isDark ? 'bg-blue-900/20' : 'bg-blue-100'}`}>
-                <Settings className={`w-6 h-6 sm:w-8 sm:h-8 ${isDark ? 'text-blue-400' : 'text-blue-600'}`} />
+          <div className={`rounded-2xl ${isDark ? 'bg-gray-800' : 'bg-white'} shadow-lg border ${isDark ? 'border-gray-700' : 'border-gray-100'} p-3 sm:p-4 md:p-6`}>
+            <div className={`flex items-start gap-2 sm:gap-3 md:gap-4 mb-4 sm:mb-6 ${language === 'ar' ? 'flex-row-reverse' : ''}`}>
+              <div className={`p-1.5 sm:p-2 md:p-3 rounded-xl ${isDark ? 'bg-blue-900/20' : 'bg-blue-100'}`}>
+                <Settings className={`w-5 h-5 sm:w-6 sm:h-6 md:w-8 md:h-8 ${isDark ? 'text-blue-400' : 'text-blue-600'}`} />
               </div>
               <div className="flex-1">
-                <h1 className={`text-xl sm:text-2xl font-bold ${isDark ? 'text-white' : 'text-gray-900'} ${language === 'ar' ? 'text-right' : 'text-left'}`}>
+                <h1 className={`text-lg sm:text-xl md:text-2xl font-bold ${isDark ? 'text-white' : 'text-gray-900'} ${language === 'ar' ? 'text-right' : 'text-left'}`}>
                   {t.header.title}
                 </h1>
-                <p className={`text-sm sm:text-base mt-1 ${isDark ? 'text-gray-400' : 'text-gray-600'} ${language === 'ar' ? 'text-right' : 'text-left'}`}>
+                <p className={`text-xs sm:text-sm md:text-base mt-1 ${isDark ? 'text-gray-400' : 'text-gray-600'} ${language === 'ar' ? 'text-right' : 'text-left'}`}>
                   {t.header.subtitle}
                 </p>
               </div>
             </div>
 
             {/* Tabs */}
-            <div className={`flex gap-1 p-1 rounded-xl ${isDark ? 'bg-gray-900/50' : 'bg-gray-100'}`}>
+            <div className={`flex gap-0.5 sm:gap-1 p-0.5 sm:p-1 rounded-xl ${isDark ? 'bg-gray-900/50' : 'bg-gray-100'}`}>
               <button
                 onClick={() => setActiveTab('emailPreferences')}
-                className={`flex-1 px-4 py-3 font-semibold rounded-lg transition-all duration-200 ${
+                className={`flex-1 px-2 sm:px-3 md:px-4 py-2 sm:py-2.5 md:py-3 text-xs sm:text-sm md:text-base font-semibold rounded-lg transition-all duration-200 ${
                   activeTab === 'emailPreferences'
                     ? isDark
                       ? 'bg-gradient-to-r from-[#4a9d9c] to-[#366c6b] text-white shadow-lg'
@@ -451,15 +442,15 @@ export default function SettingsPage() {
                     : 'text-gray-600 hover:text-gray-900 hover:bg-gray-200'
                 }`}
               >
-                <div className="flex items-center justify-center gap-2">
-                  <Mail className="w-4 h-4" />
+                <div className="flex items-center justify-center gap-1 sm:gap-2">
+                  <Mail className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                   <span className="hidden sm:inline">{t.tabs.emailPreferences}</span>
-                  <span className="sm:hidden">{language === 'ar' ? 'البريد' : 'Email'}</span>
+                  <span className="sm:hidden text-xs">{language === 'ar' ? 'البريد' : 'Email'}</span>
                 </div>
               </button>
               <button
                 onClick={() => setActiveTab('profile')}
-                className={`flex-1 px-4 py-3 font-semibold rounded-lg transition-all duration-200 ${
+                className={`flex-1 px-2 sm:px-3 md:px-4 py-2 sm:py-2.5 md:py-3 text-xs sm:text-sm md:text-base font-semibold rounded-lg transition-all duration-200 ${
                   activeTab === 'profile'
                     ? isDark
                       ? 'bg-gradient-to-r from-[#4a9d9c] to-[#366c6b] text-white shadow-lg'
@@ -469,10 +460,10 @@ export default function SettingsPage() {
                     : 'text-gray-600 hover:text-gray-900 hover:bg-gray-200'
                 }`}
               >
-                <div className="flex items-center justify-center gap-2">
-                  <User className="w-4 h-4" />
+                <div className="flex items-center justify-center gap-1 sm:gap-2">
+                  <User className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                   <span className="hidden sm:inline">{t.tabs.profile}</span>
-                  <span className="sm:hidden">{language === 'ar' ? 'الملف' : 'Profile'}</span>
+                  <span className="sm:hidden text-xs">{language === 'ar' ? 'الملف' : 'Profile'}</span>
                 </div>
               </button>
             </div>
@@ -532,16 +523,16 @@ export default function SettingsPage() {
 
                   {/* Email on Booking */}
                   <div className={`rounded-2xl ${isDark ? 'bg-gray-800' : 'bg-white'} shadow-lg border ${isDark ? 'border-gray-700' : 'border-gray-100'} overflow-hidden`}>
-                    <div className="p-4 sm:p-6">
-                      <div className={`flex items-start gap-3 sm:gap-4 mb-4 ${language === 'ar' ? 'flex-row-reverse' : ''}`}>
-                        <div className={`p-2 rounded-lg ${isDark ? 'bg-blue-900/20' : 'bg-blue-100'}`}>
-                          <Mail className={`w-5 h-5 ${isDark ? 'text-blue-400' : 'text-blue-600'}`} />
+                    <div className="p-3 sm:p-4 md:p-6">
+                      <div className={`flex items-start gap-2 sm:gap-3 md:gap-4 mb-3 sm:mb-4 ${language === 'ar' ? 'flex-row-reverse' : ''}`}>
+                        <div className={`p-1.5 sm:p-2 rounded-lg ${isDark ? 'bg-blue-900/20' : 'bg-blue-100'}`}>
+                          <Mail className={`w-4 h-4 sm:w-5 sm:h-5 ${isDark ? 'text-blue-400' : 'text-blue-600'}`} />
                         </div>
                         <div className={`flex-1 ${language === 'ar' ? 'text-right' : 'text-left'}`}>
-                          <h2 className={`text-lg sm:text-xl font-semibold ${isDark ? 'text-white' : 'text-gray-900'} ${language === 'ar' ? 'text-right' : 'text-left'}`}>
+                          <h2 className={`text-base sm:text-lg md:text-xl font-semibold ${isDark ? 'text-white' : 'text-gray-900'} ${language === 'ar' ? 'text-right' : 'text-left'}`}>
                             {t.bookingSection.title}
                           </h2>
-                          <p className={`text-sm mt-1 ${isDark ? 'text-gray-400' : 'text-gray-600'} ${language === 'ar' ? 'text-right' : 'text-left'}`}>
+                          <p className={`text-xs sm:text-sm mt-1 ${isDark ? 'text-gray-400' : 'text-gray-600'} ${language === 'ar' ? 'text-right' : 'text-left'}`}>
                             {t.bookingSection.subtitle}
                           </p>
                         </div>
@@ -549,7 +540,7 @@ export default function SettingsPage() {
 
                       <div
                         onClick={() => !saving && handleToggle('email_on_booking')}
-                        className={`rounded-xl p-4 border-2 transition-all cursor-pointer ${
+                        className={`rounded-xl p-3 sm:p-4 border-2 transition-all cursor-pointer ${
                           saving ? 'opacity-50 cursor-not-allowed' : ''
                         } ${
                           preferences.email_on_booking
@@ -562,6 +553,11 @@ export default function SettingsPage() {
                         }`}
                       >
                         <div className={`flex items-start gap-3 ${language === 'ar' ? 'flex-row-reverse' : ''}`}>
+                          {language === 'ar' && <Mail className={`w-5 h-5 flex-shrink-0 ${
+                            preferences.email_on_booking
+                              ? isDark ? 'text-blue-400' : 'text-blue-600'
+                              : isDark ? 'text-gray-600' : 'text-gray-400'
+                          }`} />}
                           <div
                             className={`mt-0.5 w-5 h-5 rounded-full border-2 flex items-center justify-center flex-shrink-0 transition-all ${
                               preferences.email_on_booking
@@ -592,11 +588,11 @@ export default function SettingsPage() {
                               {t.bookingSection.optionDescription}
                             </p>
                           </div>
-                          <Mail className={`w-5 h-5 flex-shrink-0 ${
+                          {language !== 'ar' && <Mail className={`w-5 h-5 flex-shrink-0 ${
                             preferences.email_on_booking
                               ? isDark ? 'text-blue-400' : 'text-blue-600'
                               : isDark ? 'text-gray-600' : 'text-gray-400'
-                          }`} />
+                          }`} />}
                         </div>
                       </div>
                     </div>
@@ -604,16 +600,16 @@ export default function SettingsPage() {
 
                   {/* Email on Cancellation */}
                   <div className={`rounded-2xl ${isDark ? 'bg-gray-800' : 'bg-white'} shadow-lg border ${isDark ? 'border-gray-700' : 'border-gray-100'} overflow-hidden`}>
-                    <div className="p-4 sm:p-6">
-                      <div className={`flex items-start gap-3 sm:gap-4 mb-4 ${language === 'ar' ? 'flex-row-reverse' : ''}`}>
-                        <div className={`p-2 rounded-lg ${isDark ? 'bg-red-900/20' : 'bg-red-100'}`}>
-                          <X className={`w-5 h-5 ${isDark ? 'text-red-400' : 'text-red-600'}`} />
+                    <div className="p-3 sm:p-4 md:p-6">
+                      <div className={`flex items-start gap-2 sm:gap-3 md:gap-4 mb-3 sm:mb-4 ${language === 'ar' ? 'flex-row-reverse' : ''}`}>
+                        <div className={`p-1.5 sm:p-2 rounded-lg ${isDark ? 'bg-red-900/20' : 'bg-red-100'}`}>
+                          <X className={`w-4 h-4 sm:w-5 sm:h-5 ${isDark ? 'text-red-400' : 'text-red-600'}`} />
                         </div>
                         <div className={`flex-1 ${language === 'ar' ? 'text-right' : 'text-left'}`}>
-                          <h2 className={`text-lg sm:text-xl font-semibold ${isDark ? 'text-white' : 'text-gray-900'} ${language === 'ar' ? 'text-right' : 'text-left'}`}>
+                          <h2 className={`text-base sm:text-lg md:text-xl font-semibold ${isDark ? 'text-white' : 'text-gray-900'} ${language === 'ar' ? 'text-right' : 'text-left'}`}>
                             {t.cancellationSection.title}
                           </h2>
-                          <p className={`text-sm mt-1 ${isDark ? 'text-gray-400' : 'text-gray-600'} ${language === 'ar' ? 'text-right' : 'text-left'}`}>
+                          <p className={`text-xs sm:text-sm mt-1 ${isDark ? 'text-gray-400' : 'text-gray-600'} ${language === 'ar' ? 'text-right' : 'text-left'}`}>
                             {t.cancellationSection.subtitle}
                           </p>
                         </div>
@@ -634,6 +630,11 @@ export default function SettingsPage() {
                         }`}
                       >
                         <div className={`flex items-start gap-3 ${language === 'ar' ? 'flex-row-reverse' : ''}`}>
+                          {language === 'ar' && <Mail className={`w-5 h-5 flex-shrink-0 ${
+                            preferences.email_on_cancellation
+                              ? isDark ? 'text-blue-400' : 'text-blue-600'
+                              : isDark ? 'text-gray-600' : 'text-gray-400'
+                          }`} />}
                           <div
                             className={`mt-0.5 w-5 h-5 rounded-full border-2 flex items-center justify-center flex-shrink-0 transition-all ${
                               preferences.email_on_cancellation
@@ -664,96 +665,22 @@ export default function SettingsPage() {
                               {t.cancellationSection.optionDescription}
                             </p>
                           </div>
-                          <Mail className={`w-5 h-5 flex-shrink-0 ${
+                          {language !== 'ar' && <Mail className={`w-5 h-5 flex-shrink-0 ${
                             preferences.email_on_cancellation
                               ? isDark ? 'text-blue-400' : 'text-blue-600'
                               : isDark ? 'text-gray-600' : 'text-gray-400'
-                          }`} />
+                          }`} />}
                         </div>
                       </div>
                     </div>
                   </div>
-
-                  {/* Email on Update */}
-                  <div className={`rounded-2xl ${isDark ? 'bg-gray-800' : 'bg-white'} shadow-lg border ${isDark ? 'border-gray-700' : 'border-gray-100'} overflow-hidden`}>
-                    <div className="p-4 sm:p-6">
-                      <div className={`flex items-start gap-3 sm:gap-4 mb-4 ${language === 'ar' ? 'flex-row-reverse' : ''}`}>
-                        <div className={`p-2 rounded-lg ${isDark ? 'bg-yellow-900/20' : 'bg-yellow-100'}`}>
-                          <RefreshCw className={`w-5 h-5 ${isDark ? 'text-yellow-400' : 'text-yellow-600'}`} />
-                        </div>
-                        <div className={`flex-1 ${language === 'ar' ? 'text-right' : 'text-left'}`}>
-                          <h2 className={`text-lg sm:text-xl font-semibold ${isDark ? 'text-white' : 'text-gray-900'} ${language === 'ar' ? 'text-right' : 'text-left'}`}>
-                            {t.updateSection.title}
-                          </h2>
-                          <p className={`text-sm mt-1 ${isDark ? 'text-gray-400' : 'text-gray-600'} ${language === 'ar' ? 'text-right' : 'text-left'}`}>
-                            {t.updateSection.subtitle}
-                          </p>
-                        </div>
-                      </div>
-
-                      <div
-                        onClick={() => !saving && handleToggle('email_on_update')}
-                        className={`rounded-xl p-4 border-2 transition-all cursor-pointer ${
-                          saving ? 'opacity-50 cursor-not-allowed' : ''
-                        } ${
-                          preferences.email_on_update
-                            ? isDark
-                              ? 'border-blue-600 bg-blue-900/20'
-                              : 'border-blue-500 bg-blue-50'
-                            : isDark
-                            ? 'border-gray-700 hover:border-gray-600 bg-gray-800/50'
-                            : 'border-gray-200 hover:border-gray-300 bg-gray-50'
-                        }`}
-                      >
-                        <div className={`flex items-start gap-3 ${language === 'ar' ? 'flex-row-reverse' : ''}`}>
-                          <div
-                            className={`mt-0.5 w-5 h-5 rounded-full border-2 flex items-center justify-center flex-shrink-0 transition-all ${
-                              preferences.email_on_update
-                                ? isDark
-                                  ? 'border-blue-500 bg-blue-500'
-                                  : 'border-blue-500 bg-blue-500'
-                                : isDark
-                                ? 'border-gray-600'
-                                : 'border-gray-300'
-                            }`}
-                          >
-                            {preferences.email_on_update && (
-                              <div className="w-2 h-2 bg-white rounded-full"></div>
-                            )}
-                          </div>
-                          <div className={`flex-1 ${language === 'ar' ? 'text-right' : 'text-left'}`}>
-                            <div className={`flex w-full flex-col sm:flex-row sm:items-center gap-2 ${language === 'ar' ? 'items-end text-right sm:flex-row-reverse sm:justify-start' : 'items-start text-left sm:justify-start'}`}>
-                              <p className={`flex-1 font-semibold ${isDark ? 'text-white' : 'text-gray-900'}`}>
-                                {t.updateSection.optionTitle}
-                              </p>
-                              {preferences.email_on_update && (
-                                <span className={`text-xs px-2 py-0.5 rounded-full inline-block w-fit ${isDark ? 'bg-blue-700 text-blue-100' : 'bg-blue-200 text-blue-800'}`}>
-                                  {t.status.enabled}
-                                </span>
-                              )}
-                            </div>
-                            <p className={`text-sm mt-1 ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
-                              {t.updateSection.optionDescription}
-                            </p>
-                          </div>
-                          <Mail className={`w-5 h-5 flex-shrink-0 ${
-                            preferences.email_on_update
-                              ? isDark ? 'text-blue-400' : 'text-blue-600'
-                              : isDark ? 'text-gray-600' : 'text-gray-400'
-                          }`} />
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  
 
                   {/* Save Button */}
-                  <div className={`rounded-2xl ${isDark ? 'bg-gray-800' : 'bg-white'} shadow-lg border ${isDark ? 'border-gray-700' : 'border-gray-100'} p-4 sm:p-6`}>
+                  <div className={`rounded-2xl ${isDark ? 'bg-gray-800' : 'bg-white'} shadow-lg border ${isDark ? 'border-gray-700' : 'border-gray-100'} p-3 sm:p-4 md:p-6`}>
                     <button
                       onClick={handleSave}
                       disabled={saving || loading || isLoading}
-                      className={`w-full py-3 px-6 rounded-xl font-semibold transition-all flex items-center justify-center gap-2 ${
+                      className={`w-full py-2.5 sm:py-3 px-4 sm:px-6 text-sm sm:text-base rounded-xl font-semibold transition-all flex items-center justify-center gap-2 ${
                         (saving || loading || isLoading)
                           ? 'opacity-50 cursor-not-allowed'
                           : 'hover:shadow-lg hover:scale-105'
@@ -765,12 +692,12 @@ export default function SettingsPage() {
                     >
                       {saving || isLoading ? (
                         <>
-                          <RefreshCw className="w-5 h-5 animate-spin" />
+                          <RefreshCw className="w-4 h-4 sm:w-5 sm:h-5 animate-spin" />
                           {t.buttons.saving}
                         </>
                       ) : (
                         <>
-                          <Save className="w-5 h-5" />
+                          <Save className="w-4 h-4 sm:w-5 sm:h-5" />
                           {t.buttons.save}
                         </>
                       )}
@@ -786,7 +713,7 @@ export default function SettingsPage() {
             <>
               {/* Alerts */}
               {profileError && (
-                <div className={`p-4 rounded-xl border-2 flex items-center gap-3 ${
+                <div className={`p-4 rounded-xl border-2 flex items-center gap-3 ${language === 'ar' ? 'flex-row-reverse' : ''} ${
                   isDark ? 'bg-red-900/20 border-red-700 text-red-200' : 'bg-red-50 border-red-200 text-red-800'
                 }`}>
                   <svg className="w-6 h-6 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
@@ -796,7 +723,7 @@ export default function SettingsPage() {
                 </div>
               )}
               {profileMessage && (
-                <div className={`p-4 rounded-xl border-2 flex items-center gap-3 ${
+                <div className={`p-4 rounded-xl border-2 flex items-center gap-3 ${language === 'ar' ? 'flex-row-reverse' : ''} ${
                   isDark ? 'bg-green-900/20 border-green-700 text-green-200' : 'bg-green-50 border-green-200 text-green-800'
                 }`}>
                   <svg className="w-6 h-6 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
@@ -807,19 +734,19 @@ export default function SettingsPage() {
               )}
 
               {/* Profile Header Card */}
-              <div className={`${isDark ? 'bg-gradient-to-br from-gray-800 to-gray-900 border-gray-700' : 'bg-gradient-to-br from-white to-gray-50 border-gray-200'} p-8 rounded-2xl shadow-xl border-2`}>
-                <div className="flex items-center gap-6">
-                  <div className="w-24 h-24 bg-gradient-to-br from-[#366c6b] to-[#1a3535] rounded-2xl shadow-lg flex items-center justify-center text-white font-bold text-4xl">
+              <div className={`${isDark ? 'bg-gradient-to-br from-gray-800 to-gray-900 border-gray-700' : 'bg-gradient-to-br from-white to-gray-50 border-gray-200'} p-3 sm:p-4 md:p-8 rounded-2xl shadow-xl border-2 w-full`}>
+                <div className={`flex flex-col sm:flex-row ${language === 'ar' ? 'items-center sm:items-start sm:flex-row-reverse' : 'items-center sm:items-start'} gap-3 sm:gap-6`}>
+                  <div className="w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 bg-gradient-to-br from-[#366c6b] to-[#1a3535] rounded-2xl shadow-lg flex items-center justify-center text-white font-bold text-2xl sm:text-3xl md:text-4xl flex-shrink-0">
                     {user?.first_name ? user.first_name.charAt(0).toUpperCase() : user?.username?.charAt(0).toUpperCase() || 'U'}
                   </div>
-                  <div className="flex-1">
-                    <h1 className={`text-3xl font-bold mb-2 ${isDark ? 'text-white' : 'text-gray-900'}`}>
+                  <div className={`flex-1 w-full sm:w-auto ${language === 'ar' ? 'text-center sm:text-right' : 'text-center sm:text-left'}`}>
+                    <h1 className={`text-xl sm:text-2xl md:text-3xl font-bold mb-1 sm:mb-2 ${isDark ? 'text-white' : 'text-gray-900'}`}>
                       {t.profilePage.title}
                     </h1>
-                    <p className={`${isDark ? 'text-gray-300' : 'text-gray-600'} text-lg`}>
+                    <p className={`${isDark ? 'text-gray-300' : 'text-gray-600'} text-sm sm:text-base md:text-lg`}>
                       {t.profilePage.description}
                     </p>
-                    <div className="mt-3 flex items-center gap-2">
+                    <div className={`mt-2 sm:mt-3 flex items-center ${language === 'ar' ? 'justify-center sm:justify-end' : 'justify-center sm:justify-start'} gap-2 flex-wrap`}>
                       <span className={`px-3 py-1 rounded-lg text-sm font-semibold ${
                         isDark ? 'bg-[#366c6b]/30 text-[#4a9d9c]' : 'bg-[#366c6b]/10 text-[#366c6b]'
                       }`}>
@@ -841,23 +768,23 @@ export default function SettingsPage() {
               </div>
 
               {/* Profile Form Card */}
-              <div className={`${isDark ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'} p-8 rounded-2xl shadow-xl border-2`}>
-                <div className="flex items-center gap-3 mb-6">
-                  <div className={`p-3 rounded-xl ${isDark ? 'bg-gradient-to-br from-[#366c6b] to-[#1a3535]' : 'bg-gradient-to-br from-[#4a9d9c] to-[#366c6b]'} shadow-lg`}>
-                    <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <div className={`${isDark ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'} p-3 sm:p-4 md:p-8 rounded-2xl shadow-xl border-2`}>
+                <div className={`flex items-center gap-2 sm:gap-3 mb-3 sm:mb-4 md:mb-6 ${language === 'ar' ? 'flex-row-reverse' : ''}`}>
+                  <div className={`p-2 sm:p-2.5 md:p-3 rounded-xl ${isDark ? 'bg-gradient-to-br from-[#366c6b] to-[#1a3535]' : 'bg-gradient-to-br from-[#4a9d9c] to-[#366c6b]'} shadow-lg`}>
+                    <svg className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                     </svg>
                   </div>
-                  <h2 className={`text-2xl font-bold ${isDark ? 'text-white' : 'text-gray-900'}`}>
+                  <h2 className={`text-base sm:text-lg md:text-2xl font-bold ${isDark ? 'text-white' : 'text-gray-900'} ${language === 'ar' ? 'text-right' : 'text-left'}`}>
                     {t.profilePage.personalInformation}
                   </h2>
                 </div>
 
-                <form onSubmit={handleSubmit} className="space-y-6">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <form onSubmit={handleSubmit} className="space-y-3 sm:space-y-4 md:space-y-6">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4 md:gap-6">
                     {/* Username */}
                     <div>
-                      <label className={`flex items-center gap-2 text-sm font-semibold mb-2 ${isDark ? 'text-gray-200' : 'text-gray-700'}`}>
+                      <label className={`flex items-center gap-2 text-sm font-semibold mb-2 ${isDark ? 'text-gray-200' : 'text-gray-700'} ${language === 'ar' ? 'flex-row-reverse' : ''}`}>
                         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                         </svg>
@@ -867,7 +794,8 @@ export default function SettingsPage() {
                         name="username"
                         value={form.username}
                         onChange={handleChange}
-                        className={`w-full px-4 py-3 rounded-xl border-2 transition-all focus:outline-none focus:ring-2 focus:ring-[#366c6b]/50 ${
+                        dir={language === 'ar' ? 'rtl' : 'ltr'}
+                        className={`w-full px-4 py-3 rounded-xl border-2 transition-all focus:outline-none focus:ring-2 focus:ring-[#366c6b]/50 ${language === 'ar' ? 'text-right' : 'text-left'} ${
                           isDark
                             ? 'border-gray-600 bg-gray-700 text-white hover:border-gray-500'
                             : 'border-gray-300 bg-white text-gray-900 hover:border-gray-400'
@@ -878,7 +806,7 @@ export default function SettingsPage() {
 
                     {/* First Name */}
                     <div>
-                      <label className={`flex items-center gap-2 text-sm font-semibold mb-2 ${isDark ? 'text-gray-200' : 'text-gray-700'}`}>
+                      <label className={`flex items-center gap-2 text-sm font-semibold mb-2 ${isDark ? 'text-gray-200' : 'text-gray-700'} ${language === 'ar' ? 'flex-row-reverse' : ''}`}>
                         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5.121 17.804A13.937 13.937 0 0112 16c2.5 0 4.847.655 6.879 1.804M15 10a3 3 0 11-6 0 3 3 0 016 0z" />
                         </svg>
@@ -888,7 +816,8 @@ export default function SettingsPage() {
                         name="first_name"
                         value={form.first_name}
                         onChange={handleChange}
-                        className={`w-full px-4 py-3 rounded-xl border-2 transition-all focus:outline-none focus:ring-2 focus:ring-[#366c6b]/50 ${
+                        dir={language === 'ar' ? 'rtl' : 'ltr'}
+                        className={`w-full px-4 py-3 rounded-xl border-2 transition-all focus:outline-none focus:ring-2 focus:ring-[#366c6b]/50 ${language === 'ar' ? 'text-right' : 'text-left'} ${
                           isDark
                             ? 'border-gray-600 bg-gray-700 text-white hover:border-gray-500'
                             : 'border-gray-300 bg-white text-gray-900 hover:border-gray-400'
@@ -899,7 +828,7 @@ export default function SettingsPage() {
 
                     {/* Last Name */}
                     <div>
-                      <label className={`flex items-center gap-2 text-sm font-semibold mb-2 ${isDark ? 'text-gray-200' : 'text-gray-700'}`}>
+                      <label className={`flex items-center gap-2 text-sm font-semibold mb-2 ${isDark ? 'text-gray-200' : 'text-gray-700'} ${language === 'ar' ? 'flex-row-reverse' : ''}`}>
                         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5.121 17.804A13.937 13.937 0 0112 16c2.5 0 4.847.655 6.879 1.804M15 10a3 3 0 11-6 0 3 3 0 016 0z" />
                         </svg>
@@ -909,7 +838,8 @@ export default function SettingsPage() {
                         name="last_name"
                         value={form.last_name}
                         onChange={handleChange}
-                        className={`w-full px-4 py-3 rounded-xl border-2 transition-all focus:outline-none focus:ring-2 focus:ring-[#366c6b]/50 ${
+                        dir={language === 'ar' ? 'rtl' : 'ltr'}
+                        className={`w-full px-4 py-3 rounded-xl border-2 transition-all focus:outline-none focus:ring-2 focus:ring-[#366c6b]/50 ${language === 'ar' ? 'text-right' : 'text-left'} ${
                           isDark
                             ? 'border-gray-600 bg-gray-700 text-white hover:border-gray-500'
                             : 'border-gray-300 bg-white text-gray-900 hover:border-gray-400'
@@ -920,18 +850,18 @@ export default function SettingsPage() {
 
                     {/* Email */}
                     <div>
-                      <label className={`flex items-center gap-2 text-sm font-semibold mb-2 ${isDark ? 'text-gray-200' : 'text-gray-700'}`}>
+                      <label className={`flex items-center gap-2 text-sm font-semibold mb-2 ${isDark ? 'text-gray-200' : 'text-gray-700'} ${language === 'ar' ? 'flex-row-reverse' : ''}`}>
                         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                         </svg>
                         {t.profilePage.email}
                       </label>
-                      <div className="flex gap-3">
+                      <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
                         <input
                           type="email"
                           value={user?.email || ''}
                           disabled
-                          className={`flex-1 px-4 py-3 rounded-xl border-2 ${
+                          className={`flex-1 px-3 sm:px-4 py-2.5 sm:py-3 text-sm sm:text-base rounded-xl border-2 ${
                             isDark
                               ? 'border-gray-600 bg-gray-700/50 text-gray-400'
                               : 'border-gray-300 bg-gray-100 text-gray-600'
@@ -940,9 +870,9 @@ export default function SettingsPage() {
                         <button
                           type="button"
                           onClick={() => setShowEmailModal(true)}
-                          className="px-6 py-3 rounded-xl bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white font-semibold transition-all duration-300 hover:scale-105 hover:shadow-lg flex items-center gap-2"
+                          className="px-4 sm:px-6 py-2.5 sm:py-3 text-sm sm:text-base rounded-xl bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white font-semibold transition-all duration-300 hover:scale-105 hover:shadow-lg flex items-center justify-center gap-2 w-full sm:w-auto"
                         >
-                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <svg className="w-3.5 h-3.5 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
                           </svg>
                           {t.profilePage.change}
@@ -952,15 +882,15 @@ export default function SettingsPage() {
                   </div>
 
                   {/* Action Buttons */}
-                  <div className="flex flex-row gap-4 pt-6 border-t-2 border-gray-700 dark:border-gray-600">
+                  <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 pt-3 sm:pt-4 md:pt-6 border-t-2 border-gray-700 dark:border-gray-600">
                     <button
                       type="submit"
                       disabled={profileLoading}
-                      className="flex-1 px-6 py-3 rounded-xl bg-gradient-to-r from-[#366c6b] to-[#1a3535] text-white font-semibold hover:shadow-xl transition-all duration-300 hover:scale-105 disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                      className="flex-1 px-4 sm:px-6 py-2.5 sm:py-3 text-sm sm:text-base rounded-xl bg-gradient-to-r from-[#366c6b] to-[#1a3535] text-white font-semibold hover:shadow-xl transition-all duration-300 hover:scale-105 disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                     >
                       {profileLoading ? (
                         <>
-                          <svg className="w-5 h-5 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <svg className="w-4 h-4 sm:w-5 sm:h-5 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                             <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                           </svg>
@@ -968,7 +898,7 @@ export default function SettingsPage() {
                         </>
                       ) : (
                         <>
-                          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                           </svg>
                           {t.profilePage.save}
@@ -979,13 +909,13 @@ export default function SettingsPage() {
                     <button
                       type="button"
                       onClick={() => setShowPasswordModal(true)}
-                      className={`flex-1 px-6 py-3 rounded-xl border-2 font-semibold transition-all duration-300 hover:scale-105 flex items-center justify-center gap-2 ${
+                      className={`flex-1 px-4 sm:px-6 py-2.5 sm:py-3 text-sm sm:text-base rounded-xl border-2 font-semibold transition-all duration-300 hover:scale-105 flex items-center justify-center gap-2 ${
                         isDark
                           ? 'bg-gray-900 border-gray-600 text-gray-200 hover:bg-gray-700 hover:border-gray-500'
                           : 'bg-white border-gray-300 text-gray-700 hover:bg-gray-100 hover:border-gray-400'
                       }`}
                     >
-                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" />
                       </svg>
                       {t.profilePage.changePassword}
@@ -993,8 +923,8 @@ export default function SettingsPage() {
                   </div>
 
                   {/* Danger Zone - Delete Account */}
-                  <div className="mt-6 pt-6 border-t-2 border-red-600/30">
-                    <h3 className={`text-lg font-bold mb-3 flex items-center gap-2 ${
+                  <div className="mt-3 sm:mt-4 md:mt-6 pt-3 sm:pt-4 md:pt-6 border-t-2 border-red-600/30">
+                    <h3 className={`text-base sm:text-lg font-bold mb-2 sm:mb-3 flex items-center gap-2 ${
                       isDark ? 'text-red-400' : 'text-red-600'
                     }`}>
                       <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1005,9 +935,9 @@ export default function SettingsPage() {
                     <button
                       type="button"
                       onClick={() => setShowDeleteModal(true)}
-                      className="w-full px-6 py-3 rounded-xl border-2 border-red-600 bg-red-600/10 text-red-600 dark:text-red-400 font-semibold transition-all duration-300 hover:bg-red-600 hover:text-white hover:scale-105 flex items-center justify-center gap-2"
+                      className="w-full px-4 sm:px-6 py-2.5 sm:py-3 text-sm sm:text-base rounded-xl border-2 border-red-600 bg-red-600/10 text-red-600 dark:text-red-400 font-semibold transition-all duration-300 hover:bg-red-600 hover:text-white hover:scale-105 flex items-center justify-center gap-2"
                     >
-                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                       </svg>
                       {t.profilePage.deleteAccountButton}
@@ -1022,12 +952,12 @@ export default function SettingsPage() {
 
       {/* Email Change Modal */}
       {showEmailModal && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 z-50 animate-fadeIn">
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4 z-50 animate-fadeIn">
           <div className={`${isDark ? 'bg-gray-800' : 'bg-white'} rounded-2xl shadow-2xl w-full max-w-md transform transition-all animate-slideUp`}>
-            <div className={`border-b-2 ${isDark ? 'border-gray-700' : 'border-gray-200'} p-6 flex items-center justify-between`}>
-              <div className="flex items-center gap-3">
-                <div className={`p-2 rounded-xl ${isDark ? 'bg-blue-900/30' : 'bg-blue-100'}`}>
-                  <svg className={`w-6 h-6 ${isDark ? 'text-blue-400' : 'text-blue-600'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div className={`border-b-2 ${isDark ? 'border-gray-700' : 'border-gray-200'} p-3 sm:p-4 md:p-6 flex items-center justify-between`}>
+              <div className="flex items-center gap-2 sm:gap-3">
+                <div className={`p-1.5 sm:p-2 rounded-xl ${isDark ? 'bg-blue-900/30' : 'bg-blue-100'}`}>
+                  <svg className={`w-5 h-5 sm:w-6 sm:h-6 ${isDark ? 'text-blue-400' : 'text-blue-600'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                   </svg>
                 </div>
@@ -1050,7 +980,7 @@ export default function SettingsPage() {
               </button>
             </div>
 
-            <form onSubmit={handleEmailSubmit} className="p-6 space-y-5">
+            <form onSubmit={handleEmailSubmit} className="p-3 sm:p-4 md:p-6 space-y-3 sm:space-y-4 md:space-y-5">
               {emailMessage && (
                 <div className={`p-4 rounded-xl border-2 flex items-start gap-3 ${
                   emailMessage.type === 'success'
@@ -1069,14 +999,15 @@ export default function SettingsPage() {
               )}
 
               <div>
-                <label className={`flex items-center gap-2 text-sm font-semibold mb-2 ${isDark ? 'text-gray-200' : 'text-gray-700'}`}>
+                <label className={`flex items-center gap-2 text-sm font-semibold mb-2 ${isDark ? 'text-gray-200' : 'text-gray-700'} ${language === 'ar' ? 'flex-row-reverse' : ''}`}>
                   Current Email
                 </label>
                 <input
                   type="email"
                   value={user?.email || ''}
                   disabled
-                  className={`w-full px-4 py-3 rounded-xl border-2 ${
+                  dir={language === 'ar' ? 'rtl' : 'ltr'}
+                  className={`w-full px-4 py-3 rounded-xl border-2 ${language === 'ar' ? 'text-right' : 'text-left'} ${
                     isDark
                       ? 'border-gray-600 bg-gray-700/50 text-gray-400'
                       : 'border-gray-300 bg-gray-100 text-gray-600'
@@ -1085,7 +1016,7 @@ export default function SettingsPage() {
               </div>
 
               <div>
-                <label className={`flex items-center gap-2 text-sm font-semibold mb-2 ${isDark ? 'text-gray-200' : 'text-gray-700'}`}>
+                <label className={`flex items-center gap-2 text-sm font-semibold mb-2 ${isDark ? 'text-gray-200' : 'text-gray-700'} ${language === 'ar' ? 'flex-row-reverse' : ''}`}>
                   {t.emailModal.newEmail} *
                 </label>
                 <input
@@ -1094,7 +1025,8 @@ export default function SettingsPage() {
                   value={emailForm.newEmail}
                   onChange={handleEmailChange}
                   placeholder="Enter new email address"
-                  className={`w-full px-4 py-3 rounded-xl border-2 transition-all focus:outline-none focus:ring-2 ${
+                  dir={language === 'ar' ? 'rtl' : 'ltr'}
+                  className={`w-full px-4 py-3 rounded-xl border-2 transition-all focus:outline-none focus:ring-2 ${language === 'ar' ? 'text-right' : 'text-left'} ${
                     emailErrors.newEmail
                       ? isDark ? 'border-red-600 bg-red-900/10 focus:ring-red-500' : 'border-red-500 bg-red-50 focus:ring-red-500'
                       : isDark ? 'border-gray-600 bg-gray-700 text-white hover:border-gray-500 focus:ring-[#366c6b]/50' : 'border-gray-300 bg-white text-gray-900 hover:border-gray-400 focus:ring-[#366c6b]/50'
@@ -1111,7 +1043,7 @@ export default function SettingsPage() {
               </div>
 
               <div>
-                <label className={`flex items-center gap-2 text-sm font-semibold mb-2 ${isDark ? 'text-gray-200' : 'text-gray-700'}`}>
+                <label className={`flex items-center gap-2 text-sm font-semibold mb-2 ${isDark ? 'text-gray-200' : 'text-gray-700'} ${language === 'ar' ? 'flex-row-reverse' : ''}`}>
                   {t.emailModal.confirmEmail} *
                 </label>
                 <input
@@ -1120,7 +1052,8 @@ export default function SettingsPage() {
                   value={emailForm.confirmEmail}
                   onChange={handleEmailChange}
                   placeholder="Confirm new email address"
-                  className={`w-full px-4 py-3 rounded-xl border-2 transition-all focus:outline-none focus:ring-2 ${
+                  dir={language === 'ar' ? 'rtl' : 'ltr'}
+                  className={`w-full px-4 py-3 rounded-xl border-2 transition-all focus:outline-none focus:ring-2 ${language === 'ar' ? 'text-right' : 'text-left'} ${
                     emailErrors.confirmEmail
                       ? isDark ? 'border-red-600 bg-red-900/10 focus:ring-red-500' : 'border-red-500 bg-red-50 focus:ring-red-500'
                       : isDark ? 'border-gray-600 bg-gray-700 text-white hover:border-gray-500 focus:ring-[#366c6b]/50' : 'border-gray-300 bg-white text-gray-900 hover:border-gray-400 focus:ring-[#366c6b]/50'
@@ -1193,16 +1126,16 @@ export default function SettingsPage() {
 
       {/* Password Change Modal */}
       {showPasswordModal && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 z-50 animate-fadeIn">
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4 z-50 animate-fadeIn">
           <div className={`${isDark ? 'bg-gray-800' : 'bg-white'} rounded-2xl shadow-2xl w-full max-w-md transform transition-all animate-slideUp`}>
-            <div className={`border-b-2 ${isDark ? 'border-gray-700' : 'border-gray-200'} p-6 flex items-center justify-between`}>
-              <div className="flex items-center gap-3">
-                <div className={`p-2 rounded-xl ${isDark ? 'bg-purple-900/30' : 'bg-purple-100'}`}>
-                  <svg className={`w-6 h-6 ${isDark ? 'text-purple-400' : 'text-purple-600'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div className={`border-b-2 ${isDark ? 'border-gray-700' : 'border-gray-200'} p-3 sm:p-4 md:p-6 flex items-center justify-between`}>
+              <div className="flex items-center gap-2 sm:gap-3">
+                <div className={`p-1.5 sm:p-2 rounded-xl ${isDark ? 'bg-purple-900/30' : 'bg-purple-100'}`}>
+                  <svg className={`w-5 h-5 sm:w-6 sm:h-6 ${isDark ? 'text-purple-400' : 'text-purple-600'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" />
                   </svg>
                 </div>
-                <h3 className={`text-xl font-bold ${isDark ? 'text-white' : 'text-gray-900'}`}>
+                <h3 className={`text-base sm:text-lg md:text-xl font-bold ${isDark ? 'text-white' : 'text-gray-900'}`}>
                   {t.passwordModal.title}
                 </h3>
               </div>
@@ -1221,7 +1154,7 @@ export default function SettingsPage() {
               </button>
             </div>
 
-            <form onSubmit={handlePasswordSubmit} className="p-6 space-y-5">
+            <form onSubmit={handlePasswordSubmit} className="p-3 sm:p-4 md:p-6 space-y-3 sm:space-y-4 md:space-y-5">
               {passwordMessage && (
                 <div className={`p-4 rounded-xl border-2 flex items-start gap-3 ${
                   passwordMessage.type === 'success'
@@ -1240,7 +1173,7 @@ export default function SettingsPage() {
               )}
 
               <div>
-                <label className={`flex items-center gap-2 text-sm font-semibold mb-2 ${isDark ? 'text-gray-200' : 'text-gray-700'}`}>
+                <label className={`flex items-center gap-2 text-sm font-semibold mb-2 ${isDark ? 'text-gray-200' : 'text-gray-700'} ${language === 'ar' ? 'flex-row-reverse' : ''}`}>
                   {t.passwordModal.currentPassword} *
                 </label>
                 <div className="relative">
@@ -1250,7 +1183,8 @@ export default function SettingsPage() {
                     value={passwordForm.currentPassword}
                     onChange={handlePasswordChange}
                     placeholder="Enter current password"
-                    className={`w-full px-4 py-3 pr-12 rounded-xl border-2 transition-all focus:outline-none focus:ring-2 ${
+                    dir={language === 'ar' ? 'rtl' : 'ltr'}
+                    className={`w-full px-4 py-3 pr-12 rounded-xl border-2 transition-all focus:outline-none focus:ring-2 ${language === 'ar' ? 'text-right pr-4 pl-12' : 'text-left'} ${
                       passwordErrors.currentPassword
                         ? isDark ? 'border-red-600 bg-red-900/10 focus:ring-red-500' : 'border-red-500 bg-red-50 focus:ring-red-500'
                         : isDark ? 'border-gray-600 bg-gray-700 text-white hover:border-gray-500 focus:ring-[#366c6b]/50' : 'border-gray-300 bg-white text-gray-900 hover:border-gray-400 focus:ring-[#366c6b]/50'
@@ -1259,7 +1193,7 @@ export default function SettingsPage() {
                   <button
                     type="button"
                     onClick={() => setShowCurrentPassword(!showCurrentPassword)}
-                    className={`absolute right-3 top-1/2 -translate-y-1/2 p-1.5 rounded-lg transition-all ${
+                    className={`absolute ${language === 'ar' ? 'left-3' : 'right-3'} top-1/2 -translate-y-1/2 p-1.5 rounded-lg transition-all ${
                       isDark ? 'hover:bg-gray-600 text-gray-400 hover:text-gray-200' : 'hover:bg-gray-100 text-gray-500 hover:text-gray-700'
                     }`}
                   >
@@ -1274,7 +1208,7 @@ export default function SettingsPage() {
               </div>
 
               <div>
-                <label className={`flex items-center gap-2 text-sm font-semibold mb-2 ${isDark ? 'text-gray-200' : 'text-gray-700'}`}>
+                <label className={`flex items-center gap-2 text-sm font-semibold mb-2 ${isDark ? 'text-gray-200' : 'text-gray-700'} ${language === 'ar' ? 'flex-row-reverse' : ''}`}>
                   {t.passwordModal.newPassword} *
                 </label>
                 <div className="relative">
@@ -1284,7 +1218,8 @@ export default function SettingsPage() {
                     value={passwordForm.newPassword}
                     onChange={handlePasswordChange}
                     placeholder="Enter new password"
-                    className={`w-full px-4 py-3 pr-12 rounded-xl border-2 transition-all focus:outline-none focus:ring-2 ${
+                    dir={language === 'ar' ? 'rtl' : 'ltr'}
+                    className={`w-full px-4 py-3 pr-12 rounded-xl border-2 transition-all focus:outline-none focus:ring-2 ${language === 'ar' ? 'text-right pr-4 pl-12' : 'text-left'} ${
                       passwordErrors.newPassword
                         ? isDark ? 'border-red-600 bg-red-900/10 focus:ring-red-500' : 'border-red-500 bg-red-50 focus:ring-red-500'
                         : isDark ? 'border-gray-600 bg-gray-700 text-white hover:border-gray-500 focus:ring-[#366c6b]/50' : 'border-gray-300 bg-white text-gray-900 hover:border-gray-400 focus:ring-[#366c6b]/50'
@@ -1293,7 +1228,7 @@ export default function SettingsPage() {
                   <button
                     type="button"
                     onClick={() => setShowNewPassword(!showNewPassword)}
-                    className={`absolute right-3 top-1/2 -translate-y-1/2 p-1.5 rounded-lg transition-all ${
+                    className={`absolute ${language === 'ar' ? 'left-3' : 'right-3'} top-1/2 -translate-y-1/2 p-1.5 rounded-lg transition-all ${
                       isDark ? 'hover:bg-gray-600 text-gray-400 hover:text-gray-200' : 'hover:bg-gray-100 text-gray-500 hover:text-gray-700'
                     }`}
                   >
@@ -1308,7 +1243,7 @@ export default function SettingsPage() {
               </div>
 
               <div>
-                <label className={`flex items-center gap-2 text-sm font-semibold mb-2 ${isDark ? 'text-gray-200' : 'text-gray-700'}`}>
+                <label className={`flex items-center gap-2 text-sm font-semibold mb-2 ${isDark ? 'text-gray-200' : 'text-gray-700'} ${language === 'ar' ? 'flex-row-reverse' : ''}`}>
                   Confirm {t.passwordModal.newPassword} *
                 </label>
                 <div className="relative">
@@ -1318,7 +1253,8 @@ export default function SettingsPage() {
                     value={passwordForm.confirmPassword}
                     onChange={handlePasswordChange}
                     placeholder="Confirm new password"
-                    className={`w-full px-4 py-3 pr-12 rounded-xl border-2 transition-all focus:outline-none focus:ring-2 ${
+                    dir={language === 'ar' ? 'rtl' : 'ltr'}
+                    className={`w-full px-4 py-3 pr-12 rounded-xl border-2 transition-all focus:outline-none focus:ring-2 ${language === 'ar' ? 'text-right pr-4 pl-12' : 'text-left'} ${
                       passwordErrors.confirmPassword
                         ? isDark ? 'border-red-600 bg-red-900/10 focus:ring-red-500' : 'border-red-500 bg-red-50 focus:ring-red-500'
                         : isDark ? 'border-gray-600 bg-gray-700 text-white hover:border-gray-500 focus:ring-[#366c6b]/50' : 'border-gray-300 bg-white text-gray-900 hover:border-gray-400 focus:ring-[#366c6b]/50'
@@ -1327,7 +1263,7 @@ export default function SettingsPage() {
                   <button
                     type="button"
                     onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                    className={`absolute right-3 top-1/2 -translate-y-1/2 p-1.5 rounded-lg transition-all ${
+                    className={`absolute ${language === 'ar' ? 'left-3' : 'right-3'} top-1/2 -translate-y-1/2 p-1.5 rounded-lg transition-all ${
                       isDark ? 'hover:bg-gray-600 text-gray-400 hover:text-gray-200' : 'hover:bg-gray-100 text-gray-500 hover:text-gray-700'
                     }`}
                   >
@@ -1389,16 +1325,16 @@ export default function SettingsPage() {
 
       {/* Delete Account Modal */}
       {showDeleteModal && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 z-50 animate-fadeIn">
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4 z-50 animate-fadeIn">
           <div className={`${isDark ? 'bg-gray-800' : 'bg-white'} rounded-2xl shadow-2xl w-full max-w-md transform transition-all animate-slideUp`}>
-            <div className={`border-b-2 ${isDark ? 'border-red-900/30' : 'border-red-200'} p-6 flex items-center justify-between bg-red-500/10`}>
-              <div className="flex items-center gap-3">
-                <div className={`p-2 rounded-xl ${isDark ? 'bg-red-900/50' : 'bg-red-100'}`}>
-                  <svg className={`w-6 h-6 ${isDark ? 'text-red-400' : 'text-red-600'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div className={`border-b-2 ${isDark ? 'border-red-900/30' : 'border-red-200'} p-3 sm:p-4 md:p-6 flex items-center justify-between bg-red-500/10`}>
+              <div className="flex items-center gap-2 sm:gap-3">
+                <div className={`p-1.5 sm:p-2 rounded-xl ${isDark ? 'bg-red-900/50' : 'bg-red-100'}`}>
+                  <svg className={`w-5 h-5 sm:w-6 sm:h-6 ${isDark ? 'text-red-400' : 'text-red-600'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
                   </svg>
                 </div>
-                <h3 className={`text-xl font-bold ${isDark ? 'text-red-400' : 'text-red-600'}`}>
+                <h3 className={`text-base sm:text-lg md:text-xl font-bold ${isDark ? 'text-red-400' : 'text-red-600'}`}>
                   {t.deleteModal.title}
                 </h3>
               </div>
@@ -1418,8 +1354,7 @@ export default function SettingsPage() {
               </button>
             </div>
 
-            <form onSubmit={handleDeleteAccount} className="p-6">
-              <div className={`mb-6 p-4 rounded-xl ${isDark ? 'bg-red-900/20 border-red-800' : 'bg-red-50 border-red-200'} border-2`}>
+            <form onSubmit={handleDeleteAccount} className="p-3 sm:p-4 md:p-6">\n              <div className={`mb-3 sm:mb-4 md:mb-6 p-3 sm:p-4 rounded-xl ${isDark ? 'bg-red-900/20 border-red-800' : 'bg-red-50 border-red-200'} border-2`}>
                 <div className="flex items-start gap-3">
                   <svg className={`w-5 h-5 flex-shrink-0 mt-0.5 ${isDark ? 'text-red-400' : 'text-red-600'}`} fill="currentColor" viewBox="0 0 20 20">
                     <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
@@ -1435,8 +1370,8 @@ export default function SettingsPage() {
                 </div>
               </div>
 
-              <div className="mb-6">
-                <label className={`flex items-center gap-2 text-sm font-semibold mb-2 ${isDark ? 'text-gray-200' : 'text-gray-700'}`}>
+              <div className="mb-3 sm:mb-4 md:mb-6">
+                <label className={`flex items-center gap-2 text-sm font-semibold mb-2 ${isDark ? 'text-gray-200' : 'text-gray-700'} ${language === 'ar' ? 'flex-row-reverse' : ''}`}>
                   {t.deleteModal.password}
                 </label>
                 <div className="relative">
@@ -1447,7 +1382,8 @@ export default function SettingsPage() {
                       setDeletePassword(e.target.value);
                       setDeleteError('');
                     }}
-                    className={`w-full px-4 py-3 pr-12 rounded-xl border-2 transition-all ${
+                    dir={language === 'ar' ? 'rtl' : 'ltr'}
+                    className={`w-full px-3 sm:px-4 py-2.5 sm:py-3 pr-10 sm:pr-12 text-sm sm:text-base rounded-xl border-2 transition-all ${language === 'ar' ? 'text-right pr-3 sm:pr-4 pl-10 sm:pl-12' : 'text-left'} ${
                       deleteError
                         ? 'border-red-500 focus:border-red-600'
                         : isDark
@@ -1459,7 +1395,7 @@ export default function SettingsPage() {
                   <button
                     type="button"
                     onClick={() => setShowDeletePassword(!showDeletePassword)}
-                    className={`absolute right-3 top-1/2 -translate-y-1/2 p-1.5 rounded-lg transition-all ${
+                    className={`absolute ${language === 'ar' ? 'left-3' : 'right-3'} top-1/2 -translate-y-1/2 p-1.5 rounded-lg transition-all ${
                       isDark ? 'hover:bg-gray-600 text-gray-400 hover:text-gray-200' : 'hover:bg-gray-100 text-gray-500 hover:text-gray-700'
                     }`}
                   >
@@ -1473,7 +1409,7 @@ export default function SettingsPage() {
                 )}
               </div>
 
-              <div className="flex gap-3 pt-2">
+              <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 pt-2">
                 <button
                   type="button"
                   onClick={() => {
@@ -1481,7 +1417,7 @@ export default function SettingsPage() {
                     setDeletePassword('');
                     setDeleteError('');
                   }}
-                  className={`flex-1 px-5 py-3 rounded-xl font-semibold transition-all ${
+                  className={`flex-1 px-4 sm:px-5 py-2.5 sm:py-3 text-sm sm:text-base rounded-xl font-semibold transition-all ${
                     isDark
                       ? 'bg-gray-700 hover:bg-gray-600 text-white'
                       : 'bg-gray-200 hover:bg-gray-300 text-gray-900'
@@ -1492,10 +1428,9 @@ export default function SettingsPage() {
                 </button>
                 <button
                   type="submit"
-                  className="flex-1 px-5 py-3 rounded-xl bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white font-semibold transition-all disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2 hover:scale-105 hover:shadow-xl"
+                  className="flex-1 px-4 sm:px-5 py-2.5 sm:py-3 text-sm sm:text-base rounded-xl bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white font-semibold transition-all disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2 hover:scale-105 hover:shadow-xl"
                   disabled={deleteLoading}
-                >
-                  {deleteLoading ? (
+                >\n                  {deleteLoading ? (
                     <>
                       <svg className="w-5 h-5 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>

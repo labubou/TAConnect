@@ -6,7 +6,7 @@ export const settingsStrings = {
     },
     
     tabs: {
-      emailPreferences: 'Email Preferences',
+      emailPreferences: 'Notifications Preferences',
       profile: 'Profile',
     },
     

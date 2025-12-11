@@ -165,7 +165,7 @@ export default function BookingsCalendar() {
             }
           }}
           onMouseLeave={() => setHoveredDay(null)}
-          className={`aspect-square p-1 sm:p-2 border-2 rounded-xl relative cursor-pointer transition-all duration-300 transform ${
+          className={`aspect-square p-0.5 sm:p-1 md:p-2 border sm:border-2 rounded-lg sm:rounded-xl relative cursor-pointer transition-all duration-300 transform ${
             isTodayDate 
               ? isDark 
                 ? 'bg-gradient-to-br from-[#366c6b]/40 to-[#1a3535]/40 border-[#366c6b] shadow-lg hover:shadow-xl hover:scale-105' 
@@ -179,7 +179,7 @@ export default function BookingsCalendar() {
                   : 'border-gray-300 hover:bg-gray-100 hover:border-gray-400 hover:scale-105'
           }`}
         >
-          <div className={`text-xs sm:text-sm font-bold ${
+          <div className={`text-[10px] sm:text-xs md:text-sm font-bold ${
             isTodayDate 
               ? isDark ? 'text-[#4a9d9c]' : 'text-[#366c6b]' 
               : isDark ? 'text-gray-200' : 'text-gray-800'
@@ -188,10 +188,30 @@ export default function BookingsCalendar() {
           </div>
           {hasBookings && (
             <div className="mt-0.5 space-y-0.5">
-              {dayBookings.slice(0, 2).map((booking, idx) => (
-                <div
-                  key={idx}
-                  className={`text-xs px-1.5 py-0.5 rounded-md truncate font-medium shadow-sm flex items-center gap-1 ${
+              {/* Show dots on mobile, booking details on larger screens */}
+              <div className="sm:hidden flex flex-wrap gap-0.5 mt-1">
+                {dayBookings.slice(0, 3).map((booking, idx) => (
+                  <div
+                    key={idx}
+                    className={`w-1.5 h-1.5 rounded-full ${
+                      booking.is_completed
+                        ? 'bg-green-500'
+                        : booking.is_cancelled
+                        ? 'bg-gray-400 opacity-60'
+                        : 'bg-[#366c6b]'
+                    }`}
+                  />
+                ))}
+                {dayBookings.length > 3 && (
+                  <div className="w-1.5 h-1.5 rounded-full bg-gray-400" />
+                )}
+              </div>
+              {/* Show booking details on tablet and up */}
+              <div className="hidden sm:block space-y-0.5">
+                {dayBookings.slice(0, 2).map((booking, idx) => (
+                  <div
+                    key={idx}
+                    className={`text-[9px] sm:text-[10px] md:text-xs px-1 sm:px-1.5 py-0.5 rounded-md truncate font-medium shadow-sm flex items-center gap-0.5 sm:gap-1 ${
                     booking.is_completed
                       ? isDark
                         ? 'bg-gradient-to-r from-green-700 to-green-800 text-white'
@@ -203,18 +223,19 @@ export default function BookingsCalendar() {
                       : isDark 
                         ? 'bg-gradient-to-r from-[#366c6b] to-[#1a3535] text-white' 
                         : 'bg-gradient-to-r from-[#4a9d9c] to-[#366c6b] text-white'
-                  }`}
-                >
-                  {booking.is_completed && <span className="text-[10px]">✓</span>}
-                  {booking.is_cancelled && <span className="text-[10px]">✕</span>}
-                  <span className={booking.is_cancelled ? 'line-through' : ''}>{formatTime(booking.start_time)}</span>
-                </div>
-              ))}
-              {dayBookings.length > 2 && (
-                <div className={`text-xs px-1.5 font-bold ${isDark ? 'text-[#4a9d9c]' : 'text-[#366c6b]'}`}>
-                  +{dayBookings.length - 2} more
-                </div>
-              )}
+                    }`}
+                  >
+                    {booking.is_completed && <span className="text-[8px] sm:text-[10px]">✓</span>}
+                    {booking.is_cancelled && <span className="text-[8px] sm:text-[10px]">✕</span>}
+                    <span className={booking.is_cancelled ? 'line-through' : ''}>{formatTime(booking.start_time)}</span>
+                  </div>
+                ))}
+                {dayBookings.length > 2 && (
+                  <div className={`text-[10px] sm:text-xs px-1 sm:px-1.5 font-bold ${isDark ? 'text-[#4a9d9c]' : 'text-[#366c6b]'}`}>
+                    +{dayBookings.length - 2}
+                  </div>
+                )}
+              </div>
             </div>
           )}
         </div>
@@ -342,9 +363,9 @@ export default function BookingsCalendar() {
         </div>
 
         {/* Day Names with Modern Styling */}
-        <div className="grid grid-cols-7 gap-1 sm:gap-2 mb-3">
+        <div className="grid grid-cols-7 gap-0.5 sm:gap-1 md:gap-2 mb-2 sm:mb-3">
           {dayNames.map(day => (
-            <div key={day} className={`text-center text-xs sm:text-sm font-bold py-3 rounded-lg ${isDark ? 'text-gray-400 bg-gray-800/40' : 'text-gray-600 bg-gray-100/50'}`}>
+            <div key={day} className={`text-center text-[10px] sm:text-xs md:text-sm font-bold py-1.5 sm:py-2 md:py-3 rounded-md sm:rounded-lg ${isDark ? 'text-gray-400 bg-gray-800/40' : 'text-gray-600 bg-gray-100/50'}`}>
               {day}
             </div>
           ))}
@@ -352,13 +373,13 @@ export default function BookingsCalendar() {
 
         {/* Calendar Grid with Enhanced Loading */}
         {loading ? (
-          <div className="grid grid-cols-7 gap-1 sm:gap-2">
+          <div className="grid grid-cols-7 gap-0.5 sm:gap-1 md:gap-2">
             {[...Array(35)].map((_, i) => (
-              <div key={i} className={`aspect-square ${isDark ? 'bg-gray-700' : 'bg-gray-100'} rounded-xl animate-pulse shadow-sm`} />
+              <div key={i} className={`aspect-square ${isDark ? 'bg-gray-700' : 'bg-gray-100'} rounded-lg sm:rounded-xl animate-pulse shadow-sm`} />
             ))}
           </div>
         ) : (
-          <div className="grid grid-cols-7 gap-1 sm:gap-2">
+          <div className="grid grid-cols-7 gap-0.5 sm:gap-1 md:gap-2">
             {renderCalendarDays()}
           </div>
         )}
@@ -445,22 +466,22 @@ export default function BookingsCalendar() {
         )}
 
         {/* Modern Legend */}
-        <div className={`mt-6 sm:mt-8 pt-5 border-t-2 ${isDark ? 'border-gray-700' : 'border-gray-200'} flex flex-wrap items-center gap-5 text-sm`}>
-          <div className="flex items-center gap-2.5">
-            <div className={`w-5 h-5 rounded-lg ${isDark ? 'bg-gradient-to-br from-[#366c6b]/30 to-[#1a3535]/30 border-2 border-[#366c6b]' : 'bg-gradient-to-br from-[#366c6b]/10 to-[#1a3535]/10 border-2 border-[#366c6b]'} shadow-md`}></div>
-            <span className={`font-semibold ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>{t.legend.today}</span>
+        <div className={`mt-4 sm:mt-6 md:mt-8 pt-3 sm:pt-4 md:pt-5 border-t sm:border-t-2 ${isDark ? 'border-gray-700' : 'border-gray-200'} flex flex-wrap items-center gap-2 sm:gap-3 md:gap-5 text-xs sm:text-sm`}>
+          <div className="flex items-center gap-1.5 sm:gap-2.5">
+            <div className={`w-4 h-4 sm:w-5 sm:h-5 rounded-md sm:rounded-lg ${isDark ? 'bg-gradient-to-br from-[#366c6b]/30 to-[#1a3535]/30 border sm:border-2 border-[#366c6b]' : 'bg-gradient-to-br from-[#366c6b]/10 to-[#1a3535]/10 border sm:border-2 border-[#366c6b]'} shadow-md`}></div>
+            <span className={`font-semibold text-xs sm:text-sm ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>{t.legend.today}</span>
           </div>
-          <div className="flex items-center gap-2.5">
-            <div className={`w-5 h-5 rounded-lg ${isDark ? 'bg-[#366c6b]/20 border-2 border-[#366c6b]/50' : 'bg-[#366c6b]/10 border-2 border-[#366c6b]/30'} shadow-md`}></div>
-            <span className={`font-semibold ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>{t.legend.active}</span>
+          <div className="flex items-center gap-1.5 sm:gap-2.5">
+            <div className={`w-4 h-4 sm:w-5 sm:h-5 rounded-md sm:rounded-lg ${isDark ? 'bg-[#366c6b]/20 border sm:border-2 border-[#366c6b]/50' : 'bg-[#366c6b]/10 border sm:border-2 border-[#366c6b]/30'} shadow-md`}></div>
+            <span className={`font-semibold text-xs sm:text-sm ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>{t.legend.active}</span>
           </div>
-          <div className="flex items-center gap-2.5">
-            <div className={`w-5 h-5 rounded-lg ${isDark ? 'bg-gradient-to-r from-green-700 to-green-800' : 'bg-gradient-to-r from-green-500 to-green-600'} shadow-md flex items-center justify-center text-white text-xs font-bold`}>✓</div>
-            <span className={`font-semibold ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>{t.legend.completed}</span>
+          <div className="flex items-center gap-1.5 sm:gap-2.5">
+            <div className={`w-4 h-4 sm:w-5 sm:h-5 rounded-md sm:rounded-lg ${isDark ? 'bg-gradient-to-r from-green-700 to-green-800' : 'bg-gradient-to-r from-green-500 to-green-600'} shadow-md flex items-center justify-center text-white text-[10px] sm:text-xs font-bold`}>✓</div>
+            <span className={`font-semibold text-xs sm:text-sm ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>{t.legend.completed}</span>
           </div>
-          <div className="flex items-center gap-2.5">
-            <div className={`w-5 h-5 rounded-lg ${isDark ? 'bg-gradient-to-r from-gray-600 to-gray-700' : 'bg-gradient-to-r from-gray-400 to-gray-500'} shadow-md opacity-60 flex items-center justify-center text-white text-xs font-bold`}>✕</div>
-            <span className={`font-semibold ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>{t.legend.cancelled}</span>
+          <div className="flex items-center gap-1.5 sm:gap-2.5">
+            <div className={`w-4 h-4 sm:w-5 sm:h-5 rounded-md sm:rounded-lg ${isDark ? 'bg-gradient-to-r from-gray-600 to-gray-700' : 'bg-gradient-to-r from-gray-400 to-gray-500'} shadow-md opacity-60 flex items-center justify-center text-white text-[10px] sm:text-xs font-bold`}>✕</div>
+            <span className={`font-semibold text-xs sm:text-sm ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>{t.legend.cancelled}</span>
           </div>
         </div>
       </div>

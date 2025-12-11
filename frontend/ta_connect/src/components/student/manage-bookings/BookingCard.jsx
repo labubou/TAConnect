@@ -17,16 +17,25 @@ export default function BookingCard({
 
   const getCardStyles = () => {
     switch (status) {
+      case 'pending':
+        return `${isDark ? 'bg-gradient-to-br from-yellow-900/20 to-gray-700 border-yellow-600/40' : 'bg-gradient-to-br from-yellow-50 to-white border-yellow-400/40'} border-2 rounded-xl p-3 sm:p-4 md:p-6 transition-all duration-300 hover:shadow-lg`;
       case 'cancelled':
-        return `${isDark ? 'bg-gray-700/50 border-gray-600' : 'bg-gray-50 border-gray-300'} border-2 rounded-xl p-4 sm:p-6 opacity-75`;
+        return `${isDark ? 'bg-gray-700/50 border-gray-600' : 'bg-gray-50 border-gray-300'} border-2 rounded-xl p-3 sm:p-4 md:p-6 opacity-75`;
       case 'completed':
-        return `${isDark ? 'bg-gradient-to-br from-gray-700 to-gray-750 border-green-600/30' : 'bg-gradient-to-br from-green-50 to-white border-green-300'} border-2 rounded-xl p-4 transition-all duration-300 hover:shadow-lg`;
+        return `${isDark ? 'bg-gradient-to-br from-gray-700 to-gray-750 border-green-600/30' : 'bg-gradient-to-br from-green-50 to-white border-green-300'} border-2 rounded-xl p-3 sm:p-4 transition-all duration-300 hover:shadow-lg`;
       default:
-        return `${isDark ? 'bg-gray-700 border-gray-600' : 'bg-gradient-to-br from-[#eaf6f6] to-white border-[#366c6b]/20'} border-2 rounded-xl p-4 sm:p-6 transition-all duration-300 hover:shadow-lg`;
+        return `${isDark ? 'bg-gray-700 border-gray-600' : 'bg-gradient-to-br from-[#eaf6f6] to-white border-[#366c6b]/20'} border-2 rounded-xl p-3 sm:p-4 md:p-6 transition-all duration-300 hover:shadow-lg`;
     }
   };
 
   const getStatusBadge = () => {
+    if (status === 'pending') {
+      return (
+        <span className={`inline-block mt-1 px-2 py-1 text-xs font-semibold rounded ${isDark ? 'bg-yellow-900/30 text-yellow-300' : 'bg-yellow-100 text-yellow-700'}`}>
+          {t.status.pending}
+        </span>
+      );
+    }
     if (status === 'cancelled') {
       return (
         <span className={`inline-block mt-1 px-2 py-1 text-xs font-semibold rounded ${isDark ? 'bg-red-900/30 text-red-300' : 'bg-red-100 text-red-700'}`}>
@@ -56,9 +65,9 @@ export default function BookingCard({
 
   return (
     <div className={getCardStyles()}>
-      <div className="flex justify-between items-start mb-3 sm:mb-4">
-        <div>
-          <h3 className={`text-lg sm:text-xl font-bold ${isDark ? 'text-white' : 'text-gray-900'}`}>
+      <div className="flex justify-between items-start mb-2 sm:mb-3 md:mb-4">
+        <div className="flex-1 min-w-0">
+          <h3 className={`text-base sm:text-lg md:text-xl font-bold truncate ${isDark ? 'text-white' : 'text-gray-900'}`}>
             {booking.course_name}
           </h3>
           {booking.section && status === 'active' && (
@@ -70,7 +79,7 @@ export default function BookingCard({
         </div>
       </div>
       
-      <div className={`space-y-1.5 sm:space-y-2 ${status === 'active' ? 'mb-3 sm:mb-4' : ''} text-sm sm:text-base ${getTextColor()}`}>
+      <div className={`space-y-1 sm:space-y-1.5 md:space-y-2 ${status === 'active' ? 'mb-2 sm:mb-3 md:mb-4' : ''} text-xs sm:text-sm md:text-base ${getTextColor()}`}>
         <p className="flex items-center gap-2">
           <span>👨‍🏫</span>
           <span className={status === 'completed' ? 'truncate' : ''} dir="ltr">{booking.instructor?.full_name || 'Instructor'}</span>
@@ -91,17 +100,17 @@ export default function BookingCard({
         )}
       </div>
 
-      {status === 'active' && (
+      {(status === 'active' || status === 'pending') && (
         <div className="flex flex-col xs:flex-row gap-2">
           <button
             onClick={() => onUpdate(booking)}
-            className="flex-1 px-4 py-2 sm:py-2.5 bg-gradient-to-r from-[#366c6b] to-[#1a3535] text-white rounded-lg hover:shadow-lg transition-all duration-300 hover:scale-105 text-xs sm:text-sm font-medium"
+            className="flex-1 px-3 sm:px-4 py-2 bg-gradient-to-r from-[#366c6b] to-[#1a3535] text-white rounded-lg hover:shadow-lg transition-all duration-300 hover:scale-105 text-xs sm:text-sm font-medium"
           >
             {t.buttons.update}
           </button>
           <button
             onClick={() => onCancel(booking)}
-            className={`flex-1 px-4 py-2 sm:py-2.5 ${isDark ? 'bg-red-900/30 text-red-300 hover:bg-red-900/50' : 'bg-red-100 text-red-700 hover:bg-red-200'} rounded-lg transition-all duration-300 text-xs sm:text-sm font-medium`}
+            className={`flex-1 px-3 sm:px-4 py-2 ${isDark ? 'bg-red-900/30 text-red-300 hover:bg-red-900/50' : 'bg-red-100 text-red-700 hover:bg-red-200'} rounded-lg transition-all duration-300 text-xs sm:text-sm font-medium`}
           >
             {t.buttons.cancel}
           </button>

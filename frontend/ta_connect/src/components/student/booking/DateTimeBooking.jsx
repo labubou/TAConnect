@@ -12,6 +12,8 @@ export default function DateTimeBooking({
   selectedDate,
   selectedTime,
   timeSlots,
+  description,
+  onDescriptionChange,
   onDateSelect,
   onTimeSelect,
   onBook,
@@ -81,12 +83,12 @@ export default function DateTimeBooking({
   };
 
   return (
-    <div className={`${isDark ? 'bg-gray-800' : 'bg-white border border-gray-200'} p-6 rounded-xl ${isDark ? 'shadow-lg' : 'shadow-md hover:shadow-lg transition-shadow'}`}>
-      <div className="flex items-center mb-4">
-        <div className={`w-8 h-8 ${isDark ? 'bg-gradient-to-r from-[#366c6b] to-[#1a3535]' : 'bg-gradient-to-r from-[#4a9d9c] to-[#366c6b]'} text-white rounded-full flex items-center justify-center font-bold mr-3 shadow-sm`}>
+    <div className={`${isDark ? 'bg-gray-800' : 'bg-white border border-gray-200'} p-4 sm:p-5 md:p-6 rounded-xl ${isDark ? 'shadow-lg' : 'shadow-md hover:shadow-lg transition-shadow'}`}>
+      <div className="flex items-center mb-3 sm:mb-4">
+        <div className={`w-7 h-7 sm:w-8 sm:h-8 ${isDark ? 'bg-gradient-to-r from-[#366c6b] to-[#1a3535]' : 'bg-gradient-to-r from-[#4a9d9c] to-[#366c6b]'} text-white rounded-full flex items-center justify-center font-bold text-sm sm:text-base ${language === 'ar' ? 'ml-2 sm:ml-3' : 'mr-2 sm:mr-3'} shadow-sm`}>
           {strings.steps.step3.number}
         </div>
-        <h2 className={`text-xl font-bold ${isDark ? 'text-white' : 'text-gray-800'}`}>
+        <h2 className={`text-lg sm:text-xl font-bold ${isDark ? 'text-white' : 'text-gray-800'}`}>
           {strings.steps.step3.title}
         </h2>
       </div>
@@ -97,9 +99,9 @@ export default function DateTimeBooking({
         </p>
       ) : (
         <>
-          <div className="space-y-2 mb-6 max-h-64 overflow-y-auto">
+          <div className="space-y-2 mb-4 sm:mb-6 max-h-64 overflow-y-auto">
             {availableDates.length === 0 ? (
-              <p className={`text-center py-4 ${isDark ? 'text-gray-400' : 'text-gray-700'}`}>
+              <p className={`text-center py-4 text-sm sm:text-base ${isDark ? 'text-gray-400' : 'text-gray-700'}`}>
                 {strings.steps.step3.noDates}
               </p>
             ) : (
@@ -113,13 +115,13 @@ export default function DateTimeBooking({
                   <button
                     key={index}
                     onClick={() => handleDateClick(dateStr)}
-                    className={`w-full p-3 rounded-lg border-2 bg-white dark:bg-gray-900 text-left transition-all ${
+                    className={`w-full p-2.5 sm:p-3 rounded-lg border-2 bg-white dark:bg-gray-900 text-left transition-all ${
                       selectedDate === dateStr
                         ? isDark ? 'border-purple-500 bg-purple-900/20' : 'border-purple-500 bg-purple-50 shadow-sm'
                         : `${isDark ? 'border-gray-700 hover:border-gray-600' : 'border-gray-200 hover:border-gray-300 hover:shadow-sm'}`
                     }`}
                   >
-                    <p className={`font-semibold ${isDark ? 'text-white' : 'text-gray-800'}`} dir="ltr">
+                    <p className={`text-sm sm:text-base font-semibold ${isDark ? 'text-white' : 'text-gray-800'}`} dir="ltr">
                       {formatDate(date)}
                     </p>
                   </button>
@@ -130,21 +132,21 @@ export default function DateTimeBooking({
 
           {/* Time Selection */}
           {selectedDate && (
-            <div className="mb-6">
-              <h3 className={`font-semibold ${isDark ? 'text-white' : 'text-gray-800'} mb-3`}>
+            <div className="mb-4 sm:mb-6">
+              <h3 className={`text-sm sm:text-base font-semibold ${isDark ? 'text-white' : 'text-gray-800'} mb-2 sm:mb-3`}>
                 {strings.steps.step3.selectTime}
               </h3>
               {timeSlots.length === 0 ? (
-                <p className={`text-center py-4 ${isDark ? 'text-gray-400' : 'text-gray-700'}`}>
+                <p className={`text-center py-4 text-sm sm:text-base ${isDark ? 'text-gray-400' : 'text-gray-700'}`}>
                   {strings.steps.step3.noAvailableTimes}
                 </p>
               ) : (
-                <div className="grid grid-cols-2 gap-2 max-h-48 overflow-y-auto">
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-1.5 sm:gap-2 max-h-48 overflow-y-auto">
                   {timeSlots.map((timeSlot, index) => (
                     <button
                       key={index}
                       onClick={() => handleTimeClick(timeSlot.value)}
-                      className={`p-2.5 rounded-lg border-2 bg-white dark:bg-gray-900 text-center transition-all font-medium text-sm ${
+                      className={`p-2 sm:p-2.5 rounded-lg border-2 bg-white dark:bg-gray-900 text-center transition-all font-medium text-xs sm:text-sm ${
                         selectedTime === timeSlot.value
                           ? isDark ? 'border-blue-500 bg-blue-900/20 text-blue-300' : 'border-blue-500 bg-blue-50 text-blue-700 shadow-sm'
                           : `${isDark ? 'border-gray-700 hover:border-gray-600 text-gray-300' : 'border-gray-200 hover:border-gray-300 text-gray-700 hover:shadow-sm'}`
@@ -159,13 +161,37 @@ export default function DateTimeBooking({
             </div>
           )}
 
+          {/* Description Field */}
+          {selectedDate && selectedTime && (
+            <div className="mb-3 sm:mb-4">
+              <label className={`block text-sm sm:text-base font-semibold ${isDark ? 'text-white' : 'text-gray-800'} mb-2`}>
+                {strings.steps.step3.descriptionLabel}
+              </label>
+              <textarea
+                value={description}
+                onChange={(e) => onDescriptionChange(e.target.value)}
+                placeholder={strings.steps.step3.descriptionPlaceholder}
+                rows={3}
+                maxLength={500}
+                className={`w-full p-2.5 sm:p-3 text-sm sm:text-base rounded-lg border-2 transition-all resize-none ${
+                  isDark 
+                    ? 'bg-gray-900 border-gray-700 text-white placeholder-gray-500 focus:border-blue-500' 
+                    : 'bg-white border-gray-200 text-gray-900 placeholder-gray-400 focus:border-blue-500'
+                } focus:outline-none focus:ring-2 focus:ring-blue-500/20`}
+              />
+              <p className={`text-xs mt-1 ${isDark ? 'text-gray-400' : 'text-gray-500'} text-right`}>
+                {description.length}/500
+              </p>
+            </div>
+          )}
+
           {/* Booking Summary */}
           {selectedDate && selectedTime && selectedSlot && selectedInstructor && (
-            <div className={`p-4 ${isDark ? 'bg-gray-700' : 'bg-gradient-to-br from-blue-50 to-purple-50 border border-blue-200'} rounded-lg mb-4 ${isDark ? '' : 'shadow-sm'}`}>
-              <h3 className={`font-semibold ${isDark ? 'text-white' : 'text-gray-800'} mb-3`}>
+            <div className={`p-3 sm:p-4 ${isDark ? 'bg-gray-700' : 'bg-gradient-to-br from-blue-50 to-purple-50 border border-blue-200'} rounded-lg mb-3 sm:mb-4 ${isDark ? '' : 'shadow-sm'}`}>
+              <h3 className={`text-sm sm:text-base font-semibold ${isDark ? 'text-white' : 'text-gray-800'} mb-2 sm:mb-3`}>
                 {strings.steps.step3.summaryTitle}
               </h3>
-              <div className={`text-sm ${isDark ? 'text-gray-300' : 'text-gray-800'} space-y-1.5 font-medium`}>
+              <div className={`text-xs sm:text-sm ${isDark ? 'text-gray-300' : 'text-gray-800'} space-y-1.5 font-medium`}>
                 <p dir="ltr">👨‍🏫 {selectedInstructor.first_name || ''} {selectedInstructor.last_name || ''}</p>
                 <p>📚 {selectedSlot.course_name || strings.steps.step2.officeHours}</p>
                 <p dir="ltr">📅 {formatDate(selectedDate)}</p>
@@ -178,7 +204,7 @@ export default function DateTimeBooking({
           <button
             onClick={handleBookClick}
             disabled={!selectedDate || !selectedTime || isCreatingBooking || isLoading}
-            className={`w-full ${isDark ? 'bg-gradient-to-r from-[#366c6b] to-[#1a3535]' : 'bg-gradient-to-r from-[#4a9d9c] to-[#366c6b]'} text-white py-3 px-6 rounded-lg ${isDark ? 'hover:from-[#2d5857] hover:to-[#152a2a]' : 'hover:from-[#3d8584] hover:to-[#2d5857]'} hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 font-semibold flex items-center justify-center transform hover:scale-[1.02]`}
+            className={`w-full ${isDark ? 'bg-gradient-to-r from-[#366c6b] to-[#1a3535]' : 'bg-gradient-to-r from-[#4a9d9c] to-[#366c6b]'} text-white py-2.5 sm:py-3 px-4 sm:px-6 text-sm sm:text-base rounded-lg ${isDark ? 'hover:from-[#2d5857] hover:to-[#152a2a]' : 'hover:from-[#3d8584] hover:to-[#2d5857]'} hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 font-semibold flex items-center justify-center transform hover:scale-[1.02]`}
           >
             {isCreatingBooking || isLoading ? (
               <>

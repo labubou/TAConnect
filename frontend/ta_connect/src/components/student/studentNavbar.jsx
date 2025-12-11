@@ -35,6 +35,12 @@ const StudentNavbar = ({ onToggle }) => {
     return () => window.removeEventListener('resize', checkScreenSize);
   }, [onToggle]);
 
+  // Close navbar when navigating to a different page
+  useEffect(() => {
+    setIsOpen(false);
+    if (onToggle) onToggle(false);
+  }, [location.pathname, onToggle]);
+
   const isActive = (path) => location.pathname === path;
 
   const handleLogout = async () => {
@@ -52,10 +58,8 @@ const StudentNavbar = ({ onToggle }) => {
   };
 
   const closeNavbar = () => {
-    if (isMobile) {
-      setIsOpen(false);
-      if (onToggle) onToggle(false);
-    }
+    setIsOpen(false);
+    if (onToggle) onToggle(false);
   };
 
   return (
@@ -99,6 +103,15 @@ const StudentNavbar = ({ onToggle }) => {
         <LanguageToggle />
         <ThemeToggle />
       </div>
+
+      {/* Dimming Overlay */}
+      {isOpen && (
+        <div 
+          className="fixed inset-0 bg-black/50 backdrop-blur-sm z-30 transition-opacity duration-500 ease-in-out"
+          onClick={closeNavbar}
+          aria-hidden="true"
+        />
+      )}
 
       {/* Navbar Container */}
       <nav className={`fixed top-0 h-full z-40 transition-all duration-500 ease-in-out ${

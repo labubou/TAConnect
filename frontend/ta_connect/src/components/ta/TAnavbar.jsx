@@ -15,6 +15,7 @@ const TAnavbar = ({ onToggle }) => {
   const { theme } = useTheme();
   const { language, toggleLanguage } = useLanguage();
   const t = strings[language];
+  const isRTL = language === 'ar';
 
   useEffect(() => {
     const checkScreenSize = () => {
@@ -67,13 +68,15 @@ const TAnavbar = ({ onToggle }) => {
 
       {/* Toggle Button */}
       <button 
-        className="fixed top-4 left-4 z-50 w-12 h-12 bg-white/80 dark:bg-gray-800/80 backdrop-blur-xl border border-white/30 dark:border-gray-700 rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-300 hover:scale-110 flex items-center justify-center group"
+        className={`fixed top-4 z-50 w-12 h-12 bg-white/80 dark:bg-gray-800/80 backdrop-blur-xl border border-white/30 dark:border-gray-700 rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-500 ease-in-out hover:scale-110 flex items-center justify-center group ${
+          isRTL ? 'right-4' : 'left-4'
+        } ${isOpen ? 'hover:rotate-12' : 'hover:-rotate-12'}`}
         onClick={toggleNavbar}
         aria-label={t.aria.toggleNav}
         title={isOpen ? t.aria.collapseSidebar : t.aria.expandSidebar}
       >
         <svg 
-          className={`w-6 h-6 text-gray-700 dark:text-gray-200 transition-transform duration-300 ${isOpen ? 'rotate-180' : ''} group-hover:text-[#366c6b]`}
+          className={`w-6 h-6 text-gray-700 dark:text-gray-200 transition-all duration-500 ease-in-out ${isOpen ? (isRTL ? '-rotate-180' : 'rotate-180') : 'rotate-0'} group-hover:text-[#366c6b] group-hover:scale-110`}
           fill="none" 
           stroke="currentColor" 
           viewBox="0 0 24 24"
@@ -86,8 +89,10 @@ const TAnavbar = ({ onToggle }) => {
         </svg>
       </button>
 
-      {/* Theme toggle and Language toggle - top right */}
-      <div className="fixed top-4 right-4 z-50 flex items-center gap-2">
+      {/* Theme toggle and Language toggle - top corner opposite to navbar */}
+      <div className={`fixed top-4 z-50 flex items-center gap-2 ${
+        isRTL ? 'left-4' : 'right-4'
+      }`}>
         <button
           onClick={toggleLanguage}
           className="w-12 h-12 bg-white/80 dark:bg-gray-800/80 backdrop-blur-xl border border-white/30 dark:border-gray-700 rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-300 hover:scale-110 flex items-center justify-center group"
@@ -102,12 +107,16 @@ const TAnavbar = ({ onToggle }) => {
       </div>
 
       {/* Navbar Container */}
-      <nav className={`fixed left-0 top-0 h-full z-40 transition-all duration-300 ${
+      <nav className={`fixed top-0 h-full z-40 transition-all duration-500 ease-in-out ${
+        isRTL ? 'right-0' : 'left-0'
+      } ${
         isMobile 
-          ? (isOpen ? 'translate-x-0' : '-translate-x-full') 
-          : (isOpen ? 'translate-x-0' : '-translate-x-64')
-      }`}>
-        <div className="h-full w-64 bg-gradient-to-b from-white/95 via-white/90 to-white/95 dark:from-gray-950/90 dark:via-gray-900/90 dark:to-gray-950/90 backdrop-blur-2xl border-r border-white/30 dark:border-gray-800 shadow-2xl">
+          ? (isOpen ? 'translate-x-0 opacity-100' : (isRTL ? 'translate-x-full opacity-0' : '-translate-x-full opacity-0')) 
+          : (isOpen ? 'translate-x-0 opacity-100' : (isRTL ? 'translate-x-64 opacity-0' : '-translate-x-64 opacity-0'))
+      }`} dir={isRTL ? 'rtl' : 'ltr'}>
+        <div className={`h-full w-64 bg-gradient-to-b from-white/95 via-white/90 to-white/95 dark:from-gray-950/90 dark:via-gray-900/90 dark:to-gray-950/90 backdrop-blur-2xl border-white/30 dark:border-gray-800 shadow-2xl transition-all duration-500 ${
+          isRTL ? 'border-l' : 'border-r'
+        } ${isOpen ? 'scale-100' : 'scale-95'}`}>
           <div className="flex flex-col h-full">
             
             <div className="flex-1 overflow-y-auto overflow-x-hidden scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent hover:scrollbar-thumb-gray-400 p-6">

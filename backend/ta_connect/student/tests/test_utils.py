@@ -106,19 +106,54 @@ class CompleteBookingTestCase(BaseTestCase):
     
     def test_complete_booking_already_cancelled(self):
         """Test that cancelled booking cannot be completed."""
-        booking = self.create_booking()
+        student = self.create_student()
+        slot, policy = self.create_office_hour_slot()
+        
+        # Create a booking in the past (ended)
+        past_date = datetime.date.today() - datetime.timedelta(days=1)
+        past_time = timezone.now() - datetime.timedelta(hours=2)
+        
+        booking = Booking.objects.create(
+            student=student,
+            office_hour=slot,
+            date=past_date,
+            start_time=past_time,
+            status='pending'
+        )
+        # Set end_time to be in the past
+        booking.end_time = past_time + datetime.timedelta(minutes=slot.duration_minutes)
+        booking.save()
+        
+        # Now cancel it
         booking.cancel()
         booking.save()
         
         success, message = complete_booking(booking)
         
         self.assertFalse(success)
-        # Match the actual message from complete_if_ended method
         self.assertEqual(message, "Booking status invalid.")
     
     def test_complete_booking_already_completed(self):
         """Test that completed booking cannot be completed again."""
-        booking = self.create_booking()
+        student = self.create_student()
+        slot, policy = self.create_office_hour_slot()
+        
+        # Create a booking in the past (ended)
+        past_date = datetime.date.today() - datetime.timedelta(days=1)
+        past_time = timezone.now() - datetime.timedelta(hours=2)
+        
+        booking = Booking.objects.create(
+            student=student,
+            office_hour=slot,
+            date=past_date,
+            start_time=past_time,
+            status='confirmed'
+        )
+        # Set end_time to be in the past
+        booking.end_time = past_time + datetime.timedelta(minutes=slot.duration_minutes)
+        booking.save()
+        
+        # Mark it as completed
         booking.status = 'completed'
         booking.is_completed = True
         booking.save()
@@ -126,7 +161,6 @@ class CompleteBookingTestCase(BaseTestCase):
         success, message = complete_booking(booking)
         
         self.assertFalse(success)
-        # Match the actual message from complete_if_ended method
         self.assertEqual(message, "Booking status invalid.")
     
     def test_complete_booking_no_end_time(self):
