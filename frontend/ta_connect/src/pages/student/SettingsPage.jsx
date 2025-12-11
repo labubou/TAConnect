@@ -409,11 +409,7 @@ export default function SettingsPage() {
       <StudentNavbar onToggle={setIsNavbarOpen} />
 
       <main
-        className={`transition-all duration-500 ease-in-out flex-1 ${
-          language === 'ar' 
-            ? (isNavbarOpen ? 'md:mr-64 mr-0' : 'mr-0')
-            : (isNavbarOpen ? 'md:ml-64 ml-0' : 'ml-0')
-        } pt-16 md:pt-20 px-3 sm:px-6 lg:px-10 pb-12 sm:pb-20`}
+        className="flex-1 pt-16 md:pt-20 px-3 sm:px-6 lg:px-10 pb-12 sm:pb-20"
       >
         <div className="max-w-4xl mx-auto space-y-3 sm:space-y-4 md:space-y-6">
           {/* Header */}

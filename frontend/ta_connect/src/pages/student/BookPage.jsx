@@ -412,11 +412,7 @@ export default function BookPage() {
       <StudentNavbar onToggle={setIsNavbarOpen} />
       
       <div 
-        className={`flex-1 transition-all duration-500 ease-in-out ${
-          language === 'ar'
-            ? (isNavbarOpen ? 'md:mr-64 mr-0' : 'mr-0')
-            : (isNavbarOpen ? 'md:ml-64 ml-0' : 'ml-0')
-        } pt-16 md:pt-20`}
+        className="flex-1 pt-16 md:pt-20"
         style={{ minHeight: 'calc(100vh - 4rem)' }}
       >
         <main className={`${isDark ? 'bg-gray-900' : 'bg-gray-50'} p-3 sm:p-4 md:p-6`}>
