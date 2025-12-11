@@ -414,19 +414,19 @@ export default function BookPage() {
       <div 
         className={`flex-1 transition-all duration-500 ease-in-out ${
           language === 'ar'
-            ? (isNavbarOpen ? 'mr-64' : 'mr-0')
-            : (isNavbarOpen ? 'ml-64' : 'ml-0')
-        } pt-20`}
+            ? (isNavbarOpen ? 'md:mr-64 mr-0' : 'mr-0')
+            : (isNavbarOpen ? 'md:ml-64 ml-0' : 'ml-0')
+        } pt-16 md:pt-20`}
         style={{ minHeight: 'calc(100vh - 4rem)' }}
       >
-        <main className={`${isDark ? 'bg-gray-900' : 'bg-gray-50'} p-6`}>
+        <main className={`${isDark ? 'bg-gray-900' : 'bg-gray-50'} p-3 sm:p-4 md:p-6`}>
           <div className="max-w-7xl mx-auto">
             {/* Header */}
-            <div className={`${isDark ? 'bg-gray-800' : 'bg-white border border-gray-200'} p-8 rounded-xl ${isDark ? 'shadow-lg' : 'shadow-md'} mb-6`}>
-              <h1 className={`text-3xl font-bold ${isDark ? 'text-white' : 'text-gray-800'} mb-2`}>
+            <div className={`${isDark ? 'bg-gray-800' : 'bg-white border border-gray-200'} p-4 sm:p-6 md:p-8 rounded-xl ${isDark ? 'shadow-lg' : 'shadow-md'} mb-4 md:mb-6`}>
+              <h1 className={`text-xl sm:text-2xl md:text-3xl font-bold ${isDark ? 'text-white' : 'text-gray-800'} mb-2`}>
                 {strings.header.title}
               </h1>
-              <p className={`${isDark ? 'text-gray-300' : 'text-gray-500'} text-lg`}>
+              <p className={`${isDark ? 'text-gray-300' : 'text-gray-500'} text-sm sm:text-base md:text-lg`}>
                 {strings.header.subtitle}
               </p>
             </div>
@@ -468,7 +468,7 @@ export default function BookPage() {
               />
             )}
 
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-3 sm:gap-4 md:gap-6">
               {/* Step 1: Select Instructor */}
               <InstructorSearch
                 onInstructorSelect={handleSelectInstructor}

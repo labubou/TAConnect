@@ -53,7 +53,7 @@ export default function ManageBookingsPage() {
   const { startLoading, stopLoading, isLoading } = useGlobalLoading();
   const location = useLocation();
   const isDark = theme === 'dark';
-  const [isNavbarOpen, setIsNavbarOpen] = useState(window.innerWidth >= 1024);
+  const [isNavbarOpen, setIsNavbarOpen] = useState(true);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [selectedBooking, setSelectedBooking] = useState(null);
@@ -389,16 +389,16 @@ export default function ManageBookingsPage() {
       <div 
         className={`flex-1 transition-all duration-500 ease-in-out ${
           language === 'ar'
-            ? (isNavbarOpen ? 'lg:mr-64' : 'mr-0')
-            : (isNavbarOpen ? 'lg:ml-64' : 'ml-0')
-        } pt-16 sm:pt-20`}
+            ? (isNavbarOpen ? 'md:mr-64 mr-0' : 'mr-0')
+            : (isNavbarOpen ? 'md:ml-64 ml-0' : 'ml-0')
+        } pt-16 md:pt-20`}
         style={{ minHeight: 'calc(100vh - 4rem)' }}
       >
-        <main className={`${isDark ? 'bg-gray-900' : 'bg-gray-50'} p-3 sm:p-6`}>
+        <main className={`${isDark ? 'bg-gray-900' : 'bg-gray-50'} p-3 sm:p-4 md:p-6`}>
           <div className="max-w-7xl mx-auto">
             {/* Header */}
             <div className={`${isDark ? 'bg-gray-800' : 'bg-white'} p-4 sm:p-6 md:p-8 rounded-xl shadow-lg mb-4 sm:mb-6`}>
-              <h1 className={`text-2xl sm:text-3xl font-bold ${isDark ? 'text-white' : 'text-gray-900'} mb-2`}>
+              <h1 className={`text-xl sm:text-2xl md:text-3xl font-bold ${isDark ? 'text-white' : 'text-gray-900'} mb-2`}>
                 {t.page.title}
               </h1>
               <p className={`${isDark ? 'text-gray-300' : 'text-gray-600'} text-sm sm:text-base md:text-lg`}>

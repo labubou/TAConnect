@@ -73,12 +73,12 @@ export default function TimeSlotSelector({
   };
 
   return (
-    <div className={`${isDark ? 'bg-gray-800' : 'bg-white border border-gray-200'} p-6 rounded-xl ${isDark ? 'shadow-lg' : 'shadow-md hover:shadow-lg transition-shadow'}`}>
-      <div className="flex items-center mb-4">
-        <div className={`w-8 h-8 ${isDark ? 'bg-gradient-to-r from-[#366c6b] to-[#1a3535]' : 'bg-gradient-to-r from-[#4a9d9c] to-[#366c6b]'} text-white rounded-full flex items-center justify-center font-bold mr-3 shadow-sm`}>
+    <div className={`${isDark ? 'bg-gray-800' : 'bg-white border border-gray-200'} p-4 sm:p-5 md:p-6 rounded-xl ${isDark ? 'shadow-lg' : 'shadow-md hover:shadow-lg transition-shadow'}`}>
+      <div className="flex items-center mb-3 sm:mb-4">
+        <div className={`w-7 h-7 sm:w-8 sm:h-8 ${isDark ? 'bg-gradient-to-r from-[#366c6b] to-[#1a3535]' : 'bg-gradient-to-r from-[#4a9d9c] to-[#366c6b]'} text-white rounded-full flex items-center justify-center font-bold text-sm sm:text-base ${language === 'ar' ? 'ml-2 sm:ml-3' : 'mr-2 sm:mr-3'} shadow-sm`}>
           {strings.steps.step2.number}
         </div>
-        <h2 className={`text-xl font-bold ${isDark ? 'text-white' : 'text-gray-800'}`}>
+        <h2 className={`text-lg sm:text-xl font-bold ${isDark ? 'text-white' : 'text-gray-800'}`}>
           {strings.steps.step2.title}
         </h2>
       </div>
@@ -100,7 +100,7 @@ export default function TimeSlotSelector({
               key={slot.id}
               onClick={() => handleSelectSlot(slot)}
               disabled={!slot.status}
-              className={`w-full p-4 rounded-lg border-2 bg-white dark:bg-gray-900 text-left transition-all ${
+              className={`w-full p-3 sm:p-4 rounded-lg border-2 bg-white dark:bg-gray-900 text-left transition-all ${
                 selectedSlot?.id === slot.id
                   ? isDark ? 'border-green-500 bg-green-900/20' : 'border-green-500 bg-green-50 shadow-sm'
                   : slot.status
@@ -108,20 +108,20 @@ export default function TimeSlotSelector({
                     : isDark ? 'border-gray-300 opacity-50 cursor-not-allowed' : 'border-gray-200 bg-gray-50 opacity-60 cursor-not-allowed'
               }`}
             >
-              <div className="flex items-start justify-between ">
-                <div className="flex-1">
-                  <p className={`font-semibold ${isDark ? 'text-white' : 'text-gray-800'} mb-1`}>
+              <div className="flex items-start justify-between gap-2">
+                <div className="flex-1 min-w-0">
+                  <p className={`text-sm sm:text-base font-semibold ${isDark ? 'text-white' : 'text-gray-800'} mb-1`}>
                     {slot.course_name || strings.steps.step2.officeHours}
                   </p>
-                  <div className={`text-sm ${isDark ? 'text-gray-400' : 'text-gray-700'} space-y-0.5 font-medium`}>
+                  <div className={`text-xs sm:text-sm ${isDark ? 'text-gray-400' : 'text-gray-700'} space-y-0.5 font-medium`}>
                     <p dir="ltr">📅 {slot.day_of_week}</p>
                     <p dir="ltr">🕐 {formatTime(slot.start_time)} - {formatTime(slot.end_time)}</p>
                     <p dir="ltr">📍 {slot.location || strings.steps.step2.online}</p>
-                    <p dir="ltr">📆 {formatDate(slot.start_date)} to {formatDate(slot.end_date)}</p>
+                    <p dir="ltr" className="hidden sm:block">📆 {formatDate(slot.start_date)} to {formatDate(slot.end_date)}</p>
                   </div>
                 </div>
                 {!slot.status && (
-                  <span className={`text-xs ${isDark ? 'bg-red-100 text-red-700' : 'bg-red-100 text-red-600'} px-2 py-1 rounded font-medium`}>
+                  <span className={`text-xs ${isDark ? 'bg-red-100 text-red-700' : 'bg-red-100 text-red-600'} px-2 py-1 rounded font-medium flex-shrink-0`}>
                     {strings.steps.step2.inactive}
                   </span>
                 )}

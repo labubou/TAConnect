@@ -99,19 +99,19 @@ export default function InstructorSearch({
   };
 
   return (
-    <div className={`${isDark ? 'bg-gray-800' : 'bg-white border border-white-200'} p-6 rounded-xl ${isDark ? 'shadow-lg' : 'shadow-md hover:shadow-lg transition-shadow'}`}>
-      <div className="flex items-center mb-4">
-        <div className={`w-8 h-8 ${isDark ? 'bg-gradient-to-r from-[#366c6b] to-[#1a3535]' : 'bg-gradient-to-r from-[#4a9d9c] to-[#366c6b]'} text-white rounded-full flex items-center justify-center font-bold mr-3 shadow-sm`}>
+    <div className={`${isDark ? 'bg-gray-800' : 'bg-white border border-white-200'} p-4 sm:p-5 md:p-6 rounded-xl ${isDark ? 'shadow-lg' : 'shadow-md hover:shadow-lg transition-shadow'}`}>
+      <div className="flex items-center mb-3 sm:mb-4">
+        <div className={`w-7 h-7 sm:w-8 sm:h-8 ${isDark ? 'bg-gradient-to-r from-[#366c6b] to-[#1a3535]' : 'bg-gradient-to-r from-[#4a9d9c] to-[#366c6b]'} text-white rounded-full flex items-center justify-center font-bold text-sm sm:text-base ${language === 'ar' ? 'ml-2 sm:ml-3' : 'mr-2 sm:mr-3'} shadow-sm`}>
           {strings.steps.step1.number}
         </div>
-        <h2 className={`text-xl font-bold ${isDark ? 'text-white' : 'text-gray-800'}`}>
+        <h2 className={`text-lg sm:text-xl font-bold ${isDark ? 'text-white' : 'text-gray-800'}`}>
           {strings.steps.step1.title}
         </h2>
       </div>
 
       {/* Search Bar */}
-      <div className="mb-4">
-        <div className="relative flex gap-2">
+      <div className="mb-3 sm:mb-4">
+        <div className="relative flex flex-col sm:flex-row gap-2">
           <div className="relative flex-1">
             <input
               type="text"
@@ -119,7 +119,7 @@ export default function InstructorSearch({
               onChange={(e) => setSearchQuery(e.target.value)}
               onKeyPress={(e) => e.key === 'Enter' && handleSearchInstructors()}
               placeholder={strings.steps.step1.searchPlaceholder}
-              className={`w-full px-4 py-2.5 pr-10 border ${isDark ? 'border-gray-600 bg-gray-700 text-white placeholder-gray-400' : 'border-gray-300 bg-white text-gray-900 placeholder-gray-400 focus:border-blue-400'} rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none transition-all`}
+              className={`w-full px-3 sm:px-4 py-2 sm:py-2.5 pr-10 border text-sm sm:text-base ${isDark ? 'border-gray-600 bg-gray-700 text-white placeholder-gray-400' : 'border-gray-300 bg-white text-gray-900 placeholder-gray-400 focus:border-blue-400'} rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none transition-all`}
             />
             {isSearching && (
               <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
@@ -143,7 +143,7 @@ export default function InstructorSearch({
           <button
             onClick={handleSearchInstructors}
             disabled={!searchQuery.trim() || isSearching || isLoading}
-            className={`px-4 py-2 ${isDark ? 'bg-gradient-to-r from-[#366c6b] to-[#1a3535] hover:from-[#2d5857] hover:to-[#152a2a]' : 'bg-gradient-to-r from-[#4a9d9c] to-[#366c6b] hover:from-[#3d8584] hover:to-[#2d5857]'} text-white rounded-lg hover:shadow-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed font-medium`}
+            className={`w-full sm:w-auto px-4 py-2 sm:py-2.5 text-sm sm:text-base ${isDark ? 'bg-gradient-to-r from-[#366c6b] to-[#1a3535] hover:from-[#2d5857] hover:to-[#152a2a]' : 'bg-gradient-to-r from-[#4a9d9c] to-[#366c6b] hover:from-[#3d8584] hover:to-[#2d5857]'} text-white rounded-lg hover:shadow-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed font-medium`}
           >
             {strings.steps.step1.searchButton}
           </button>
@@ -189,21 +189,21 @@ export default function InstructorSearch({
             <button
               key={instructor.id}
               onClick={() => handleSelectInstructor(instructor)}
-              className={`w-full p-4 rounded-lg border-2 bg-white dark:bg-gray-900 transition-all ${
+              className={`w-full p-3 sm:p-4 rounded-lg border-2 bg-white dark:bg-gray-900 transition-all ${
                 selectedInstructor?.id === instructor.id
                   ? isDark ? 'border-blue-500 bg-blue-900/20' : 'border-blue-500 bg-blue-50 shadow-sm'
                   : `${isDark ? 'border-gray-700 hover:border-gray-600' : 'border-gray-200 hover:border-gray-300 hover:shadow-sm'}`
               }`}
             >
-              <div className="flex items-center gap-3" dir="ltr">
-                <div className={`w-10 h-10 flex-shrink-0 ${isDark ? 'bg-gradient-to-br from-[#366c6b] to-[#1a3535]' : 'bg-gradient-to-br from-[#4a9d9c] to-[#366c6b]'} rounded-full flex items-center justify-center text-white font-bold shadow-sm`}>
+              <div className="flex items-center gap-2 sm:gap-3" dir="ltr">
+                <div className={`w-9 h-9 sm:w-10 sm:h-10 flex-shrink-0 text-sm sm:text-base ${isDark ? 'bg-gradient-to-br from-[#366c6b] to-[#1a3535]' : 'bg-gradient-to-br from-[#4a9d9c] to-[#366c6b]'} rounded-full flex items-center justify-center text-white font-bold shadow-sm`}>
                   {instructor.first_name?.[0]}{instructor.last_name?.[0]}
                 </div>
                 <div className="flex-1 min-w-0 text-left">
-                  <p className={`font-semibold truncate ${isDark ? 'text-white' : 'text-gray-800'}`}>
+                  <p className={`text-sm sm:text-base font-semibold truncate ${isDark ? 'text-white' : 'text-gray-800'}`}>
                     {instructor.first_name} {instructor.last_name}
                   </p>
-                  <p className={`text-sm truncate ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
+                  <p className={`text-xs sm:text-sm truncate ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
                     {instructor.email}
                   </p>
                 </div>
