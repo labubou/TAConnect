@@ -298,25 +298,25 @@ export default function ProfilePage() {
 
       <main
         className={`transition-all duration-300 ${
-          isNavbarOpen ? 'ml-64' : 'ml-0'
-        } pt-20 p-6`}
+          isNavbarOpen ? 'md:ml-64 ml-0' : 'ml-0'
+        } pt-20 p-4 md:p-6`}
         style={{ minHeight: '100vh' }}
       >
         <div className="max-w-4xl mx-auto space-y-6">
           {/* Header Card */}
-          <div className={`${isDark ? 'bg-gradient-to-br from-gray-800 to-gray-900 border-gray-700' : 'bg-gradient-to-br from-white to-gray-50 border-gray-200'} p-8 rounded-2xl shadow-xl border-2`}>
-            <div className="flex items-center gap-6">
-              <div className="w-24 h-24 bg-gradient-to-br from-[#366c6b] to-[#1a3535] rounded-2xl shadow-lg flex items-center justify-center text-white font-bold text-4xl">
+          <div className={`${isDark ? 'bg-gradient-to-br from-gray-800 to-gray-900 border-gray-700' : 'bg-gradient-to-br from-white to-gray-50 border-gray-200'} p-4 sm:p-6 md:p-8 rounded-2xl shadow-xl border-2`}>
+            <div className="flex flex-col sm:flex-row items-center gap-4 sm:gap-6">
+              <div className="w-20 h-20 sm:w-24 sm:h-24 bg-gradient-to-br from-[#366c6b] to-[#1a3535] rounded-2xl shadow-lg flex items-center justify-center text-white font-bold text-3xl sm:text-4xl">
                 {user?.first_name ? user.first_name.charAt(0).toUpperCase() : user?.username?.charAt(0).toUpperCase() || 'U'}
               </div>
-              <div className="flex-1">
-                <h1 className={`text-3xl font-bold mb-2 ${isDark ? 'text-white' : 'text-gray-900'}`}>
+              <div className="flex-1 text-center sm:text-left">
+                <h1 className={`text-2xl sm:text-3xl font-bold mb-2 ${isDark ? 'text-white' : 'text-gray-900'}`}>
                   {t.profilePage.title}
                 </h1>
-                <p className={`${isDark ? 'text-gray-300' : 'text-gray-600'} text-lg`}>
+                <p className={`${isDark ? 'text-gray-300' : 'text-gray-600'} text-base sm:text-lg`}>
                   {t.profilePage.description}
                 </p>
-                <div className="mt-3 flex items-center gap-2">
+                <div className="mt-3 flex items-center justify-center sm:justify-start gap-2 flex-wrap">
                   <span className={`px-3 py-1 rounded-lg text-sm font-semibold ${
                     isDark ? 'bg-[#366c6b]/30 text-[#4a9d9c]' : 'bg-[#366c6b]/10 text-[#366c6b]'
                   }`}>
@@ -360,7 +360,7 @@ export default function ProfilePage() {
           )}
 
           {/* Profile Form Card */}
-          <div className={`${isDark ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'} p-8 rounded-2xl shadow-xl border-2`}>
+          <div className={`${isDark ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'} p-4 sm:p-6 md:p-8 rounded-2xl shadow-xl border-2`}>
             <div className="flex items-center gap-3 mb-6">
               <div className={`p-3 rounded-xl ${isDark ? 'bg-gradient-to-br from-[#366c6b] to-[#1a3535]' : 'bg-gradient-to-br from-[#4a9d9c] to-[#366c6b]'} shadow-lg`}>
                 <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -445,7 +445,7 @@ export default function ProfilePage() {
                     </svg>
                     {t.profilePage.email}
                   </label>
-                  <div className="flex gap-3">
+                  <div className="flex flex-col sm:flex-row gap-3">
                     <input
                       type="email"
                       value={user?.email || ''}
@@ -459,7 +459,7 @@ export default function ProfilePage() {
                     <button
                       type="button"
                       onClick={() => setShowEmailModal(true)}
-                      className="px-6 py-3 rounded-xl bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white font-semibold transition-all duration-300 hover:scale-105 hover:shadow-lg flex items-center gap-2"
+                      className="w-full sm:w-auto px-6 py-3 rounded-xl bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white font-semibold transition-all duration-300 hover:scale-105 hover:shadow-lg flex items-center justify-center gap-2"
                     >
                       <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
@@ -471,7 +471,7 @@ export default function ProfilePage() {
               </div>
 
               {/* Action Buttons */}
-              <div className="flex flex-row gap-4 pt-6 border-t-2 border-gray-700 dark:border-gray-600">
+              <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 pt-6 border-t-2 border-gray-700 dark:border-gray-600">
                 <button
                   type="submit"
                   disabled={loading}
