@@ -169,7 +169,7 @@ export default function ManageAllowedStudentsModal({
                 : "bg-blue-500 hover:bg-blue-600 text-white"
             }`}
           >
-            {strings.buttons.toggle}
+            {strings.status.toggle}
           </button>
         </div>
       </div>

@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
-import strings from "../../../strings/allowedStudentsPageStrings";
+import { useLanguage } from "../../../contexts/LanguageContext";
+import allStrings from "../../../strings/allowedStudentsPageStrings";
 
 export default function AllowedStudentsStatus({
   isDark,
@@ -8,6 +9,8 @@ export default function AllowedStudentsStatus({
   onStatusUpdated,
   onClose,
 }) {
+  const { language } = useLanguage();
+  const strings = allStrings[language] || allStrings.en;
   const [loading, setLoading] = useState(true);
   const [toggling, setToggling] = useState(false);
   const [allowedOnly, setAllowedOnly] = useState(false);

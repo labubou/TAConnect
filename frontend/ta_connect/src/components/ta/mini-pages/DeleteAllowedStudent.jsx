@@ -1,6 +1,7 @@
 import { useState } from "react";
 import axios from "axios";
-import strings from "../../../strings/allowedStudentsPageStrings";
+import { useLanguage } from "../../../contexts/LanguageContext";
+import allStrings from "../../../strings/allowedStudentsPageStrings";
 
 export default function DeleteAllowedStudent({
   isDark,
@@ -8,6 +9,8 @@ export default function DeleteAllowedStudent({
   onStudentDeleted,
   onClose,
 }) {
+  const { language } = useLanguage();
+  const strings = allStrings[language] || allStrings.en;
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 

@@ -1,6 +1,7 @@
 import { useState } from "react";
 import axios from "axios";
-import strings from "../../../strings/allowedStudentsPageStrings";
+import { useLanguage } from "../../../contexts/LanguageContext";
+import allStrings from "../../../strings/allowedStudentsPageStrings";
 
 export default function EditAllowedStudent({
   isDark,
@@ -8,6 +9,8 @@ export default function EditAllowedStudent({
   onStudentUpdated,
   onClose,
 }) {
+  const { language } = useLanguage();
+  const strings = allStrings[language] || allStrings.en;
   const [formData, setFormData] = useState({
     first_name: student.first_name || "",
     last_name: student.last_name || "",
