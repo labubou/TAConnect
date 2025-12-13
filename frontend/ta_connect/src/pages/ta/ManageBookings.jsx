@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useTheme } from '../../contexts/ThemeContext';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { useGlobalLoading } from '../../contexts/GlobalLoadingContext';
+import { useNavigate } from 'react-router-dom';
 import TAnavbar from '../../components/ta/TAnavbar';
 import ErrorBoundary from '../../components/General/ErrorBoundary';
 import Footer from '../../components/General/Footer';
@@ -38,6 +39,7 @@ export default function ManageBookings() {
   const { language } = useLanguage();
   const strings = allStrings[language];
   const { startLoading, stopLoading } = useGlobalLoading();
+  const navigate = useNavigate();
   const isDark = theme === 'dark';
   const [isNavbarOpen, setIsNavbarOpen] = useState(true);
   const [bookings, setBookings] = useState([]);
@@ -487,6 +489,20 @@ export default function ManageBookings() {
                   }`}
                 >
                   {strings.filters.clear}
+                </button>
+                <button
+                  onClick={() => navigate('/ta/pending-bookings')}
+                  className={`px-4 py-2 rounded-lg font-medium transition-all flex items-center justify-center gap-2 ${
+                    isDark
+                      ? 'bg-amber-600 text-white hover:bg-amber-700 disabled:opacity-50'
+                      : 'bg-amber-500 text-white hover:bg-amber-600 disabled:opacity-50'
+                  }`}
+                  title="View pending bookings"
+                >
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
+                  </svg>
+                  {strings.buttons.pendingBookings}
                 </button>
                 <button
                   onClick={handleExportClick}

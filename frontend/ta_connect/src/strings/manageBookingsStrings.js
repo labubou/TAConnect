@@ -59,6 +59,7 @@ const manageBookingsStrings = {
       view: "View Details",
       confirmCancel: "Confirm Cancel",
       deleteAllCancelled: "Delete All Cancelled",
+      pendingBookings: "Pending Bookings",
     },
     modals: {
       cancelTitle: "Cancel Booking",
@@ -175,6 +176,7 @@ const manageBookingsStrings = {
       view: "عرض التفاصيل",
       confirmCancel: "تأكيد الإلغاء",
       deleteAllCancelled: "حذف جميع الملغاة",
+      pendingBookings: "الحجوزات قيد الانتظار",
     },
     modals: {
       cancelTitle: "إلغاء الحجز",
