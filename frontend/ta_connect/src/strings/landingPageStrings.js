@@ -27,10 +27,13 @@ const landingPageStrings = {
       },
     ],
     footer: {
-      copyright: "All rights reserved.",
-      github: "GitHub",
+      copyright: "TAConnect © 2024. All rights reserved.",
+      github: "GitHub Repository",
       about: "About",
       contact: "Contact",
+      quickLinks: "Quick Links",
+      followUs: "Follow Us",
+      team: "Our Team",
     },
   },
   ar: {
@@ -60,10 +63,13 @@ const landingPageStrings = {
       },
     ],
     footer: {
-      copyright: "جميع الحقوق محفوظة.",
-      github: "GitHub",
+      copyright: "TAConnect © 2024. جميع الحقوق محفوظة.",
+      github: "مستودع GitHub",
       about: "عن البرنامج",
       contact: "تواصل معنا",
+      quickLinks: "روابط سريعة",
+      followUs: "متابعتنا",
+      team: "فريقنا",
     },
   },
 };

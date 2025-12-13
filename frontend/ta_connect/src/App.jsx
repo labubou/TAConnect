@@ -26,10 +26,12 @@ const VerifyEmailChangePage = lazy(() => import('./pages/main/VerifyEmailChangeP
 const ForgotPasswordPage = lazy(() => import('./pages/main/ForgotPasswordPage'));
 const ResetPasswordPage = lazy(() => import('./pages/main/ResetPasswordPage'));
 const ProfilePage = lazy(() => import('./pages/main/ProfilePage'));
+const AboutPage = lazy(() => import('./pages/main/AboutPage'));
+const ContactPage = lazy(() => import('./pages/main/ContactPage'));
 const TAPage = lazy(() => import('./pages/ta/TAPage'));
 const ManageCourses = lazy(() => import('./pages/ta/ManageCourses'));
 const Dashboard = lazy(() => import('./pages/ta/Dashboard'));
-const EmailPreferencesPage = lazy(() => import('./pages/ta/EmailPreferencesPage'));
+const TASettingsPage = lazy(() => import('./pages/ta/SettingsPage'));
 const InstructorManageBookings = lazy(() => import('./pages/ta/ManageBookings'));
 const PendingBookingsPage = lazy(() => import('./pages/ta/PendingBookingsPage'));
 const StudentHomePage = lazy(() => import('./pages/student/studentHomePage'));
@@ -116,6 +118,22 @@ function App() {
                   </Suspense>
                 }
               />
+              <Route 
+                path="/about"
+                element={
+                  <Suspense fallback={<PageLoader />}>
+                    <AboutPage />
+                  </Suspense>
+                }
+              />
+              <Route 
+                path="/contact"
+                element={
+                  <Suspense fallback={<PageLoader />}>
+                    <ContactPage />
+                  </Suspense>
+                }
+              />
               <Route
                 path="/forgot-password"
                 element={
@@ -157,6 +175,16 @@ function App() {
                 } 
               />
               <Route 
+                path="/ta/settings" 
+                element={
+                  <ProtectedRoute>
+                    <Suspense fallback={<PageLoader />}>
+                      <TASettingsPage />
+                    </Suspense>
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
                 path="/ta/profile" 
                 element={
                   <ProtectedRoute>
@@ -172,16 +200,6 @@ function App() {
                   <ProtectedRoute>
                     <Suspense fallback={<PageLoader />}>
                       <ManageCourses />
-                    </Suspense>
-                  </ProtectedRoute>
-                } 
-              />
-              <Route 
-                path="/ta/email-preferences" 
-                element={
-                  <ProtectedRoute>
-                    <Suspense fallback={<PageLoader />}>
-                      <EmailPreferencesPage />
                     </Suspense>
                   </ProtectedRoute>
                 } 

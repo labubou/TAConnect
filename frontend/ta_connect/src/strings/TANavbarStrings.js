@@ -1,10 +1,13 @@
 const TANavbarStrings = {
   en: {
+    appName: "TA Connect",
     navigation: {
       profile: "Profile",
       createSlot: "Create Slot",
       manageCourses: "Manage Slots",
       manageBookings: "Manage Bookings",
+      pendingBookings: "Pending Bookings",
+      settings: "Settings",
       logout: "Logout",
       dashboard: "Dashboard",
       emailPreferences: "Email Preferences",
@@ -12,6 +15,7 @@ const TANavbarStrings = {
 
     user: {
       defaultName: "User",
+      taPortal: "TA Portal",
       emailNotVerified: "Email not verified. Please verify your account.",
     },
 
@@ -59,11 +63,14 @@ const TANavbarStrings = {
     }
   },
   ar: {
+    appName: "TA Connect",
     navigation: {
       profile: "الملف الشخصي",
       createSlot: "إنشاء موعد",
       manageCourses: "إدارة المواعيد",
       manageBookings: "إدارة الحجوزات",
+      pendingBookings: "الحجوزات المعلقة",
+      settings: "الإعدادات",
       logout: "تسجيل الخروج",
       dashboard: "لوحة التحكم",
       emailPreferences: "إعدادات البريد الإلكتروني",
@@ -71,6 +78,7 @@ const TANavbarStrings = {
 
     user: {
       defaultName: "المستخدم",
+      taPortal: "بوابة TA",
       emailNotVerified: "البريد الإلكتروني غير موثق. يرجى التحقق من حسابك.",
     },
 
