@@ -79,6 +79,17 @@ export default function ManageBookings() {
     }
   };
 
+  // Handle redirect from old email links with booking_id parameter
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const bookingId = params.get('booking_id');
+    
+    if (bookingId) {
+      // Redirect to the new pending bookings page with the correct parameter format
+      navigate(`/ta/pending-bookings?id=${bookingId}`, { replace: true });
+    }
+  }, [navigate]);
+
   // Fetch bookings when filters change
   useEffect(() => {
     fetchBookings();
