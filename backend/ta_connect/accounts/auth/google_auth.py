@@ -25,10 +25,10 @@ from accounts.schemas.auth_schemas import (
 from utils.email_sending.auth.send_welcome_email import send_welcome_email
 
 class GoogleAuthRateThrottle(AnonRateThrottle):
-    rate = '10/hour'  # Limit Google OAuth attempts
+    rate = '20/hour'  # Limit Google OAuth attempts
 
 class SetUserTypeRateThrottle(UserRateThrottle):
-    rate = '5/hour'  # Limit user type setting attempts
+    rate = '10/hour'  # Limit user type setting attempts
 
 class GoogleLoginUrlView(GenericAPIView):
     """Provides the Google OAuth2 login URL"""
