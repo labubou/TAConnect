@@ -29,7 +29,6 @@ const ProfilePage = lazy(() => import('./pages/main/ProfilePage'));
 const TAPage = lazy(() => import('./pages/ta/TAPage'));
 const ManageCourses = lazy(() => import('./pages/ta/ManageCourses'));
 const Dashboard = lazy(() => import('./pages/ta/Dashboard'));
-const AnalyticsDashboard = lazy(() => import('./pages/ta/AnalyticsDashboard'));
 const EmailPreferencesPage = lazy(() => import('./pages/ta/EmailPreferencesPage'));
 const InstructorManageBookings = lazy(() => import('./pages/ta/ManageBookings'));
 const StudentHomePage = lazy(() => import('./pages/student/studentHomePage'));
@@ -172,16 +171,6 @@ function App() {
                   <ProtectedRoute>
                     <Suspense fallback={<PageLoader />}>
                       <ManageCourses />
-                    </Suspense>
-                  </ProtectedRoute>
-                } 
-              />
-              <Route 
-                path="/ta/analytics" 
-                element={
-                  <ProtectedRoute>
-                    <Suspense fallback={<PageLoader />}>
-                      <AnalyticsDashboard />
                     </Suspense>
                   </ProtectedRoute>
                 } 

@@ -31,20 +31,12 @@
 /**
  * 2. useInstructorBookings()
  *    - Caches: 5 minutes
- *    - Used by: TAPage, AnalyticsDashboard
+ *    - Used by: TAPage
  *    - Data: Bookings for an instructor
  */
 
 /**
- * 3. useAnalyticsData(startDate, endDate)
- *    - Caches: 5 minutes per date range
- *    - Used by: AnalyticsDashboard
- *    - Data: Analytics with optional date filtering
- *    - Key: ['analytics', startDate, endDate] - Different caches for different date ranges
- */
-
-/**
- * 4. useSearchInstructors(query)
+ * 3. useSearchInstructors(query)
  *    - Caches: 10 minutes (longer cache for search results)
  *    - Used by: BookPage
  *    - Data: Search results for instructor names
@@ -76,7 +68,7 @@
  * 
  * 2. Feature chunks (lazy loaded):
  *    - Auth pages (login, register, verification)
- *    - TA pages (dashboard, manage courses, analytics)
+ *    - TA pages (dashboard, manage courses)
  *    - Student pages (book slot, home)
  * 
  * 3. Main chunk (always loaded):
