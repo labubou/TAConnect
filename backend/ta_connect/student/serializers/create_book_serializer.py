@@ -37,15 +37,27 @@ class CreateBookingSerializer(serializers.Serializer):
         if not is_time_available(slot, attrs['date'], start_dt, slot.duration_minutes):
             raise serializers.ValidationError("Time overlaps existing booking")
 
+        # 5. check slot status
         if slot.status is False:
             raise serializers.ValidationError("This slot is inactive")
         
+        # 6. check specific email requirement
         if slot.policy and slot.policy.require_specific_email:
             student_email = request.user.email
             is_allowed = slot.policy.allowed_students.filter(email=student_email).exists()
             if not is_allowed:
                 raise serializers.ValidationError("Your email is not authorized to book this office hour slot")
         
+        # 7. check max bookings per student
+        max_bookings = slot.policy.set_student_limit
+        if max_bookings:
+            existing_bookings_count = Booking.objects.filter(
+                office_hour=slot,
+                student=request.user
+            ).count()
+            if existing_bookings_count >= max_bookings:
+                raise serializers.ValidationError("You have reached the maximum number of bookings for this slot")
+
         attrs['start_datetime'] = start_dt
         return attrs
 
