@@ -290,7 +290,28 @@ export default function BookPage() {
       }
     } catch (err) {
       console.error('Error fetching available times:', err);
-      setError(strings.errors.failedLoadTimes);
+      let errorMsg = strings.errors.failedLoadTimes;
+
+      if (err.response?.data) {
+        const data = err.response.data;
+        if (typeof data.error === 'string') {
+          errorMsg = data.error;
+        } else if (data.error && typeof data.error === 'object') {
+          const values = Object.values(data.error);
+          if (values.length > 0) {
+            const firstVal = values[0];
+            errorMsg = Array.isArray(firstVal) ? firstVal[0] : String(firstVal);
+          }
+        } else if (data.message) {
+          errorMsg = data.message;
+        } else if (data.non_field_errors) {
+          errorMsg = Array.isArray(data.non_field_errors) ? data.non_field_errors[0] : String(data.non_field_errors);
+        } else if (data.detail) {
+          errorMsg = data.detail;
+        }
+      }
+
+      setError(typeof errorMsg === 'string' ? errorMsg : strings.errors.failedLoadTimes);
       setTimeSlots([]);
     } finally {
       stopLoading('fetch-times');

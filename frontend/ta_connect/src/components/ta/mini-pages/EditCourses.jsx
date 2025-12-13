@@ -28,6 +28,7 @@ export default function EditCourses({ isDark, slot, onSlotUpdated, onClose }) {
   const [csvStatus, setCsvStatus] = useState(null);
   const [isDragging, setIsDragging] = useState(false);
   const fileInputRef = useRef(null);
+  const dragCounterRef = useRef(0);
 
   useEffect(() => {
     if (slot) {
@@ -61,19 +62,34 @@ export default function EditCourses({ isDark, slot, onSlotUpdated, onClose }) {
     }
   };
 
+  const handleDragEnter = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    dragCounterRef.current++;
+    if (e.dataTransfer.items && e.dataTransfer.items.length > 0) {
+      setIsDragging(true);
+    }
+  };
+
   const handleDragOver = (e) => {
     e.preventDefault();
-    setIsDragging(true);
+    e.stopPropagation();
   };
 
   const handleDragLeave = (e) => {
     e.preventDefault();
-    setIsDragging(false);
+    e.stopPropagation();
+    dragCounterRef.current--;
+    if (dragCounterRef.current === 0) {
+      setIsDragging(false);
+    }
   };
 
   const handleDrop = (e) => {
     e.preventDefault();
+    e.stopPropagation();
     setIsDragging(false);
+    dragCounterRef.current = 0;
     const file = e.dataTransfer.files && e.dataTransfer.files[0];
     if (file && file.name.endsWith('.csv')) {
       setForm((prev) => ({ ...prev, csv_file: file }));
@@ -98,17 +114,33 @@ export default function EditCourses({ isDark, slot, onSlotUpdated, onClose }) {
         headers: { "Content-Type": "multipart/form-data" },
       });
       
+      // Backend returns: { message, created_users: [], errors: [] }
+      const createdCount = res.data.created_users?.length || 0;
+      const errors = res.data.errors || [];
+      
       return {
         success: true,
-        created: res.data.created_users?.length || 0,
-        errors: res.data.errors || [],
+        created: createdCount,
+        errors: errors,
+        message: res.data.message,
       };
     } catch (err) {
       console.error("CSV upload error:", err);
+      // Extract error message from backend response
+      let errorMessage = strings.create.csv.uploadError;
+      if (err.response?.data) {
+        if (typeof err.response.data.error === 'string') {
+          errorMessage = err.response.data.error;
+        } else if (err.response.data.message) {
+          errorMessage = err.response.data.message;
+        } else if (err.response.data.detail) {
+          errorMessage = err.response.data.detail;
+        }
+      }
       return {
         success: false,
         created: 0,
-        errors: [err.response?.data?.error || err.message || strings.create.csv.uploadError],
+        errors: [{ message: errorMessage }],
       };
     }
   };
@@ -206,10 +238,11 @@ export default function EditCourses({ isDark, slot, onSlotUpdated, onClose }) {
           onSlotUpdated({
             ...slot,
             ...payloadObj,
+            csvResult: csvResult, // Pass CSV result to parent
           });
         
-        // Delay closing if CSV was uploaded to show results
-        if (!csvResult && onClose) {
+        // Always close modal - parent will handle showing CSV results
+        if (onClose) {
           onClose();
         }
       } else {
@@ -596,6 +629,7 @@ export default function EditCourses({ isDark, slot, onSlotUpdated, onClose }) {
           
           {!form.csv_file ? (
             <div
+              onDragEnter={handleDragEnter}
               onDragOver={handleDragOver}
               onDragLeave={handleDragLeave}
               onDrop={handleDrop}
