@@ -328,10 +328,10 @@ function ContactPage() {
                 {t.contactInfo.email}
               </h3>
               <a
-                href="mailto:contact@taconnect.com"
+                href="mailto:taconnect.team@gmail.com"
                 className={`text-sm break-all ${isDark ? 'text-blue-400 hover:text-blue-300' : 'text-blue-600 hover:text-blue-700'}`}
               >
-                contact@taconnect.com
+                taconnect.team@gmail.com
               </a>
             </div>
 
