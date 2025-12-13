@@ -113,6 +113,8 @@ export default function ManageCourses() {
   const [isNavbarOpen, setIsNavbarOpen] = useState(true);
   const [modalState, setModalState] = useState({ type: null, slot: null });
   const [infoBanner, setInfoBanner] = useState("");
+  const [errorBanner, setErrorBanner] = useState("");
+  const [csvResultBanner, setCsvResultBanner] = useState(null); // { created: [], errors: [] }
   const [isExporting, setIsExporting] = useState(false);
   const [exportError, setExportError] = useState("");
 
@@ -130,6 +132,18 @@ export default function ManageCourses() {
     const timer = setTimeout(() => setInfoBanner(""), 5000);
     return () => clearTimeout(timer);
   }, [infoBanner]);
+
+  useEffect(() => {
+    if (!errorBanner) return;
+    const timer = setTimeout(() => setErrorBanner(""), 8000);
+    return () => clearTimeout(timer);
+  }, [errorBanner]);
+
+  useEffect(() => {
+    if (!csvResultBanner) return;
+    const timer = setTimeout(() => setCsvResultBanner(null), 10000);
+    return () => clearTimeout(timer);
+  }, [csvResultBanner]);
 
   useEffect(() => {
     if (!exportError) return;
@@ -157,6 +171,11 @@ export default function ManageCourses() {
     // Refetch to get updated list from server
     refetch();
     setModalState({ type: null, slot: null });
+    
+    // Handle CSV result if present
+    if (newSlot?.csvResult) {
+      handleCsvResult(newSlot.csvResult);
+    }
   };
 
   const handleSlotDeleted = (id) => {
@@ -169,6 +188,35 @@ export default function ManageCourses() {
     // Refetch to get updated list from server
     refetch();
     setModalState({ type: null, slot: null });
+    
+    // Handle CSV result if present
+    if (updatedSlot?.csvResult) {
+      handleCsvResult(updatedSlot.csvResult);
+    }
+  };
+
+  const handleCsvResult = (csvResult) => {
+    if (!csvResult) return;
+    
+    const { success, created, errors } = csvResult;
+    
+    if (success && created > 0 && (!errors || errors.length === 0)) {
+      // Full success
+      setInfoBanner(strings.csv?.successMessage?.replace('{count}', created) || `Successfully added ${created} student(s) from CSV.`);
+    } else if (success && created > 0 && errors && errors.length > 0) {
+      // Partial success - show both info and errors
+      setCsvResultBanner({
+        created: created,
+        errors: errors
+      });
+    } else if (errors && errors.length > 0) {
+      // Only errors
+      const errorMessages = errors.map(e => typeof e === 'string' ? e : e.message || JSON.stringify(e)).join('; ');
+      setErrorBanner(errorMessages);
+    } else if (!success) {
+      // General failure
+      setErrorBanner(strings.csv?.uploadError || 'Failed to process CSV file.');
+    }
   };
 
   const openModal = (type, slot = null) => {
@@ -262,6 +310,100 @@ export default function ManageCourses() {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                 </svg>
               </button>
+            </div>
+          )}
+
+          {/* Error Banner for CSV or other errors */}
+          {errorBanner && (
+            <div
+              className={`rounded-2xl px-3 sm:px-4 py-2 sm:py-3 border flex items-center justify-between gap-2 sm:gap-4 text-sm animate-slideUp shadow-lg ${
+                isDark
+                  ? "bg-red-900/20 border-red-700 text-red-200"
+                  : "bg-red-50 border-red-200 text-red-800"
+              }`}
+            >
+              <div className="flex items-center gap-2">
+                <svg className="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <p className="text-xs sm:text-sm font-medium">{errorBanner}</p>
+              </div>
+              <button
+                onClick={() => setErrorBanner("")}
+                className={`p-2 rounded-lg transition-all duration-200 hover:scale-110 active:scale-95 ${
+                  isDark
+                    ? "hover:bg-red-900/40 text-red-100"
+                    : "hover:bg-red-100 text-red-900"
+                }`}
+                aria-label={strings.modals.close}
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+          )}
+
+          {/* CSV Result Banner - shows both success and error info */}
+          {csvResultBanner && (
+            <div
+              className={`rounded-2xl px-3 sm:px-4 py-3 sm:py-4 border text-sm animate-slideUp shadow-lg ${
+                isDark
+                  ? "bg-amber-900/20 border-amber-700"
+                  : "bg-amber-50 border-amber-200"
+              }`}
+            >
+              <div className="flex items-start justify-between gap-2 sm:gap-4">
+                <div className="flex-1 space-y-2">
+                  {csvResultBanner.created > 0 && (
+                    <div className={`flex items-center gap-2 ${isDark ? "text-emerald-300" : "text-emerald-700"}`}>
+                      <svg className="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                      <p className="text-xs sm:text-sm font-medium">
+                        {strings.csv?.partialSuccess?.replace('{count}', csvResultBanner.created) || `Successfully added ${csvResultBanner.created} student(s).`}
+                      </p>
+                    </div>
+                  )}
+                  {csvResultBanner.errors && csvResultBanner.errors.length > 0 && (
+                    <div className={`${isDark ? "text-red-300" : "text-red-700"}`}>
+                      <div className="flex items-center gap-2 mb-1">
+                        <svg className="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        <p className="text-xs sm:text-sm font-medium">
+                          {strings.csv?.errorsFound?.replace('{count}', csvResultBanner.errors.length) || `${csvResultBanner.errors.length} error(s) found:`}
+                        </p>
+                      </div>
+                      <ul className="ml-7 text-xs space-y-1 max-h-32 overflow-y-auto">
+                        {csvResultBanner.errors.slice(0, 5).map((err, idx) => (
+                          <li key={idx} className="list-disc">
+                            {typeof err === 'string' ? err : err.message || JSON.stringify(err)}
+                          </li>
+                        ))}
+                        {csvResultBanner.errors.length > 5 && (
+                          <li className="list-disc opacity-70">
+                            {strings.csv?.andMore?.replace('{count}', csvResultBanner.errors.length - 5) || `...and ${csvResultBanner.errors.length - 5} more`}
+                          </li>
+                        )}
+                      </ul>
+                    </div>
+                  )}
+                </div>
+                <button
+                  onClick={() => setCsvResultBanner(null)}
+                  className={`p-2 rounded-lg transition-all duration-200 hover:scale-110 active:scale-95 ${
+                    isDark
+                      ? "hover:bg-amber-900/40 text-amber-100"
+                      : "hover:bg-amber-100 text-amber-900"
+                  }`}
+                  aria-label={strings.modals.close}
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
             </div>
           )}
 
