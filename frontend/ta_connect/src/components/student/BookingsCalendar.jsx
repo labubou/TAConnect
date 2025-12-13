@@ -88,7 +88,7 @@ export default function BookingsCalendar() {
   const formatTime = (time) => {
     if (!time) return '';
     try {
-      // Handle ISO datetime string (e.g., "2024-11-27T14:30:00Z")
+      // Handle ISO datetime string (e.g., "2025-11-27T14:30:00Z")
       if (typeof time === 'string' && time.includes('T')) {
         // Extract just the time portion to avoid timezone conversion
         const timePart = time.split('T')[1].split('.')[0].split('Z')[0];

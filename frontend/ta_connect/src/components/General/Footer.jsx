@@ -122,7 +122,7 @@ function Footer() {
           </p>
           <div className="flex gap-4 mt-4 sm:mt-0">
             <a 
-              href="https://github.com/Kbassem10/TAConnect" 
+              href="https://github.com/labubou/TAConnect" 
               target="_blank" 
               rel="noopener noreferrer"
               className={`transition-colors hover:text-blue-600 ${isDark ? 'text-gray-400 hover:text-blue-400' : 'text-gray-600'}`}
@@ -131,7 +131,7 @@ function Footer() {
               <Github size={20} />
             </a>
             <a 
-              href="mailto:contact@taconnect.com" 
+              href="mailto:taconnect.team@gmail.com" 
               className={`transition-colors hover:text-blue-600 ${isDark ? 'text-gray-400 hover:text-blue-400' : 'text-gray-600'}`}
               title="Send us an email"
             >

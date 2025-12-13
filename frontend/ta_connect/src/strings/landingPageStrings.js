@@ -27,7 +27,7 @@ const landingPageStrings = {
       },
     ],
     footer: {
-      copyright: "TAConnect © 2024. All rights reserved.",
+      copyright: "TAConnect © 2025. All rights reserved.",
       github: "GitHub Repository",
       about: "About",
       contact: "Contact",
@@ -63,7 +63,7 @@ const landingPageStrings = {
       },
     ],
     footer: {
-      copyright: "TAConnect © 2024. جميع الحقوق محفوظة.",
+      copyright: "TAConnect © 2025. جميع الحقوق محفوظة.",
       github: "مستودع GitHub",
       about: "عن البرنامج",
       contact: "تواصل معنا",

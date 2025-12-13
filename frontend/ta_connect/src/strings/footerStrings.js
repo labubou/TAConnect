@@ -1,7 +1,7 @@
 // src/strings/footerStrings.js
 const footerStrings = {
   en: {
-    copyright: "TAConnect © 2024. All rights reserved.",
+    copyright: "All rights reserved.",
     quickLinks: "Quick Links",
     aboutUs: "About Us",
     contactUs: "Contact Us",
@@ -14,7 +14,7 @@ const footerStrings = {
     email: "Contact us",
   },
   ar: {
-    copyright: "TAConnect © 2024. جميع الحقوق محفوظة.",
+    copyright: "جميع الحقوق محفوظة.",
     quickLinks: "روابط سريعة",
     aboutUs: "عن البرنامج",
     contactUs: "تواصل معنا",
