@@ -194,6 +194,118 @@ class BookingCreateViewTestCase(BaseTestCase):
         response = self.client.get(self.get_bookings_url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertGreaterEqual(len(response.data['bookings']), 2)
+    
+    def test_create_booking_validation_student_limit_exceeded(self):
+        """Test booking creation when student has reached max bookings limit (400 Bad Request)."""
+        student, token = self.create_and_authenticate_student()
+        slot, policy = self.create_office_hour_slot()
+        
+        # Set student limit to 2
+        policy.set_student_limit = 2
+        policy.save()
+        
+        # Create 2 existing bookings for this student on this slot
+        # Use different times to avoid overlap
+        booking_date = datetime.date.today() + datetime.timedelta(days=1)
+        
+        # First booking at slot start time
+        self.create_booking(
+            student=student, 
+            office_hour_slot=slot, 
+            date=booking_date,
+            start_time=slot.start_time
+        )
+        
+        # Second booking at a later time (start_time + duration)
+        second_booking_time = datetime.datetime.combine(
+            booking_date,
+            slot.start_time
+        ) + datetime.timedelta(minutes=slot.duration_minutes)
+        self.create_booking(
+            student=student, 
+            office_hour_slot=slot, 
+            date=booking_date,
+            start_time=second_booking_time.time()
+        )
+        
+        # Try to create a third booking (should fail due to limit)
+        third_booking_time = second_booking_time + datetime.timedelta(minutes=slot.duration_minutes)
+        data = {
+            'slot_id': slot.id,
+            'date': booking_date.isoformat(),
+            'start_time': third_booking_time.time().strftime('%H:%M:%S')
+        }
+        
+        response = self.client.post(self.create_booking_url, data, format='json')
+        
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertIn('You have reached the maximum number of bookings', str(response.data))
+    
+    def test_create_booking_success_under_student_limit(self):
+        """Test booking creation succeeds when student is under the limit (201 Created)."""
+        student, token = self.create_and_authenticate_student()
+        slot, policy = self.create_office_hour_slot()
+        
+        # Set student limit to 3
+        policy.set_student_limit = 3
+        policy.save()
+        
+        # Create 1 existing booking for this student on this slot
+        booking_date = datetime.date.today() + datetime.timedelta(days=1)
+        self.create_booking(
+            student=student, 
+            office_hour_slot=slot, 
+            date=booking_date,
+            start_time=slot.start_time
+        )
+        
+        # Try to create a second booking (should succeed, under limit of 3)
+        second_booking_time = datetime.datetime.combine(
+            booking_date,
+            slot.start_time
+        ) + datetime.timedelta(minutes=slot.duration_minutes)
+        
+        data = {
+            'slot_id': slot.id,
+            'date': booking_date.isoformat(),
+            'start_time': second_booking_time.time().strftime('%H:%M:%S')
+        }
+        
+        response = self.client.post(self.create_booking_url, data, format='json')
+        
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertIn('booking_id', response.data)
+    
+    def test_create_booking_no_student_limit_set(self):
+        """Test booking creation succeeds when no student limit is set (201 Created)."""
+        student, token = self.create_and_authenticate_student()
+        slot, policy = self.create_office_hour_slot()
+        
+        # Set student limit to None (no limit)
+        policy.set_student_limit = None
+        policy.save()
+        
+        booking_date = datetime.date.today() + datetime.timedelta(days=1)
+        
+        # Create multiple bookings without limit
+        for i in range(3):
+            booking_time = datetime.datetime.combine(
+                booking_date,
+                slot.start_time
+            ) + datetime.timedelta(minutes=slot.duration_minutes * i)
+            
+            data = {
+                'slot_id': slot.id,
+                'date': booking_date.isoformat(),
+                'start_time': booking_time.time().strftime('%H:%M:%S')
+            }
+            
+            response = self.client.post(self.create_booking_url, data, format='json')
+            self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        
+        # Verify all 3 bookings were created
+        bookings_count = Booking.objects.filter(student=student, office_hour=slot).count()
+        self.assertEqual(bookings_count, 3)
 
 
 class BookingDetailViewTestCase(BaseTestCase):
