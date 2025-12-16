@@ -60,6 +60,14 @@ class OfficeHourSlot(models.Model):
         
         return True
 
+    class Meta:
+        indexes = [
+            models.Index(fields=['instructor', 'status'], name='idx_slot_instructor_status'),
+            models.Index(fields=['instructor', 'start_date', 'end_date'], name='idx_slot_instructor_dates'),
+            models.Index(fields=['day_of_week', 'status'], name='idx_slot_day_status'),
+            models.Index(fields=['created_at'], name='idx_slot_created_at'),
+        ]
+
     def __str__(self):
         return f"{self.course_name} - {self.section} {self.day_of_week} {self.start_time}-{self.end_time}"
 
@@ -89,6 +97,10 @@ class AllowedStudents(models.Model):
     class Meta:
         verbose_name_plural = "Allowed Students"
         unique_together = ['booking_policy', 'email']  # Prevent duplicate emails per policy
+        indexes = [
+            models.Index(fields=['booking_policy', 'email'], name='idx_allowed_policy_email'),
+            models.Index(fields=['email'], name='idx_allowed_email'),
+        ]
 
     def __str__(self):
         return f"{self.email} - {self.booking_policy}"

@@ -109,6 +109,15 @@ class Booking(models.Model):
         
         return False, "Booking status invalid."
 
+    class Meta:
+        indexes = [
+            models.Index(fields=['office_hour', 'date', 'is_cancelled'], name='idx_booking_slot_date_cancel'),
+            models.Index(fields=['student', 'status'], name='idx_booking_student_status'),
+            models.Index(fields=['office_hour', 'status'], name='idx_booking_slot_status'),
+            models.Index(fields=['date', 'status'], name='idx_booking_date_status'),
+            models.Index(fields=['created_at'], name='idx_booking_created_at'),
+        ]
+
     def __str__(self):
         # office_hour.course_name exists on OfficeHourSlot; section may be optional
         section = getattr(self.office_hour, "section", "") or ""
