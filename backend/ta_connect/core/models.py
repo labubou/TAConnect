@@ -31,24 +31,6 @@ class TimeStampedModel(models.Model):
         self.updated_at = timezone.now()
         super().save(*args, **kwargs)
 
-class UUIDModel(models.Model):
-    """
-    Abstract base model that uses UUID as the primary key.
-    
-    Usage:
-        class MyModel(UUIDModel, TimeStampedModel):
-            name = models.CharField(max_length=100)
-    """
-    id = models.UUIDField(
-        primary_key=True,
-        default=uuid.uuid4,
-        editable=False,
-        help_text="Unique identifier"
-    )
-
-    class Meta:
-        abstract = True
-
 class BaseModel(TimeStampedModel):
     """
     The standard base model for TAConnect.
