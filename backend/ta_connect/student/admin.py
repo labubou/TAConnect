@@ -12,7 +12,7 @@ class BookingAdmin(admin.ModelAdmin):
     list_filter = ("is_cancelled", "is_completed","status", "date", "created_at")
     search_fields = ("student__username", "student__email", "office_hour__course_name", "book_description")
     date_hierarchy = "date"
-    readonly_fields = ("created_at", "end_time")
+    readonly_fields = ("created_at", "end_time", "updated_at")
 
 def _table_exists(table_name: str) -> bool:
     try:

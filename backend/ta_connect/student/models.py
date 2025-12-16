@@ -3,9 +3,10 @@ from django.conf import settings
 import datetime
 from django.utils import timezone
 from utils.convert_datetime import get_cairo_time
+from core.models import BaseModel
 # Create your models here.
 
-class Booking(models.Model):
+class Booking(BaseModel):
     
     STATUS_CHOICES = [
         ("pending", "Pending"),
@@ -22,7 +23,6 @@ class Booking(models.Model):
     start_time = models.DateTimeField()
     end_time = models.DateTimeField(blank=True, null=True)
     date = models.DateField(default=datetime.date.today)
-    created_at = models.DateTimeField(auto_now_add=True)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default="pending")
     book_description = models.TextField(blank=True, null=True, default="")
     

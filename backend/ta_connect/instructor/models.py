@@ -3,9 +3,9 @@ from django.db import models
 from django.utils import timezone
 import datetime
 from encrypted_model_fields.fields import EncryptedCharField
-
+from core.models import BaseModel
 # Create your models here.
-class OfficeHourSlot(models.Model):
+class OfficeHourSlot(BaseModel):
     # use AUTH_USER_MODEL to avoid direct import and migration pitfalls
     instructor = models.ForeignKey(
         settings.AUTH_USER_MODEL,
@@ -28,8 +28,6 @@ class OfficeHourSlot(models.Model):
     end_date = models.DateField()
     room = models.TextField(default="TBA")
     status = models.BooleanField(default=True)  # Active or Inactive
-    updated_at = models.DateTimeField(auto_now=True)
-    created_at = models.DateTimeField(default=timezone.now)
 
     def is_time_available(self, check_date, check_start_time, exclude_booking_id=None):
         """
@@ -71,7 +69,7 @@ class OfficeHourSlot(models.Model):
     def __str__(self):
         return f"{self.course_name} - {self.section} {self.day_of_week} {self.start_time}-{self.end_time}"
 
-class BookingPolicy(models.Model):
+class BookingPolicy(BaseModel):
     office_hour_slot = models.OneToOneField(
         OfficeHourSlot, 
         on_delete=models.CASCADE,
@@ -83,7 +81,7 @@ class BookingPolicy(models.Model):
     def __str__(self):
         return f"Policy for {self.office_hour_slot}"
 
-class AllowedStudents(models.Model):
+class AllowedStudents(BaseModel):
     booking_policy = models.ForeignKey(
         BookingPolicy,
         on_delete=models.CASCADE,  # Deleting BookingPolicy deletes AllowedStudents
