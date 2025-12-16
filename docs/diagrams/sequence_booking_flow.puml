@@ -1,0 +1,146 @@
+@startuml TAConnect - Booking Sequence Diagram
+
+title TAConnect - Complete Booking Flow
+
+skinparam sequenceArrowThickness 2
+skinparam roundcorner 10
+skinparam maxmessagesize 200
+skinparam sequence {
+    ParticipantBackgroundColor #E3F2FD
+    ParticipantBorderColor #1976D2
+    LifeLineBackgroundColor #BBDEFB
+}
+
+actor "Student" as Student #LightGreen
+participant "Frontend\n(React)" as FE #E8F5E9
+participant "Django REST API" as API #E3F2FD
+participant "BookingCreateView" as BookingView #E3F2FD
+participant "OfficeHourSlot" as Slot #FFF3E0
+participant "Booking Model" as BookingModel #FFF3E0
+database "PostgreSQL/SQLite" as DB #FFEBEE
+participant "Email Service" as Email #F3E5F5
+participant "Push Notification\nService" as Push #FCE4EC
+actor "Instructor (TA)" as Instructor #LightCoral
+
+== 1. Student Authentication ==
+Student -> FE: Enter credentials
+FE -> API: POST /api/auth/login/
+API -> DB: Validate user credentials
+DB --> API: User object + tokens
+API --> FE: { access_token, refresh_token, user }
+FE --> Student: Redirect to Dashboard
+
+== 2. Search for Instructor ==
+Student -> FE: Search instructor by name
+FE -> API: GET /api/instructor/search/?search=<name>
+API -> DB: Query Users WHERE user_type='instructor'\nAND name LIKE '%<name>%'
+DB --> API: List of matching instructors
+API --> FE: { instructors: [...] }
+FE --> Student: Display instructor list
+
+== 3. View Instructor's Available Slots ==
+Student -> FE: Select instructor
+FE -> API: GET /api/instructor/<instructor_id>/
+API -> DB: Get instructor + active office hour slots
+DB --> API: Instructor data + OfficeHourSlots
+API --> FE: { instructor, slots: [...] }
+FE --> Student: Display available office hour slots
+
+== 4. Get Available Time Slots for a Date ==
+Student -> FE: Select slot and date
+FE -> API: GET /api/student/available-times/\n?slot_id=<id>&date=<YYYY-MM-DD>
+API -> Slot: get_available_times(slot, date)
+Slot -> DB: Query existing bookings for slot+date
+DB --> Slot: List of booked times
+Slot --> API: Calculate available time windows
+API --> FE: { available_times: ["09:00", "09:10", ...] }
+FE --> Student: Display available time slots
+
+== 5. Create Booking ==
+Student -> FE: Select time & add description
+FE -> API: POST /api/student/book/
+note right of FE
+  {
+    "slot_id": 123,
+    "date": "2024-12-20",
+    "start_time": "09:00",
+    "book_description": "Help with assignment"
+  }
+end note
+
+API -> BookingView: BookingCreateView.post()
+BookingView -> Slot: Validate slot exists & is active
+Slot -> DB: SELECT * FROM OfficeHourSlot
+DB --> Slot: Slot data
+
+BookingView -> Slot: Check booking policy
+Slot -> DB: SELECT * FROM BookingPolicy
+DB --> Slot: Policy (student limit, require_email)
+
+alt Require Specific Email Policy
+    BookingView -> DB: Check if student in AllowedStudents
+    DB --> BookingView: Student allowed / not allowed
+    alt Student Not Allowed
+        BookingView --> API: 403 Forbidden
+        API --> FE: { error: "Not authorized to book" }
+        FE --> Student: Show error message
+    end
+end
+
+BookingView -> Slot: is_time_available(date, start_time)
+Slot -> DB: Check for conflicting bookings
+DB --> Slot: No conflicts
+
+BookingView -> BookingModel: Create new booking
+BookingModel -> DB: INSERT INTO Booking\n(student, slot, date, time, status='pending')
+DB --> BookingModel: Booking created (id=456)
+BookingModel --> BookingView: Booking object
+
+== 6. Send Notifications ==
+par Parallel Notification Dispatch
+    BookingView -> Email: send_booking_pending_email()
+    Email -> Email: Render pending email template
+    Email --> Student: Email: "Booking Pending Confirmation"
+    Email --> Instructor: Email: "New Booking Request"
+    
+    BookingView -> Push: send_booking_pending_push()
+    Push --> Student: Push: "Booking submitted"
+    Push --> Instructor: Push: "New booking request"
+end
+
+BookingView --> API: Booking success response
+API --> FE: { booking_id: 456, message: "Booking created" }
+FE --> Student: Show success message
+
+== 7. Instructor Confirms Booking ==
+Instructor -> FE: View pending bookings
+FE -> API: GET /api/instructor/bookings/?status=pending
+API -> DB: SELECT * FROM Booking\nWHERE instructor=<id> AND status='pending'
+DB --> API: List of pending bookings
+API --> FE: { bookings: [...] }
+FE --> Instructor: Display pending bookings
+
+Instructor -> FE: Confirm booking
+FE -> API: POST /api/instructor/bookings/<booking_id>/confirm/
+API -> BookingModel: booking.confirm()
+BookingModel -> DB: UPDATE Booking SET status='confirmed'
+DB --> BookingModel: Updated
+
+API -> Email: send_booking_confirmation_email()
+Email --> Student: Email: "Booking Confirmed!"
+Email --> Instructor: Email: "Booking Confirmed"
+
+API -> Push: send_booking_confirmed_push()
+Push --> Student: Push: "Your booking is confirmed"
+
+API --> FE: { success: true, message: "Booking confirmed" }
+FE --> Instructor: Show confirmation
+
+== 8. Booking Completion (Automatic) ==
+note over API, DB
+  When booking end_time passes:
+  - If status='confirmed' → Mark as 'completed'
+  - If status='pending' → Mark as 'cancelled'
+end note
+
+@enduml

@@ -1,0 +1,141 @@
+@startuml TAConnect - Authentication Sequence Diagram
+
+title TAConnect - User Authentication Flows
+
+skinparam sequenceArrowThickness 2
+skinparam roundcorner 10
+skinparam sequence {
+    ParticipantBackgroundColor #E3F2FD
+    ParticipantBorderColor #1976D2
+}
+
+actor "User" as User #LightBlue
+participant "Frontend\n(React)" as FE #E8F5E9
+participant "Django REST API" as API #E3F2FD
+participant "RegisterView" as RegisterView #E3F2FD
+participant "LoginView" as LoginView #E3F2FD
+participant "User Model" as UserModel #FFF3E0
+database "Database" as DB #FFEBEE
+participant "Email Service" as Email #F3E5F5
+
+== Registration Flow ==
+User -> FE: Fill registration form
+note right of User
+  {
+    "username": "john_doe",
+    "email": "john@university.edu",
+    "password": "SecurePass123!",
+    "user_type": "student"
+  }
+end note
+
+FE -> API: POST /api/auth/register/
+API -> RegisterView: RegisterView.post()
+RegisterView -> RegisterView: Validate input data
+
+alt Validation Failed
+    RegisterView --> API: 400 Bad Request
+    API --> FE: { errors: [...] }
+    FE --> User: Show validation errors
+else Validation Passed
+    RegisterView -> UserModel: Create user (email_verify=False)
+    UserModel -> DB: INSERT INTO User
+    DB --> UserModel: User created
+    
+    RegisterView -> Email: send_verification_email()
+    Email -> Email: Generate verification token
+    Email -> Email: Create verification URL
+    Email --> User: Email with verification link
+    
+    RegisterView --> API: 201 Created
+    API --> FE: { message: "Check email to verify" }
+    FE --> User: Show success + check email
+end
+
+== Email Verification Flow ==
+User -> Email: Click verification link
+Email -> FE: Redirect to /verify-email?uid=<>&token=<>
+FE -> API: POST /api/auth/verify-email/
+note right of FE
+  { "uid": "base64_uid", "token": "verification_token" }
+end note
+
+API -> API: Decode UID, validate token
+alt Token Valid
+    API -> DB: UPDATE User SET email_verify=True
+    DB --> API: Updated
+    API -> Email: send_welcome_email()
+    Email --> User: Welcome email
+    API --> FE: { message: "Email verified" }
+    FE --> User: Redirect to login
+else Token Invalid/Expired
+    API --> FE: { error: "Invalid or expired link" }
+    FE --> User: Show error
+end
+
+== Login Flow ==
+User -> FE: Enter credentials
+FE -> API: POST /api/auth/login/
+API -> LoginView: LoginView.post()
+LoginView -> DB: Query user by username/email
+DB --> LoginView: User object
+
+alt User Not Found
+    LoginView --> API: 401 Unauthorized
+    API --> FE: { error: "Invalid credentials" }
+    FE --> User: Show error
+else Email Not Verified
+    LoginView --> API: 403 Forbidden
+    API --> FE: { error: "Please verify email first" }
+    FE --> User: Show verification required
+else Valid Credentials
+    LoginView -> LoginView: Verify password hash
+    LoginView -> LoginView: Generate JWT tokens
+    LoginView --> API: 200 OK
+    API --> FE: { access_token, refresh_token, user }
+    FE -> FE: Store tokens in localStorage
+    FE --> User: Redirect to dashboard
+end
+
+== Google OAuth Flow ==
+User -> FE: Click "Login with Google"
+FE -> FE: Redirect to Google OAuth
+User -> User: Authorize with Google
+FE -> API: POST /api/auth/google/
+note right of FE
+  { "credential": "google_id_token" }
+end note
+
+API -> API: Verify Google token
+API -> DB: Find or create user
+DB --> API: User object
+API -> API: Generate JWT tokens
+API --> FE: { access_token, refresh_token, user }
+FE --> User: Redirect to dashboard
+
+== Password Reset Flow ==
+User -> FE: Click "Forgot Password"
+FE -> API: POST /api/auth/forgot-password/
+note right of FE
+  { "email": "john@university.edu" }
+end note
+
+API -> DB: Find user by email
+alt User Found
+    API -> Email: send_password_reset_email()
+    Email --> User: Reset link email
+end
+API --> FE: { message: "If email exists, reset link sent" }
+FE --> User: Show confirmation
+
+User -> Email: Click reset link
+Email -> FE: Redirect to /reset-password?uid=<>&token=<>
+User -> FE: Enter new password
+FE -> API: POST /api/auth/reset-password/
+API -> API: Validate token
+API -> DB: UPDATE User password
+DB --> API: Updated
+API --> FE: { message: "Password reset successful" }
+FE --> User: Redirect to login
+
+@enduml

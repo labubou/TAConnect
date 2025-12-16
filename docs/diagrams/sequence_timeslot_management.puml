@@ -1,0 +1,189 @@
+@startuml TAConnect - Time Slot Management Sequence Diagram
+
+title TAConnect - Instructor Time Slot Management
+
+skinparam sequenceArrowThickness 2
+skinparam roundcorner 10
+skinparam sequence {
+    ParticipantBackgroundColor #FFEBEE
+    ParticipantBorderColor #C62828
+}
+
+actor "Instructor (TA)" as Instructor #LightCoral
+participant "Frontend\n(React)" as FE #E8F5E9
+participant "Django REST API" as API #E3F2FD
+participant "TimeSlotCreateView" as CreateView #FFEBEE
+participant "TimeSlotDetailView" as DetailView #FFEBEE
+participant "OfficeHourSlot" as Slot #FFF3E0
+participant "BookingPolicy" as Policy #FFF3E0
+participant "Booking" as Booking #FFF3E0
+database "Database" as DB #E8EAF6
+participant "Email Service" as Email #F3E5F5
+
+== Create New Time Slot ==
+Instructor -> FE: Fill time slot form
+note right of Instructor
+  {
+    "course_name": "CS101",
+    "section": "A",
+    "day_of_week": "Mon",
+    "start_time": "09:00",
+    "end_time": "11:00",
+    "duration_minutes": 15,
+    "start_date": "2024-12-01",
+    "end_date": "2024-12-31",
+    "room": "Building A, Room 101",
+    "policy": {
+      "require_specific_email": false,
+      "set_student_limit": 1
+    }
+  }
+end note
+
+FE -> API: POST /api/instructor/slots/
+API -> CreateView: TimeSlotCreateView.post()
+CreateView -> CreateView: Validate serializer
+
+alt Validation Error
+    CreateView --> API: 400 Bad Request
+    API --> FE: { errors: [...] }
+    FE --> Instructor: Show validation errors
+else Valid Data
+    CreateView -> Slot: Create OfficeHourSlot
+    Slot -> DB: INSERT INTO OfficeHourSlot
+    DB --> Slot: Slot created (id=123)
+    
+    CreateView -> Policy: Create BookingPolicy
+    Policy -> DB: INSERT INTO BookingPolicy
+    DB --> Policy: Policy created
+    
+    CreateView --> API: 201 Created
+    API --> FE: { time_slot_id: 123, message: "Created" }
+    FE --> Instructor: Show success
+end
+
+== View All My Time Slots ==
+Instructor -> FE: Navigate to "My Slots"
+FE -> API: GET /api/instructor/slots/
+API -> DB: SELECT * FROM OfficeHourSlot\nWHERE instructor=<id>
+DB --> API: List of slots with policies
+API --> FE: { slots: [...] }
+FE --> Instructor: Display slots table/grid
+
+== Update Time Slot ==
+Instructor -> FE: Edit slot details
+FE -> API: PATCH /api/instructor/slots/<slot_id>/
+note right of FE
+  {
+    "start_time": "10:00",
+    "end_time": "12:00"
+  }
+end note
+
+API -> DetailView: TimeSlotDetailView.patch()
+DetailView -> DB: Get slot by id + instructor
+DB --> DetailView: Slot object
+
+DetailView -> DetailView: Track critical field changes
+note right of DetailView
+  Critical fields:
+  - day_of_week
+  - start_time / end_time
+  - start_date / end_date
+  - duration_minutes
+end note
+
+DetailView -> Slot: Update slot fields
+Slot -> DB: UPDATE OfficeHourSlot
+DB --> Slot: Updated
+
+alt Critical Fields Changed
+    DetailView -> Booking: Find affected bookings
+    Booking -> DB: SELECT * FROM Booking\nWHERE office_hour=<id>\nAND is_cancelled=False
+    DB --> Booking: Affected bookings
+    
+    loop For each affected booking
+        DetailView -> Booking: booking.cancel()
+        Booking -> DB: UPDATE Booking SET is_cancelled=True
+        DB --> Booking: Cancelled
+        
+        DetailView -> Email: send_cancellation_email()
+        Email --> Email: Notify student of cancellation
+    end
+end
+
+DetailView --> API: 200 OK
+API --> FE: { success: true, message: "Updated" }
+FE --> Instructor: Show success + refresh
+
+== Delete Time Slot ==
+Instructor -> FE: Click delete slot
+FE -> FE: Show confirmation dialog
+Instructor -> FE: Confirm deletion
+FE -> API: DELETE /api/instructor/slots/<slot_id>/
+
+API -> DetailView: TimeSlotDetailView.delete()
+DetailView -> DB: Get slot by id + instructor
+DB --> DetailView: Slot object
+
+DetailView -> Booking: Get all active bookings
+Booking -> DB: SELECT * FROM Booking\nWHERE office_hour=<id>\nAND is_cancelled=False
+DB --> Booking: Active bookings
+
+loop For each active booking
+    DetailView -> Booking: booking.cancel()
+    Booking -> DB: UPDATE Booking SET is_cancelled=True
+    DetailView -> Email: send_bulk_cancellation_email()
+    Email --> Email: Notify students
+end
+
+DetailView -> Slot: Delete slot (cascades to policy)
+Slot -> DB: DELETE FROM OfficeHourSlot
+DB --> Slot: Deleted
+
+DetailView --> API: 200 OK
+API --> FE: { success: true, message: "Deleted" }
+FE --> Instructor: Refresh slot list
+
+== Upload Allowed Students (CSV) ==
+Instructor -> FE: Upload CSV file
+FE -> API: POST /api/instructor/slots/<id>/allowed-students/upload/
+note right of FE
+  CSV Content:
+  first_name,last_name,id_number,email
+  John,Doe,12345,john@univ.edu
+  Jane,Smith,67890,jane@univ.edu
+end note
+
+API -> API: Parse CSV file
+API -> DB: Get BookingPolicy for slot
+DB --> API: Policy object
+
+loop For each row in CSV
+    API -> DB: INSERT INTO AllowedStudents\n(policy, first_name, last_name, id_number, email)
+    DB --> API: Created
+end
+
+API --> FE: { success: true, count: 2 }
+FE --> Instructor: Show upload success
+
+== Toggle Slot Status (Activate/Deactivate) ==
+Instructor -> FE: Toggle slot status
+FE -> API: PATCH /api/instructor/slots/<id>/status/
+note right of FE
+  { "status": false }
+end note
+
+API -> DB: UPDATE OfficeHourSlot SET status=False
+DB --> API: Updated
+
+alt Slot Deactivated
+    API -> Booking: Cancel pending bookings
+    Booking -> DB: UPDATE Booking SET is_cancelled=True\nWHERE status='pending'
+    API -> Email: Notify affected students
+end
+
+API --> FE: { success: true }
+FE --> Instructor: Update UI toggle
+
+@enduml

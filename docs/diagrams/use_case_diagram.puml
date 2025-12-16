@@ -1,0 +1,137 @@
+@startuml TAConnect Use Case Diagram
+
+skinparam actorStyle awesome
+skinparam packageStyle rectangle
+skinparam usecase {
+    BackgroundColor LightBlue
+    BorderColor DarkBlue
+}
+
+title TAConnect - Use Case Diagram
+
+left to right direction
+
+actor "Student" as student #LightGreen
+actor "Instructor (TA)" as instructor #LightCoral
+actor "Email System" as email #LightGray
+
+rectangle "TAConnect System" {
+    
+    ' ==================== Authentication ====================
+    package "Authentication" #EEEEEE {
+        usecase "Register Account" as UC_Register
+        usecase "Login" as UC_Login
+        usecase "Verify Email" as UC_VerifyEmail
+        usecase "Reset Password" as UC_ResetPassword
+        usecase "Login with Google" as UC_GoogleAuth
+        usecase "Logout" as UC_Logout
+        usecase "Update Profile" as UC_UpdateProfile
+        usecase "Change Email" as UC_ChangeEmail
+        usecase "Delete Account" as UC_DeleteAccount
+    }
+    
+    ' ==================== Student Functions ====================
+    package "Student Functions" #E8F5E9 {
+        usecase "Search Instructors" as UC_SearchInstructors
+        usecase "View Instructor Slots" as UC_ViewSlots
+        usecase "View Available Times" as UC_AvailableTimes
+        usecase "Book Office Hour" as UC_Book
+        usecase "View My Bookings" as UC_ViewBookings
+        usecase "Update Booking" as UC_UpdateBooking
+        usecase "Cancel Booking" as UC_CancelBooking
+        usecase "Manage Email Preferences" as UC_StudentNotifs
+    }
+    
+    ' ==================== Instructor Functions ====================
+    package "Instructor Functions" #FFEBEE {
+        usecase "Create Time Slot" as UC_CreateSlot
+        usecase "Update Time Slot" as UC_UpdateSlot
+        usecase "Delete Time Slot" as UC_DeleteSlot
+        usecase "Activate/Deactivate Slot" as UC_ToggleSlot
+        usecase "View My Slots" as UC_ViewMySlots
+        usecase "View Slot Bookings" as UC_ViewSlotBookings
+        usecase "Confirm Booking" as UC_ConfirmBooking
+        usecase "Cancel Student Booking" as UC_CancelStudentBooking
+        usecase "Set Booking Policy" as UC_SetPolicy
+        usecase "Upload Allowed Students (CSV)" as UC_UploadStudents
+        usecase "Export Bookings (CSV)" as UC_ExportBookings
+        usecase "Export Time Slots (CSV)" as UC_ExportSlots
+        usecase "View Analytics Dashboard" as UC_Analytics
+        usecase "Manage Email Preferences" as UC_InstructorNotifs
+    }
+    
+    ' ==================== Notification System ====================
+    package "Notifications" #FFF3E0 {
+        usecase "Send Booking Pending Email" as UC_SendPending
+        usecase "Send Booking Confirmation Email" as UC_SendConfirmation
+        usecase "Send Cancellation Email" as UC_SendCancellation
+        usecase "Send Booking Update Email" as UC_SendUpdate
+        usecase "Send Push Notification" as UC_PushNotification
+    }
+}
+
+' ==================== Student Relationships ====================
+student --> UC_Register
+student --> UC_Login
+student --> UC_GoogleAuth
+student --> UC_Logout
+student --> UC_UpdateProfile
+student --> UC_ChangeEmail
+student --> UC_DeleteAccount
+student --> UC_ResetPassword
+
+student --> UC_SearchInstructors
+student --> UC_ViewSlots
+student --> UC_AvailableTimes
+student --> UC_Book
+student --> UC_ViewBookings
+student --> UC_UpdateBooking
+student --> UC_CancelBooking
+student --> UC_StudentNotifs
+
+' ==================== Instructor Relationships ====================
+instructor --> UC_Register
+instructor --> UC_Login
+instructor --> UC_GoogleAuth
+instructor --> UC_Logout
+instructor --> UC_UpdateProfile
+instructor --> UC_ChangeEmail
+instructor --> UC_DeleteAccount
+instructor --> UC_ResetPassword
+
+instructor --> UC_CreateSlot
+instructor --> UC_UpdateSlot
+instructor --> UC_DeleteSlot
+instructor --> UC_ToggleSlot
+instructor --> UC_ViewMySlots
+instructor --> UC_ViewSlotBookings
+instructor --> UC_ConfirmBooking
+instructor --> UC_CancelStudentBooking
+instructor --> UC_SetPolicy
+instructor --> UC_UploadStudents
+instructor --> UC_ExportBookings
+instructor --> UC_ExportSlots
+instructor --> UC_Analytics
+instructor --> UC_InstructorNotifs
+
+' ==================== Email System Relationships ====================
+email --> UC_VerifyEmail
+email --> UC_SendPending
+email --> UC_SendConfirmation
+email --> UC_SendCancellation
+email --> UC_SendUpdate
+
+' ==================== Include/Extend Relationships ====================
+UC_Register ..> UC_VerifyEmail : <<include>>
+UC_Book ..> UC_SendPending : <<include>>
+UC_Book ..> UC_PushNotification : <<include>>
+UC_ConfirmBooking ..> UC_SendConfirmation : <<include>>
+UC_CancelBooking ..> UC_SendCancellation : <<include>>
+UC_CancelStudentBooking ..> UC_SendCancellation : <<include>>
+UC_UpdateBooking ..> UC_SendUpdate : <<include>>
+UC_ChangeEmail ..> UC_VerifyEmail : <<include>>
+
+UC_ViewSlots <.. UC_AvailableTimes : <<extend>>
+UC_SetPolicy <.. UC_UploadStudents : <<extend>>
+
+@enduml
