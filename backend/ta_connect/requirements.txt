@@ -14,3 +14,7 @@ python-dateutil
 django-encrypted-model-fields
 pytz
 django-webpush
+pylint
+django-extensions
+pydotplus
+graphviz
