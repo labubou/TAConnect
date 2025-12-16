@@ -44,6 +44,11 @@ class User(AbstractUser):
     class Meta:
         verbose_name = "User"
         verbose_name_plural = "Users"
+        indexes = [
+            models.Index(fields=['email'], name='idx_user_email'),
+            models.Index(fields=['user_type'], name='idx_user_type'),
+            models.Index(fields=['email_verify'], name='idx_user_email_verify'),
+        ]
 
 class InstructorProfile(models.Model):
     """
