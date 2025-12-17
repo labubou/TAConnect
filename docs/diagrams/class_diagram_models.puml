@@ -1,0 +1,190 @@
+@startuml TAConnect - Class Diagram (Models Only)
+
+skinparam classAttributeIconSize 0
+skinparam roundcorner 10
+skinparam class {
+    BackgroundColor #FEFEFE
+    BorderColor #333333
+    ArrowColor #333333
+}
+skinparam stereotypeCBackgroundColor #E3F2FD
+
+title TAConnect - Database Models Class Diagram
+
+' ==================== Core Module ====================
+package "core" #F5F5F5 {
+    abstract class TimeStampedModel <<abstract>> {
+        +created_at: DateTimeField
+        +updated_at: DateTimeField
+        --
+        +save()
+    }
+    
+    abstract class BaseModel <<abstract>> {
+    }
+    
+    TimeStampedModel <|-- BaseModel
+}
+
+' ==================== Accounts Module ====================
+package "accounts" #E3F2FD {
+    class User {
+        +id: Integer <<PK>>
+        +username: CharField
+        +email: EmailField
+        +password: CharField
+        +first_name: CharField
+        +last_name: CharField
+        +email_verify: BooleanField
+        +user_type: CharField {instructor, student}
+        --
+        +is_instructor(): Boolean
+        +is_student(): Boolean
+        +full_name: String <<property>>
+        +username_exists(username): Boolean
+        +email_exists(email): Boolean
+    }
+    
+    class InstructorProfile {
+        +id: Integer <<PK>>
+        +user: OneToOneField <<FK>>
+        +email_notifications_on_booking: BooleanField
+        +email_notifications_on_cancellation: BooleanField
+        +email_notifications_on_update: BooleanField
+    }
+    
+    class StudentProfile {
+        +id: Integer <<PK>>
+        +user: OneToOneField <<FK>>
+        +email_notifications_on_booking: BooleanField
+        +email_notifications_on_cancellation: BooleanField
+        +email_notifications_on_update: BooleanField
+    }
+    
+    class PendingEmailChange {
+        +id: Integer <<PK>>
+        +user: ForeignKey <<FK>>
+        +new_email: EmailField
+        +token: CharField
+        +created_at: DateTimeField
+        +used: BooleanField
+        --
+        +is_expired(): Boolean
+        +is_valid(): Boolean
+    }
+}
+
+' ==================== Instructor Module ====================
+package "instructor" #FFEBEE {
+    class OfficeHourSlot {
+        +id: Integer <<PK>>
+        +instructor: ForeignKey <<FK>>
+        +course_name: TextField
+        +section: CharField
+        +day_of_week: CharField {Mon-Sun}
+        +start_time: TimeField
+        +end_time: TimeField
+        +duration_minutes: PositiveIntegerField
+        +start_date: DateField
+        +end_date: DateField
+        +room: TextField
+        +status: BooleanField
+        +created_at: DateTimeField
+        +updated_at: DateTimeField
+        --
+        +is_time_available(date, time): Boolean
+    }
+    
+    class BookingPolicy {
+        +id: Integer <<PK>>
+        +office_hour_slot: OneToOneField <<FK>>
+        +require_specific_email: BooleanField
+        +set_student_limit: PositiveIntegerField
+        +created_at: DateTimeField
+        +updated_at: DateTimeField
+    }
+    
+    class AllowedStudents {
+        +id: Integer <<PK>>
+        +booking_policy: ForeignKey <<FK>>
+        +first_name: CharField
+        +last_name: CharField
+        +id_number: EncryptedCharField
+        +email: EmailField
+        +created_at: DateTimeField
+        +updated_at: DateTimeField
+    }
+}
+
+' ==================== Student Module ====================
+package "student" #E8F5E9 {
+    class Booking {
+        +id: Integer <<PK>>
+        +student: ForeignKey <<FK>>
+        +office_hour: ForeignKey <<FK>>
+        +start_time: DateTimeField
+        +end_time: DateTimeField
+        +date: DateField
+        +status: CharField {pending, confirmed, cancelled, completed}
+        +book_description: TextField
+        +is_cancelled: BooleanField
+        +is_completed: BooleanField
+        +created_at: DateTimeField
+        +updated_at: DateTimeField
+        --
+        +pending()
+        +confirm()
+        +cancel()
+        +complete()
+        +is_ended: Boolean <<property>>
+        +complete_if_ended(): Tuple
+    }
+}
+
+' ==================== Inheritance Relationships ====================
+BaseModel <|-- OfficeHourSlot
+BaseModel <|-- BookingPolicy
+BaseModel <|-- AllowedStudents
+BaseModel <|-- Booking
+
+' ==================== Association Relationships ====================
+' User relationships
+User "1" -- "0..1" InstructorProfile : has >
+User "1" -- "0..1" StudentProfile : has >
+User "1" -- "0..*" PendingEmailChange : has >
+
+' Instructor creates office hours
+User "1" -- "0..*" OfficeHourSlot : creates >
+
+' Student makes bookings
+User "1" -- "0..*" Booking : makes >
+
+' Office Hour Slot relationships
+OfficeHourSlot "1" -- "1" BookingPolicy : has >
+OfficeHourSlot "1" -- "0..*" Booking : contains >
+
+' Booking Policy relationships
+BookingPolicy "1" -- "0..*" AllowedStudents : allows >
+
+' ==================== Notes ====================
+note right of User
+    <b>User Types:</b>
+    - instructor: Teaching Assistant
+    - student: Student user
+    
+    Extends Django's AbstractUser
+end note
+
+note bottom of Booking
+    <b>Status Flow:</b>
+    pending → confirmed → completed
+           ↘ cancelled
+end note
+
+note bottom of OfficeHourSlot
+    <b>Recurring Pattern:</b>
+    Office hours repeat on day_of_week
+    between start_date and end_date
+end note
+
+@enduml
