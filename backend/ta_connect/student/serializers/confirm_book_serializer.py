@@ -21,6 +21,10 @@ class ConfirmBookingSerializer(serializers.Serializer):
         if booking.status == 'confirmed':
             raise serializers.ValidationError("Booking is already confirmed")
         
+        if booking.status != 'pending':
+            raise serializers.ValidationError("Only pending bookings can be confirmed")
+        
+        
         return attrs
     
     def update(self, instance, validated_data):

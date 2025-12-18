@@ -53,7 +53,10 @@ class CreateBookingSerializer(serializers.Serializer):
         if max_bookings:
             existing_bookings_count = Booking.objects.filter(
                 office_hour=slot,
-                student=request.user
+                date=attrs['date'],
+                student=request.user,
+                is_cancelled=False,
+                status__in=['pending', 'confirmed', 'completed']
             ).count()
             if existing_bookings_count >= max_bookings:
                 raise serializers.ValidationError("You have reached the maximum number of bookings for this slot")
