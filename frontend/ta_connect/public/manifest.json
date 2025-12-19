@@ -1,0 +1,56 @@
+{
+  "name": "TA Connect",
+  "short_name": "TA Connect",
+  "description": "Connecting Teaching Assistants with Students for Better Learning",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#366c6b",
+  "orientation": "portrait-primary",
+  "scope": "/",
+  "id": "ta-connect-pwa",
+  "icons": [
+    {
+      "src": "/Logo.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/Logo.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/Logo.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "/Logo.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "TA Dashboard",
+      "short_name": "TA Dashboard",
+      "description": "View TA dashboard (If TA)",
+      "url": "/ta",
+      "icons": [{ "src": "/Logo.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Student Dashboard",
+      "short_name": "Student Dashboard",
+      "description": "View student dashboard (If student)",
+      "url": "/student",
+      "icons": [{ "src": "/Logo.png", "sizes": "192x192" }]
+    }
+  ],
+  "categories": ["education", "productivity"],
+  "prefer_related_applications": false
+}

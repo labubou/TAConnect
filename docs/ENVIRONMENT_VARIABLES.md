@@ -44,10 +44,55 @@ VAPID_PRIVATE_KEY=your-vapid-private-key
 # Vite projects use VITE_* prefix
 VITE_API_URL=http://localhost:8000
 
+# App URL (for SEO meta tags, sitemap, and social sharing)
+# Set this to your domain when self-hosting
+# Default: https://taconnect.netlify.app
+VITE_APP_URL=https://your-domain.com
+
+# Google Search Console Verification (optional)
+# Get your code from: https://search.google.com/search-console
+# Only the verification code is needed (not the full meta tag)
+VITE_GOOGLE_SITE_VERIFICATION=your-verification-code
+
 # Push Notifications
 # Must match VAPID_PUBLIC_KEY from backend
 VITE_VAPID_PUBLIC_KEY=your-vapid-public-key
 ```
+
+## 🌐 Self-Hosting SEO Configuration
+
+When self-hosting TAConnect, you can fully customize the SEO and search engine settings:
+
+### App URL (`VITE_APP_URL`)
+This URL is used for:
+- Canonical URLs for SEO
+- Open Graph meta tags (Facebook, LinkedIn sharing)
+- Twitter Card meta tags
+- Sitemap generation (`sitemap.xml`)
+- Robots.txt sitemap reference
+- JSON-LD structured data
+
+```env
+# Examples:
+VITE_APP_URL=https://ta.youruniversity.edu
+VITE_APP_URL=https://taconnect.yourdomain.com
+```
+
+### Google Search Console (`VITE_GOOGLE_SITE_VERIFICATION`)
+To verify your self-hosted instance with Google:
+
+1. Go to [Google Search Console](https://search.google.com/search-console)
+2. Add your domain as a property
+3. Choose "HTML tag" verification method
+4. Copy just the `content` value from the meta tag
+5. Add it to your `.env` file
+
+```env
+# If Google gives you: <meta name="google-site-verification" content="ABC123XYZ" />
+VITE_GOOGLE_SITE_VERIFICATION=ABC123XYZ
+```
+
+> 💡 **Note:** The `sitemap.xml` and `robots.txt` are automatically generated during build with your configured `VITE_APP_URL`.
 
 ## Generating Required Keys
 

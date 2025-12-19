@@ -14,6 +14,14 @@ self.addEventListener('activate', (event) => {
   event.waitUntil(clients.claim());
 });
 
+// Handle messages from the main thread
+self.addEventListener('message', (event) => {
+  if (event.data && event.data.type === 'SKIP_WAITING') {
+    console.log('Service Worker: Skipping waiting...');
+    self.skipWaiting();
+  }
+});
+
 // Push event - handle incoming push notifications
 self.addEventListener('push', (event) => {
   console.log('Push notification received:', event);
