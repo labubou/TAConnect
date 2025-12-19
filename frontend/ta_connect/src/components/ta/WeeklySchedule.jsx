@@ -1,75 +1,73 @@
-import { useState, useEffect } from 'react';
+import { useState, useMemo } from 'react';
 import { useInstructorBookings } from '../../hooks/useApi';
 import { useLanguage } from '../../contexts/LanguageContext';
 import allStrings from '../../strings/WeeklyScheduleStrings';
 
+// Helper function to calculate week data without side effects
+const calculateWeekData = (weekOffset) => {
+  const today = new Date();
+  // Create a new date with the offset applied
+  const targetDate = new Date(today.getTime() + (weekOffset * 7 * 24 * 60 * 60 * 1000));
+  
+  const currentDay = targetDate.getDay();
+  // Get Sunday of the current week
+  const weekStart = new Date(targetDate);
+  weekStart.setDate(targetDate.getDate() - currentDay);
+  weekStart.setHours(0, 0, 0, 0);
+  
+  const weekEnd = new Date(weekStart);
+  weekEnd.setDate(weekStart.getDate() + 6);
+
+  const startStr = weekStart.toISOString().split('T')[0];
+  const endStr = weekEnd.toISOString().split('T')[0];
+
+  // Generate all dates for the week
+  const dates = [];
+  for (let i = 0; i < 7; i++) {
+    const date = new Date(weekStart);
+    date.setDate(weekStart.getDate() + i);
+    dates.push(date.toISOString().split('T')[0]);
+  }
+
+  return { startStr, endStr, dates };
+};
+
 export default function WeeklySchedule({ isDark = false }) {
   const { language } = useLanguage();
   const strings = allStrings[language] || allStrings.en;
-  const [weekDates, setWeekDates] = useState([]);
-  const [weekStartDate, setWeekStartDate] = useState('');
-  const [weekEndDate, setWeekEndDate] = useState('');
   const [currentWeekOffset, setCurrentWeekOffset] = useState(0);
 
-  // Initialize week dates and handle navigation
-  useEffect(() => {
-    const today = new Date();
-    // Add weeks offset
-    today.setDate(today.getDate() + (currentWeekOffset * 7));
-    
-    const currentDay = today.getDay();
-    const diff = today.getDate() - currentDay; // Sunday to Saturday
-    
-    const weekStart = new Date(today.setDate(diff));
-    const weekEnd = new Date(weekStart);
-    weekEnd.setDate(weekEnd.getDate() + 6);
-
-    const startStr = weekStart.toISOString().split('T')[0];
-    const endStr = weekEnd.toISOString().split('T')[0];
-
-    setWeekStartDate(startStr);
-    setWeekEndDate(endStr);
-
-    // Generate all dates for the week
-    const dates = [];
-    for (let i = 0; i < 7; i++) {
-      const date = new Date(weekStart);
-      date.setDate(date.getDate() + i);
-      dates.push(date.toISOString().split('T')[0]);
-    }
-
-    setWeekDates(dates);
-  }, [currentWeekOffset]);
+  // Calculate week data based on offset using useMemo
+  const { startStr: weekStartDate, endStr: weekEndDate, dates: weekDates } = useMemo(
+    () => calculateWeekData(currentWeekOffset),
+    [currentWeekOffset]
+  );
 
   // Fetch bookings for the selected week with date range params
   const { data: bookings = [], isLoading, error } = useInstructorBookings(weekStartDate, weekEndDate);
-  const [weekBookings, setWeekBookings] = useState([]);
 
-  // Filter bookings for current week
-  useEffect(() => {
+  // Filter and sort bookings for current week using useMemo
+  const weekBookings = useMemo(() => {
     try {
       if (!bookings || bookings.length === 0 || !Array.isArray(bookings)) {
-        setWeekBookings([]);
-        return;
+        return [];
       }
 
-      const filtered = bookings.filter(booking => {
+      return bookings.filter(booking => {
         return booking && booking.date && weekDates.includes(booking.date);
       }).sort((a, b) => {
         try {
           const dateA = new Date(a.date + ' ' + (a.office_hour?.start_time || '00:00'));
           const dateB = new Date(b.date + ' ' + (b.office_hour?.start_time || '00:00'));
           return dateA - dateB;
-        } catch (error) {
-          console.warn('Error sorting bookings:', error);
+        } catch (sortError) {
+          console.warn('Error sorting bookings:', sortError);
           return 0;
         }
       });
-
-      setWeekBookings(filtered);
-    } catch (error) {
-      console.error('Error filtering week bookings:', error);
-      setWeekBookings([]);
+    } catch (filterError) {
+      console.error('Error filtering week bookings:', filterError);
+      return [];
     }
   }, [bookings, weekDates]);
 
@@ -106,13 +104,6 @@ export default function WeeklySchedule({ isDark = false }) {
     return `${displayHour}:${minutes} ${ampm}`;
   };
 
-  const getStatusColor = (booking) => {
-    if (booking.is_cancelled) {
-      return isDark ? 'bg-red-900/20 text-red-300 border-red-500/30' : 'bg-red-50 text-red-700 border-red-200';
-    }
-    return isDark ? 'bg-blue-900/20 text-blue-300 border-blue-500/30' : 'bg-blue-50 text-blue-700 border-blue-200';
-  };
-
   const getStatusBadgeColor = (booking) => {
     if (booking.is_cancelled) {
       return isDark ? 'bg-red-900/40 text-red-300' : 'bg-red-100 text-red-700';
@@ -143,213 +134,137 @@ export default function WeeklySchedule({ isDark = false }) {
   }
 
   return (
-    <div className={`p-4 sm:p-6 rounded-lg ${isDark ? 'bg-gray-700' : 'bg-white'} border ${isDark ? 'border-gray-600' : 'border-gray-200'}`}>
+    <div className={`p-4 sm:p-6 rounded-lg ${isDark ? 'bg-gray-700' : 'bg-white'} border ${isDark ? 'border-gray-600' : 'border-gray-200'} h-full flex flex-col`}>
       {/* Header with Navigation */}
-      <div className="mb-6">
-        <h2 className={`text-xl sm:text-2xl font-bold ${isDark ? 'text-white' : 'text-gray-900'}`}>
+      <div className="mb-4">
+        <h2 className={`text-lg sm:text-xl font-bold ${isDark ? 'text-white' : 'text-gray-900'}`}>
           {strings.weekSchedule.title}
         </h2>
         
-        {/* Date Range and Navigation */}
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mt-4">
-          <p className={`text-sm sm:text-base font-medium ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
-            {getWeekDisplay()}
-          </p>
+        {/* Date Range */}
+        <p className={`text-sm font-medium mt-2 ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
+          {getWeekDisplay()}
+        </p>
+        
+        {/* Navigation Buttons - Always stacked for better fit */}
+        <div className="flex gap-2 mt-3">
+          <button
+            onClick={handlePrevWeek}
+            className={`flex-1 px-3 py-2 rounded-lg font-medium text-xs sm:text-sm transition-all ${
+              isDark
+                ? 'bg-gray-600 hover:bg-gray-500 text-white'
+                : 'bg-gray-100 hover:bg-gray-200 text-gray-900'
+            }`}
+            title={strings.weekSchedule.prevWeek}
+          >
+            <span className="hidden sm:inline">{strings.weekSchedule.prevWeek}</span>
+            <span className="sm:hidden">← Prev</span>
+          </button>
           
-          {/* Navigation Buttons */}
-          <div className="flex gap-2 w-full sm:w-auto">
-            <button
-              onClick={handlePrevWeek}
-              className={`flex-1 sm:flex-none px-4 py-2 rounded-lg font-medium text-sm transition-all ${
-                isDark
-                  ? 'bg-gray-600 hover:bg-gray-500 text-white'
-                  : 'bg-gray-100 hover:bg-gray-200 text-gray-900'
-              }`}
-            >
-              {strings.weekSchedule.prevWeek}
-            </button>
-            
-            <button
-              onClick={handleToday}
-              className={`flex-1 sm:flex-none px-4 py-2 rounded-lg font-medium text-sm transition-all ${
-                isDark
-                  ? 'bg-blue-600 hover:bg-blue-700 text-white'
-                  : 'bg-blue-500 hover:bg-blue-600 text-white'
-              }`}
-            >
-              {strings.weekSchedule.today}
-            </button>
-            
-            <button
-              onClick={handleNextWeek}
-              className={`flex-1 sm:flex-none px-4 py-2 rounded-lg font-medium text-sm transition-all ${
-                isDark
-                  ? 'bg-gray-600 hover:bg-gray-500 text-white'
-                  : 'bg-gray-100 hover:bg-gray-200 text-gray-900'
-              }`}
-            >
-              {strings.weekSchedule.nextWeek}
-            </button>
-          </div>
+          <button
+            onClick={handleToday}
+            className={`flex-1 px-3 py-2 rounded-lg font-medium text-xs sm:text-sm transition-all ${
+              isDark
+                ? 'bg-blue-600 hover:bg-blue-700 text-white'
+                : 'bg-blue-500 hover:bg-blue-600 text-white'
+            }`}
+          >
+            {strings.weekSchedule.today}
+          </button>
+          
+          <button
+            onClick={handleNextWeek}
+            className={`flex-1 px-3 py-2 rounded-lg font-medium text-xs sm:text-sm transition-all ${
+              isDark
+                ? 'bg-gray-600 hover:bg-gray-500 text-white'
+                : 'bg-gray-100 hover:bg-gray-200 text-gray-900'
+            }`}
+            title={strings.weekSchedule.nextWeek}
+          >
+            <span className="hidden sm:inline">{strings.weekSchedule.nextWeek}</span>
+            <span className="sm:hidden">Next →</span>
+          </button>
         </div>
       </div>
 
-      {/* Desktop View - Table */}
-      {weekBookings.length > 0 ? (
-        <>
-          <div className="hidden md:block overflow-x-auto rounded-lg border" style={{ borderColor: isDark ? '#374151' : '#e5e7eb' }}>
-            <table className="w-full">
-              <thead>
-                <tr className={isDark ? 'bg-gray-600' : 'bg-gray-100'}>
-                  <th className={`px-4 sm:px-6 py-3 text-left text-sm font-semibold ${isDark ? 'text-gray-200' : 'text-gray-900'}`}>
-                    {strings.table.headers.dateTime}
-                  </th>
-                  <th className={`px-4 sm:px-6 py-3 text-left text-sm font-semibold ${isDark ? 'text-gray-200' : 'text-gray-900'}`}>
-                    {strings.table.headers.student}
-                  </th>
-                  <th className={`px-4 sm:px-6 py-3 text-left text-sm font-semibold ${isDark ? 'text-gray-200' : 'text-gray-900'}`}>
-                    {strings.table.headers.course}
-                  </th>
-                  <th className={`px-4 sm:px-6 py-3 text-left text-sm font-semibold ${isDark ? 'text-gray-200' : 'text-gray-900'}`}>
-                    {strings.table.headers.room}
-                  </th>
-                  <th className={`px-4 sm:px-6 py-3 text-left text-sm font-semibold ${isDark ? 'text-gray-200' : 'text-gray-900'}`}>
-                    {strings.table.headers.status}
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                {weekBookings.map((booking, index) => (
-                  <tr key={booking.id} className={`border-t ${index % 2 === 0 ? (isDark ? 'bg-gray-700/50' : 'bg-gray-50/50') : ''}`} style={{ borderColor: isDark ? '#374151' : '#e5e7eb' }}>
-                    <td className={`px-4 sm:px-6 py-4 text-sm ${isDark ? 'text-gray-300' : 'text-gray-900'}`}>
-                      <div>
-                        <p className="font-medium">{formatDate(booking.date)}</p>
-                        <p className={`text-xs ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
-                          {formatTime(booking.office_hour.start_time)} - {formatTime(booking.office_hour.end_time)}
-                        </p>
-                      </div>
-                    </td>
-                    <td className={`px-4 sm:px-6 py-4 text-sm ${isDark ? 'text-gray-300' : 'text-gray-900'}`}>
-                      <div>
-                        <p className="font-medium">
-                          {booking.student.first_name} {booking.student.last_name}
-                        </p>
-                        <p className={`text-xs ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
-                          {booking.student.email}
-                        </p>
-                        {booking.description && (
-                          <p className={`text-xs mt-1 italic ${isDark ? 'text-gray-500' : 'text-gray-500'}`}>
-                            💬 {booking.description}
-                          </p>
-                        )}
-                      </div>
-                    </td>
-                    <td className={`px-4 sm:px-6 py-4 text-sm ${isDark ? 'text-gray-300' : 'text-gray-900'}`}>
-                      <div>
-                        <p className="font-medium">{booking.office_hour.course_name}</p>
-                        {booking.office_hour.section && (
-                          <p className={`text-xs ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
-                            Sec: {booking.office_hour.section}
-                          </p>
-                        )}
-                      </div>
-                    </td>
-                    <td className={`px-4 sm:px-6 py-4 text-sm ${isDark ? 'text-gray-300' : 'text-gray-900'}`}>
-                      {booking.office_hour.room || 'N/A'}
-                    </td>
-                    <td className="px-4 sm:px-6 py-4">
-                      <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${getStatusBadgeColor(booking)}`}>
-                        {booking.is_cancelled ? strings.status.cancelled : strings.status.confirmed}
-                      </span>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-
-          {/* Mobile View - Cards */}
-          <div className="md:hidden space-y-4">
+      {/* Bookings List - Card-based layout for all screen sizes */}
+      <div className="flex-1 overflow-y-auto">
+        {weekBookings.length > 0 ? (
+          <div className="space-y-3">
             {weekBookings.map((booking) => (
               <div
                 key={booking.id}
-                className={`p-4 rounded-lg border-2 transition-all ${getStatusColor(booking)}`}
+                className={`p-3 sm:p-4 rounded-lg border transition-all ${
+                  booking.is_cancelled
+                    ? (isDark ? 'bg-red-900/20 border-red-500/30' : 'bg-red-50 border-red-200')
+                    : (isDark ? 'bg-gray-600/50 border-gray-500/30' : 'bg-gray-50 border-gray-200')
+                }`}
               >
-                {/* Date and Status */}
-                <div className="flex justify-between items-start mb-3">
-                  <div>
-                    <p className={`text-xs font-semibold ${isDark ? 'text-gray-400' : 'text-gray-600'} uppercase`}>
-                      {strings.table.headers.dateTime}
-                    </p>
+                {/* Date, Time, and Status Row */}
+                <div className="flex justify-between items-start gap-2 mb-2">
+                  <div className="flex-1 min-w-0">
                     <p className={`text-sm font-semibold ${isDark ? 'text-white' : 'text-gray-900'}`}>
                       {formatDate(booking.date)}
                     </p>
-                    <p className={`text-xs ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
+                    <p className={`text-xs ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
                       {formatTime(booking.office_hour.start_time)} - {formatTime(booking.office_hour.end_time)}
                     </p>
                   </div>
-                  <span className={`px-3 py-1 rounded-full text-xs font-medium whitespace-nowrap ${getStatusBadgeColor(booking)}`}>
+                  <span className={`flex-shrink-0 px-2 py-1 rounded-full text-xs font-medium ${getStatusBadgeColor(booking)}`}>
                     {booking.is_cancelled ? strings.status.cancelled : strings.status.confirmed}
                   </span>
                 </div>
 
                 {/* Student Info */}
-                <div className="mb-3 pb-3 border-b" style={{ borderColor: isDark ? 'rgba(75, 85, 99, 0.3)' : '#e5e7eb' }}>
-                  <p className={`text-xs font-semibold ${isDark ? 'text-gray-400' : 'text-gray-600'} uppercase`}>
-                    {strings.table.headers.student}
-                  </p>
-                  <p className={`text-sm font-semibold ${isDark ? 'text-white' : 'text-gray-900'}`}>
+                <div className={`py-2 border-t ${isDark ? 'border-gray-500/30' : 'border-gray-200'}`}>
+                  <p className={`text-sm font-medium ${isDark ? 'text-gray-200' : 'text-gray-800'}`}>
                     {booking.student.first_name} {booking.student.last_name}
                   </p>
-                  <p className={`text-xs ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
+                  <p className={`text-xs ${isDark ? 'text-gray-400' : 'text-gray-600'} truncate`}>
                     {booking.student.email}
                   </p>
                   {booking.description && (
-                    <p className={`text-xs mt-2 pt-2 italic border-t ${isDark ? 'border-gray-700 text-gray-500' : 'border-gray-200 text-gray-500'}`}>
+                    <p className={`text-xs mt-1 italic ${isDark ? 'text-gray-500' : 'text-gray-500'} line-clamp-2`}>
                       💬 {booking.description}
                     </p>
                   )}
                 </div>
 
                 {/* Course and Room */}
-                <div className="grid grid-cols-1 gap-3">
-                  <div>
-                    <p className={`text-xs font-semibold ${isDark ? 'text-gray-400' : 'text-gray-600'} uppercase`}>
-                      {strings.table.headers.course}
-                    </p>
-                    <p className={`text-sm ${isDark ? 'text-white' : 'text-gray-900'}`}>
+                <div className={`pt-2 border-t ${isDark ? 'border-gray-500/30' : 'border-gray-200'} flex flex-wrap gap-x-4 gap-y-1 text-xs`}>
+                  <div className="flex items-center gap-1">
+                    <span className={`font-medium ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>📚</span>
+                    <span className={isDark ? 'text-gray-300' : 'text-gray-700'}>
                       {booking.office_hour.course_name}
-                      {booking.office_hour.section && ` - ${booking.office_hour.section}`}
-                    </p>
+                      {booking.office_hour.section && ` (${booking.office_hour.section})`}
+                    </span>
                   </div>
                   {booking.office_hour.room && (
-                    <div>
-                      <p className={`text-xs font-semibold ${isDark ? 'text-gray-400' : 'text-gray-600'} uppercase`}>
-                        {strings.table.headers.room}
-                      </p>
-                      <p className={`text-sm ${isDark ? 'text-white' : 'text-gray-900'}`}>
+                    <div className="flex items-center gap-1">
+                      <span className={`font-medium ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>📍</span>
+                      <span className={isDark ? 'text-gray-300' : 'text-gray-700'}>
                         {booking.office_hour.room}
-                      </p>
+                      </span>
                     </div>
                   )}
                 </div>
               </div>
             ))}
           </div>
-        </>
-      ) : (
-        <div className={`text-center py-12 ${isDark ? 'bg-gray-600/30' : 'bg-gray-50'} rounded-lg`}>
-          <svg className={`w-12 h-12 mx-auto mb-3 ${isDark ? 'text-gray-500' : 'text-gray-300'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-          </svg>
-          <p className={`text-lg font-semibold ${isDark ? 'text-gray-300' : 'text-gray-600'}`}>
-            {strings.weekSchedule.noBookings}
-          </p>
-          <p className={`text-sm mt-1 ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>
-            {strings.weekSchedule.noBookingsDescription}
-          </p>
-        </div>
-      )}
+        ) : (
+          <div className={`text-center py-8 ${isDark ? 'bg-gray-600/30' : 'bg-gray-50'} rounded-lg`}>
+            <svg className={`w-10 h-10 mx-auto mb-2 ${isDark ? 'text-gray-500' : 'text-gray-300'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <p className={`text-sm font-semibold ${isDark ? 'text-gray-300' : 'text-gray-600'}`}>
+              {strings.weekSchedule.noBookings}
+            </p>
+            <p className={`text-xs mt-1 ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>
+              {strings.weekSchedule.noBookingsDescription}
+            </p>
+          </div>
+        )}
+      </div>
     </div>
   );
 }
