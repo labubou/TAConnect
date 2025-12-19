@@ -92,9 +92,9 @@ export default function Dashboard() {
 
             {/* Content Grid */}
             {!isLoading && (
-              <div className="grid grid-cols-1 gap-6 lg:gap-8">
-                {/* Monthly Calendar */}
-                <div>
+              <div className="grid grid-cols-1 xl:grid-cols-3 gap-6 lg:gap-8">
+                {/* Monthly Calendar - Takes 2 columns on xl screens */}
+                <div className="xl:col-span-2">
                   <ErrorBoundary>
                     <MonthlyCalendar 
                       slots={safeSlots} 
@@ -104,8 +104,8 @@ export default function Dashboard() {
                   </ErrorBoundary>
                 </div>
 
-                {/* Weekly Schedule */}
-                <div>
+                {/* Weekly Schedule - Takes 1 column on xl screens */}
+                <div className="xl:col-span-1">
                   <ErrorBoundary>
                     <WeeklySchedule 
                       isDark={isDark}
