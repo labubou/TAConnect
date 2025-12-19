@@ -139,3 +139,21 @@ cp frontend/ta_connect/.env.example frontend/ta_connect/.env
 
 Edit the file and set `VITE_VAPID_PUBLIC_KEY` to match your backend's `VAPID_PUBLIC_KEY`.
 
+### SEO Configuration (Self-Hosting)
+
+For self-hosted deployments, configure your domain for proper SEO:
+
+```bash
+# In frontend/ta_connect/.env
+VITE_APP_URL=https://your-domain.com
+VITE_GOOGLE_SITE_VERIFICATION=your-google-verification-code  # optional
+```
+
+This ensures:
+- ✅ Correct canonical URLs
+- ✅ Proper social media sharing (Open Graph, Twitter Cards)
+- ✅ Auto-generated `sitemap.xml` and `robots.txt` with your domain
+- ✅ Google Search Console verification (if configured)
+
+See [Environment Variables](ENVIRONMENT_VARIABLES.md) for detailed SEO configuration.
+

@@ -2,30 +2,97 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/png" href="/src/assets/Logo.png" />
-    <link rel="apple-touch-icon" href="/src/assets/Logo.png" />
+    <link rel="icon" type="image/png" href="/Logo.png" />
+    <link rel="apple-touch-icon" href="/Logo.png" />
+    <link rel="manifest" href="/manifest.json" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="theme-color" content="#366c6b" />
-    <meta name="description" content="TA Connect - Connecting Teaching Assistants with Students for Better Learning. Book office hours, manage appointments, and enhance your academic experience." />
-    <meta name="keywords" content="TA Connect, Teaching Assistant, Office Hours, Student Booking, Academic Support, University" />
-    <meta name="author" content="TA Connect Team" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <meta name="apple-mobile-web-app-title" content="TA Connect" />
+    <meta name="application-name" content="TA Connect" />
+    <meta name="msapplication-TileColor" content="#366c6b" />
+    <meta name="msapplication-config" content="none" />
     
-    <!-- Open Graph / Social Media Meta Tags -->
-    <meta property="og:title" content="TA Connect - Office Hours Made Easy" />
-    <meta property="og:description" content="Connecting Teaching Assistants with Students for Better Learning" />
+    <!-- Google Search Console Verification (configure via VITE_GOOGLE_SITE_VERIFICATION) -->
+    <!-- Self-hosters: Get your own verification code from Google Search Console -->
+    %VITE_GOOGLE_VERIFICATION_TAG%
+    
+    <!-- Primary SEO Meta Tags -->
+    <title>TA Connect - Book Office Hours with Teaching Assistants | Easy Student-TA Scheduling</title>
+    <meta name="title" content="TA Connect - Book Office Hours with Teaching Assistants | Easy Student-TA Scheduling" />
+    <meta name="description" content="TA Connect makes booking office hours easy. Students can schedule appointments with Teaching Assistants, manage bookings, and get academic support. Free, fast, and user-friendly." />
+    <meta name="keywords" content="TA Connect, Teaching Assistant, Office Hours, Student Booking, Academic Support, University, College, Book TA, Schedule Office Hours, Student Help, Academic Appointments, TA Scheduling, University Support" />
+    <meta name="author" content="TA Connect Team" />
+    <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
+    <meta name="googlebot" content="index, follow" />
+    <meta name="bingbot" content="index, follow" />
+    <link rel="canonical" href="%VITE_APP_URL%/" />
+    
+    <!-- Geo Tags -->
+    <meta name="geo.region" content="EG" />
+    <meta name="geo.placename" content="Cairo" />
+    
+    <!-- Open Graph / Facebook Meta Tags -->
     <meta property="og:type" content="website" />
-    <meta property="og:image" content="/src/assets/Logo.png" />
+    <meta property="og:url" content="%VITE_APP_URL%/" />
+    <meta property="og:title" content="TA Connect - Book Office Hours with Teaching Assistants" />
+    <meta property="og:description" content="Easily book office hours with Teaching Assistants. Manage appointments, get notifications, and enhance your academic experience with TA Connect." />
+    <meta property="og:image" content="%VITE_APP_URL%/Logo.png" />
+    <meta property="og:image:width" content="512" />
+    <meta property="og:image:height" content="512" />
+    <meta property="og:image:alt" content="TA Connect Logo - Student and TA Scheduling Platform" />
+    <meta property="og:site_name" content="TA Connect" />
+    <meta property="og:locale" content="en_US" />
     
     <!-- Twitter Card Meta Tags -->
-    <meta name="twitter:card" content="summary" />
-    <meta name="twitter:title" content="TA Connect - Office Hours Made Easy" />
-    <meta name="twitter:description" content="Connecting Teaching Assistants with Students for Better Learning" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:url" content="%VITE_APP_URL%/" />
+    <meta name="twitter:title" content="TA Connect - Book Office Hours with Teaching Assistants" />
+    <meta name="twitter:description" content="Easily book office hours with Teaching Assistants. Manage appointments and enhance your academic experience." />
+    <meta name="twitter:image" content="%VITE_APP_URL%/Logo.png" />
+    <meta name="twitter:image:alt" content="TA Connect Logo" />
     
-    <title>TA Connect - Office Hours Made Easy</title>
+    <!-- Structured Data / JSON-LD for Rich Results -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebApplication",
+      "name": "TA Connect",
+      "alternateName": "TAConnect",
+      "url": "%VITE_APP_URL%",
+      "logo": "%VITE_APP_URL%/Logo.png",
+      "description": "TA Connect is a web application that connects Teaching Assistants with Students for easy office hour booking and academic support.",
+      "applicationCategory": "EducationalApplication",
+      "operatingSystem": "Any",
+      "browserRequirements": "Requires JavaScript",
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "USD"
+      },
+      "creator": {
+        "@type": "Organization",
+        "name": "TA Connect Team",
+        "url": "https://github.com/labubou/TAConnect"
+      },
+      "featureList": [
+        "Book office hours with TAs",
+        "Manage appointments",
+        "Push notifications",
+        "Calendar integration",
+        "Multi-language support"
+      ],
+      "screenshot": "%VITE_APP_URL%/Logo.png",
+      "softwareVersion": "1.0.0"
+    }
+    </script>
     
     <!-- Preconnect to improve performance -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="dns-prefetch" href="https://fonts.googleapis.com" />
     
     <style>
       /* Loading spinner for initial page load */

@@ -1,0 +1,24 @@
+User-agent: *
+Allow: /
+Allow: /login
+Allow: /register
+Allow: /forgot-password
+Allow: /about
+Allow: /contact
+Allow: /book
+
+# Disallow backend API paths
+Disallow: /api/
+
+# Disallow authenticated frontend routes
+Disallow: /ta/
+Disallow: /student/
+Disallow: /verify-email
+Disallow: /reset-password
+Disallow: /select-user-type
+Disallow: /auth/
+
+# Crawl delay for respectful crawling
+Crawl-delay: 1
+
+Sitemap: https://taconnect.netlify.app/sitemap.xml

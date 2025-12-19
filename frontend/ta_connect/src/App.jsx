@@ -5,6 +5,8 @@ import { GlobalLoadingProvider } from './contexts/GlobalLoadingContext'
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
 import { lazy, Suspense, useEffect } from 'react'
 import ProtectedRoute from './components/General/ProtectedRoute';
+import TARoute from './components/General/TARoute';
+import StudentRoute from './components/General/StudentRoute';
 import PublicRoute from './components/General/PublicRoute';
 import PublicBookingRedirect from './components/General/PublicBookingRedirect';
 import { SkeletonLoader } from './components/General/SkeletonLoader';
@@ -39,6 +41,12 @@ const BookPage = lazy(() => import('./pages/student/BookPage'));
 const ManageBookingsPage = lazy(() => import('./pages/student/ManageBookingsPage'));
 const StudentSettingsPage = lazy(() => import('./pages/student/SettingsPage'));
 
+// PWA Components
+const InstallPrompt = lazy(() => import('./components/pwa/InstallPrompt'));
+const OfflineIndicator = lazy(() => import('./components/pwa/OfflineIndicator'));
+const UpdatePrompt = lazy(() => import('./components/pwa/UpdatePrompt'));
+const InstallButton = lazy(() => import('./components/pwa/InstallButton'));
+
 /**
  * Fallback component displayed while lazy-loaded pages are loading
  */
@@ -69,12 +77,17 @@ function App() {
             <Router>
               <GlobalLoadingOverlay />
               <div className="min-h-screen bg-[var(--bg)] text-[var(--text)] transition-colors">
+                {/* Global PWA Components */}
+                <InstallPrompt />
+                <OfflineIndicator />
+                <UpdatePrompt />
                 <Routes>
               <Route 
                 path="/" 
                 element={
                   <PublicRoute>
                     <LandingPage />
+                    <InstallButton className="fixed bottom-4 right-4 z-50" />
                   </PublicRoute>
                 } 
               />
@@ -167,61 +180,61 @@ function App() {
               <Route 
                 path="/ta" 
                 element={
-                  <ProtectedRoute>
+                  <TARoute>
                     <Suspense fallback={<PageLoader />}>
                       <Dashboard />
                     </Suspense>
-                  </ProtectedRoute>
+                  </TARoute>
                 } 
               />
               <Route 
                 path="/ta/settings" 
                 element={
-                  <ProtectedRoute>
+                  <TARoute>
                     <Suspense fallback={<PageLoader />}>
                       <TASettingsPage />
                     </Suspense>
-                  </ProtectedRoute>
+                  </TARoute>
                 } 
               />
               <Route 
                 path="/ta/profile" 
                 element={
-                  <ProtectedRoute>
+                  <TARoute>
                     <Suspense fallback={<PageLoader />}>
                       <ProfilePage />
                     </Suspense>
-                  </ProtectedRoute>
+                  </TARoute>
                 } 
               />
               <Route 
                 path="/ta/manage-courses" 
                 element={
-                  <ProtectedRoute>
+                  <TARoute>
                     <Suspense fallback={<PageLoader />}>
                       <ManageCourses />
                     </Suspense>
-                  </ProtectedRoute>
+                  </TARoute>
                 } 
               />
               <Route 
                 path="/ta/manage-bookings" 
                 element={
-                  <ProtectedRoute>
+                  <TARoute>
                     <Suspense fallback={<PageLoader />}>
                       <InstructorManageBookings />
                     </Suspense>
-                  </ProtectedRoute>
+                  </TARoute>
                 } 
               />
               <Route 
                 path="/ta/pending-bookings" 
                 element={
-                  <ProtectedRoute>
+                  <TARoute>
                     <Suspense fallback={<PageLoader />}>
                       <PendingBookingsPage />
                     </Suspense>
-                  </ProtectedRoute>
+                  </TARoute>
                 } 
               />
 
@@ -229,53 +242,53 @@ function App() {
               <Route 
                 path="/student" 
                 element={
-                  <ProtectedRoute>
+                  <StudentRoute>
                     <Suspense fallback={<PageLoader />}>
                       <StudentHomePage />
                     </Suspense>
-                  </ProtectedRoute>
+                  </StudentRoute>
                 } 
               />
               <Route 
                 path="/student/profile" 
                 element={
-                  <ProtectedRoute>
+                  <StudentRoute>
                     <Suspense fallback={<PageLoader />}>
                       <ProfilePage />
                     </Suspense>
-                  </ProtectedRoute>
+                  </StudentRoute>
                 } 
               />
               <Route 
                 path="/student/book" 
                 element={
                   <PublicBookingRedirect>
-                    <ProtectedRoute>
+                    <StudentRoute>
                       <Suspense fallback={<PageLoader />}>
                         <BookPage />
                       </Suspense>
-                    </ProtectedRoute>
+                    </StudentRoute>
                   </PublicBookingRedirect>
                 } 
               />
               <Route 
                 path="/student/manage-booked" 
                 element={
-                  <ProtectedRoute>
+                  <StudentRoute>
                     <Suspense fallback={<PageLoader />}>
                       <ManageBookingsPage />
                     </Suspense>
-                  </ProtectedRoute>
+                  </StudentRoute>
                 } 
               />
               <Route 
                 path="/student/settings" 
                 element={
-                  <ProtectedRoute>
+                  <StudentRoute>
                     <Suspense fallback={<PageLoader />}>
                       <StudentSettingsPage />
                     </Suspense>
-                  </ProtectedRoute>
+                  </StudentRoute>
                 } 
               />
             </Routes>

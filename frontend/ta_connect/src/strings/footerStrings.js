@@ -12,6 +12,8 @@ const footerStrings = {
     teamDescription: "Built by a passionate team of students",
     address: "Cairo, Egypt",
     email: "Contact us",
+    installApp: "Install App",
+    installAppDescription: "Get the app for a better experience",
   },
   ar: {
     copyright: "جميع الحقوق محفوظة.",
@@ -25,6 +27,8 @@ const footerStrings = {
     teamDescription: "تم بناؤه من قبل فريق طلابي متحمس",
     address: "القاهرة، مصر",
     email: "تواصل معنا",
+    installApp: "تثبيت التطبيق",
+    installAppDescription: "احصل على التطبيق لتجربة أفضل",
   },
 };
 
