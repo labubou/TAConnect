@@ -11,6 +11,7 @@ from student.models import Booking
 from student.sendBookingEmail import send_booking_cancelled_email,send_booking_update_email, send_booking_pending_email
 from utils.push_notifications.booking.send_booking_cancelled import send_booking_cancelled_push
 from utils.push_notifications.booking.send_booking_pending import send_booking_pending_push
+from utils.google_calendar import remove_booking_from_calendars
 from instructor.models import OfficeHourSlot
 from accounts.permissions import IsStudent
 from student.serializers.create_book_serializer import CreateBookingSerializer
@@ -226,6 +227,15 @@ class BookingDetailView(GenericAPIView):
             return Response({'error': 'Booking ID is required.'}, status=status.HTTP_400_BAD_REQUEST)
 
         booking = get_object_or_404(Booking, id=pk, student=request.user)
+
+        # Remove calendar events before cancellation
+        try:
+            student_deleted, instructor_deleted = remove_booking_from_calendars(booking)
+            if student_deleted or instructor_deleted:
+                print(f"Calendar events removed - Student: {student_deleted}, Instructor: {instructor_deleted}")
+        except Exception as e:
+            # Log error but don't fail the cancellation
+            print(f"Failed to remove calendar events: {e}")
 
         serializer = self.get_serializer(
             instance=booking, 

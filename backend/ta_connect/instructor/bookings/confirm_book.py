@@ -6,6 +6,7 @@ from drf_yasg.utils import swagger_auto_schema
 from student.models import Booking
 from utils.email_sending.booking.send_booking_confirmation import send_booking_confirmation_email
 from utils.push_notifications.booking.send_booking_confirmed import send_booking_confirmed_push
+from utils.google_calendar import add_booking_to_calendars
 from student.serializers.confirm_book_serializer import ConfirmBookingSerializer
 from accounts.permissions import IsInstructor
 from instructor.schemas.confirm_booking_schemas import confirm_booking_instructor_swagger
@@ -15,6 +16,7 @@ class InstructorConfirmBookingView(GenericAPIView):
     """
     Confirm a student's booking as an instructor.
     Sends email notification to the student.
+    Adds calendar events to both student's and instructor's Google Calendars.
     """
     queryset = Booking.objects.all()
     permission_classes = [IsInstructor]
@@ -55,6 +57,15 @@ class InstructorConfirmBookingView(GenericAPIView):
             )
 
         confirmed_booking = serializer.save()
+
+        # Add events to Google Calendars (student and instructor)
+        try:
+            student_event_id, instructor_event_id = add_booking_to_calendars(confirmed_booking)
+            if student_event_id or instructor_event_id:
+                print(f"Calendar events created - Student: {student_event_id}, Instructor: {instructor_event_id}")
+        except Exception as e:
+            # Log error but don't fail the confirmation
+            print(f"Failed to add calendar events: {e}")
 
         # Send email notification to the student and the instructor
         try:

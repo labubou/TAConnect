@@ -49,6 +49,28 @@ export const settingsStrings = {
       loading: 'Loading preferences...',
     },
 
+    // Google Calendar Integration strings
+    googleCalendar: {
+      title: 'Google Calendar Integration',
+      subtitle: 'Sync your bookings with Google Calendar',
+      connectButton: 'Connect Google Calendar',
+      connecting: 'Connecting...',
+      connectDescription: 'Connect any Google account to sync your bookings with Google Calendar',
+      enableSync: 'Enable Calendar Sync',
+      syncDescription: 'Automatically add booking events to your Google Calendar',
+      connectedTo: 'Connected to',
+      connectionSuccess: 'Google Calendar connected successfully!',
+      connectionError: 'Failed to connect Google Calendar. Please try again.',
+      connectionCancelled: 'Google Calendar connection cancelled or failed.',
+      urlError: 'Failed to get Google Calendar connection URL. Please try again.',
+      toggleEnabled: 'Google Calendar enabled successfully.',
+      toggleDisabled: 'Google Calendar disabled successfully.',
+      toggleError: 'Failed to update Google Calendar settings. Please try again.',
+      gettingUrl: 'Getting Google Calendar connection URL...',
+      enabling: 'Enabling Google Calendar...',
+      disabling: 'Disabling Google Calendar...',
+    },
+
     // Profile tab strings
     profilePage: {
       title: "Profile",
@@ -171,6 +193,28 @@ export const settingsStrings = {
       saveError: 'تعذر حفظ التفضيلات. يرجى المحاولة مرة أخرى.',
       resetSuccess: 'تم استعادة التفضيلات الافتراضية',
       loading: 'جاري تحميل التفضيلات...',
+    },
+
+    // Google Calendar Integration strings
+    googleCalendar: {
+      title: 'تكامل تقويم جوجل',
+      subtitle: 'قم بمزامنة حجوزاتك مع تقويم جوجل',
+      connectButton: 'اتصل بـ Google Calendar',
+      connecting: 'جاري الاتصال...',
+      connectDescription: 'قم بتوصيل أي حساب Google لمزامنة حجوزاتك مع تقويم جوجل',
+      enableSync: 'تمكين مزامنة التقويم',
+      syncDescription: 'إضافة مواعيد الحجز تلقائياً إلى تقويم Google الخاص بك',
+      connectedTo: 'متصل بـ',
+      connectionSuccess: 'تم الاتصال بـ Google Calendar بنجاح!',
+      connectionError: 'فشل الاتصال بـ Google Calendar. يرجى المحاولة مرة أخرى.',
+      connectionCancelled: 'تم إلغاء أو فشل الاتصال بـ Google Calendar.',
+      urlError: 'فشل الحصول على رابط الاتصال بـ Google Calendar. يرجى المحاولة مرة أخرى.',
+      toggleEnabled: 'تم تفعيل Google Calendar بنجاح.',
+      toggleDisabled: 'تم تعطيل Google Calendar بنجاح.',
+      toggleError: 'فشل تحديث إعدادات Google Calendar. يرجى المحاولة مرة أخرى.',
+      gettingUrl: 'جاري الحصول على رابط الاتصال بـ Google Calendar...',
+      enabling: 'جاري تفعيل Google Calendar...',
+      disabling: 'جاري تعطيل Google Calendar...',
     },
 
     // Profile tab strings

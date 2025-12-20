@@ -37,6 +37,107 @@ export default function ProfilePage() {
     }
   }, [user]);
 
+  // Fetch Google Calendar status
+  useEffect(() => {
+    const fetchGoogleCalendarStatus = async () => {
+      try {
+        const res = await axios.get('/api/auth/google/calendar/status/');
+        setGoogleCalendarStatus(res.data);
+      } catch (err) {
+        console.error('Failed to fetch Google Calendar status:', err);
+      }
+    };
+    fetchGoogleCalendarStatus();
+  }, []);
+
+  // Handle Google Calendar callback
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const code = urlParams.get('code');
+    const error = urlParams.get('error');
+
+    if (code && window.location.pathname.includes('/auth/google/calendar/callback')) {
+      handleGoogleCalendarConnect(code);
+      // Clean up URL
+      window.history.replaceState({}, document.title, '/profile');
+    } else if (error) {
+      setGoogleCalendarMessage({ type: 'error', text: 'Google Calendar connection cancelled or failed.' });
+      // Clean up URL
+      window.history.replaceState({}, document.title, '/profile');
+    }
+  }, []);
+
+  const handleGoogleCalendarConnect = async (code) => {
+    setGoogleCalendarLoading(true);
+    setGoogleCalendarMessage('');
+    startLoading('google-calendar-connect', 'Connecting Google Calendar...');
+
+    try {
+      const res = await axios.post('/api/auth/google/calendar/connect/', { code });
+      setGoogleCalendarStatus({
+        connected: true,
+        calendar_enabled: res.data.calendar_enabled,
+        has_valid_credentials: true
+      });
+      setGoogleCalendarMessage({ type: 'success', text: res.data.message || 'Google Calendar connected successfully!' });
+      stopLoading('google-calendar-connect');
+    } catch (err) {
+      stopLoading('google-calendar-connect');
+      setGoogleCalendarMessage({
+        type: 'error',
+        text: err.response?.data?.error || 'Failed to connect Google Calendar. Please try again.'
+      });
+    } finally {
+      setGoogleCalendarLoading(false);
+    }
+  };
+
+  const handleConnectGoogleCalendar = async () => {
+    try {
+      setGoogleCalendarLoading(true);
+      startLoading('google-calendar-url', 'Getting Google Calendar connection URL...');
+      const res = await axios.get('/api/auth/google/calendar/url/');
+      stopLoading('google-calendar-url');
+      // Redirect to Google OAuth
+      window.location.href = res.data.auth_url;
+    } catch (err) {
+      stopLoading('google-calendar-url');
+      setGoogleCalendarMessage({
+        type: 'error',
+        text: err.response?.data?.error || 'Failed to get Google Calendar connection URL. Please try again.'
+      });
+      setGoogleCalendarLoading(false);
+    }
+  };
+
+  const handleDisconnectGoogleCalendar = async () => {
+    if (!window.confirm('Are you sure you want to disconnect Google Calendar? This will remove all calendar integration.')) {
+      return;
+    }
+
+    setGoogleCalendarLoading(true);
+    startLoading('google-calendar-disconnect', 'Disconnecting Google Calendar...');
+
+    try {
+      await axios.post('/api/auth/google/calendar/disconnect/');
+      setGoogleCalendarStatus({
+        connected: false,
+        calendar_enabled: false,
+        has_valid_credentials: false
+      });
+      setGoogleCalendarMessage({ type: 'success', text: 'Google Calendar disconnected successfully.' });
+      stopLoading('google-calendar-disconnect');
+    } catch (err) {
+      stopLoading('google-calendar-disconnect');
+      setGoogleCalendarMessage({
+        type: 'error',
+        text: err.response?.data?.error || 'Failed to disconnect Google Calendar. Please try again.'
+      });
+    } finally {
+      setGoogleCalendarLoading(false);
+    }
+  };
+
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
@@ -70,6 +171,15 @@ export default function ProfilePage() {
   const [deleteError, setDeleteError] = useState('');
   const [deleteLoading, setDeleteLoading] = useState(false);
   const [showDeletePassword, setShowDeletePassword] = useState(false);
+
+  // Google Calendar state
+  const [googleCalendarStatus, setGoogleCalendarStatus] = useState({
+    connected: false,
+    calendar_enabled: false,
+    has_valid_credentials: false
+  });
+  const [googleCalendarLoading, setGoogleCalendarLoading] = useState(false);
+  const [googleCalendarMessage, setGoogleCalendarMessage] = useState('');
 
   const handleChange = (e) =>
     setForm((f) => ({ ...f, [e.target.name]: e.target.value }));
@@ -466,6 +576,128 @@ export default function ProfilePage() {
                       </svg>
                       {t.profilePage.change}
                     </button>
+                  </div>
+                </div>
+              </div>
+
+              {/* Google Calendar Integration Section */}
+              <div className={`mt-6 pt-6 border-t-2 ${isDark ? 'border-gray-700' : 'border-gray-200'}`}>
+                <div className="flex items-center gap-3 mb-4">
+                  <div className={`p-2 rounded-xl ${isDark ? 'bg-blue-900/30' : 'bg-blue-100'}`}>
+                    <svg className={`w-5 h-5 ${isDark ? 'text-blue-400' : 'text-blue-600'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                    </svg>
+                  </div>
+                  <h3 className={`text-lg font-bold ${isDark ? 'text-white' : 'text-gray-900'}`}>
+                    Google Calendar Integration
+                  </h3>
+                </div>
+
+                {/* Google Calendar Status Message */}
+                {googleCalendarMessage && (
+                  <div className={`mb-4 p-3 rounded-xl border-2 flex items-center gap-3 ${
+                    googleCalendarMessage.type === 'success'
+                      ? isDark ? 'bg-green-900/20 border-green-700 text-green-200' : 'bg-green-50 border-green-200 text-green-800'
+                      : isDark ? 'bg-red-900/20 border-red-700 text-red-200' : 'bg-red-50 border-red-200 text-red-800'
+                  }`}>
+                    <svg className="w-5 h-5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                      {googleCalendarMessage.type === 'success' ? (
+                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                      ) : (
+                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+                      )}
+                    </svg>
+                    <p className="text-sm font-medium">{googleCalendarMessage.text}</p>
+                  </div>
+                )}
+
+                {/* Google Calendar Connection Status */}
+                <div className={`p-4 rounded-xl border-2 ${
+                  isDark ? 'bg-gray-800/50 border-gray-700' : 'bg-gray-50 border-gray-200'
+                }`}>
+                  <div className="flex items-center justify-between mb-3">
+                    <div>
+                      <p className={`text-sm font-semibold ${isDark ? 'text-gray-200' : 'text-gray-700'}`}>
+                        Connection Status
+                      </p>
+                      <p className={`text-xs mt-1 ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
+                        {googleCalendarStatus.connected
+                          ? 'Google account connected'
+                          : 'No Google account connected'}
+                      </p>
+                    </div>
+                    <div className={`px-3 py-1 rounded-lg text-xs font-semibold ${
+                      googleCalendarStatus.connected
+                        ? isDark ? 'bg-green-900/30 text-green-400' : 'bg-green-100 text-green-700'
+                        : isDark ? 'bg-gray-700 text-gray-400' : 'bg-gray-200 text-gray-600'
+                    }`}>
+                      {googleCalendarStatus.connected ? 'Connected' : 'Not Connected'}
+                    </div>
+                  </div>
+
+                  {googleCalendarStatus.connected && (
+                    <div className="mt-3 pt-3 border-t border-gray-600 dark:border-gray-700">
+                      <p className={`text-xs ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
+                        Calendar Integration: {googleCalendarStatus.calendar_enabled ? 'Enabled' : 'Disabled'}
+                        <br />
+                        <span className="text-xs mt-1">
+                          You can enable/disable calendar sync from Settings.
+                        </span>
+                      </p>
+                    </div>
+                  )}
+
+                  {/* Action Buttons */}
+                  <div className="flex gap-3 mt-4">
+                    {!googleCalendarStatus.connected ? (
+                      <button
+                        type="button"
+                        onClick={handleConnectGoogleCalendar}
+                        disabled={googleCalendarLoading}
+                        className="flex-1 px-4 py-2.5 rounded-xl bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white font-semibold transition-all duration-300 hover:scale-105 disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                      >
+                        {googleCalendarLoading ? (
+                          <>
+                            <svg className="w-4 h-4 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                            </svg>
+                            Connecting...
+                          </>
+                        ) : (
+                          <>
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                            </svg>
+                            Connect Google Calendar
+                          </>
+                        )}
+                      </button>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={handleDisconnectGoogleCalendar}
+                        disabled={googleCalendarLoading}
+                        className="flex-1 px-4 py-2.5 rounded-xl border-2 border-red-600 bg-red-600/10 text-red-600 dark:text-red-400 font-semibold transition-all duration-300 hover:bg-red-600 hover:text-white hover:scale-105 disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                      >
+                        {googleCalendarLoading ? (
+                          <>
+                            <svg className="w-4 h-4 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                            </svg>
+                            Disconnecting...
+                          </>
+                        ) : (
+                          <>
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                            Disconnect
+                          </>
+                        )}
+                      </button>
+                    )}
                   </div>
                 </div>
               </div>

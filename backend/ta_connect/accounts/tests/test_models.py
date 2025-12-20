@@ -345,3 +345,222 @@ class StudentProfileModelTestCase(BaseTestCase):
         expected_str = "Student Profile: teststudent"
         self.assertEqual(str(profile), expected_str)
 
+
+class GoogleCalendarCredentialsModelTestCase(BaseTestCase):
+    """
+    Test cases for the GoogleCalendarCredentials model.
+    Tests cover creation, validation, expiration checks, and enable/disable functionality.
+    """
+    
+    def test_credentials_creation_happy_path(self):
+        """Test successful Google Calendar credentials creation."""
+        user = self.create_user(username='testuser', email='test@example.com')
+        from accounts.models import GoogleCalendarCredentials
+        from django.utils import timezone
+        from datetime import timedelta
+        
+        credentials = GoogleCalendarCredentials.objects.create(
+            user=user,
+            access_token='test_access_token',
+            refresh_token='test_refresh_token',
+            token_expiry=timezone.now() + timedelta(hours=1),
+            calendar_enabled=True
+        )
+        
+        self.assertIsNotNone(credentials.id)
+        self.assertEqual(credentials.user, user)
+        self.assertEqual(credentials.access_token, 'test_access_token')
+        self.assertEqual(credentials.refresh_token, 'test_refresh_token')
+        self.assertTrue(credentials.calendar_enabled)
+    
+    def test_credentials_one_to_one_relationship(self):
+        """Test that each user can only have one set of credentials."""
+        user = self.create_user(username='testuser', email='test@example.com')
+        from accounts.models import GoogleCalendarCredentials
+        from django.utils import timezone
+        from datetime import timedelta
+        from django.db import IntegrityError
+        
+        # Create first credentials
+        GoogleCalendarCredentials.objects.create(
+            user=user,
+            access_token='token1',
+            refresh_token='refresh1',
+            token_expiry=timezone.now() + timedelta(hours=1)
+        )
+        
+        # Try to create another credentials for same user (should fail)
+        with self.assertRaises(IntegrityError):
+            GoogleCalendarCredentials.objects.create(
+                user=user,
+                access_token='token2',
+                refresh_token='refresh2',
+                token_expiry=timezone.now() + timedelta(hours=1)
+            )
+    
+    def test_credentials_is_expired_not_expired(self):
+        """Test is_expired() method when token is not expired."""
+        user = self.create_user(username='testuser', email='test@example.com')
+        from accounts.models import GoogleCalendarCredentials
+        from django.utils import timezone
+        from datetime import timedelta
+        
+        credentials = GoogleCalendarCredentials.objects.create(
+            user=user,
+            access_token='test_token',
+            refresh_token='test_refresh',
+            token_expiry=timezone.now() + timedelta(hours=1)
+        )
+        
+        self.assertFalse(credentials.is_expired())
+    
+    def test_credentials_is_expired_expired(self):
+        """Test is_expired() method when token is expired."""
+        user = self.create_user(username='testuser', email='test@example.com')
+        from accounts.models import GoogleCalendarCredentials
+        from django.utils import timezone
+        from datetime import timedelta
+        
+        credentials = GoogleCalendarCredentials.objects.create(
+            user=user,
+            access_token='test_token',
+            refresh_token='test_refresh',
+            token_expiry=timezone.now() - timedelta(hours=1)
+        )
+        
+        self.assertTrue(credentials.is_expired())
+    
+    def test_credentials_is_expired_no_expiry(self):
+        """Test is_expired() method when token_expiry is None."""
+        user = self.create_user(username='testuser', email='test@example.com')
+        from accounts.models import GoogleCalendarCredentials
+        
+        credentials = GoogleCalendarCredentials.objects.create(
+            user=user,
+            access_token='test_token',
+            refresh_token='test_refresh',
+            token_expiry=None
+        )
+        
+        self.assertTrue(credentials.is_expired())
+    
+    def test_credentials_has_valid_credentials_enabled(self):
+        """Test has_valid_credentials() when calendar is enabled and has refresh token."""
+        user = self.create_user(username='testuser', email='test@example.com')
+        from accounts.models import GoogleCalendarCredentials
+        
+        credentials = GoogleCalendarCredentials.objects.create(
+            user=user,
+            access_token='test_token',
+            refresh_token='test_refresh',
+            calendar_enabled=True
+        )
+        
+        self.assertTrue(credentials.has_valid_credentials())
+    
+    def test_credentials_has_valid_credentials_disabled(self):
+        """Test has_valid_credentials() when calendar is disabled."""
+        user = self.create_user(username='testuser', email='test@example.com')
+        from accounts.models import GoogleCalendarCredentials
+        
+        credentials = GoogleCalendarCredentials.objects.create(
+            user=user,
+            access_token='test_token',
+            refresh_token='test_refresh',
+            calendar_enabled=False
+        )
+        
+        self.assertFalse(credentials.has_valid_credentials())
+    
+    def test_credentials_has_valid_credentials_no_refresh_token(self):
+        """Test has_valid_credentials() when refresh_token is missing."""
+        user = self.create_user(username='testuser', email='test@example.com')
+        from accounts.models import GoogleCalendarCredentials
+        
+        credentials = GoogleCalendarCredentials.objects.create(
+            user=user,
+            access_token='test_token',
+            refresh_token=None,
+            calendar_enabled=True
+        )
+        
+        self.assertFalse(credentials.has_valid_credentials())
+    
+    def test_credentials_cascade_delete(self):
+        """Test that credentials are deleted when user is deleted."""
+        user = self.create_user(username='testuser', email='test@example.com')
+        from accounts.models import GoogleCalendarCredentials
+        
+        credentials = GoogleCalendarCredentials.objects.create(
+            user=user,
+            access_token='test_token',
+            refresh_token='test_refresh'
+        )
+        
+        credentials_id = credentials.id
+        
+        # Delete user
+        user.delete()
+        
+        # Credentials should be deleted
+        self.assertFalse(GoogleCalendarCredentials.objects.filter(id=credentials_id).exists())
+    
+    def test_credentials_str_representation(self):
+        """Test the __str__ method of GoogleCalendarCredentials."""
+        user = self.create_user(username='testuser', email='test@example.com')
+        from accounts.models import GoogleCalendarCredentials
+        
+        credentials = GoogleCalendarCredentials.objects.create(
+            user=user,
+            access_token='test_token',
+            refresh_token='test_refresh'
+        )
+        
+        expected_str = f"Google Calendar Credentials for {user.username}"
+        self.assertEqual(str(credentials), expected_str)
+    
+    def test_credentials_default_calendar_enabled(self):
+        """Test that calendar_enabled defaults to True."""
+        user = self.create_user(username='testuser', email='test@example.com')
+        from accounts.models import GoogleCalendarCredentials
+        
+        credentials = GoogleCalendarCredentials.objects.create(
+            user=user,
+            access_token='test_token',
+            refresh_token='test_refresh'
+        )
+        
+        self.assertTrue(credentials.calendar_enabled)
+    
+    def test_credentials_google_email_field(self):
+        """Test that google_email field can be stored and retrieved."""
+        user = self.create_user(username='testuser', email='test@example.com')
+        from accounts.models import GoogleCalendarCredentials
+        
+        credentials = GoogleCalendarCredentials.objects.create(
+            user=user,
+            access_token='test_token',
+            refresh_token='test_refresh',
+            google_email='connected@gmail.com'
+        )
+        
+        self.assertEqual(credentials.google_email, 'connected@gmail.com')
+        
+        # Retrieve and verify
+        retrieved = GoogleCalendarCredentials.objects.get(user=user)
+        self.assertEqual(retrieved.google_email, 'connected@gmail.com')
+    
+    def test_credentials_google_email_optional(self):
+        """Test that google_email field is optional."""
+        user = self.create_user(username='testuser', email='test@example.com')
+        from accounts.models import GoogleCalendarCredentials
+        
+        credentials = GoogleCalendarCredentials.objects.create(
+            user=user,
+            access_token='test_token',
+            refresh_token='test_refresh',
+            google_email=None
+        )
+        
+        self.assertIsNone(credentials.google_email)
+

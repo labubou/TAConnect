@@ -45,6 +45,24 @@ class GetProfileView(GenericAPIView):
         """Get current user profile information"""
         try:
             user = request.user
+            
+            # Get Google Calendar status
+            google_calendar_status = {
+                'connected': False,
+                'calendar_enabled': False,
+                'has_valid_credentials': False,
+                'google_email': None
+            }
+            
+            if hasattr(user, 'google_calendar_credentials'):
+                creds = user.google_calendar_credentials
+                google_calendar_status = {
+                    'connected': bool(creds.refresh_token),
+                    'calendar_enabled': creds.calendar_enabled,
+                    'has_valid_credentials': creds.has_valid_credentials(),
+                    'google_email': creds.google_email
+                }
+            
             return Response({
                 'id': user.id,
                 'username': user.username,
@@ -54,6 +72,7 @@ class GetProfileView(GenericAPIView):
                 'email_verify': user.email_verify,
                 'user_type': user.user_type,
                 'date_joined': user.date_joined,
+                'google_calendar': google_calendar_status,
             }, status=status.HTTP_200_OK)
         except Exception:
             return Response(

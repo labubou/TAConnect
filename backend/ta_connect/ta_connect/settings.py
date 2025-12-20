@@ -386,7 +386,7 @@ SOCIALACCOUNT_PROVIDERS = {
             'secret': GOOGLE_OAUTH2_CLIENT_SECRET,
         },
         'REDIRECT_URI': f"{SITE_DOMAIN}/api/auth/google/callback/",
-        'SCOPE': ['profile', 'email'],
+        'SCOPE': ['profile', 'email', 'https://www.googleapis.com/auth/calendar.events'],
     }
 }
 

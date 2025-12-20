@@ -11,11 +11,13 @@ from accounts.permissions import IsInstructor
 from instructor.schemas.cancel_booking_schemas import cancel_booking_instructor_swagger
 from utils.error_formatter import format_serializer_errors
 from utils.push_notifications.booking.send_booking_cancelled import send_booking_cancelled_push
+from utils.google_calendar import remove_booking_from_calendars
 
 class InstructorCancelBookingView(GenericAPIView):
     """
     Cancel a student's booking as an instructor.
     Sends email notification to the student.
+    Removes calendar events from both student's and instructor's Google Calendars.
     """
     queryset = Booking.objects.all()
     permission_classes = [IsInstructor]
@@ -54,6 +56,15 @@ class InstructorCancelBookingView(GenericAPIView):
                 {'error': 'Booking is already completed and cannot be cancelled.'},
                 status=status.HTTP_400_BAD_REQUEST
             )
+
+        # Remove calendar events before cancellation
+        try:
+            student_deleted, instructor_deleted = remove_booking_from_calendars(booking)
+            if student_deleted or instructor_deleted:
+                print(f"Calendar events removed - Student: {student_deleted}, Instructor: {instructor_deleted}")
+        except Exception as e:
+            # Log error but don't fail the cancellation
+            print(f"Failed to remove calendar events: {e}")
 
         # Validate and cancel the booking
         serializer = self.get_serializer(

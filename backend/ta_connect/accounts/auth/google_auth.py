@@ -1,9 +1,12 @@
 #all of the google auth related function
 #all of this file is copied from the internet and it's working as expected
 #it's updated on 16 Nov 2025 by Karim Bassem
+#updated on 20 Dec 2025 by adding Google Calendar integration
 
 from django.shortcuts import redirect
-from ..models import StudentProfile, User, InstructorProfile
+from django.utils import timezone
+from datetime import timedelta
+from ..models import StudentProfile, User, InstructorProfile, GoogleCalendarCredentials
 from rest_framework import status
 from rest_framework.generics import GenericAPIView
 from rest_framework.views import APIView
@@ -23,6 +26,9 @@ from accounts.schemas.auth_schemas import (
     set_user_type_response,
 )
 from utils.email_sending.auth.send_welcome_email import send_welcome_email
+
+# Google OAuth2 scopes - includes Calendar for appointment integration
+GOOGLE_OAUTH_SCOPES = 'openid email profile https://www.googleapis.com/auth/calendar.events'
 
 class GoogleAuthRateThrottle(AnonRateThrottle):
     rate = '20/hour'  # Limit Google OAuth attempts
@@ -50,8 +56,9 @@ class GoogleLoginUrlView(GenericAPIView):
                 f'client_id={GOOGLE_OAUTH2_CLIENT_ID}&'
                 f'redirect_uri={redirect_uri}&'
                 'response_type=code&'
-                'scope=openid email profile&'
-                'access_type=offline'
+                f'scope={GOOGLE_OAUTH_SCOPES}&'
+                'access_type=offline&'
+                'prompt=consent'
             )
             return Response({'auth_url': oauth2_url}, status=status.HTTP_200_OK)
         except Exception:
@@ -59,6 +66,60 @@ class GoogleLoginUrlView(GenericAPIView):
                 {'error': 'Failed to generate Google login URL. Please try again.'},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
+
+
+def save_google_calendar_credentials(user, token_data, google_email=None):
+    """
+    Save or update Google Calendar credentials for a user.
+    
+    Args:
+        user: User instance
+        token_data: Dictionary containing access_token, refresh_token, expires_in
+        google_email: Optional email address of the connected Google account
+                     If not provided, will be fetched from Google API
+    """
+    try:
+        access_token = token_data.get('access_token')
+        refresh_token = token_data.get('refresh_token')
+        expires_in = token_data.get('expires_in', 3600)  # Default 1 hour
+        
+        # Calculate token expiry time
+        token_expiry = timezone.now() + timedelta(seconds=expires_in)
+        
+        # If email not provided, fetch it from Google API
+        if not google_email and access_token:
+            try:
+                userinfo_url = 'https://www.googleapis.com/oauth2/v3/userinfo'
+                headers = {'Authorization': f'Bearer {access_token}'}
+                userinfo_response = requests.get(userinfo_url, headers=headers, timeout=10)
+                if userinfo_response.status_code == 200:
+                    user_info = userinfo_response.json()
+                    google_email = user_info.get('email')
+            except Exception as e:
+                print(f"Failed to fetch Google email: {e}")
+                # Continue without email - it's not critical
+        
+        # Create or update credentials
+        credentials, created = GoogleCalendarCredentials.objects.update_or_create(
+            user=user,
+            defaults={
+                'access_token': access_token,
+                'token_expiry': token_expiry,
+                'google_email': google_email,
+            }
+        )
+        
+        # Only update refresh_token if a new one is provided
+        # (refresh tokens are not always returned on subsequent authentications)
+        if refresh_token:
+            credentials.refresh_token = refresh_token
+            credentials.save()
+            
+        return True
+    except Exception as e:
+        print(f"Failed to save Google Calendar credentials: {e}")
+        return False
+
 
 class GoogleAuthView(GenericAPIView):
     """Authenticate with Google OAuth2 authorization code"""
@@ -148,7 +209,9 @@ class GoogleAuthView(GenericAPIView):
             user = User.objects.filter(email=email).first()
             
             if user:
-                # User exists
+                # User exists - save/update Google Calendar credentials
+                save_google_calendar_credentials(user, token_data, google_email=email)
+                
                 refresh = RefreshToken.for_user(user)
                 
                 return Response({
@@ -191,6 +254,9 @@ class GoogleAuthView(GenericAPIView):
                         {'error': 'Failed to create user account. Please try again.'},
                         status=status.HTTP_500_INTERNAL_SERVER_ERROR
                     )
+
+                # Save Google Calendar credentials for new user
+                save_google_calendar_credentials(user, token_data, google_email=email)
 
                 # Generate tokens
                 refresh = RefreshToken.for_user(user)

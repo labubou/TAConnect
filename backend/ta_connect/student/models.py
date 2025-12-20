@@ -29,6 +29,10 @@ class Booking(BaseModel):
     is_cancelled = models.BooleanField(default=False)
     is_completed = models.BooleanField(default=False)
 
+    # Google Calendar Event IDs for calendar integration
+    student_calendar_event_id = models.CharField(max_length=255, blank=True, null=True, verbose_name="Student Calendar Event ID")
+    instructor_calendar_event_id = models.CharField(max_length=255, blank=True, null=True, verbose_name="Instructor Calendar Event ID")
+
 
     def save(self, *args, **kwargs):
         # Sync status based on boolean fields
