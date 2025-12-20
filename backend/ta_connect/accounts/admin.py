@@ -1,7 +1,7 @@
 from django.contrib import admin
 from django.contrib.auth import get_user_model
 from django.contrib.auth.admin import UserAdmin as DjangoUserAdmin
-from .models import InstructorProfile, StudentProfile, PendingEmailChange
+from .models import InstructorProfile, StudentProfile, PendingEmailChange, GoogleCalendarCredentials
 from webpush.models import PushInformation, SubscriptionInfo
 
 User = get_user_model()
@@ -83,3 +83,18 @@ class SubscriptionInfoAdmin(admin.ModelAdmin):
             return obj.endpoint[:50] + "..." if len(obj.endpoint) > 50 else obj.endpoint
         return "-"
     endpoint_preview.short_description = "Endpoint"
+
+
+@admin.register(GoogleCalendarCredentials)
+class GoogleCalendarCredentialsAdmin(admin.ModelAdmin):
+    list_display = ("id", "user", "calendar_enabled", "has_refresh_token", "token_expiry", "updated_at")
+    search_fields = ("user__username", "user__email")
+    list_filter = ("calendar_enabled",)
+    readonly_fields = ("created_at", "updated_at", "has_refresh_token")
+    raw_id_fields = ("user",)
+    ordering = ("-updated_at",)
+    
+    def has_refresh_token(self, obj):
+        return bool(obj.refresh_token)
+    has_refresh_token.short_description = "Has Refresh Token"
+    has_refresh_token.boolean = True

@@ -102,3 +102,34 @@ class PendingEmailChange(models.Model):
     def is_valid(self):
         """Check if token is valid (not used and not expired)"""
         return not self.used and not self.is_expired()
+
+
+class GoogleCalendarCredentials(models.Model):
+    """
+    Store Google OAuth credentials for Calendar API access.
+    Each user can have one set of credentials for Google Calendar integration.
+    """
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='google_calendar_credentials')
+    access_token = models.TextField(blank=True, null=True)
+    refresh_token = models.TextField(blank=True, null=True)
+    token_expiry = models.DateTimeField(blank=True, null=True)
+    calendar_enabled = models.BooleanField(default=True, verbose_name="Calendar Integration Enabled")
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = "Google Calendar Credentials"
+        verbose_name_plural = "Google Calendar Credentials"
+
+    def __str__(self):
+        return f"Google Calendar Credentials for {self.user.username}"
+
+    def is_expired(self):
+        """Check if the access token has expired"""
+        if not self.token_expiry:
+            return True
+        return timezone.now() >= self.token_expiry
+
+    def has_valid_credentials(self):
+        """Check if user has valid Google Calendar credentials"""
+        return bool(self.refresh_token) and self.calendar_enabled
