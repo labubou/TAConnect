@@ -50,7 +50,8 @@ class GetProfileView(GenericAPIView):
             google_calendar_status = {
                 'connected': False,
                 'calendar_enabled': False,
-                'has_valid_credentials': False
+                'has_valid_credentials': False,
+                'google_email': None
             }
             
             if hasattr(user, 'google_calendar_credentials'):
@@ -58,7 +59,8 @@ class GetProfileView(GenericAPIView):
                 google_calendar_status = {
                     'connected': bool(creds.refresh_token),
                     'calendar_enabled': creds.calendar_enabled,
-                    'has_valid_credentials': creds.has_valid_credentials()
+                    'has_valid_credentials': creds.has_valid_credentials(),
+                    'google_email': creds.google_email
                 }
             
             return Response({

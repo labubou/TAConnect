@@ -531,4 +531,36 @@ class GoogleCalendarCredentialsModelTestCase(BaseTestCase):
         )
         
         self.assertTrue(credentials.calendar_enabled)
+    
+    def test_credentials_google_email_field(self):
+        """Test that google_email field can be stored and retrieved."""
+        user = self.create_user(username='testuser', email='test@example.com')
+        from accounts.models import GoogleCalendarCredentials
+        
+        credentials = GoogleCalendarCredentials.objects.create(
+            user=user,
+            access_token='test_token',
+            refresh_token='test_refresh',
+            google_email='connected@gmail.com'
+        )
+        
+        self.assertEqual(credentials.google_email, 'connected@gmail.com')
+        
+        # Retrieve and verify
+        retrieved = GoogleCalendarCredentials.objects.get(user=user)
+        self.assertEqual(retrieved.google_email, 'connected@gmail.com')
+    
+    def test_credentials_google_email_optional(self):
+        """Test that google_email field is optional."""
+        user = self.create_user(username='testuser', email='test@example.com')
+        from accounts.models import GoogleCalendarCredentials
+        
+        credentials = GoogleCalendarCredentials.objects.create(
+            user=user,
+            access_token='test_token',
+            refresh_token='test_refresh',
+            google_email=None
+        )
+        
+        self.assertIsNone(credentials.google_email)
 

@@ -192,6 +192,7 @@ class GoogleCalendarStatusViewTestCase(BaseTestCase):
         self.assertFalse(response.data['connected'])
         self.assertFalse(response.data['calendar_enabled'])
         self.assertFalse(response.data['has_valid_credentials'])
+        self.assertIsNone(response.data['google_email'])
     
     def test_get_status_connected_enabled(self):
         """Test status retrieval when user is connected and enabled (200 OK)."""
@@ -201,7 +202,8 @@ class GoogleCalendarStatusViewTestCase(BaseTestCase):
             user=user,
             access_token='test_token',
             refresh_token='test_refresh',
-            calendar_enabled=True
+            calendar_enabled=True,
+            google_email='test@gmail.com'
         )
         
         response = self.client.get('/api/auth/google/calendar/status/')
@@ -210,6 +212,7 @@ class GoogleCalendarStatusViewTestCase(BaseTestCase):
         self.assertTrue(response.data['connected'])
         self.assertTrue(response.data['calendar_enabled'])
         self.assertTrue(response.data['has_valid_credentials'])
+        self.assertEqual(response.data['google_email'], 'test@gmail.com')
     
     def test_get_status_connected_disabled(self):
         """Test status retrieval when user is connected but disabled (200 OK)."""
@@ -219,7 +222,8 @@ class GoogleCalendarStatusViewTestCase(BaseTestCase):
             user=user,
             access_token='test_token',
             refresh_token='test_refresh',
-            calendar_enabled=False
+            calendar_enabled=False,
+            google_email='test@gmail.com'
         )
         
         response = self.client.get('/api/auth/google/calendar/status/')
@@ -228,6 +232,7 @@ class GoogleCalendarStatusViewTestCase(BaseTestCase):
         self.assertTrue(response.data['connected'])
         self.assertFalse(response.data['calendar_enabled'])
         self.assertFalse(response.data['has_valid_credentials'])
+        self.assertEqual(response.data['google_email'], 'test@gmail.com')
     
     def test_get_status_requires_authentication(self):
         """Test that endpoint requires authentication (401 Unauthorized)."""

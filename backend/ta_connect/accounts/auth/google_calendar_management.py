@@ -156,8 +156,21 @@ class GoogleCalendarConnectView(GenericAPIView):
             token_data = token_response.json()
             user = request.user
 
+            # Fetch Google account email using access token
+            google_email = None
+            try:
+                userinfo_url = 'https://www.googleapis.com/oauth2/v3/userinfo'
+                headers = {'Authorization': f'Bearer {token_data.get("access_token")}'}
+                userinfo_response = requests.get(userinfo_url, headers=headers, timeout=10)
+                if userinfo_response.status_code == 200:
+                    user_info = userinfo_response.json()
+                    google_email = user_info.get('email')
+            except Exception as e:
+                print(f"Failed to fetch Google email: {e}")
+                # Continue without email - it's not critical for connection
+
             # Save or update Google Calendar credentials
-            success = save_google_calendar_credentials(user, token_data)
+            success = save_google_calendar_credentials(user, token_data, google_email=google_email)
             
             if not success:
                 return Response(
@@ -170,7 +183,8 @@ class GoogleCalendarConnectView(GenericAPIView):
             
             return Response({
                 'message': 'Google Calendar connected successfully.',
-                'calendar_enabled': creds.calendar_enabled
+                'calendar_enabled': creds.calendar_enabled,
+                'google_email': creds.google_email
             }, status=status.HTTP_200_OK)
 
         except Exception as e:
@@ -247,7 +261,8 @@ class GoogleCalendarStatusView(GenericAPIView):
                 return Response({
                     'connected': False,
                     'calendar_enabled': False,
-                    'has_valid_credentials': False
+                    'has_valid_credentials': False,
+                    'google_email': None
                 }, status=status.HTTP_200_OK)
             
             creds = user.google_calendar_credentials
@@ -255,7 +270,8 @@ class GoogleCalendarStatusView(GenericAPIView):
             return Response({
                 'connected': bool(creds.refresh_token),
                 'calendar_enabled': creds.calendar_enabled,
-                'has_valid_credentials': creds.has_valid_credentials()
+                'has_valid_credentials': creds.has_valid_credentials(),
+                'google_email': creds.google_email
             }, status=status.HTTP_200_OK)
             
         except Exception as e:

@@ -35,6 +35,7 @@ export default function SettingsPage() {
   const [googleCalendarEnabled, setGoogleCalendarEnabled] = useState(false);
   const [googleCalendarConnected, setGoogleCalendarConnected] = useState(false);
   const [googleCalendarLoading, setGoogleCalendarLoading] = useState(false);
+  const [googleCalendarEmail, setGoogleCalendarEmail] = useState(null);
 
   // Profile form state
   const [form, setForm] = useState({
@@ -124,6 +125,7 @@ export default function SettingsPage() {
         const calendarResponse = await axios.get('/api/auth/google/calendar/status/');
         setGoogleCalendarConnected(calendarResponse.data.connected);
         setGoogleCalendarEnabled(calendarResponse.data.calendar_enabled);
+        setGoogleCalendarEmail(calendarResponse.data.google_email || null);
       } catch (calendarErr) {
         console.error('Failed to fetch Google Calendar status:', calendarErr);
       }
@@ -153,7 +155,7 @@ export default function SettingsPage() {
   const handleConnectGoogleCalendar = async () => {
     try {
       setGoogleCalendarLoading(true);
-      startLoading('google-calendar-url', 'Getting Google Calendar connection URL...');
+      startLoading('google-calendar-url', t.googleCalendar?.gettingUrl || 'Getting Google Calendar connection URL...');
       const res = await axios.get('/api/auth/google/calendar/url/?from=settings');
       stopLoading('google-calendar-url');
       // Redirect to Google OAuth
@@ -162,7 +164,7 @@ export default function SettingsPage() {
       stopLoading('google-calendar-url');
       setMessage({
         type: 'error',
-        text: err.response?.data?.error || 'Failed to get Google Calendar connection URL. Please try again.'
+        text: err.response?.data?.error || t.googleCalendar?.urlError || 'Failed to get Google Calendar connection URL. Please try again.'
       });
       setGoogleCalendarLoading(false);
     }
@@ -177,7 +179,7 @@ export default function SettingsPage() {
 
     const newValue = !googleCalendarEnabled;
     setGoogleCalendarLoading(true);
-    startLoading('toggle-google-calendar', newValue ? 'Enabling Google Calendar...' : 'Disabling Google Calendar...');
+    startLoading('toggle-google-calendar', newValue ? (t.googleCalendar?.enabling || 'Enabling Google Calendar...') : (t.googleCalendar?.disabling || 'Disabling Google Calendar...'));
 
     try {
       const response = await axios.post('/api/auth/google/calendar/toggle/', {
@@ -188,13 +190,13 @@ export default function SettingsPage() {
       stopLoading('toggle-google-calendar');
       setMessage({
         type: 'success',
-        text: response.data.message || `Google Calendar ${newValue ? 'enabled' : 'disabled'} successfully.`
+        text: response.data.message || (newValue ? (t.googleCalendar?.toggleEnabled || 'Google Calendar enabled successfully.') : (t.googleCalendar?.toggleDisabled || 'Google Calendar disabled successfully.'))
       });
     } catch (err) {
       stopLoading('toggle-google-calendar');
       setMessage({
         type: 'error',
-        text: err.response?.data?.error || 'Failed to update Google Calendar settings. Please try again.'
+        text: err.response?.data?.error || t.googleCalendar?.toggleError || 'Failed to update Google Calendar settings. Please try again.'
       });
     } finally {
       setGoogleCalendarLoading(false);
@@ -206,19 +208,20 @@ export default function SettingsPage() {
     
     setGoogleCalendarLoading(true);
     setMessage({ type: '', text: '' });
-    startLoading('google-calendar-connect', 'Connecting Google Calendar...');
+    startLoading('google-calendar-connect', t.googleCalendar?.connecting || 'Connecting Google Calendar...');
 
     try {
       const res = await axios.post('/api/auth/google/calendar/connect/', { code });
       setGoogleCalendarConnected(true);
       setGoogleCalendarEnabled(res.data.calendar_enabled);
-      setMessage({ type: 'success', text: res.data.message || 'Google Calendar connected successfully!' });
+      setGoogleCalendarEmail(res.data.google_email || null);
+      setMessage({ type: 'success', text: res.data.message || t.googleCalendar?.connectionSuccess || 'Google Calendar connected successfully!' });
       stopLoading('google-calendar-connect');
     } catch (err) {
       stopLoading('google-calendar-connect');
       setMessage({
         type: 'error',
-        text: err.response?.data?.error || 'Failed to connect Google Calendar. Please try again.'
+        text: err.response?.data?.error || t.googleCalendar?.connectionError || 'Failed to connect Google Calendar. Please try again.'
       });
     } finally {
       setGoogleCalendarLoading(false);
@@ -240,7 +243,7 @@ export default function SettingsPage() {
     } else if (error && googleCalendar === 'true') {
       setMessage({
         type: 'error',
-        text: 'Google Calendar connection cancelled or failed.'
+        text: t.googleCalendar?.connectionCancelled || 'Google Calendar connection cancelled or failed.'
       });
       // Clean up URL - remove query params but keep pathname
       const cleanUrl = window.location.pathname;
@@ -800,10 +803,10 @@ export default function SettingsPage() {
                         </div>
                         <div className={`flex-1 ${language === 'ar' ? 'text-right' : 'text-left'}`}>
                           <h2 className={`text-base sm:text-lg md:text-xl font-semibold ${isDark ? 'text-white' : 'text-gray-900'} ${language === 'ar' ? 'text-right' : 'text-left'}`}>
-                            Google Calendar Integration
+                            {t.googleCalendar?.title || 'Google Calendar Integration'}
                           </h2>
                           <p className={`text-xs sm:text-sm mt-1 ${isDark ? 'text-gray-400' : 'text-gray-600'} ${language === 'ar' ? 'text-right' : 'text-left'}`}>
-                            Sync your bookings with Google Calendar
+                            {t.googleCalendar?.subtitle || 'Sync your bookings with Google Calendar'}
                           </p>
                         </div>
                       </div>
@@ -821,19 +824,19 @@ export default function SettingsPage() {
                                   <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                                   <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                                 </svg>
-                                Connecting...
+                                {t.googleCalendar?.connecting || 'Connecting...'}
                               </>
                             ) : (
                               <>
                                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                                 </svg>
-                                Connect Google Calendar
+                                {t.googleCalendar?.connectButton || 'Connect Google Calendar'}
                               </>
                             )}
                           </button>
                           <p className={`text-xs mt-2 text-center ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
-                            Connect any Google account to sync your bookings with Google Calendar
+                            {t.googleCalendar?.connectDescription || 'Connect any Google account to sync your bookings with Google Calendar'}
                           </p>
                         </div>
                       )}
@@ -881,7 +884,7 @@ export default function SettingsPage() {
                           <div className={`flex-1 ${language === 'ar' ? 'text-right' : 'text-left'}`}>
                             <div className={`flex w-full flex-col sm:flex-row sm:items-center gap-2 ${language === 'ar' ? 'items-end text-right sm:flex-row-reverse sm:justify-start' : 'items-start text-left sm:justify-start'}`}>
                               <p className={`flex-1 font-semibold ${isDark ? 'text-white' : 'text-gray-900'}`}>
-                                Enable Calendar Sync
+                                {t.googleCalendar?.enableSync || 'Enable Calendar Sync'}
                               </p>
                               {googleCalendarEnabled && (
                                 <span className={`text-xs px-2 py-0.5 rounded-full inline-block w-fit ${isDark ? 'bg-blue-700 text-blue-100' : 'bg-blue-200 text-blue-800'}`}>
@@ -890,8 +893,18 @@ export default function SettingsPage() {
                               )}
                             </div>
                             <p className={`text-sm mt-1 ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
-                              Automatically add booking events to your Google Calendar
+                              {t.googleCalendar?.syncDescription || 'Automatically add booking events to your Google Calendar'}
                             </p>
+                            {googleCalendarEmail && (
+                              <div className={`mt-2 flex items-center gap-2 ${language === 'ar' ? 'flex-row-reverse' : ''}`}>
+                                <svg className={`w-4 h-4 ${isDark ? 'text-gray-400' : 'text-gray-500'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                                </svg>
+                                <p className={`text-xs ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
+                                  {t.googleCalendar?.connectedTo || 'Connected to'}: <span className={`font-medium ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>{googleCalendarEmail}</span>
+                                </p>
+                              </div>
+                            )}
                           </div>
                           {language !== 'ar' && (
                             <svg className={`w-5 h-5 flex-shrink-0 ${
