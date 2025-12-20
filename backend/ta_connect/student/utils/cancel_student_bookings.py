@@ -1,6 +1,7 @@
 from student.models import Booking
 from utils.email_sending.booking.send_cancel_booking_email_mass import send_cancel_booking_email_mass
 from utils.push_notifications.booking.send_booking_cancelled_mass import send_booking_cancelled_push_mass
+from utils.google_calendar import remove_booking_from_calendars
 
 def cancel_student_bookings(time_slot, bookings=None, cancellation_reason=None):
     """
@@ -33,6 +34,15 @@ def cancel_student_bookings(time_slot, bookings=None, cancellation_reason=None):
         bookings_list = list(bookings)
         
         for booking in bookings_list:
+            # Remove calendar events before cancellation
+            try:
+                student_deleted, instructor_deleted = remove_booking_from_calendars(booking)
+                if student_deleted or instructor_deleted:
+                    print(f"Calendar events removed for booking {booking.id} - Student: {student_deleted}, Instructor: {instructor_deleted}")
+            except Exception as e:
+                # Log error but don't fail the cancellation
+                print(f"Failed to remove calendar events for booking {booking.id}: {e}")
+            
             booking.cancel()
             booking.save()
             cancelled_count += 1

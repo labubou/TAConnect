@@ -1,5 +1,5 @@
 from django.urls import path
-from .auth import login, register, logout, google_auth, forget_password, profile
+from .auth import login, register, logout, google_auth, forget_password, profile, google_calendar_management
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 from rest_framework_simplejwt.views import (
@@ -33,6 +33,14 @@ urlpatterns = [
     path('auth/google/authenticate/', google_auth.GoogleAuthView.as_view(), name='google_auth'),
     path('auth/google/callback/', google_auth.GoogleCallbackView.as_view(), name='google_callback'),
     path('auth/google/set-user-type/', google_auth.SetUserTypeView.as_view(), name='set_user_type'),
+    
+    # Google Calendar management endpoints
+    path('auth/google/calendar/url/', google_calendar_management.GoogleCalendarConnectUrlView.as_view(), name='google_calendar_connect_url'),
+    path('auth/google/calendar/connect/', google_calendar_management.GoogleCalendarConnectView.as_view(), name='google_calendar_connect'),
+    path('auth/google/calendar/callback/', google_calendar_management.GoogleCalendarCallbackView.as_view(), name='google_calendar_callback'),
+    path('auth/google/calendar/status/', google_calendar_management.GoogleCalendarStatusView.as_view(), name='google_calendar_status'),
+    path('auth/google/calendar/toggle/', google_calendar_management.GoogleCalendarToggleView.as_view(), name='google_calendar_toggle'),
+    path('auth/google/calendar/disconnect/', google_calendar_management.GoogleCalendarDisconnectView.as_view(), name='google_calendar_disconnect'),
 
     # Profile endpoints
     path('profile/', profile.GetProfileView.as_view(), name='get_profile'),

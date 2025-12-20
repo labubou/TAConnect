@@ -31,7 +31,7 @@ def get_calendar_service(user):
         user: User object with google_calendar_credentials
         
     Returns:
-        Google Calendar API service object or None if credentials are invalid
+        Google Calendar API service object or None if credentials are invalid or calendar is disabled
     """
     try:
         # Check if user has calendar credentials
@@ -40,6 +40,11 @@ def get_calendar_service(user):
             return None
             
         creds_model = user.google_calendar_credentials
+        
+        # Check if calendar integration is enabled
+        if not creds_model.calendar_enabled:
+            print(f"User {user.username} has Google Calendar integration disabled")
+            return None
         
         if not creds_model.has_valid_credentials():
             print(f"User {user.username} has no valid calendar credentials")
