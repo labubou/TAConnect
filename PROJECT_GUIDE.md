@@ -49,6 +49,22 @@ Add the keys to your environment files:
 - `VAPID_PUBLIC_KEY` and `VAPID_PRIVATE_KEY` → `backend/ta_connect/.env`
 - `VITE_VAPID_PUBLIC_KEY` (same as public key) → `frontend/ta_connect/.env`
 
+**Configure Google Calendar Integration (Optional):**
+1. Go to [Google Cloud Console](https://console.cloud.google.com/)
+2. Create a new project or select an existing one
+3. Enable the Google Calendar API
+4. Create OAuth 2.0 credentials (Web application)
+5. Add authorized redirect URIs:
+   - `http://localhost:8000/api/auth/google/callback/` (for development)
+   - `https://yourdomain.com/api/auth/google/callback/` (for production)
+   - `http://localhost:8000/api/auth/google/calendar/callback/` (for calendar connection)
+   - `https://yourdomain.com/api/auth/google/calendar/callback/` (for production)
+6. Add credentials to `backend/ta_connect/.env`:
+   - `GOOGLE_OAUTH2_CLIENT_ID=your-client-id`
+   - `GOOGLE_OAUTH2_CLIENT_SECRET=your-client-secret`
+   - `GOOGLE_REDIRECT_URI=http://localhost:8000/api/auth/google/callback/` (or your production URL)
+   - `GOOGLE_CALENDAR_CONNECT_REDIRECT_URI=http://localhost:8000/api/auth/google/calendar/callback/` (or your production URL)
+
 ```bash
 docker compose up --build
 ```
@@ -66,7 +82,7 @@ docker compose up --build
 
 ## 🧪 Testing
 
-TAConnect includes **~128 tests** covering models, views, and serializers.
+TAConnect includes **~158 tests** covering models, views, and serializers, including comprehensive Google Calendar integration tests.
 
 ```bash
 # Run all tests

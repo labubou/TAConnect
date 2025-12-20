@@ -181,10 +181,17 @@ docker exec taconnect-backend-1 python manage.py test accounts.tests.test_views 
 - `UserModelTestCase`: User creation, validation, user types, profiles
 - `InstructorProfileModelTestCase`: Profile creation, one-to-one relationships
 - `StudentProfileModelTestCase`: Profile creation, one-to-one relationships
+- `GoogleCalendarCredentialsModelTestCase`: Credentials creation, validation, expiration checks, enable/disable
 - `RegisterViewTestCase`: Registration endpoint (happy path, validation, security)
 - `LoginViewTestCase`: Login endpoint (username/email, unverified email)
 - `UserViewTestCase`: User data retrieval (authenticated/unauthenticated)
 - `VerifyEmailViewTestCase`: Email verification (valid/invalid tokens)
+- `GoogleCalendarConnectUrlViewTestCase`: Get OAuth URL (happy path, authentication, throttling)
+- `GoogleCalendarConnectViewTestCase`: Connect Google Calendar (happy path, invalid code, token exchange errors)
+- `GoogleCalendarStatusViewTestCase`: Get connection status (connected, not connected, enabled/disabled)
+- `GoogleCalendarToggleViewTestCase`: Enable/disable calendar (happy path, not connected, validation)
+- `GoogleCalendarDisconnectViewTestCase`: Disconnect calendar (happy path, not connected)
+- `GoogleCalendarCallbackViewTestCase`: OAuth callback handling (code, error, redirect)
 - `RegisterSerializerTestCase`: Registration serializer validation
 - `LoginSerializerTestCase`: Login serializer validation
 
@@ -206,6 +213,37 @@ docker exec taconnect-backend-1 python manage.py test accounts.tests.test_views 
 - `UpdateBookingSerializerTestCase`: Booking update validation
 - `CancelBookingSerializerTestCase`: Booking cancellation validation (past bookings)
 - `ConfirmBookingSerializerTestCase`: Booking confirmation validation
+
+### Google Calendar Integration Tests
+
+The Google Calendar integration includes comprehensive tests covering:
+
+**Model Tests (`GoogleCalendarCredentialsModelTestCase`):**
+- Credentials creation (happy path, one-to-one relationship)
+- Token expiration checks (`is_expired()` method)
+- Valid credentials check (`has_valid_credentials()` method)
+- Calendar enabled/disabled state
+- Cascade delete when user is deleted
+- String representation
+
+**View Tests:**
+- `GoogleCalendarConnectUrlViewTestCase`: OAuth URL generation, authentication required, throttling
+- `GoogleCalendarConnectViewTestCase`: Successful connection, invalid code, token exchange failures, network errors
+- `GoogleCalendarStatusViewTestCase`: Status retrieval (connected/not connected, enabled/disabled)
+- `GoogleCalendarToggleViewTestCase`: Enable/disable functionality, validation (not connected, invalid data)
+- `GoogleCalendarDisconnectViewTestCase`: Successful disconnect, not connected error handling
+- `GoogleCalendarCallbackViewTestCase`: OAuth callback redirects (success, error, missing code)
+
+**Edge Cases Covered:**
+- Missing or invalid authorization codes
+- Expired tokens
+- Network failures during token exchange
+- Users without credentials
+- Disabled calendar integration
+- Unauthenticated access attempts
+- Rate limiting (throttling)
+- Invalid redirect URIs
+- Missing state parameters
 
 ### Writing New Tests
 
@@ -328,10 +366,10 @@ def test_user_can_only_access_own_resources(self):
 ### Test Statistics
 
 **Total Test Count:**
-- Accounts App: ~50 tests
+- Accounts App: ~80 tests (including Google Calendar tests)
 - Instructor App: ~42 tests
 - Student App: ~36 tests
-- **Total: ~128 tests** covering models, views, and serializers
+- **Total: ~158 tests** covering models, views, and serializers
 
 **Test Categories:**
 - Happy Path Tests: ~40% (successful operations)

@@ -84,6 +84,13 @@ Whether you're a university IT department, a small academic institution, or an i
 - Customizable preferences
 - **Push notifications** (real-time browser alerts)
 
+### 📅 Google Calendar Integration
+- **Automatic sync**: Booking events automatically added to Google Calendar
+- **Universal access**: Works for all users (Google and non-Google login)
+- **Flexible connection**: Connect any Google account to your TAConnect account
+- **Enable/disable toggle**: Control calendar sync from settings
+- **Event management**: Automatic creation, update, and deletion of calendar events
+
 </td>
 </tr>
 <tr>
@@ -174,7 +181,8 @@ docker compose up --build
 - [x] Dark/Light theme
 - [x] Multi-language support
 - [x] Push notifications (Web Push API)
-- [ ] Calendar integrations (Google, Outlook)
+- [x] Google Calendar integration (automatic sync, universal access)
+- [ ] Outlook Calendar integration
 - [ ] AI scheduling assistant
 
 ---

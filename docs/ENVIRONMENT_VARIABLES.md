@@ -24,9 +24,11 @@ CORS_ALLOWED_ORIGINS=http://localhost:3000
 # Email configuration
 MAIL_PASSWORD=your-email-app-password
 
-# Google OAuth (optional)
-GOOGLE_CLIENT_ID=your-google-client-id
-GOOGLE_CLIENT_SECRET=your-google-client-secret
+# Google OAuth & Calendar Integration (optional)
+GOOGLE_OAUTH2_CLIENT_ID=your-google-client-id
+GOOGLE_OAUTH2_CLIENT_SECRET=your-google-client-secret
+GOOGLE_REDIRECT_URI=http://localhost:8000/api/auth/google/callback/
+GOOGLE_CALENDAR_CONNECT_REDIRECT_URI=http://localhost:8000/api/auth/google/calendar/callback/
 
 # Field Encryption (required)
 # Generate: python -c "from cryptography.fernet import Fernet; print(Fernet.generate_key().decode())"
