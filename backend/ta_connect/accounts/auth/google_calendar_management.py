@@ -5,6 +5,8 @@ This module provides endpoints for:
 - Connecting a Google account for Calendar integration
 - Enabling/disabling Google Calendar integration
 - Getting Google Calendar connection status
+
+This code is vibe coded most of it by cursor but updated by Karim Bassem.
 """
 
 from django.shortcuts import redirect

@@ -69,6 +69,11 @@ export const settingsStrings = {
       gettingUrl: 'Getting Google Calendar connection URL...',
       enabling: 'Enabling Google Calendar...',
       disabling: 'Disabling Google Calendar...',
+      disconnectButton: 'Disconnect Google Calendar',
+      disconnecting: 'Disconnecting...',
+      disconnectSuccess: 'Google Calendar disconnected successfully.',
+      disconnectError: 'Failed to disconnect Google Calendar. Please try again.',
+      disconnectConfirm: 'Are you sure you want to disconnect Google Calendar? This will remove all calendar integration.',
     },
 
     // Profile tab strings
@@ -215,6 +220,11 @@ export const settingsStrings = {
       gettingUrl: 'جاري الحصول على رابط الاتصال بـ Google Calendar...',
       enabling: 'جاري تفعيل Google Calendar...',
       disabling: 'جاري تعطيل Google Calendar...',
+      disconnectButton: 'قطع الاتصال بـ Google Calendar',
+      disconnecting: 'جاري قطع الاتصال...',
+      disconnectSuccess: 'تم قطع الاتصال بـ Google Calendar بنجاح.',
+      disconnectError: 'فشل قطع الاتصال بـ Google Calendar. يرجى المحاولة مرة أخرى.',
+      disconnectConfirm: 'هل أنت متأكد من أنك تريد قطع الاتصال بـ Google Calendar؟ سيؤدي هذا إلى إزالة جميع تكاملات التقويم.',
     },
 
     // Profile tab strings
