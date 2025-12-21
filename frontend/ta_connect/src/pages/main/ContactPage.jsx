@@ -342,12 +342,12 @@ function ContactPage() {
                 {t.contactInfo.github}
               </h3>
               <a
-                href="https://github.com/Kbassem10/TAConnect"
+                href="https://github.com/labubou/TAConnect"
                 target="_blank"
                 rel="noopener noreferrer"
                 className={`text-sm transition-colors ${isDark ? 'text-blue-400 hover:text-blue-300' : 'text-blue-600 hover:text-blue-700'}`}
               >
-                github.com/Kbassem10/TAConnect
+                github.com/labubou/TAConnect
               </a>
             </div>
           </div>

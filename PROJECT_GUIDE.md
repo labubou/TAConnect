@@ -26,7 +26,7 @@ Welcome to the **TAConnect Technical Documentation**. TAConnect is a **fully sel
 ### Setup
 
 ```bash
-git clone https://github.com/Kbassem10/TAConnect.git
+git clone https://github.com/labubou/TAConnect.git
 cd TAConnect
 cp backend/ta_connect/.env.example backend/ta_connect/.env
 ```

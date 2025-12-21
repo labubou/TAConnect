@@ -84,7 +84,7 @@ VITE_VAPID_PUBLIC_KEY='your-generated-public-key'
 Docker provides the easiest way to self-host TAConnect. It handles all dependencies and ensures a consistent environment.
 
 ```bash
-git clone https://github.com/Kbassem10/TAConnect.git
+git clone https://github.com/labubou/TAConnect.git
 cd TAConnect
 docker compose up --build
 ```

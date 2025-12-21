@@ -16,6 +16,7 @@ const footerStrings = {
     installAppDescription: "Get the app for a better experience",
     terms: "Terms of Service",
     privacy: "Privacy Policy",
+    feedback: "Feedback & Bugs",
   },
   ar: {
     copyright: "جميع الحقوق محفوظة.",
@@ -33,6 +34,7 @@ const footerStrings = {
     installAppDescription: "احصل على التطبيق لتجربة أفضل",
     terms: "شروط الخدمة",
     privacy: "سياسة الخصوصية",
+    feedback: "التعليقات والأخطاء",
   },
 };
 
