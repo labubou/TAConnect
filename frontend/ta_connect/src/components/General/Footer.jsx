@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom';
 import { Github, Mail, MapPin } from 'lucide-react';
 import landingPageStrings from '../../strings/landingPageStrings';
 import footerStrings from '../../strings/footerStrings';
+import TallyFeedbackLink from './TallyFeedbackLink';
 
 function Footer() {
   const { language } = useLanguage();
@@ -92,7 +93,7 @@ function Footer() {
               </li>
               <li>
                 <a 
-                  href="https://github.com/Kbassem10/TAConnect" 
+                  href="https://github.com/labubou/TAConnect" 
                   target="_blank" 
                   rel="noopener noreferrer"
                   className={`text-sm transition-colors hover:text-blue-600 flex items-center space-x-1 ${isDark ? 'text-gray-400 hover:text-blue-400' : 'text-gray-600'}`}
@@ -100,6 +101,11 @@ function Footer() {
                   <Github size={14} />
                   <span>{t.footer.github}</span>
                 </a>
+              </li>
+              <li>
+                <TallyFeedbackLink 
+                  className={`text-sm transition-colors hover:text-blue-600 ${isDark ? 'text-gray-400 hover:text-blue-400' : 'text-gray-600'}`}
+                />
               </li>
             </ul>
           </div>

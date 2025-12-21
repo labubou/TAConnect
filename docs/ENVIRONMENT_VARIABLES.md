@@ -59,6 +59,10 @@ VITE_GOOGLE_SITE_VERIFICATION=your-verification-code
 # Push Notifications
 # Must match VAPID_PUBLIC_KEY from backend
 VITE_VAPID_PUBLIC_KEY=your-vapid-public-key
+
+# Tally Form Integration (Feedback & Bugs)
+# Get your form ID from your Tally form share URL: https://tally.so/forms/YOUR_FORM_ID/share
+VITE_TALLY_FORM_ID=your-tally-form-id
 ```
 
 ## 🌐 Self-Hosting SEO Configuration

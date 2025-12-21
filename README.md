@@ -4,7 +4,7 @@
 
 ### Smart Office Hours & Scheduling Platform
 
-[![Project Status](https://img.shields.io/badge/Status-Active%20Development-brightgreen?style=for-the-badge)](https://github.com/Kbassem10/TAConnect)
+[![Project Status](https://img.shields.io/badge/Status-Active%20Development-brightgreen?style=for-the-badge)](https://github.com/labubou/TAConnect)
 [![License](https://img.shields.io/badge/License-AGPL--3.0%20%2F%20Commercial-blue?style=for-the-badge)](LICENSE.md)
 [![Django](https://img.shields.io/badge/Django-6.0-092E20?style=for-the-badge&logo=django)](https://www.djangoproject.com/)
 [![React](https://img.shields.io/badge/React-19.x-61DAFB?style=for-the-badge&logo=react)](https://reactjs.org/)
@@ -122,7 +122,7 @@ Whether you're a university IT department, a small academic institution, or an i
 
 ```bash
 # Clone the repository
-git clone https://github.com/Kbassem10/TAConnect.git
+git clone https://github.com/labubou/TAConnect.git
 cd TAConnect
 
 # Copy environment file
