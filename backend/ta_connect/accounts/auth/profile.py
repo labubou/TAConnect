@@ -19,7 +19,7 @@ from ..serializers.verify_email_change_serializer import VerifyEmailChangeSerial
 from utils.email_sending.profile.send_change_email import send_change_email
 
 class ProfileRateThrottle(UserRateThrottle):
-    rate = '20/hour'  # Limit profile operations
+    rate = '50/hour'  # Limit profile operations
 
 class PasswordChangeRateThrottle(UserRateThrottle):
     rate = '5/hour'  # Limit password change attempts

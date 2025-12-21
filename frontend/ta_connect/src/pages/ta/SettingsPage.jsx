@@ -312,18 +312,24 @@ export default function TASettingsPage() {
     startLoading('update-profile', 'Updating profile...');
 
     try {
-      const res = await axios.patch('/api/profile/', form);
+      const res = await axios.put('/api/profile/update/', form);
       stopLoading('update-profile');
       
       if (res.data?.user) {
-        updateUser(res.data.user);
+        // Merge updated user data with existing user to preserve fields like user_type
+        const mergedUser = {
+          ...user,
+          ...res.data.user,
+          user_type: user?.user_type, // Preserve user_type as it's not in the response
+        };
+        updateUser(mergedUser);
         setProfileMessage(t.profilePage?.success || 'Profile updated successfully');
       } else {
         setProfileMessage(t.profilePage?.unexpectedError || 'Profile updated');
       }
     } catch (err) {
       stopLoading('update-profile');
-      const errMsg = err.response?.data?.message || t.profilePage?.failed || 'Failed to update profile';
+      const errMsg = err.response?.data?.message || err.response?.data?.error || t.profilePage?.failed || 'Failed to update profile';
       setProfileError(errMsg);
     } finally {
       setProfileLoading(false);
