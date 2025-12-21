@@ -313,7 +313,7 @@ export default function SettingsPage() {
     startLoading('update-profile', 'Updating profile...');
 
     try {
-      const res = await axios.put('/api/profile/', form);
+      const res = await axios.patch('/api/profile/', form);
       stopLoading('update-profile');
       
       if (res.data?.user) {
