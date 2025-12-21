@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useNavigate, useSearchParams, Link } from 'react-router-dom';
 import { useTheme } from '../../contexts/ThemeContext';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { useGlobalLoading } from '../../contexts/GlobalLoadingContext';
@@ -8,6 +8,7 @@ import LanguageToggle from '../../components/General/LanguageToggle';
 import Footer from '../../components/General/Footer';
 import Logo from '../../assets/Logo.png';
 import strings from '../../strings/registerPageStrings';
+import footerStrings from '../../strings/footerStrings';
 import axios from 'axios';
 
 function RegisterPage() {
@@ -17,6 +18,7 @@ function RegisterPage() {
   const { language } = useLanguage();
   const { startLoading, stopLoading, isLoading: globalIsLoading } = useGlobalLoading();
   const t = strings[language];
+  const ft = footerStrings[language];
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
@@ -484,6 +486,26 @@ function RegisterPage() {
               >
                 {t.footer.loginLink}
               </button>
+            </p>
+          </div>
+
+          {/* Terms and Privacy Links */}
+          <div className="mt-4 text-center">
+            <p className={`text-xs ${isDark ? 'text-gray-500' : 'text-gray-500'}`}>
+              {language === 'ar' ? 'باستخدام TAConnect، أنت توافق على' : 'By using TAConnect, you agree to our'}{' '}
+              <Link 
+                to="/terms" 
+                className={`underline hover:text-blue-600 ${isDark ? 'text-gray-400 hover:text-blue-400' : 'text-gray-600'}`}
+              >
+                {ft.terms || (language === 'ar' ? 'شروط الخدمة' : 'Terms of Service')}
+              </Link>
+              {' '}{language === 'ar' ? 'و' : 'and'}{' '}
+              <Link 
+                to="/privacy" 
+                className={`underline hover:text-blue-600 ${isDark ? 'text-gray-400 hover:text-blue-400' : 'text-gray-600'}`}
+              >
+                {ft.privacy || (language === 'ar' ? 'سياسة الخصوصية' : 'Privacy Policy')}
+              </Link>
             </p>
           </div>
         </div>

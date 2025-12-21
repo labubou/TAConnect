@@ -14,6 +14,8 @@ const footerStrings = {
     email: "Contact us",
     installApp: "Install App",
     installAppDescription: "Get the app for a better experience",
+    terms: "Terms of Service",
+    privacy: "Privacy Policy",
   },
   ar: {
     copyright: "جميع الحقوق محفوظة.",
@@ -29,6 +31,8 @@ const footerStrings = {
     email: "تواصل معنا",
     installApp: "تثبيت التطبيق",
     installAppDescription: "احصل على التطبيق لتجربة أفضل",
+    terms: "شروط الخدمة",
+    privacy: "سياسة الخصوصية",
   },
 };
 

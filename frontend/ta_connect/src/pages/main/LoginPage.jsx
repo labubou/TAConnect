@@ -3,13 +3,14 @@ import { useTheme } from '../../contexts/ThemeContext';
 import { useLanguage } from '../../contexts/LanguageContext';
 import ThemeToggle from '../../components/General/ThemeToggle';
 import LanguageToggle from '../../components/General/LanguageToggle';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useNavigate, useSearchParams, Link } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { useGlobalLoading } from '../../contexts/GlobalLoadingContext';
 import axios from 'axios';
 import Logo from '../../assets/Logo.png';
 import strings from '../../strings/loginPageStrings';
 import Footer from '../../components/General/Footer';
+import footerStrings from '../../strings/footerStrings';
 
 
 function LoginPage() {
@@ -25,6 +26,7 @@ function LoginPage() {
     const { theme } = useTheme();
     const { language } = useLanguage();
     const t = strings[language];
+    const ft = footerStrings[language];
     const returnUrl = searchParams.get('returnUrl');
     const registered = searchParams.get('registered');
     const [infoMessage, setInfoMessage] = useState(
@@ -294,6 +296,26 @@ function LoginPage() {
               >
                 {t.registerHere}
               </button>
+            </p>
+          </div>
+
+          {/* Terms and Privacy Links */}
+          <div className="mt-4 text-center">
+            <p className={`text-xs ${isDark ? 'text-gray-500' : 'text-gray-500'}`}>
+              {language === 'ar' ? 'باستخدام TAConnect، أنت توافق على' : 'By using TAConnect, you agree to our'}{' '}
+              <Link 
+                to="/terms" 
+                className={`underline hover:text-blue-600 ${isDark ? 'text-gray-400 hover:text-blue-400' : 'text-gray-600'}`}
+              >
+                {ft.terms || (language === 'ar' ? 'شروط الخدمة' : 'Terms of Service')}
+              </Link>
+              {' '}{language === 'ar' ? 'و' : 'and'}{' '}
+              <Link 
+                to="/privacy" 
+                className={`underline hover:text-blue-600 ${isDark ? 'text-gray-400 hover:text-blue-400' : 'text-gray-600'}`}
+              >
+                {ft.privacy || (language === 'ar' ? 'سياسة الخصوصية' : 'Privacy Policy')}
+              </Link>
             </p>
           </div>
         </div>

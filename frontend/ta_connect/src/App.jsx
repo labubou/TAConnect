@@ -30,6 +30,8 @@ const ResetPasswordPage = lazy(() => import('./pages/main/ResetPasswordPage'));
 const ProfilePage = lazy(() => import('./pages/main/ProfilePage'));
 const AboutPage = lazy(() => import('./pages/main/AboutPage'));
 const ContactPage = lazy(() => import('./pages/main/ContactPage'));
+const TermsPage = lazy(() => import('./pages/main/TermsPage'));
+const PrivacyPage = lazy(() => import('./pages/main/PrivacyPage'));
 const TAPage = lazy(() => import('./pages/ta/TAPage'));
 const ManageCourses = lazy(() => import('./pages/ta/ManageCourses'));
 const Dashboard = lazy(() => import('./pages/ta/Dashboard'));
@@ -144,6 +146,22 @@ function App() {
                 element={
                   <Suspense fallback={<PageLoader />}>
                     <ContactPage />
+                  </Suspense>
+                }
+              />
+              <Route 
+                path="/terms"
+                element={
+                  <Suspense fallback={<PageLoader />}>
+                    <TermsPage />
+                  </Suspense>
+                }
+              />
+              <Route 
+                path="/privacy"
+                element={
+                  <Suspense fallback={<PageLoader />}>
+                    <PrivacyPage />
                   </Suspense>
                 }
               />

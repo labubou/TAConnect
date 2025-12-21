@@ -75,6 +75,22 @@ function Footer() {
                 </Link>
               </li>
               <li>
+                <Link 
+                  to="/terms" 
+                  className={`text-sm transition-colors hover:text-blue-600 ${isDark ? 'text-gray-400 hover:text-blue-400' : 'text-gray-600'}`}
+                >
+                  {ft.terms || (language === 'ar' ? 'شروط الخدمة' : 'Terms of Service')}
+                </Link>
+              </li>
+              <li>
+                <Link 
+                  to="/privacy" 
+                  className={`text-sm transition-colors hover:text-blue-600 ${isDark ? 'text-gray-400 hover:text-blue-400' : 'text-gray-600'}`}
+                >
+                  {ft.privacy || (language === 'ar' ? 'سياسة الخصوصية' : 'Privacy Policy')}
+                </Link>
+              </li>
+              <li>
                 <a 
                   href="https://github.com/Kbassem10/TAConnect" 
                   target="_blank" 
