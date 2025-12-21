@@ -418,8 +418,8 @@ export default function SettingsPage() {
     setEmailMessage('');
 
     try {
-      const res = await axios.post('/api/profile/change-email/', {
-        new_email: emailForm.newEmail,
+      const res = await axios.put('/api/profile/update/', {
+        email: emailForm.newEmail,
       });
 
       stopLoading('change-email');

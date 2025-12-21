@@ -417,8 +417,8 @@ export default function TASettingsPage() {
     setEmailMessage('');
 
     try {
-      const res = await axios.post('/api/profile/change-email/', {
-        new_email: emailForm.newEmail,
+      const res = await axios.put('/api/profile/update/', {
+        email: emailForm.newEmail,
       });
       stopLoading('change-email');
       setEmailMessage(t.emailModal?.successMessage || 'Verification email sent. Please check your inbox.');

@@ -25,7 +25,7 @@ class PasswordChangeRateThrottle(UserRateThrottle):
     rate = '5/hour'  # Limit password change attempts
 
 class EmailVerificationRateThrottle(UserRateThrottle):
-    rate = '10/hour'  # Limit email verification attempts
+    rate = '20/hour'  # Limit email verification attempts
 
 class GetProfileView(GenericAPIView):
     """Get current user profile information"""
