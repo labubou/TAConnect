@@ -14,6 +14,9 @@ from instructor.serializers.time_slots_serializer import TimeSlotSerializer
 from utils.error_formatter import format_serializer_errors
 from student.utils.cancel_student_bookings import cancel_student_bookings
 from student.models import Booking
+from utils.email_sending.booking.send_update_booking_email_mass import send_update_booking_email_mass
+from utils.push_notifications.booking.send_booking_update import send_booking_update_push_mass
+from utils.google_calendar import update_bookings_calendar_locations_mass
 import datetime
 
 class TimeSlotCreateView(GenericAPIView):
@@ -131,6 +134,38 @@ class TimeSlotDetailView(GenericAPIView):
             except Exception as e:
                 print(f"Error cancelling affected bookings for slot {slot_id}: {e}")
         
+        room_changed = getattr(updated_slot, 'room_changed', False)
+        if room_changed:
+            try:
+                # Get all non-cancelled bookings for this slot
+                affected_bookings = Booking.objects.filter(office_hour=updated_slot, is_cancelled=False)
+                
+                if affected_bookings.exists():
+                    # Send email notifications
+                    email_result = send_update_booking_email_mass(
+                        bookings=affected_bookings,
+                        update_reason='room_update'
+                    )
+                    
+                    # Send push notifications
+                    push_result = send_booking_update_push_mass(
+                        bookings=affected_bookings,
+                        update_reason='room_update'
+                    )
+                    
+                    # Update Google Calendar events
+                    calendar_result = update_bookings_calendar_locations_mass(
+                        bookings=affected_bookings,
+                        new_room=updated_slot.room
+                    )
+                    
+                    print(f"Room update notifications sent for {len(affected_bookings)} bookings. "
+                          f"Emails: {email_result.get('sent_count', 0)}, "
+                          f"Push: {push_result.get('sent_count', 0)}, "
+                          f"Calendar: {calendar_result.get('updated_count', 0)}")
+            except Exception as e:
+                print(f"Error sending room update notifications for slot {slot_id}: {e}")
+                
         return Response({
             'success': True, 
             'time_slot_id': updated_slot.id, 

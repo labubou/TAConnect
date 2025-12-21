@@ -25,7 +25,7 @@ def send_booking_confirmed_push(student, instructor, slot, booking_date, booking
     student_payload = {
         "head": "✅ Booking Confirmed!",
         "body": f"Your booking with {instructor_name} for {course_name} on {formatted_date} at {formatted_time} has been confirmed.",
-        "icon": f"{frontend_url}/static/icons/notification-icon.png",
+        "icon": f"{frontend_url}/Logo.png",
         "url": f"{frontend_url}/student/manage-booked",
         "tag": f"booking-confirmed-{booking_id}",
         "requireInteraction": False

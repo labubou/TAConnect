@@ -1,7 +1,7 @@
 """
 Google Calendar Integration Utility for TAConnect
 
-This module provides functions to create and delete calendar events
+This module provides functions to create, delete, and update calendar events
 for booking appointments between students and instructors.
 """
 
@@ -301,3 +301,126 @@ def remove_booking_from_calendars(booking):
         booking.save(update_fields=['student_calendar_event_id', 'instructor_calendar_event_id'])
     
     return student_deleted, instructor_deleted
+
+
+def update_booking_event_location(user, event_id, new_location):
+    """
+    Update the location of a calendar event.
+    
+    Args:
+        user: User object whose calendar contains the event
+        event_id: Google Calendar event ID string
+        new_location: New location/room string
+        
+    Returns:
+        True if successful, False otherwise
+    """
+    try:
+        if not event_id:
+            return False
+            
+        service = get_calendar_service(user)
+        if not service:
+            return False
+        
+        # Get the existing event
+        event = service.events().get(
+            calendarId='primary',
+            eventId=event_id
+        ).execute()
+        
+        # Update the location
+        event['location'] = new_location
+        
+        # Update the event
+        updated_event = service.events().update(
+            calendarId='primary',
+            eventId=event_id,
+            body=event
+        ).execute()
+        
+        print(f"Calendar event location updated for {user.username}: {event_id} -> {new_location}")
+        return True
+        
+    except HttpError as e:
+        # 404 means event was already deleted or doesn't exist
+        if e.resp.status == 404:
+            print(f"Calendar event not found for {user.username}: {event_id}")
+            return False
+        print(f"Google Calendar API error updating event location for {user.username}: {e}")
+        return False
+    except Exception as e:
+        print(f"Error updating calendar event location for {user.username}: {e}")
+        return False
+
+
+def update_booking_calendar_locations(booking, new_room):
+    """
+    Update calendar event locations for both student's and instructor's Google Calendars.
+    
+    Args:
+        booking: Booking model instance
+        new_room: New room/location string
+        
+    Returns:
+        Tuple of (student_updated, instructor_updated) booleans
+    """
+    student_updated = False
+    instructor_updated = False
+    
+    # Update student's calendar event location
+    if booking.student_calendar_event_id:
+        try:
+            student_updated = update_booking_event_location(
+                user=booking.student,
+                event_id=booking.student_calendar_event_id,
+                new_location=new_room
+            )
+        except Exception as e:
+            print(f"Failed to update event location in student's calendar: {e}")
+    
+    # Update instructor's calendar event location
+    if booking.instructor_calendar_event_id:
+        try:
+            instructor = booking.office_hour.instructor
+            instructor_updated = update_booking_event_location(
+                user=instructor,
+                event_id=booking.instructor_calendar_event_id,
+                new_location=new_room
+            )
+        except Exception as e:
+            print(f"Failed to update event location in instructor's calendar: {e}")
+    
+    return student_updated, instructor_updated
+
+
+def update_bookings_calendar_locations_mass(bookings, new_room):
+    """
+    Update calendar event locations for multiple bookings in bulk.
+    
+    Args:
+        bookings: QuerySet or list of Booking objects
+        new_room: New room/location string
+        
+    Returns:
+        dict: {'success': bool, 'updated_count': int, 'failed_count': int}
+    """
+    updated_count = 0
+    failed_count = 0
+    
+    for booking in bookings:
+        try:
+            student_updated, instructor_updated = update_booking_calendar_locations(booking, new_room)
+            if student_updated or instructor_updated:
+                updated_count += 1
+            else:
+                failed_count += 1
+        except Exception as e:
+            print(f"Failed to update calendar locations for booking {booking.id}: {e}")
+            failed_count += 1
+    
+    return {
+        'success': failed_count == 0,
+        'updated_count': updated_count,
+        'failed_count': failed_count
+    }

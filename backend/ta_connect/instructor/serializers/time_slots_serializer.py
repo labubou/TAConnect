@@ -49,11 +49,16 @@ class TimeSlotSerializer(serializers.Serializer):
     def update(self, instance, validated_data):
         # Track which critical time fields were changed
         critical_fields_changed = []
+        room_changed = False
         critical_fields = ['start_time', 'end_time', 'day_of_week', 'duration_minutes', 'start_date', 'end_date']
         
         for field in critical_fields:
             if field in validated_data and getattr(instance, field) != validated_data[field]:
                 critical_fields_changed.append(field)
+        
+        # Check if room changed separately since it's not a critical field
+        if 'room' in validated_data and getattr(instance, 'room') != validated_data['room']:
+            room_changed = True
 
         instance.course_name = validated_data.get('course_name', instance.course_name)
         instance.section = validated_data.get('section', instance.section)
@@ -70,4 +75,5 @@ class TimeSlotSerializer(serializers.Serializer):
         
         # Attach list of changed fields to instance for view to check
         instance.critical_fields_changed = critical_fields_changed
+        instance.room_changed = room_changed
         return instance

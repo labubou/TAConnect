@@ -41,7 +41,7 @@ def send_booking_pending_push(student, instructor, slot, booking_date, booking_t
     student_payload = {
         "head": "Booking Pending Approval",
         "body": f"Your booking with {instructor_name} for {course_name} on {formatted_date} at {formatted_time} is pending approval.",
-        "icon": f"{frontend_url}/static/icons/notification-icon.png",
+        "icon": f"{frontend_url}/Logo.png",
         "url": f"{frontend_url}/student/manage-booked",
         "tag": f"booking-pending-{booking_id}",
         "requireInteraction": False
@@ -54,7 +54,7 @@ def send_booking_pending_push(student, instructor, slot, booking_date, booking_t
     instructor_payload = {
         "head": "⚡ New Booking Request",
         "body": f"{student_name} requests {course_name} on {formatted_date} at {formatted_time}. Tap to review and approve.",
-        "icon": f"{frontend_url}/static/icons/notification-icon.png",
+        "icon": f"{frontend_url}/Logo.png",
         "url": f"{frontend_url}/ta/manage-bookings/?booking_id={booking_id}",
         "tag": f"booking-request-{booking_id}",
         "requireInteraction": True

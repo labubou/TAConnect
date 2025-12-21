@@ -33,7 +33,7 @@ def send_booking_cancelled_push(student, instructor, slot, booking_date, booking
         student_payload = {
             "head": "❌ Booking Cancelled",
             "body": f"Your booking with {instructor_name} for {course_name} on {formatted_date} at {formatted_time} has been cancelled.",
-            "icon": f"{frontend_url}/static/icons/notification-icon.png",
+            "icon": f"{frontend_url}/Logo.png",
             "url": f"{frontend_url}/student/book",
             "tag": f"booking-cancelled-{booking_id}",
             "requireInteraction": False
@@ -45,7 +45,7 @@ def send_booking_cancelled_push(student, instructor, slot, booking_date, booking
         instructor_payload = {
             "head": "Booking Cancelled",
             "body": f"{student_name} cancelled their {course_name} booking on {formatted_date} at {formatted_time}.",
-            "icon": f"{frontend_url}/static/icons/notification-icon.png",
+            "icon": f"{frontend_url}/Logo.png",
             "url": f"{frontend_url}/ta/manage-bookings",
             "tag": f"booking-cancelled-{booking_id}",
             "requireInteraction": False

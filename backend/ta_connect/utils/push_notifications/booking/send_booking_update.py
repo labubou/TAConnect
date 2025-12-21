@@ -6,10 +6,7 @@ logger = logging.getLogger(__name__)
 
 # Map reason codes to user-friendly messages
 REASON_MESSAGES = {
-    'slot_disabled': 'The time slot has been temporarily disabled',
-    'slot_deleted': 'The time slot has been removed',
-    'manual': 'The instructor has cancelled this session',
-    'schedule_conflict': 'Due to a scheduling conflict',
+    'room_update': 'The meeting location has been updated',
 }
 
 def format_booking_data(booking):
@@ -25,6 +22,7 @@ def format_booking_data(booking):
     student_name = f"{student.first_name} {student.last_name}".strip() or student.username
     instructor_name = f"{instructor.first_name} {instructor.last_name}".strip() or instructor.username
     course_name = slot.course_name if slot.course_name else 'Office Hours'
+    room = slot.room if hasattr(slot, 'room') and slot.room else 'TBA'
     
     return {
         'student': student,
@@ -34,25 +32,25 @@ def format_booking_data(booking):
         'course_name': course_name,
         'formatted_date': formatted_date,
         'formatted_time': formatted_time,
+        'room': room,
         'booking_id': booking.id,
     }
 
 
-def send_booking_cancelled_push_mass(bookings, cancellation_reason=None):
+def send_booking_update_push_mass(bookings, update_reason=None):
     """
-    Send push notifications to all students and instructors for cancelled bookings.
+    Send push notifications to all students for updated bookings.
     
     Args:
-        bookings: List of Booking objects that were cancelled
-        cancellation_reason: Optional reason for cancellation
+        bookings: List of Booking objects that were updated
+        update_reason: Optional reason for update
     
     Returns:
         dict: {'success': bool, 'sent_count': int, 'failed_count': int}
     """
-    reason_text = REASON_MESSAGES.get(cancellation_reason, cancellation_reason) if cancellation_reason else 'The session has been cancelled'
+    reason_text = REASON_MESSAGES.get(update_reason, update_reason) if update_reason else 'Your booking has been updated'
     
     student_notifications = []
-    instructor_notifications = []
     
     for booking in bookings:
         try:
@@ -62,39 +60,22 @@ def send_booking_cancelled_push_mass(bookings, cancellation_reason=None):
             student_notifications.append({
                 'user': data['student'],
                 'payload': {
-                    "head": "❌ Booking Cancelled",
-                    "body": f"Your booking with {data['instructor_name']} for {data['course_name']} on {data['formatted_date']} at {data['formatted_time']} has been cancelled. {reason_text}.",
+                    "head": "📍 Booking Updated",
+                    "body": f"Your booking with {data['instructor_name']} for {data['course_name']} on {data['formatted_date']} at {data['formatted_time']} has been updated. {reason_text}. New location: {data['room']}.",
                     "icon": f"{frontend_url}/Logo.png",
                     "url": f"{frontend_url}/student/manage-booked",
-                    "tag": f"booking-cancelled-{data['booking_id']}",
+                    "tag": f"booking-updated-{data['booking_id']}",
                     "requireInteraction": True
                 }
             })
-            
-            # Prepare instructor notification
-            instructor_notifications.append({
-                'user': data['instructor'],
-                'payload': {
-                    "head": "Booking Cancellation Confirmed",
-                    "body": f"Booking with {data['student_name']} for {data['course_name']} on {data['formatted_date']} at {data['formatted_time']} has been cancelled.",
-                    "icon": f"{frontend_url}/Logo.png",
-                    "url": f"{frontend_url}/ta/manage-bookings",
-                    "tag": f"booking-cancelled-instructor-{data['booking_id']}",
-                    "requireInteraction": False
-                }
-            })
         except Exception as e:
-            logger.error(f"Error preparing cancellation push for booking {booking.id}: {str(e)}")
+            logger.error(f"Error preparing update push for booking {booking.id}: {str(e)}")
     
     # Send notifications in bulk
-    all_notifications = student_notifications + instructor_notifications
-    users = [n['user'] for n in all_notifications]
-    
-    # Since each user gets a unique payload, we need to send individually but can use bulk pattern
     sent_count = 0
     failed_count = 0
     
-    for notification in all_notifications:
+    for notification in student_notifications:
         result = send_push_notification_bulk([notification['user']], notification['payload'])
         sent_count += result['sent_count']
         failed_count += result['failed_count']
@@ -104,3 +85,4 @@ def send_booking_cancelled_push_mass(bookings, cancellation_reason=None):
         'sent_count': sent_count,
         'failed_count': failed_count
     }
+
