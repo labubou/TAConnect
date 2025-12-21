@@ -3,7 +3,7 @@ const termsPageStrings = {
   en: {
     title: "Terms of Service",
     subtitle: "Please read these terms carefully before using TAConnect",
-    lastUpdated: "Last Updated: January 2025",
+    lastUpdated: "Last Updated: December 2025",
     sections: {
       acceptance: {
         title: "1. Acceptance of Terms",

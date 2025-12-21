@@ -3,7 +3,7 @@ const privacyPageStrings = {
   en: {
     title: "Privacy Policy",
     subtitle: "How we collect, use, and protect your information",
-    lastUpdated: "Last Updated: January 2025",
+    lastUpdated: "Last Updated: December 2025",
     sections: {
       introduction: {
         title: "1. Introduction",
