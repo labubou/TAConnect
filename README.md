@@ -151,7 +151,7 @@ docker compose up --build
 | React 19 | Django 5 | PostgreSQL | Docker |
 | Vite | Django REST | | Docker Compose |
 | Tailwind CSS | JWT Auth | | |
-| React Query | drf-spectacular | | |
+| React Query | drf_yasg | | |
 
 </div>
 
@@ -182,7 +182,6 @@ docker compose up --build
 - [x] Multi-language support
 - [x] Push notifications (Web Push API)
 - [x] Google Calendar integration (automatic sync, universal access)
-- [ ] Outlook Calendar integration
 - [ ] AI scheduling assistant
 
 ---
