@@ -40,6 +40,11 @@ export const settingsStrings = {
     status: {
       enabled: 'Enabled',
     },
+
+    pushNotifications: {
+      deviceNote:
+        'Push notifications work on only one device per account. To switch devices, simply disable notifications and then enable them again on the device you want to use (you can do this directly from the new device).',
+    },
     
     messages: {
       loadError: 'Failed to load preferences. Please try again.',
@@ -190,6 +195,11 @@ export const settingsStrings = {
     
     status: {
       enabled: 'مفعّل',
+    },
+
+    pushNotifications: {
+      deviceNote:
+        'تعمل إشعارات الدفع على جهاز واحد فقط لكل حساب. لنقل الإشعارات إلى جهاز آخر، قم بإيقاف تفعيل الإشعارات ثم إعادة تفعيلها على الجهاز الذي تريد استخدامه (يمكنك القيام بذلك مباشرة من الجهاز الجديد).',
     },
     
     messages: {

@@ -622,6 +622,18 @@ export default function TASettingsPage() {
               {!loading && (
                 <>
                   <PushNotificationToggle className="mb-4" />
+                  <div
+                    className={`mb-4 rounded-xl border text-xs sm:text-sm px-3 py-2 ${
+                      isDark
+                        ? 'border-yellow-600 bg-yellow-900/20 text-yellow-200'
+                        : 'border-yellow-300 bg-yellow-50 text-yellow-800'
+                    }`}
+                  >
+                    <p className={`${language === 'ar' ? 'text-right' : 'text-left'}`}>
+                      {t.pushNotifications?.deviceNote ||
+                        'Push notifications work on only one device per account. To switch devices, simply disable notifications and then enable them again on the device you want to use (you can do this directly from the new device).'}
+                    </p>
+                  </div>
 
                   {/* Email on Booking */}
                   <div className={`rounded-2xl ${isDark ? 'bg-gray-800' : 'bg-white'} shadow-lg border ${isDark ? 'border-gray-700' : 'border-gray-100'} overflow-hidden`}>
