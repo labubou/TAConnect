@@ -15,19 +15,21 @@ from datetime import timedelta
 from ..models import User, GoogleCalendarCredentials
 from rest_framework import status
 from rest_framework.generics import GenericAPIView
+from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.response import Response
 from rest_framework.throttling import UserRateThrottle
 import requests
 from ta_connect.settings import SITE_DOMAIN, GOOGLE_OAUTH2_CLIENT_ID, GOOGLE_OAUTH2_CLIENT_SECRET, frontend_url
 from decouple import config
+from drf_yasg import openapi
 from drf_yasg.utils import swagger_auto_schema
 from accounts.auth.google_auth import save_google_calendar_credentials, GOOGLE_OAUTH_SCOPES
 
 class GoogleCalendarRateThrottle(UserRateThrottle):
     rate = '50/hour'  # Limit Google Calendar connection attempts
 
-class GoogleCalendarConnectUrlView(GenericAPIView):
+class GoogleCalendarConnectUrlView(APIView):
     """
     Provides the Google OAuth2 URL for connecting Google Calendar.
     This endpoint is for users who want to connect a Google account
@@ -39,12 +41,15 @@ class GoogleCalendarConnectUrlView(GenericAPIView):
     @swagger_auto_schema(
         operation_description='Get Google OAuth2 URL for connecting Google Calendar.',
         responses={
-            200: {
-                'type': 'object',
-                'properties': {
-                    'auth_url': {'type': 'string', 'description': 'Google OAuth2 authorization URL'}
-                }
-            },
+            200: openapi.Response(
+                description='Google OAuth2 authorization URL',
+                schema=openapi.Schema(
+                    type=openapi.TYPE_OBJECT,
+                    properties={
+                        'auth_url': openapi.Schema(type=openapi.TYPE_STRING, description='Google OAuth2 authorization URL')
+                    }
+                )
+            ),
             401: 'Authentication required',
             429: 'Too many requests',
             500: 'Internal server error'
@@ -82,7 +87,7 @@ class GoogleCalendarConnectUrlView(GenericAPIView):
             )
 
 
-class GoogleCalendarConnectView(GenericAPIView):
+class GoogleCalendarConnectView(APIView):
     """
     Connect a Google account for Calendar integration.
     This endpoint handles the OAuth callback and saves the credentials.
@@ -93,21 +98,25 @@ class GoogleCalendarConnectView(GenericAPIView):
 
     @swagger_auto_schema(
         operation_description='Connect Google account for Calendar integration using authorization code.',
-        request_body={
-            'type': 'object',
-            'properties': {
-                'code': {'type': 'string', 'description': 'Google OAuth2 authorization code'}
+        request_body=openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                'code': openapi.Schema(type=openapi.TYPE_STRING, description='Google OAuth2 authorization code')
             },
-            'required': ['code']
-        },
+            required=['code']
+        ),
         responses={
-            200: {
-                'type': 'object',
-                'properties': {
-                    'message': {'type': 'string'},
-                    'calendar_enabled': {'type': 'boolean'}
-                }
-            },
+            200: openapi.Response(
+                description='Successful connection',
+                schema=openapi.Schema(
+                    type=openapi.TYPE_OBJECT,
+                    properties={
+                        'message': openapi.Schema(type=openapi.TYPE_STRING),
+                        'calendar_enabled': openapi.Schema(type=openapi.TYPE_BOOLEAN),
+                        'google_email': openapi.Schema(type=openapi.TYPE_STRING)
+                    }
+                )
+            ),
             400: 'Invalid code',
             401: 'Authentication required',
             429: 'Too many requests',
@@ -197,7 +206,7 @@ class GoogleCalendarConnectView(GenericAPIView):
             )
 
 
-class GoogleCalendarCallbackView(GenericAPIView):
+class GoogleCalendarCallbackView(APIView):
     """
     Handles the callback from Google OAuth2 for Calendar connection.
     Redirects to frontend with code or error.
@@ -233,7 +242,7 @@ class GoogleCalendarCallbackView(GenericAPIView):
         return redirect(f"{base_url}?error=google_calendar_auth_failed&google_calendar=true")
 
 
-class GoogleCalendarStatusView(GenericAPIView):
+class GoogleCalendarStatusView(APIView):
     """
     Get Google Calendar connection status for the current user.
     """
@@ -242,14 +251,18 @@ class GoogleCalendarStatusView(GenericAPIView):
     @swagger_auto_schema(
         operation_description='Get Google Calendar connection status.',
         responses={
-            200: {
-                'type': 'object',
-                'properties': {
-                    'connected': {'type': 'boolean'},
-                    'calendar_enabled': {'type': 'boolean'},
-                    'has_valid_credentials': {'type': 'boolean'}
-                }
-            },
+            200: openapi.Response(
+                description='Status information',
+                schema=openapi.Schema(
+                    type=openapi.TYPE_OBJECT,
+                    properties={
+                        'connected': openapi.Schema(type=openapi.TYPE_BOOLEAN),
+                        'calendar_enabled': openapi.Schema(type=openapi.TYPE_BOOLEAN),
+                        'has_valid_credentials': openapi.Schema(type=openapi.TYPE_BOOLEAN),
+                        'google_email': openapi.Schema(type=openapi.TYPE_STRING)
+                    }
+                )
+            ),
             401: 'Authentication required',
             500: 'Internal server error'
         }
@@ -284,7 +297,7 @@ class GoogleCalendarStatusView(GenericAPIView):
             )
 
 
-class GoogleCalendarToggleView(GenericAPIView):
+class GoogleCalendarToggleView(APIView):
     """
     Enable or disable Google Calendar integration.
     """
@@ -293,21 +306,24 @@ class GoogleCalendarToggleView(GenericAPIView):
 
     @swagger_auto_schema(
         operation_description='Enable or disable Google Calendar integration.',
-        request_body={
-            'type': 'object',
-            'properties': {
-                'enabled': {'type': 'boolean', 'description': 'True to enable, False to disable'}
+        request_body=openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                'enabled': openapi.Schema(type=openapi.TYPE_BOOLEAN, description='True to enable, False to disable')
             },
-            'required': ['enabled']
-        },
+            required=['enabled']
+        ),
         responses={
-            200: {
-                'type': 'object',
-                'properties': {
-                    'message': {'type': 'string'},
-                    'calendar_enabled': {'type': 'boolean'}
-                }
-            },
+            200: openapi.Response(
+                description='Toggle result',
+                schema=openapi.Schema(
+                    type=openapi.TYPE_OBJECT,
+                    properties={
+                        'message': openapi.Schema(type=openapi.TYPE_STRING),
+                        'calendar_enabled': openapi.Schema(type=openapi.TYPE_BOOLEAN)
+                    }
+                )
+            ),
             400: 'Invalid request or no Google account connected',
             401: 'Authentication required',
             429: 'Too many requests',
@@ -360,7 +376,7 @@ class GoogleCalendarToggleView(GenericAPIView):
             )
 
 
-class GoogleCalendarDisconnectView(GenericAPIView):
+class GoogleCalendarDisconnectView(APIView):
     """
     Disconnect Google Calendar by removing credentials.
     """
@@ -370,12 +386,15 @@ class GoogleCalendarDisconnectView(GenericAPIView):
     @swagger_auto_schema(
         operation_description='Disconnect Google Calendar by removing credentials.',
         responses={
-            200: {
-                'type': 'object',
-                'properties': {
-                    'message': {'type': 'string'}
-                }
-            },
+            200: openapi.Response(
+                description='Successful disconnection',
+                schema=openapi.Schema(
+                    type=openapi.TYPE_OBJECT,
+                    properties={
+                        'message': openapi.Schema(type=openapi.TYPE_STRING)
+                    }
+                )
+            ),
             400: 'No Google account connected',
             401: 'Authentication required',
             429: 'Too many requests',

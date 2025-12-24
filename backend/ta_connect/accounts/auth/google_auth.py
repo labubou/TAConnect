@@ -36,7 +36,7 @@ class GoogleAuthRateThrottle(AnonRateThrottle):
 class SetUserTypeRateThrottle(UserRateThrottle):
     rate = '10/hour'  # Limit user type setting attempts
 
-class GoogleLoginUrlView(GenericAPIView):
+class GoogleLoginUrlView(APIView):
     """Provides the Google OAuth2 login URL"""
     permission_classes = [AllowAny]
 
@@ -121,7 +121,7 @@ def save_google_calendar_credentials(user, token_data, google_email=None):
         return False
 
 
-class GoogleAuthView(GenericAPIView):
+class GoogleAuthView(APIView):
     """Authenticate with Google OAuth2 authorization code"""
     permission_classes = [AllowAny]
     throttle_classes = [GoogleAuthRateThrottle]
