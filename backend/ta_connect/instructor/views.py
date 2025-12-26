@@ -122,7 +122,7 @@ class GetUserBookingView(GenericAPIView):
                             'status': book.office_hour.status,
                         },
                         'date': book.date.strftime('%Y-%m-%d') if book.date else None,
-                        'start_time': book.start_time.strftime('%Y-%m-%d %H:%M:%S') if book.start_time else None,
+                        'start_time': book.start_time.isoformat() if book.start_time else None,
                         'description': book.book_description if book.book_description else None,
                         'is_cancelled': book.is_cancelled,
                         'is_completed': book.is_completed,

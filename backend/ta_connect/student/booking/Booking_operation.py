@@ -71,8 +71,8 @@ class BookingCreateView(GenericAPIView):
                         'section': booking.office_hour.section,
                         'room': booking.office_hour.room,
                         'date': booking.date,
-                        'start_time': booking.start_time,
-                        'end_time': booking.end_time,
+                        'start_time': booking.start_time.isoformat() if booking.start_time else None,
+                        'end_time': booking.end_time.isoformat() if booking.end_time else None,
                         'book_description': booking.book_description,
                         'is_cancelled': booking.is_cancelled,
                         'is_completed': booking.is_completed,
@@ -115,8 +115,8 @@ class BookingCreateView(GenericAPIView):
                 student=request.user,
                 instructor=slot.instructor,
                 slot=slot,
-                booking_date=serializer.validated_data['date'],
-                booking_time=serializer.validated_data['start_time'],
+                booking_date=booking.date,
+                booking_time=booking.start_time,  # Use actual DateTimeField from booking
                 booking_id=booking.id
             )
 
@@ -194,7 +194,7 @@ class BookingDetailView(GenericAPIView):
             instructor=booking.office_hour.instructor,
             slot=booking.office_hour,
             booking_date=updated_booking.date,
-            booking_time=updated_booking.start_time,
+            booking_time=updated_booking.start_time,  # DateTimeField (UTC)
             booking_id=updated_booking.id
         )
 

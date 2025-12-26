@@ -5,6 +5,7 @@ import { useQuery } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import strings from '../../strings/MonthlyCalendarStrings';
+import { formatTime } from '../../utils/dateTimeUtils';
 
 export default function BookingsCalendar() {
   const { theme } = useTheme();
@@ -85,34 +86,7 @@ export default function BookingsCalendar() {
     });
   };
 
-  const formatTime = (time) => {
-    if (!time) return '';
-    try {
-      // Handle ISO datetime string (e.g., "2025-11-27T14:30:00Z")
-      if (typeof time === 'string' && time.includes('T')) {
-        // Extract just the time portion to avoid timezone conversion
-        const timePart = time.split('T')[1].split('.')[0].split('Z')[0];
-        const [hours, minutes] = timePart.split(':');
-        const hour = parseInt(hours);
-        const ampm = hour >= 12 ? (language === 'ar' ? 'م' : 'PM') : (language === 'ar' ? 'ص' : 'AM');
-        const displayHour = hour % 12 || 12;
-        return `${displayHour}:${minutes} ${ampm}`;
-      }
-      // Handle time-only string (e.g., "14:30:00" or "14:30")
-      const timeParts = time.toString().split(':');
-      if (timeParts.length >= 2) {
-        const hours = parseInt(timeParts[0]);
-        const minutes = timeParts[1];
-        const ampm = hours >= 12 ? (language === 'ar' ? 'م' : 'PM') : (language === 'ar' ? 'ص' : 'AM');
-        const displayHour = hours % 12 || 12;
-        return `${displayHour}:${minutes} ${ampm}`;
-      }
-      return time;
-    } catch (e) {
-      console.error('Error formatting time:', e, time);
-      return time;
-    }
-  };
+  const formatTimeLocal = (time) => formatTime(time, language);
 
   const previousMonth = () => {
     setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() - 1));
@@ -227,7 +201,7 @@ export default function BookingsCalendar() {
                   >
                     {booking.is_completed && <span className="text-[8px] sm:text-[10px]">✓</span>}
                     {booking.is_cancelled && <span className="text-[8px] sm:text-[10px]">✕</span>}
-                    <span className={booking.is_cancelled ? 'line-through' : ''}>{formatTime(booking.start_time)}</span>
+                    <span className={booking.is_cancelled ? 'line-through' : ''}>{formatTimeLocal(booking.start_time)}</span>
                   </div>
                 ))}
                 {dayBookings.length > 2 && (
@@ -286,7 +260,7 @@ export default function BookingsCalendar() {
                   </div>
                   <p className={`text-xs ${isDark ? 'text-gray-300' : 'text-gray-600'} flex items-center gap-1.5 ${booking.is_cancelled ? 'line-through opacity-60' : ''}`}>
                     <span className="text-sm">🕐</span>
-                    <span>{formatTime(booking.start_time)} - {formatTime(booking.end_time)}</span>
+                    <span>{formatTimeLocal(booking.start_time)} - {formatTimeLocal(booking.end_time)}</span>
                   </p>
                   <p className={`text-xs ${isDark ? 'text-gray-300' : 'text-gray-600'} flex items-center gap-1.5 ${booking.is_cancelled ? 'opacity-60' : ''}`}>
                     <span className="text-sm">👨‍🏫</span>
@@ -433,7 +407,7 @@ export default function BookingsCalendar() {
                       <div className="space-y-2">
                         <p className={`text-sm ${isDark ? 'text-gray-300' : 'text-gray-600'} flex items-center gap-2.5 font-medium ${booking.is_cancelled ? 'line-through opacity-60' : ''}`}>
                           <span className="text-lg">🕐</span>
-                          <span>{formatTime(booking.start_time)} - {formatTime(booking.end_time)}</span>
+                          <span>{formatTimeLocal(booking.start_time)} - {formatTimeLocal(booking.end_time)}</span>
                         </p>
                         <p className={`text-sm ${isDark ? 'text-gray-300' : 'text-gray-600'} flex items-center gap-2.5 font-medium ${booking.is_cancelled ? 'opacity-60' : ''}`}>
                           <span className="text-lg">👨‍🏫</span>

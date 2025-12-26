@@ -48,9 +48,9 @@ def send_update_booking_email_mass(bookings, update_reason='room_update'):
         if not student_wants_email and not instructor_wants_email:
             continue
         
-        # Format date and time once
-        formatted_date = booking.date.strftime('%B %d, %Y') if hasattr(booking.date, 'strftime') else str(booking.date)
-        formatted_time = booking.start_time.strftime('%I:%M %p') if hasattr(booking.start_time, 'strftime') else str(booking.start_time)
+        # Format date and time once - booking.start_time is a DateTimeField (UTC)
+        from utils.datetime_formatter import format_datetime_for_display
+        formatted_date, formatted_time = format_datetime_for_display(booking.start_time)
         
         # Prepare shared email context
         email_context = {

@@ -28,6 +28,7 @@ import {
   confirmBooking,
   cancelBooking,
 } from '../../services/pendingBookingService';
+import { formatDate, formatTime, formatDateOnly } from '../../utils/dateTimeUtils';
 
 export default function PendingBookingsPage() {
   const { theme } = useTheme();
@@ -409,10 +410,7 @@ export default function PendingBookingsPage() {
                           {strings.bookingCard.date}:
                         </span>
                         <span>
-                          {booking.date &&
-                            new Date(booking.date).toLocaleDateString(
-                              language === 'ar' ? 'ar-EG' : 'en-US'
-                            )}
+                          {booking.date && formatDateOnly(booking.date, language)}
                         </span>
                       </div>
 
@@ -421,11 +419,16 @@ export default function PendingBookingsPage() {
                           {strings.bookingCard.time}:
                         </span>
                         <span>
-                          {booking.office_hour?.start_time &&
-                            booking.office_hour?.start_time.substring(0, 5)}{' '}
-                          -{' '}
-                          {booking.office_hour?.end_time &&
-                            booking.office_hour?.end_time.substring(0, 5)}
+                          {booking.start_time
+                            ? formatTime(booking.start_time, language)
+                            : booking.office_hour?.start_time
+                            ? formatTime(booking.office_hour.start_time, language)
+                            : '—'}{' '}
+                          {booking.end_time && (
+                            <>
+                              - {formatTime(booking.end_time, language)}
+                            </>
+                          )}
                         </span>
                       </div>
 

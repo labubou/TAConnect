@@ -1,8 +1,11 @@
 import { useState, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
+import { useLanguage } from '../../contexts/LanguageContext';
 import strings from '../../strings/TAPageStrings';
+import { formatTime } from '../../utils/dateTimeUtils';
 
 export default function DashboardSlots({ isDark, slots, bookings, loading, error, onCreateSlot }) {
+  const { language } = useLanguage();
   const [hoveredSlotId, setHoveredSlotId] = useState(null);
   const [hoveredRect, setHoveredRect] = useState(null);
   const [stickySlotId, setStickySlotId] = useState(null);
@@ -37,7 +40,8 @@ export default function DashboardSlots({ isDark, slots, bookings, loading, error
     Sun: strings.taPage.weekSchedule.sunday,
   };
 
-  const formatTime = (timeStr) => {
+  // Format time-only strings (from TimeField)
+  const formatTimeOnly = (timeStr) => {
     if (!timeStr) return '';
     const time = timeStr.split(':');
     const hours = parseInt(time[0], 10);
@@ -45,6 +49,11 @@ export default function DashboardSlots({ isDark, slots, bookings, loading, error
     const ampm = hours >= 12 ? 'PM' : 'AM';
     const hour12 = hours % 12 || 12;
     return `${hour12}:${minutes} ${ampm}`;
+  };
+  
+  // Format DateTimeField values (UTC datetime strings)
+  const formatBookingTime = (dateTimeString) => {
+    return formatTime(dateTimeString, language);
   };
 
   const getSlotsForDay = (day) => {
@@ -171,7 +180,7 @@ export default function DashboardSlots({ isDark, slots, bookings, loading, error
                           <div
                             className={`text-xs mb-1 ${isDark ? 'text-gray-400' : 'text-gray-600'}`}
                           >
-                            {formatTime(slot.start_time)} - {formatTime(slot.end_time)}
+                            {formatTimeOnly(slot.start_time)} - {formatTimeOnly(slot.end_time)}
                           </div>
                           {slot.room && (
                             <div className={`text-xs ${isDark ? 'text-gray-500' : 'text-gray-500'}`}>
@@ -221,7 +230,7 @@ export default function DashboardSlots({ isDark, slots, bookings, loading, error
                                       📅 {booking.date || '—'}
                                     </div>
                                     <div className={`text-xs ${isDark ? 'text-gray-500' : 'text-gray-500'}`}>
-                                      🕐 {booking.start_time ? formatTime((booking.start_time + '').split(' ')[1] || '') : ''}
+                                      🕐 {booking.start_time ? formatBookingTime(booking.start_time) : ''}
                                     </div>
                                     {booking.description && (
                                       <div className={`text-xs mt-2 pt-2 border-t italic ${isDark ? 'border-gray-700 text-gray-400' : 'border-gray-200 text-gray-600'}`}>

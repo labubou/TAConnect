@@ -14,6 +14,7 @@ import axios from 'axios';
 import { useQuery } from '@tanstack/react-query';
 import { useCancelInstructorBooking, useUpdateBooking } from '../../hooks/useApi';
 import allStrings from '../../strings/manageBookingsStrings';
+import { formatTime, formatDate } from '../../utils/dateTimeUtils';
 
 // Helper function to get current month's date range
 const getCurrentMonthDateRange = () => {
@@ -269,49 +270,9 @@ export default function ManageBookingsPage() {
     });
   };
 
-  const formatTime = (time) => {
-    if (!time) return '';
-    try {
-      // Handle ISO datetime string (e.g., "2025-11-27T14:30:00Z")
-      if (typeof time === 'string' && time.includes('T')) {
-        // Extract just the time portion to avoid timezone conversion
-        const timePart = time.split('T')[1].split('.')[0].split('Z')[0];
-        const [hours, minutes] = timePart.split(':');
-        const hour = parseInt(hours);
-        const ampm = hour >= 12 ? (language === 'ar' ? 'م' : 'PM') : (language === 'ar' ? 'ص' : 'AM');
-        const displayHour = hour % 12 || 12;
-        return `${displayHour}:${minutes} ${ampm}`;
-      }
-      // Handle time-only string (e.g., "14:30:00" or "14:30")
-      const timeParts = time.toString().split(':');
-      if (timeParts.length >= 2) {
-        const hours = parseInt(timeParts[0]);
-        const minutes = timeParts[1];
-        const ampm = hours >= 12 ? (language === 'ar' ? 'م' : 'PM') : (language === 'ar' ? 'ص' : 'AM');
-        const displayHour = hours % 12 || 12;
-        return `${displayHour}:${minutes} ${ampm}`;
-      }
-      return time;
-    } catch (e) {
-      console.error('Error formatting time:', e, time);
-      return time;
-    }
-  };
-
-  const formatDate = (date) => {
-    if (!date) return '';
-    try {
-      const d = new Date(date);
-      return d.toLocaleDateString(language === 'ar' ? 'ar-EG' : 'en-US', {
-        weekday: 'short',
-        year: 'numeric',
-        month: 'short',
-        day: 'numeric'
-      });
-    } catch (e) {
-      return String(date);
-    }
-  };
+  // Use utility functions for timezone-aware formatting
+  const formatTimeLocal = (time) => formatTime(time, language);
+  const formatDateLocal = (date) => formatDate(date, language);
 
   const handleClearCancelled = () => {
     const cancelledIds = bookings.filter(b => b.is_cancelled).map(b => b.id);
@@ -451,8 +412,8 @@ export default function ManageBookingsPage() {
                     bookings={pendingBookings}
                     status="pending"
                     emptyMessage={t.messages.noPendingBookings}
-                    formatDate={formatDate}
-                    formatTime={formatTime}
+                    formatDate={formatDateLocal}
+                    formatTime={formatTimeLocal}
                     onUpdate={handleUpdateClick}
                     onCancel={handleCancelClick}
                   />
@@ -465,8 +426,8 @@ export default function ManageBookingsPage() {
                     bookings={activeBookings}
                     status="active"
                     emptyMessage={t.messages.noActiveBookings}
-                    formatDate={formatDate}
-                    formatTime={formatTime}
+                    formatDate={formatDateLocal}
+                    formatTime={formatTimeLocal}
                     onUpdate={handleUpdateClick}
                     onCancel={handleCancelClick}
                   />
@@ -479,8 +440,8 @@ export default function ManageBookingsPage() {
                     bookings={cancelledBookings}
                     status="cancelled"
                     emptyMessage={t.messages.noCancelledBookings}
-                    formatDate={formatDate}
-                    formatTime={formatTime}
+                    formatDate={formatDateLocal}
+                    formatTime={formatTimeLocal}
                   />
                 )}
 
@@ -491,8 +452,8 @@ export default function ManageBookingsPage() {
                     bookings={completedBookings}
                     status="completed"
                     emptyMessage={t.messages.noCompletedBookings}
-                    formatDate={formatDate}
-                    formatTime={formatTime}
+                    formatDate={formatDateLocal}
+                    formatTime={formatTimeLocal}
                     gridCols="grid-cols-1 md:grid-cols-2 lg:grid-cols-3"
                   />
                 )}
