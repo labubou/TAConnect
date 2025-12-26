@@ -105,26 +105,6 @@ export default function TASettingsPage() {
     }
   }, [message]);
 
-  // Handle Google Calendar callback
-  useEffect(() => {
-    const urlParams = new URLSearchParams(window.location.search);
-    const code = urlParams.get('code');
-    const error = urlParams.get('error');
-    const googleCalendar = urlParams.get('google_calendar');
-
-    if (code && googleCalendar === 'true') {
-      handleGoogleCalendarConnect(code);
-      // Clean up URL
-      window.history.replaceState({}, document.title, window.location.pathname);
-    } else if (error && googleCalendar === 'true') {
-      setMessage({
-        type: 'error',
-        text: t.googleCalendar?.connectionCancelled || 'Google Calendar connection cancelled or failed.'
-      });
-      // Clean up URL
-      window.history.replaceState({}, document.title, window.location.pathname);
-    }
-  }, []);
 
   // ==================================================================================
   // BACKEND CONNECTION - FETCH PREFERENCES
@@ -258,6 +238,8 @@ export default function TASettingsPage() {
   };
 
   const handleGoogleCalendarConnect = async (code) => {
+    if (!code) return;
+    
     setGoogleCalendarLoading(true);
     setMessage({ type: '', text: '' });
     startLoading('google-calendar-connect', t.googleCalendar?.connecting || 'Connecting Google Calendar...');
@@ -279,6 +261,30 @@ export default function TASettingsPage() {
       setGoogleCalendarLoading(false);
     }
   };
+
+  // Handle Google Calendar callback - must be after handleGoogleCalendarConnect is defined
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const code = urlParams.get('code');
+    const error = urlParams.get('error');
+    const googleCalendar = urlParams.get('google_calendar');
+
+    if (code && googleCalendar === 'true') {
+      handleGoogleCalendarConnect(code);
+      // Clean up URL - remove query params but keep pathname
+      const cleanUrl = window.location.pathname;
+      window.history.replaceState({}, document.title, cleanUrl);
+    } else if (error && googleCalendar === 'true') {
+      setMessage({
+        type: 'error',
+        text: t.googleCalendar?.connectionCancelled || 'Google Calendar connection cancelled or failed.'
+      });
+      // Clean up URL - remove query params but keep pathname
+      const cleanUrl = window.location.pathname;
+      window.history.replaceState({}, document.title, cleanUrl);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const handleReset = () => {
     setPreferences({
