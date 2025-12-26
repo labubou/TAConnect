@@ -63,7 +63,11 @@ class GoogleCalendarConnectUrlView(APIView):
                                 default=f'{SITE_DOMAIN}/api/auth/google/calendar/callback/')
             
             # Check if request is from settings page
-            state = request.GET.get('from', '')  # 'settings' or 'profile'
+            from_param = request.GET.get('from', '')  # 'settings' or 'profile'
+            
+            # Include user type in state to determine redirect destination in callback
+            user_type = request.user.user_type if request.user.is_authenticated else 'student'
+            state = f"{from_param}:{user_type}" if from_param else user_type
             
             oauth2_url = (
                 'https://accounts.google.com/o/oauth2/v2/auth?'
@@ -75,7 +79,7 @@ class GoogleCalendarConnectUrlView(APIView):
                 'prompt=consent'
             )
             
-            # Add state parameter to identify where the request came from
+            # Add state parameter to identify where the request came from and user type
             if state:
                 oauth2_url += f'&state={state}'
             return Response({'auth_url': oauth2_url}, status=status.HTTP_200_OK)
@@ -223,14 +227,27 @@ class GoogleCalendarCallbackView(APIView):
         error = request.GET.get('error')
         state = request.GET.get('state', '')  # Get state parameter if provided
         
-        # Determine redirect URL based on user type (if authenticated) or default to student
-        if request.user.is_authenticated:
-            if request.user.user_type == 'instructor':
-                base_url = f"{frontend_url}/ta/settings"
+        # Determine redirect URL based on state parameter (which includes user type)
+        # State format: "from:user_type" or just "user_type"
+        user_type = 'student'  # default
+        if state:
+            # Parse state to extract user type
+            if ':' in state:
+                # Format: "from:user_type"
+                parts = state.split(':', 1)
+                user_type = parts[1] if len(parts) > 1 else 'student'
             else:
-                base_url = f"{frontend_url}/student/settings"
+                # Format: just "user_type" (for backward compatibility)
+                user_type = state
+        
+        # Fallback to checking authenticated user if state doesn't contain user type
+        if user_type not in ['instructor', 'student'] and request.user.is_authenticated:
+            user_type = request.user.user_type
+        
+        # Determine base URL based on user type
+        if user_type == 'instructor':
+            base_url = f"{frontend_url}/ta/settings"
         else:
-            # Default to student settings if not authenticated
             base_url = f"{frontend_url}/student/settings"
         
         if error:
