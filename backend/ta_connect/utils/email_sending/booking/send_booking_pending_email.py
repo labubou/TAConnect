@@ -2,6 +2,7 @@ from ta_connect.settings import frontend_url
 from django.utils.http import urlsafe_base64_encode
 from django.utils.encoding import force_bytes
 from ..send_email import send_email
+from utils.datetime_formatter import format_datetime_for_display
 
 
 def send_booking_pending_email(student, instructor, slot, booking_date, booking_time, booking_id):
@@ -14,7 +15,7 @@ def send_booking_pending_email(student, instructor, slot, booking_date, booking_
         instructor: User object (instructor/TA)
         slot: OfficeHourSlot object
         booking_date: Date object or string (YYYY-MM-DD)
-        booking_time: Time object or string (HH:MM)
+        booking_time: DateTimeField (timezone-aware UTC) or Time object or string (HH:MM)
         booking_id: The ID of the pending booking
     
     Returns:
@@ -32,16 +33,20 @@ def send_booking_pending_email(student, instructor, slot, booking_date, booking_
     # if instructor.instructor_profile.email_notifications_on_booking is False:
     #     instructor_sent = True
 
-    # Format date and time if they're objects
-    if hasattr(booking_date, 'strftime'):
-        formatted_date = booking_date.strftime('%B %d, %Y')
+    # Format date and time - handle both DateTimeField and separate date/time
+    if hasattr(booking_time, 'isoformat'):  # DateTimeField
+        formatted_date, formatted_time = format_datetime_for_display(booking_time)
     else:
-        formatted_date = booking_date
+        # Fallback for separate date and time
+        if hasattr(booking_date, 'strftime'):
+            formatted_date = booking_date.strftime('%B %d, %Y')
+        else:
+            formatted_date = booking_date
 
-    if hasattr(booking_time, 'strftime'):
-        formatted_time = booking_time.strftime('%I:%M %p')
-    else:
-        formatted_time = booking_time
+        if hasattr(booking_time, 'strftime'):
+            formatted_time = booking_time.strftime('%I:%M %p')
+        else:
+            formatted_time = booking_time
 
     # Encode booking ID for URL
     encoded_booking_id = urlsafe_base64_encode(force_bytes(booking_id))

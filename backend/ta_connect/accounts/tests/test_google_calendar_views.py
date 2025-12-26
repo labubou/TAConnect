@@ -14,7 +14,6 @@ from unittest.mock import patch, Mock
 from django.utils import timezone
 from datetime import timedelta
 
-
 class GoogleCalendarConnectUrlViewTestCase(BaseTestCase):
     """
     Test cases for the Google Calendar Connect URL endpoint.

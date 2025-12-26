@@ -1,6 +1,7 @@
 import logging
 from ta_connect.settings import frontend_url
 from ..send_push_notification import send_push_notification
+from utils.datetime_formatter import format_datetime_for_display
 
 logger = logging.getLogger(__name__)
 
@@ -11,15 +12,20 @@ def send_booking_cancelled_push(student, instructor, slot, booking_date, booking
     Args:
         cancelled_by: 'instructor' or 'student' - determines who gets notified
     """
-    if hasattr(booking_date, 'strftime'):
-        formatted_date = booking_date.strftime('%B %d, %Y')
+    # Format date and time - handle both DateTimeField and separate date/time
+    if hasattr(booking_time, 'isoformat'):  # DateTimeField
+        formatted_date, formatted_time = format_datetime_for_display(booking_time)
     else:
-        formatted_date = str(booking_date)
-    
-    if hasattr(booking_time, 'strftime'):
-        formatted_time = booking_time.strftime('%I:%M %p')
-    else:
-        formatted_time = str(booking_time)
+        # Fallback for separate date and time
+        if hasattr(booking_date, 'strftime'):
+            formatted_date = booking_date.strftime('%B %d, %Y')
+        else:
+            formatted_date = str(booking_date)
+        
+        if hasattr(booking_time, 'strftime'):
+            formatted_time = booking_time.strftime('%I:%M %p')
+        else:
+            formatted_time = str(booking_time)
     
     student_name = f"{student.first_name} {student.last_name}".strip() or student.username
     instructor_name = f"{instructor.first_name} {instructor.last_name}".strip() or instructor.username

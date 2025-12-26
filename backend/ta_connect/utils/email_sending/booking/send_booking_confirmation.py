@@ -1,5 +1,6 @@
 from ta_connect.settings import frontend_url
 from ..send_email import send_email
+from utils.datetime_formatter import format_datetime_for_display
 
 def send_booking_confirmation_email(student, instructor, slot, booking_date, booking_time):
     """
@@ -11,7 +12,7 @@ def send_booking_confirmation_email(student, instructor, slot, booking_date, boo
         instructor: User object (instructor/TA)
         slot: OfficeHourSlot object
         booking_date: Date object or string (YYYY-MM-DD)
-        booking_time: Time object or string (HH:MM)
+        booking_time: DateTimeField (timezone-aware UTC) or Time object or string (HH:MM)
     
     Returns:
         dict: {'success': bool, 'student_sent': bool, 'instructor_sent': bool, 'errors': []}
@@ -28,16 +29,20 @@ def send_booking_confirmation_email(student, instructor, slot, booking_date, boo
     if instructor.instructor_profile.email_notifications_on_booking is False:
         instructor_sent = True
 
-    # Format date and time if they're objects
-    if hasattr(booking_date, 'strftime'):
-        formatted_date = booking_date.strftime('%B %d, %Y')
+    # Format date and time - handle both DateTimeField and separate date/time
+    if hasattr(booking_time, 'isoformat'):  # DateTimeField
+        formatted_date, formatted_time = format_datetime_for_display(booking_time)
     else:
-        formatted_date = booking_date
+        # Fallback for separate date and time
+        if hasattr(booking_date, 'strftime'):
+            formatted_date = booking_date.strftime('%B %d, %Y')
+        else:
+            formatted_date = booking_date
 
-    if hasattr(booking_time, 'strftime'):
-        formatted_time = booking_time.strftime('%I:%M %p')
-    else:
-        formatted_time = booking_time
+        if hasattr(booking_time, 'strftime'):
+            formatted_time = booking_time.strftime('%I:%M %p')
+        else:
+            formatted_time = booking_time
 
     # Prepare email context
     email_context = {

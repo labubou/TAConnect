@@ -137,11 +137,11 @@ def create_booking_event(user, booking, is_instructor=False):
             'description': description,
             'start': {
                 'dateTime': start_datetime.isoformat(),
-                'timeZone': 'Africa/Cairo',  # Use Cairo timezone as per project settings
+                'timeZone': 'UTC',
             },
             'end': {
                 'dateTime': end_datetime.isoformat(),
-                'timeZone': 'Africa/Cairo',
+                'timeZone': 'UTC',
             },
             'colorId': EVENT_COLOR_CONFIRMED,
             'reminders': {

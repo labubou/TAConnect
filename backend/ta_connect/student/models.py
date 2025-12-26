@@ -2,7 +2,6 @@ from django.db import models
 from django.conf import settings
 import datetime
 from django.utils import timezone
-from utils.convert_datetime import get_cairo_time
 from core.models import BaseModel
 # Create your models here.
 
@@ -83,19 +82,10 @@ class Booking(BaseModel):
 
     @property
     def is_ended(self):
-        """
-        Returns True if the booking time has passed.
-        Uses get_cairo_time() for 'Now', but uses raw DB time for 'End'.
-        """
-        if not self.end_time:
-            return False
-
-        now_cairo = get_cairo_time() 
-        now_simple = now_cairo.replace(tzinfo=None, second=0, microsecond=0)
-
-        end_simple = self.end_time.replace(tzinfo=None, second=0, microsecond=0)
-
-        return now_simple >= end_simple
+        if self.end_time is None:
+            return False  # A booking without an end time cannot be "ended"
+            
+        return timezone.now() >= self.end_time
 
     def complete_if_ended(self):
         """Encapsulates the completion logic you wrote."""

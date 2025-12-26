@@ -11,13 +11,14 @@ REASON_MESSAGES = {
 
 def format_booking_data(booking):
     """Extract and format booking data for notifications."""
+    from utils.datetime_formatter import format_datetime_for_display
+    
     student = booking.student
     instructor = booking.office_hour.instructor
     slot = booking.office_hour
     
-    # Use 'date' and 'start_time' attributes (not booking_date/booking_time)
-    formatted_date = booking.date.strftime('%B %d, %Y') if hasattr(booking.date, 'strftime') else str(booking.date)
-    formatted_time = booking.start_time.strftime('%I:%M %p') if hasattr(booking.start_time, 'strftime') else str(booking.start_time)
+    # Use 'start_time' which is a DateTimeField (UTC) - convert to Cairo timezone
+    formatted_date, formatted_time = format_datetime_for_display(booking.start_time)
     
     student_name = f"{student.first_name} {student.last_name}".strip() or student.username
     instructor_name = f"{instructor.first_name} {instructor.last_name}".strip() or instructor.username

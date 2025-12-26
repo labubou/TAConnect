@@ -1,5 +1,6 @@
 from ta_connect.settings import frontend_url
 from ..send_email import send_email
+from utils.datetime_formatter import format_datetime_for_display
 
 
 def send_booking_update_email(student, instructor, slot, old_date, old_time, new_date, new_time):
@@ -11,9 +12,9 @@ def send_booking_update_email(student, instructor, slot, old_date, old_time, new
         instructor: User object (instructor/TA)
         slot: OfficeHourSlot object
         old_date: Date object or string (YYYY-MM-DD)
-        old_time: Time object or string (HH:MM)
+        old_time: DateTimeField (timezone-aware UTC) or Time object or string (HH:MM)
         new_date: Date object or string (YYYY-MM-DD)
-        new_time: Time object or string (HH:MM)
+        new_time: DateTimeField (timezone-aware UTC) or Time object or string (HH:MM)
     
     Returns:
         dict: {'success': bool, 'student_sent': bool, 'instructor_sent': bool, 'errors': []}
@@ -29,19 +30,23 @@ def send_booking_update_email(student, instructor, slot, old_date, old_time, new
     if instructor.instructor_profile.email_notifications_on_update is False:
         instructor_sent = True
 
-    # Format dates and times if they're objects
+    # Format dates and times - handle both DateTimeField and separate date/time
     def format_datetime(date, time):
-        if hasattr(date, 'strftime'):
-            formatted_date = date.strftime('%B %d, %Y')
+        if hasattr(time, 'isoformat'):  # DateTimeField
+            return format_datetime_for_display(time)
         else:
-            formatted_date = date
+            # Fallback for separate date and time
+            if hasattr(date, 'strftime'):
+                formatted_date = date.strftime('%B %d, %Y')
+            else:
+                formatted_date = date
 
-        if hasattr(time, 'strftime'):
-            formatted_time = time.strftime('%I:%M %p')
-        else:
-            formatted_time = time
+            if hasattr(time, 'strftime'):
+                formatted_time = time.strftime('%I:%M %p')
+            else:
+                formatted_time = time
 
-        return formatted_date, formatted_time
+            return formatted_date, formatted_time
 
     old_formatted_date, old_formatted_time = format_datetime(old_date, old_time)
     new_formatted_date, new_formatted_time = format_datetime(new_date, new_time)

@@ -1,4 +1,3 @@
-from datetime import timezone
 from rest_framework import serializers
 from student.utils.book_is_time_available import is_time_available
 
