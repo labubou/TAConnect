@@ -44,6 +44,8 @@ class GoogleCalendarConnectUrlViewTestCase(BaseTestCase):
         self.assertIn('auth_url', response.data)
         self.assertIn('accounts.google.com', response.data['auth_url'])
         self.assertIn('oauth2', response.data['auth_url'])
+        # Verify it includes calendar scope
+        self.assertIn('calendar.events', response.data['auth_url'])
     
     def test_get_oauth_url_requires_authentication(self):
         """Test that endpoint requires authentication (401 Unauthorized)."""
@@ -61,7 +63,8 @@ class GoogleCalendarConnectUrlViewTestCase(BaseTestCase):
         
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertIn('auth_url', response.data)
-        self.assertIn('state=settings', response.data['auth_url'])
+        # State should include from parameter and user type
+        self.assertIn('state=', response.data['auth_url'])
 
 
 class GoogleCalendarConnectViewTestCase(BaseTestCase):
@@ -85,40 +88,44 @@ class GoogleCalendarConnectViewTestCase(BaseTestCase):
             google_calendar_management.GoogleCalendarConnectView.throttle_classes = self._original_throttle
     
     @patch('accounts.auth.google_calendar_management.requests.post')
-    @patch('accounts.auth.google_calendar_management.save_google_calendar_credentials')
-    def test_connect_google_calendar_happy_path(self, mock_save, mock_post):
+    @patch('accounts.auth.google_calendar_management.requests.get')
+    def test_connect_google_calendar_happy_path(self, mock_get, mock_post):
         """Test successful Google Calendar connection (200 OK)."""
         user, token = self.create_and_authenticate_user()
         
         # Mock successful token exchange
-        mock_response = Mock()
-        mock_response.status_code = 200
-        mock_response.json.return_value = {
+        mock_token_response = Mock()
+        mock_token_response.status_code = 200
+        mock_token_response.json.return_value = {
             'access_token': 'test_access_token',
             'refresh_token': 'test_refresh_token',
             'expires_in': 3600
         }
-        mock_response.content = b'{}'
-        mock_post.return_value = mock_response
-        mock_save.return_value = True
+        mock_token_response.content = b'{}'
+        mock_post.return_value = mock_token_response
         
-        # Mock credentials retrieval
-        creds = GoogleCalendarCredentials.objects.create(
-            user=user,
-            access_token='test_access_token',
-            refresh_token='test_refresh_token',
-            token_expiry=timezone.now() + timedelta(hours=1),
-            calendar_enabled=True
-        )
+        # Mock userinfo response
+        mock_userinfo_response = Mock()
+        mock_userinfo_response.status_code = 200
+        mock_userinfo_response.json.return_value = {
+            'email': 'test@gmail.com'
+        }
+        mock_get.return_value = mock_userinfo_response
         
-        with patch.object(GoogleCalendarCredentials.objects, 'get', return_value=creds):
-            response = self.client.post('/api/auth/google/calendar/connect/', {
-                'code': 'valid_auth_code'
-            }, format='json')
+        response = self.client.post('/api/auth/google/calendar/connect/', {
+            'code': 'valid_auth_code'
+        }, format='json')
         
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertIn('message', response.data)
         self.assertIn('calendar_enabled', response.data)
+        self.assertIn('google_email', response.data)
+        
+        # Verify credentials were saved
+        creds = GoogleCalendarCredentials.objects.get(user=user)
+        self.assertEqual(creds.access_token, 'test_access_token')
+        self.assertEqual(creds.refresh_token, 'test_refresh_token')
+        self.assertEqual(creds.google_email, 'test@gmail.com')
     
     def test_connect_google_calendar_missing_code(self):
         """Test connection with missing authorization code (400 Bad Request)."""
@@ -201,6 +208,7 @@ class GoogleCalendarStatusViewTestCase(BaseTestCase):
             user=user,
             access_token='test_token',
             refresh_token='test_refresh',
+            token_expiry=timezone.now() + timedelta(hours=1),
             calendar_enabled=True,
             google_email='test@gmail.com'
         )
@@ -221,6 +229,7 @@ class GoogleCalendarStatusViewTestCase(BaseTestCase):
             user=user,
             access_token='test_token',
             refresh_token='test_refresh',
+            token_expiry=timezone.now() + timedelta(hours=1),
             calendar_enabled=False,
             google_email='test@gmail.com'
         )
@@ -230,6 +239,8 @@ class GoogleCalendarStatusViewTestCase(BaseTestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertTrue(response.data['connected'])
         self.assertFalse(response.data['calendar_enabled'])
+        # has_valid_credentials should be False when calendar_enabled is False
+        # because the integration is not active even though credentials exist
         self.assertFalse(response.data['has_valid_credentials'])
         self.assertEqual(response.data['google_email'], 'test@gmail.com')
     
@@ -270,6 +281,7 @@ class GoogleCalendarToggleViewTestCase(BaseTestCase):
             user=user,
             access_token='test_token',
             refresh_token='test_refresh',
+            token_expiry=timezone.now() + timedelta(hours=1),
             calendar_enabled=False
         )
         
@@ -293,6 +305,7 @@ class GoogleCalendarToggleViewTestCase(BaseTestCase):
             user=user,
             access_token='test_token',
             refresh_token='test_refresh',
+            token_expiry=timezone.now() + timedelta(hours=1),
             calendar_enabled=True
         )
         
@@ -326,7 +339,8 @@ class GoogleCalendarToggleViewTestCase(BaseTestCase):
         GoogleCalendarCredentials.objects.create(
             user=user,
             access_token='test_token',
-            refresh_token='test_refresh'
+            refresh_token='test_refresh',
+            token_expiry=timezone.now() + timedelta(hours=1)
         )
         
         response = self.client.post('/api/auth/google/calendar/toggle/', {}, format='json')
@@ -342,6 +356,25 @@ class GoogleCalendarToggleViewTestCase(BaseTestCase):
         }, format='json')
         
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+    
+    def test_toggle_enable_without_refresh_token(self):
+        """Test enabling calendar without refresh token (400 Bad Request)."""
+        user, token = self.create_and_authenticate_user()
+        
+        GoogleCalendarCredentials.objects.create(
+            user=user,
+            access_token='test_token',
+            refresh_token='',  # No refresh token
+            token_expiry=timezone.now() + timedelta(hours=1),
+            calendar_enabled=False
+        )
+        
+        response = self.client.post('/api/auth/google/calendar/toggle/', {
+            'enabled': True
+        }, format='json')
+        
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertIn('error', response.data)
 
 
 class GoogleCalendarDisconnectViewTestCase(BaseTestCase):
@@ -371,7 +404,8 @@ class GoogleCalendarDisconnectViewTestCase(BaseTestCase):
         creds = GoogleCalendarCredentials.objects.create(
             user=user,
             access_token='test_token',
-            refresh_token='test_refresh'
+            refresh_token='test_refresh',
+            token_expiry=timezone.now() + timedelta(hours=1)
         )
         creds_id = creds.id
         
@@ -413,7 +447,8 @@ class GoogleCalendarCallbackViewTestCase(BaseTestCase):
         response = self.client.get('/api/auth/google/calendar/callback/?code=test_code')
         
         self.assertEqual(response.status_code, 302)  # Redirect
-        self.assertIn('settings', response.url)
+        # Default redirect should be to student settings
+        self.assertIn('student/settings', response.url)
         self.assertIn('code=test_code', response.url)
         self.assertIn('google_calendar=true', response.url)
     
@@ -423,7 +458,8 @@ class GoogleCalendarCallbackViewTestCase(BaseTestCase):
         response = self.client.get('/api/auth/google/calendar/callback/?error=access_denied')
         
         self.assertEqual(response.status_code, 302)  # Redirect
-        self.assertIn('settings', response.url)
+        # Default redirect should be to student settings
+        self.assertIn('student/settings', response.url)
         self.assertIn('error=google_calendar_auth_cancelled', response.url)
         self.assertIn('google_calendar=true', response.url)
     
@@ -433,7 +469,8 @@ class GoogleCalendarCallbackViewTestCase(BaseTestCase):
         response = self.client.get('/api/auth/google/calendar/callback/')
         
         self.assertEqual(response.status_code, 302)  # Redirect
-        self.assertIn('settings', response.url)
+        # Default redirect should be to student settings
+        self.assertIn('student/settings', response.url)
         self.assertIn('error=google_calendar_auth_failed', response.url)
         self.assertIn('google_calendar=true', response.url)
     
@@ -442,7 +479,8 @@ class GoogleCalendarCallbackViewTestCase(BaseTestCase):
         """Test callback redirects to TA settings for instructor."""
         instructor, token = self.create_and_authenticate_user(user_type='instructor')
         
-        response = self.client.get('/api/auth/google/calendar/callback/?code=test_code')
+        # Simulate state parameter with instructor user type
+        response = self.client.get('/api/auth/google/calendar/callback/?code=test_code&state=settings:instructor')
         
         self.assertEqual(response.status_code, 302)
         self.assertIn('ta/settings', response.url)
@@ -452,8 +490,17 @@ class GoogleCalendarCallbackViewTestCase(BaseTestCase):
         """Test callback redirects to student settings for student."""
         student, token = self.create_and_authenticate_user(user_type='student')
         
-        response = self.client.get('/api/auth/google/calendar/callback/?code=test_code')
+        # Simulate state parameter with student user type
+        response = self.client.get('/api/auth/google/calendar/callback/?code=test_code&state=settings:student')
         
         self.assertEqual(response.status_code, 302)
         self.assertIn('student/settings', response.url)
+    
+    @patch('accounts.auth.google_calendar_management.frontend_url', 'http://localhost:3000')
+    def test_callback_with_state_only_user_type(self):
+        """Test callback with state parameter containing only user type."""
+        response = self.client.get('/api/auth/google/calendar/callback/?code=test_code&state=instructor')
+        
+        self.assertEqual(response.status_code, 302)
+        self.assertIn('ta/settings', response.url)
 
