@@ -36,6 +36,7 @@ ALLOWED_HOSTS = [
     '0.0.0.0',
     'backend',
     'taconnect.pythonanywhere.com',
+    '100.102.138.78',
     ]
 
 ALLOWED_HOSTS.append(frontend_url.replace('http://', '').replace('https://', ''))
@@ -282,6 +283,7 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 CSRF_TRUSTED_ORIGINS = [
     "http://localhost:3000",
     "http://127.0.0.1:3000",
+    "http://100.102.138.78:3000",
 ]
 CSRF_TRUSTED_ORIGINS.append(frontend_url)
 CSRF_TRUSTED_ORIGINS.append(SITE_DOMAIN)
@@ -290,7 +292,9 @@ CSRF_TRUSTED_ORIGINS.append(SITE_DOMAIN)
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",
     "http://127.0.0.1:3000",
+    "http://100.102.138.78:3000",
 ]
+
 CORS_ALLOWED_ORIGINS.append(frontend_url)
 CORS_ALLOWED_ORIGINS.append(SITE_DOMAIN)
 
